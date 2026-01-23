@@ -10,20 +10,27 @@ https://github.com/user-attachments/assets/3b154018-6e2e-462b-9621-1b92354ffef7
 
 ## The Problem
 
-AI coding agents are powerful. But using them is completely ad-hoc.
+Running multiple Claude Code agents is frustrating.
 
-You open a terminal, start prompting, and hope for the best. There's no structure. No workflow. No way to coordinate when you want multiple agents working on different parts of your codebase.
+**You end up with:**
+- 5 terminals for 5 agents, constantly cmd+tabbing, forgetting which is which
+- No way to see what's happening across all of them at once
+- All agents working in the same directory, overwriting each other's changes
+- Closing a terminal and losing all context
 
-**When you want to scale AI across your team:**
-- Everyone does it differently
-- There's no visibility into what's running where
-- No consistent workflow to follow
+**You can't scale.** The more agents you run, the harder it is to keep track. Switch tabs, lose context. Your brain becomes the bottleneck.
+
+**You're forced to choose:** granular tasks with few agents, or many agents with coarse tasks. You can't have both.
+
+There's no control plane. No dashboard. No structure.
+
+---
 
 ## Caspian
 
-A control plane for AI-powered development. Spin up agents in isolated workspaces, run them in parallel, and manage everything from one place.
+Each agent gets its own isolated workspace. Run as many as you want. See everything from one screen.
 
-**Structure your AI workflows. Scale them across your team.**
+**Granularity and scale. No tradeoff.**
 
 ---
 
@@ -31,21 +38,21 @@ A control plane for AI-powered development. Spin up agents in isolated workspace
 
 | What | Why it matters |
 |------|----------------|
-| **Isolated Workspaces** | Each agent gets its own worktree. Clean separation between tasks. |
-| **Parallel Execution** | Run multiple agents on different features simultaneously. |
-| **Live Monitoring** | See what every agent is doing in real-time. |
-| **Curated Workflows** | Define how your team uses AI. Consistent process, every time. |
+| **Isolated Workspaces** | Each agent gets its own worktree. No more agents overwriting each other. |
+| **Parallel Execution** | Run multiple agents on different tasks simultaneously. |
+| **Single Dashboard** | See all your agents at once. No more tab switching. |
+| **Live Monitoring** | Watch what every agent is doing in real-time. |
+| **Persistent Context** | Close the app, come back later. Everything's still there. |
 | **PR Integration** | Ship completed work directly as pull requests. |
-| **Claude Code Native** | Built for Anthropic's Claude Code CLI. |
 
 ---
 
 ## Quick Start
 
-### You'll need
-- [Node.js](https://nodejs.org/) 18+
-- [Rust](https://rustup.rs/) 1.77+
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+### Prerequisites
+- Node.js 18+
+- Rust 1.77+
+- Claude Code CLI
 
 ### Get running
 
@@ -62,7 +69,7 @@ npm run tauri:dev
 npm run tauri:build
 ```
 
-Find your app in `src-tauri/target/release/bundle/`
+Output: `src-tauri/target/release/bundle/`
 
 ---
 
@@ -71,10 +78,10 @@ Find your app in `src-tauri/target/release/bundle/`
 ```
 1. Add repo     →  Point Caspian at your project
 2. Create node  →  Spin up an isolated workspace
-3. Run agent    →  Let Claude Code do its thing
+3. Run agent    →  Launch Claude Code in that workspace
 4. Watch        →  See everything in real-time
 5. Review       →  Check the changes
-6. Ship         →  Create a PR, merge when ready
+6. Ship         →  Create a PR
 ```
 
 ---
@@ -110,10 +117,8 @@ Find your app in `src-tauri/target/release/bundle/`
 
 ## Contributing
 
-We welcome PRs. Check out [CONTRIBUTING.md](CONTRIBUTING.md) for the details.
-
 ```bash
-npm install        # deps
+npm install        # install deps
 npm run tauri:dev  # dev server
 npm run lint       # check your work
 ```
@@ -123,9 +128,3 @@ npm run lint       # check your work
 ## License
 
 MIT
-
----
-
-## Links
-
-[Website](https://caspian.ai) · [Docs](https://docs.caspian.ai) · [Discord](https://discord.gg/caspian) · [Twitter](https://twitter.com/CaspianAI)
