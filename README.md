@@ -4,7 +4,7 @@
 
 Caspian is the control plane for AI-generated code. Because "the AI did it" isn't a valid excuse in your post-mortem.
 
-<video src="https://github.com/TheCaspianAI/Caspian/raw/main/public/demo.mp4" controls="controls" style="max-width: 100%;"></video>
+https://github.com/user-attachments/assets/ce2b6093-bec4-4fa0-8880-14027559e5ba
 
 ---
 
