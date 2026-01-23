@@ -22,6 +22,14 @@ export interface InvokeOptions {
 }
 
 /**
+ * Result type for safeInvokeWithError - always returns error info instead of null
+ */
+export interface InvokeResult<T> {
+  data: T | null;
+  error: string | null;
+}
+
+/**
  * Safe invoke wrapper with exponential backoff retry for transient failures
  * Returns mock data when not in Tauri
  */
@@ -62,6 +70,57 @@ export async function safeInvoke<T>(
   }
 
   return null;
+}
+
+/**
+ * Safe invoke wrapper that returns error information instead of null.
+ * Use this when you need to display error messages to the user.
+ * Unlike safeInvoke which swallows errors, this always returns an InvokeResult
+ * with either data or a meaningful error message.
+ */
+export async function safeInvokeWithError<T>(
+  cmd: string,
+  args?: Record<string, unknown>,
+  options: InvokeOptions = {}
+): Promise<InvokeResult<T>> {
+  if (!isTauri()) {
+    return {
+      data: null,
+      error: 'Not running in desktop app environment',
+    };
+  }
+
+  const {
+    maxRetries = 3,
+    retryableErrors = ['network', 'timeout', 'connection', 'econnrefused'],
+    baseDelay = 100,
+  } = options;
+
+  let lastError: string = 'Unknown error';
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const { invoke } = await import('@tauri-apps/api/core');
+      const data = await invoke<T>(cmd, args);
+      return { data, error: null };
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+      const errorString = lastError.toLowerCase();
+      const isRetryable = retryableErrors.some(e => errorString.includes(e));
+
+      if (!isRetryable || attempt === maxRetries) {
+        console.error(`[Tauri] Invoke error for ${cmd}:`, error);
+        return { data: null, error: lastError };
+      }
+
+      // Exponential backoff: 100ms, 200ms, 400ms, ...
+      const delay = baseDelay * Math.pow(2, attempt);
+      console.warn(`[Tauri] Retrying ${cmd} (attempt ${attempt + 1}/${maxRetries}) after ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+
+  return { data: null, error: lastError };
 }
 
 // Safe event listener wrapper

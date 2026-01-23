@@ -15,7 +15,7 @@ function LoadingScreen() {
 }
 
 function App() {
-  const { bootState, initialize } = useAuthStore();
+  const { bootState, initialize, hasCompletedOnboarding } = useAuthStore();
 
   useEffect(() => {
     initialize();
@@ -26,8 +26,8 @@ function App() {
     return <LoadingScreen />;
   }
 
-  // Show welcome screen if not authenticated (require GitHub login)
-  if (bootState !== 'authenticated') {
+  // Show welcome screen on first run (before onboarding is complete)
+  if (!hasCompletedOnboarding) {
     return <WelcomeScreen />;
   }
 

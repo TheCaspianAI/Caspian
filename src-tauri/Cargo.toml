@@ -17,7 +17,7 @@ tauri-build = { version = "2.5.3", features = [] }
 
 [dependencies]
 # Tauri
-tauri = { version = "2.9.5", features = [] }
+tauri = { version = "2.9.5", features = ["macos-private-api"] }
 tauri-plugin-log = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-stronghold = "2"

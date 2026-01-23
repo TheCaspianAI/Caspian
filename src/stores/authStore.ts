@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { safeInvoke, safeListen, isTauri } from '../utils/tauri';
+import { safeInvoke, safeInvokeWithError, safeListen, isTauri } from '../utils/tauri';
 
 type UnlistenFn = () => void;
 
@@ -33,22 +33,24 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   setupProgress: string | null; // For showing setup progress messages
+  hasCompletedOnboarding: boolean; // First-run onboarding flag
 
   // Actions
   initialize: () => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
+  completeOnboarding: () => void; // Mark onboarding as complete
 
-  // gh CLI actions
-  checkGhCliInstalled: () => Promise<boolean>;
-  checkGhCliAuth: () => Promise<boolean>;
-  installGhCli: () => Promise<boolean>;
-  startFullSetup: () => Promise<void>; // Full onboarding flow
+  // Git auth actions
+  checkGitConfigured: () => Promise<boolean>;
+  startFullSetup: () => Promise<void>; // Simple git-based setup
 
   // Internal
   _unlistenFns: UnlistenFn[];
   _cleanup: () => void;
 }
+
+const ONBOARDING_KEY = 'caspian_onboarding_complete';
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   // Initial state
@@ -57,6 +59,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
   setupProgress: null,
+  hasCompletedOnboarding: localStorage.getItem(ONBOARDING_KEY) === 'true',
   _unlistenFns: [],
 
   // Initialize auth state on app startup
@@ -184,104 +187,61 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   // Clear error
   clearError: () => set({ error: null }),
 
-  // gh CLI actions
+  // Mark onboarding as complete (first-run flow)
+  completeOnboarding: () => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    set({ hasCompletedOnboarding: true });
+  },
 
-  // Check if gh CLI is installed
-  checkGhCliInstalled: async (): Promise<boolean> => {
+  // Git auth actions
+
+  // Check if git is configured with user.name and user.email
+  checkGitConfigured: async (): Promise<boolean> => {
     if (!isTauri()) return false;
     try {
-      const result = await safeInvoke<CommandResult<boolean>>('check_gh_cli_installed');
+      const result = await safeInvoke<CommandResult<boolean>>('check_git_configured');
       return result?.success === true && result.data === true;
     } catch {
       return false;
     }
   },
 
-  // Check if gh CLI is authenticated
-  checkGhCliAuth: async (): Promise<boolean> => {
-    if (!isTauri()) return false;
-    try {
-      const result = await safeInvoke<CommandResult<boolean>>('check_gh_cli_auth');
-      return result?.success === true && result.data === true;
-    } catch {
-      return false;
-    }
-  },
-
-  // Install gh CLI
-  installGhCli: async () => {
-    if (!isTauri()) return false;
-    try {
-      const result = await safeInvoke<CommandResult<void>>('install_gh_cli');
-      return result?.success === true;
-    } catch {
-      return false;
-    }
-  },
-
-  // Full onboarding flow:
-  // 1. Check/install gh CLI
-  // 2. Check if already authenticated -> done
-  // 3. Run gh auth login --web -> wait for result
+  // Simple git-based setup flow:
+  // 1. Check if git is configured
+  // 2. If yes, get user info and mark as authenticated
+  // 3. If no, show error with instructions
   startFullSetup: async () => {
-    const { checkGhCliInstalled, installGhCli, checkGhCliAuth } = get();
-    set({ isLoading: true, error: null, setupProgress: 'Checking GitHub CLI...' });
+    set({ isLoading: true, error: null, setupProgress: 'Checking git configuration...' });
 
     try {
-      // Step 1: Check if gh CLI is installed
-      const ghInstalled = await checkGhCliInstalled();
+      // Get user info from git config
+      const { data: result, error: ipcError } = await safeInvokeWithError<CommandResult<GitHubUser>>('get_git_user');
 
-      if (!ghInstalled) {
-        set({ setupProgress: 'Installing GitHub CLI...' });
-        const installed = await installGhCli();
-        if (!installed) {
-          set({
-            isLoading: false,
-            setupProgress: null,
-            error: 'Failed to install GitHub CLI. Please install it manually from https://cli.github.com',
-          });
-          return;
-        }
+      if (ipcError) {
+        set({
+          isLoading: false,
+          setupProgress: null,
+          error: `Failed to check git configuration: ${ipcError}`,
+        });
+        return;
       }
 
-      // Step 2: Check if already authenticated
-      set({ setupProgress: 'Checking authentication...' });
-      const isAuthed = await checkGhCliAuth();
-
-      if (isAuthed) {
-        // Already authenticated, fetch user and complete
-        set({ setupProgress: 'Fetching user info...' });
-        const result = await safeInvoke<CommandResult<AuthStatus>>('get_auth_status');
-
-        if (result?.success && result.data?.status === 'authenticated' && result.data.user) {
-          set({
-            bootState: 'authenticated',
-            user: result.data.user,
-            isLoading: false,
-            setupProgress: null,
-            error: null,
-          });
-          return;
-        }
-      }
-
-      // Step 3: Run gh auth login --web (opens browser)
-      set({ setupProgress: 'Opening browser for GitHub login...' });
-      const loginResult = await safeInvoke<CommandResult<GitHubUser>>('run_gh_auth_login');
-
-      if (loginResult?.success && loginResult.data) {
+      if (result?.success && result.data) {
+        // Mark onboarding complete on successful setup
+        localStorage.setItem(ONBOARDING_KEY, 'true');
         set({
           bootState: 'authenticated',
-          user: loginResult.data,
+          user: result.data,
           isLoading: false,
           setupProgress: null,
           error: null,
+          hasCompletedOnboarding: true,
         });
       } else {
         set({
           isLoading: false,
           setupProgress: null,
-          error: loginResult?.error || 'Authentication failed',
+          error: result?.error || 'Git is not configured. Please run: git config --global user.name "Your Name" && git config --global user.email "you@example.com"',
         });
       }
     } catch (error) {

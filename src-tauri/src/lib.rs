@@ -146,11 +146,13 @@ pub fn run() {
             commands::set_requires_input,
             commands::get_all_notification_counts,
             commands::send_system_notification,
-            // Auth commands (gh CLI based)
+            // Auth commands (git-based, with legacy gh CLI support)
             commands::get_auth_status,
             commands::sign_out,
             commands::get_github_user,
             commands::get_auth_actor,
+            commands::check_git_configured,
+            commands::get_git_user,
             commands::check_gh_cli_installed,
             commands::check_gh_cli_auth,
             commands::install_gh_cli,
