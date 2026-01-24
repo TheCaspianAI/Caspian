@@ -35,7 +35,9 @@ impl ClaudeCodeAdapter {
         // Common installation locations for Claude CLI
         let mut locations: Vec<String> = vec![
             "/usr/local/bin/claude".to_string(),
-            "/opt/homebrew/bin/claude".to_string(),
+            "/opt/homebrew/bin/claude".to_string(), // macOS Homebrew
+            "/usr/bin/claude".to_string(),          // Linux system-wide
+            "/snap/bin/claude".to_string(),         // Linux snap package
         ];
 
         // Add user-specific paths if HOME is available

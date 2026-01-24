@@ -625,8 +625,10 @@ pub fn run_agent_diagnostics() -> CommandResult<AgentDiagnostics> {
     // Try common locations
     let mut binary_locations: Vec<String> = vec![
         "claude".to_string(),                           // In PATH
-        "/usr/local/bin/claude".to_string(),           // Homebrew default
+        "/usr/local/bin/claude".to_string(),           // Homebrew default (also Linux)
         "/opt/homebrew/bin/claude".to_string(),        // Apple Silicon Homebrew
+        "/usr/bin/claude".to_string(),                 // Linux system-wide
+        "/snap/bin/claude".to_string(),                // Linux snap package
     ];
 
     // Add user-specific paths if HOME is set

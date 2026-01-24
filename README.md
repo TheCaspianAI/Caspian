@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)]()
+[![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)]()
 [![Built with Tauri](https://img.shields.io/badge/Built%20with-Tauri-orange.svg)]()
 
 **The control plane for AI coding agents.**
@@ -55,15 +56,33 @@ Run 10 agents on 10 focused tasks. See everything. Control everything.
 
 ## Quick Start
 
-> **Note:** Caspian currently supports macOS only.
+> **Note:** Caspian supports macOS and Linux (Ubuntu/Debian).
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20.19+ or 22.12+ (required by Vite)
 - Rust 1.77+
 - Claude Code CLI
 
+**Linux additional requirements:**
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install libwebkit2gtk-4.1-dev \
+  build-essential \
+  curl \
+  wget \
+  file \
+  libxdo-dev \
+  libssl-dev \
+  libayatana-appindicator3-dev \
+  librsvg2-dev
+```
+
+> **For detailed Linux setup instructions, see [LINUX_SETUP.md](LINUX_SETUP.md)**
+
 ### Get running
 
+**macOS:**
 ```bash
 git clone https://github.com/TheCaspianAI/Caspian.git
 cd Caspian
@@ -71,10 +90,24 @@ npm install
 npm run tauri:dev
 ```
 
+**Linux:**
+```bash
+git clone https://github.com/TheCaspianAI/Caspian.git
+cd Caspian
+npm install
+npm run tauri:dev:linux
+```
+
 ### Build for production
 
+**macOS:**
 ```bash
 npm run tauri:build
+```
+
+**Linux:**
+```bash
+npm run tauri:build:linux
 ```
 
 Output: `src-tauri/target/release/bundle/`

@@ -11,6 +11,8 @@
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build",
+    "tauri:dev:linux": "tauri dev --config src-tauri/tauri.linux.conf.json",
+    "tauri:build:linux": "tauri build --config src-tauri/tauri.linux.conf.json",
     "setup-oauth": "./scripts/setup-oauth.sh",
     "dev:tauri": "./scripts/tauri-dev.sh",
     "build:tauri": "./scripts/tauri-build.sh"

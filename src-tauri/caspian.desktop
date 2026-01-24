@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Caspian
+Comment=Control plane for AI-generated code changes
+Exec=caspian
+Icon=caspian
+Terminal=false
+Categories=Development;IDE;
+Keywords=AI;coding;agents;development;git;
+StartupWMClass=Caspian
+MimeType=x-scheme-handler/caspian;

@@ -63,6 +63,15 @@ sentry = "0.46.1"
 [target.'cfg(target_os = "macos")'.dependencies]
 window-vibrancy = "0.5"
 
+# macOS-specific Tauri features
+[target.'cfg(target_os = "macos")'.dependencies.tauri]
+version = "2.9.5"
+features = ["macos-private-api"]
+
+# Linux-specific dependencies
+[target.'cfg(target_os = "linux")'.dependencies]
+# Add any Linux-specific dependencies here if needed
+
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]

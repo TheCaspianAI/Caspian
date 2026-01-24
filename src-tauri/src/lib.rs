@@ -69,6 +69,12 @@ pub fn run() {
                 log::info!("Tauri setup: macOS vibrancy applied");
             }
 
+            // Linux-specific window setup (if needed)
+            #[cfg(target_os = "linux")]
+            {
+                log::info!("Tauri setup: Linux window configuration applied");
+            }
+
             log::info!("Tauri setup: complete");
             Ok(())
         })
