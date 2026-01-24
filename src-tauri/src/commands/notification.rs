@@ -290,7 +290,7 @@ pub fn send_system_notification(app: AppHandle, title: String, body: String) -> 
                         title,
                         body
                     );
-                    return Err("Notification permission denied. Please enable notifications in System Preferences.".to_string());
+                    return Err("Notification permission denied. Please enable notifications in your system settings.".to_string());
                 }
                 tauri_plugin_notification::PermissionState::Prompt
                 | tauri_plugin_notification::PermissionState::PromptWithRationale => {
@@ -298,7 +298,7 @@ pub fn send_system_notification(app: AppHandle, title: String, body: String) -> 
                         "System notification permission pending, attempting to send. Title: '{}'",
                         title
                     );
-                    // Try anyway - macOS may prompt for permission
+                    // Try anyway - the OS may prompt for permission
                 }
             }
         }

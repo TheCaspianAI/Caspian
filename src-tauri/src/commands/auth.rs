@@ -97,7 +97,13 @@ pub async fn get_auth_status() -> CommandResult<AuthStatus> {
 /// Check if gh CLI is installed
 #[tauri::command]
 pub async fn check_gh_cli_installed() -> CommandResult<bool> {
-    match std::process::Command::new("which").arg("gh").output() {
+    // Use platform-appropriate command to find executables
+    #[cfg(target_os = "windows")]
+    let result = std::process::Command::new("where").arg("gh").output();
+    #[cfg(not(target_os = "windows"))]
+    let result = std::process::Command::new("which").arg("gh").output();
+
+    match result {
         Ok(output) => CommandResult::ok(output.status.success()),
         Err(_) => CommandResult::ok(false),
     }
@@ -115,33 +121,66 @@ pub async fn check_gh_cli_auth() -> CommandResult<bool> {
     }
 }
 
-/// Install gh CLI using Homebrew (macOS) - kept for optional features
+/// Install gh CLI using package manager (Homebrew on macOS, winget on Windows)
 #[tauri::command]
 pub async fn install_gh_cli() -> CommandResult<()> {
-    log::info!("Installing gh CLI via Homebrew");
+    #[cfg(target_os = "windows")]
+    {
+        log::info!("Installing gh CLI via winget");
 
-    let brew_check = std::process::Command::new("which").arg("brew").output();
+        // Check if winget is available
+        let winget_check = std::process::Command::new("where").arg("winget").output();
 
-    match brew_check {
-        Ok(output) if output.status.success() => {
-            match std::process::Command::new("brew")
-                .args(["install", "gh"])
-                .output()
-            {
-                Ok(output) if output.status.success() => {
-                    log::info!("gh CLI installed successfully");
-                    CommandResult::ok(())
+        match winget_check {
+            Ok(output) if output.status.success() => {
+                match std::process::Command::new("winget")
+                    .args(["install", "--id", "GitHub.cli", "-e", "--accept-source-agreements", "--accept-package-agreements"])
+                    .output()
+                {
+                    Ok(output) if output.status.success() => {
+                        log::info!("gh CLI installed successfully via winget");
+                        CommandResult::ok(())
+                    }
+                    Ok(output) => {
+                        let stderr = String::from_utf8_lossy(&output.stderr);
+                        CommandResult::err(&format!("Failed to install gh via winget: {}", stderr))
+                    }
+                    Err(e) => CommandResult::err(&format!("Failed to run winget: {}", e)),
                 }
-                Ok(output) => {
-                    let stderr = String::from_utf8_lossy(&output.stderr);
-                    CommandResult::err(&format!("Failed to install gh: {}", stderr))
-                }
-                Err(e) => CommandResult::err(&format!("Failed to run brew: {}", e)),
             }
+            _ => CommandResult::err(
+                "winget not found. Please install gh CLI manually: https://cli.github.com/",
+            ),
         }
-        _ => CommandResult::err(
-            "Homebrew not found. Please install gh CLI manually: https://cli.github.com/",
-        ),
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        log::info!("Installing gh CLI via Homebrew");
+
+        let brew_check = std::process::Command::new("which").arg("brew").output();
+
+        match brew_check {
+            Ok(output) if output.status.success() => {
+                match std::process::Command::new("brew")
+                    .args(["install", "gh"])
+                    .output()
+                {
+                    Ok(output) if output.status.success() => {
+                        log::info!("gh CLI installed successfully");
+                        CommandResult::ok(())
+                    }
+                    Ok(output) => {
+                        let stderr = String::from_utf8_lossy(&output.stderr);
+                        CommandResult::err(&format!("Failed to install gh: {}", stderr))
+                    }
+                    Err(e) => CommandResult::err(&format!("Failed to run brew: {}", e)),
+                }
+            }
+            _ => CommandResult::err(
+                "Homebrew not found. Please install gh CLI manually: https://cli.github.com/",
+            ),
+        }
     }
 }
 

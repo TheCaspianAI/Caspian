@@ -29,23 +29,45 @@ impl ClaudeCodeAdapter {
 
     /// Find Claude CLI binary in common installation locations
     /// This is necessary because macOS .app bundles have a restricted PATH
+    /// and Windows apps need to check common npm installation locations
     fn find_claude_binary() -> Option<String> {
         use std::process::Command;
 
         // Common installation locations for Claude CLI
-        let mut locations: Vec<String> = vec![
-            "/usr/local/bin/claude".to_string(),
-            "/opt/homebrew/bin/claude".to_string(),
-        ];
+        let mut locations: Vec<String> = Vec::new();
 
-        // Add user-specific paths if HOME is available
-        if let Ok(home) = std::env::var("HOME") {
-            locations.insert(0, format!("{}/.local/bin/claude", home)); // Most common for npm -g
-            locations.push(format!("{}/bin/claude", home));
-            locations.push(format!("{}/.npm-global/bin/claude", home));
+        // Platform-specific paths
+        #[cfg(target_os = "windows")]
+        {
+            // Windows npm global install locations
+            if let Ok(appdata) = std::env::var("APPDATA") {
+                locations.push(format!("{}\\npm\\claude.cmd", appdata));
+            }
+            if let Ok(localappdata) = std::env::var("LOCALAPPDATA") {
+                locations.push(format!("{}\\npm\\claude.cmd", localappdata));
+            }
+            // Also check common Windows paths
+            if let Ok(userprofile) = std::env::var("USERPROFILE") {
+                locations.push(format!("{}\\AppData\\Roaming\\npm\\claude.cmd", userprofile));
+                locations.push(format!("{}\\.local\\bin\\claude.exe", userprofile));
+            }
         }
 
-        // Also try plain "claude" in case it's in PATH
+        #[cfg(not(target_os = "windows"))]
+        {
+            // macOS/Linux paths
+            locations.push("/usr/local/bin/claude".to_string());
+            locations.push("/opt/homebrew/bin/claude".to_string());
+
+            // Add user-specific paths if HOME is available
+            if let Ok(home) = std::env::var("HOME") {
+                locations.insert(0, format!("{}/.local/bin/claude", home)); // Most common for npm -g
+                locations.push(format!("{}/bin/claude", home));
+                locations.push(format!("{}/.npm-global/bin/claude", home));
+            }
+        }
+
+        // Also try plain "claude" in case it's in PATH (works on all platforms)
         locations.push("claude".to_string());
 
         for location in &locations {
@@ -125,13 +147,26 @@ impl AgentAdapter for ClaudeCodeAdapter {
                         found_path
                     }
                     None => {
-                        let home = std::env::var("HOME").unwrap_or_default();
-                        let searched_paths = vec![
-                            format!("{}/.local/bin/claude", home),
-                            "/usr/local/bin/claude".to_string(),
-                            "/opt/homebrew/bin/claude".to_string(),
-                            format!("{}/bin/claude", home),
-                        ];
+                        #[cfg(target_os = "windows")]
+                        let searched_paths = {
+                            let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+                            let appdata = std::env::var("APPDATA").unwrap_or_default();
+                            vec![
+                                format!("{}\\npm\\claude.cmd", appdata),
+                                format!("{}\\AppData\\Roaming\\npm\\claude.cmd", userprofile),
+                                format!("{}\\.local\\bin\\claude.exe", userprofile),
+                            ]
+                        };
+                        #[cfg(not(target_os = "windows"))]
+                        let searched_paths = {
+                            let home = std::env::var("HOME").unwrap_or_default();
+                            vec![
+                                format!("{}/.local/bin/claude", home),
+                                "/usr/local/bin/claude".to_string(),
+                                "/opt/homebrew/bin/claude".to_string(),
+                                format!("{}/bin/claude", home),
+                            ]
+                        };
                         let error_msg = format!(
                             "Claude CLI not found in any common location. Searched: {}. \
                             Install with: npm install -g @anthropic-ai/claude-code",
@@ -169,10 +204,18 @@ impl AgentAdapter for ClaudeCodeAdapter {
             }
         }
 
-        // Check 2: Verify Claude CLI is authenticated (checks ~/.claude/ config directory)
+        // Check 2: Verify Claude CLI is authenticated (checks config directory)
         // Claude Code CLI manages its own authentication, NOT via ANTHROPIC_API_KEY
-        let home_dir = std::env::var("HOME").unwrap_or_default();
-        let claude_config_dir = std::path::Path::new(&home_dir).join(".claude");
+        #[cfg(target_os = "windows")]
+        let claude_config_dir = {
+            let userprofile = std::env::var("USERPROFILE").unwrap_or_default();
+            std::path::Path::new(&userprofile).join(".claude")
+        };
+        #[cfg(not(target_os = "windows"))]
+        let claude_config_dir = {
+            let home_dir = std::env::var("HOME").unwrap_or_default();
+            std::path::Path::new(&home_dir).join(".claude")
+        };
 
         if claude_config_dir.exists() {
             log::info!("✓ Claude config directory found: {:?}", claude_config_dir);

@@ -608,6 +608,10 @@ pub fn run_agent_diagnostics() -> CommandResult<AgentDiagnostics> {
 
     sentry_utils::add_breadcrumb("agent", "Running agent diagnostics", sentry::Level::Info);
 
+    // Get home directory in platform-appropriate way
+    #[cfg(target_os = "windows")]
+    let home_dir = std::env::var("USERPROFILE").ok();
+    #[cfg(not(target_os = "windows"))]
     let home_dir = std::env::var("HOME").ok();
 
     let mut diagnostics = AgentDiagnostics {
@@ -625,14 +629,28 @@ pub fn run_agent_diagnostics() -> CommandResult<AgentDiagnostics> {
     // Try common locations
     let mut binary_locations: Vec<String> = vec![
         "claude".to_string(),                           // In PATH
-        "/usr/local/bin/claude".to_string(),           // Homebrew default
-        "/opt/homebrew/bin/claude".to_string(),        // Apple Silicon Homebrew
     ];
 
-    // Add user-specific paths if HOME is set
-    if let Ok(home) = std::env::var("HOME") {
-        binary_locations.push(format!("{}/.local/bin/claude", home));  // npm global default
-        binary_locations.push(format!("{}/bin/claude", home));         // user bin
+    // Platform-specific paths
+    #[cfg(target_os = "windows")]
+    {
+        if let Ok(appdata) = std::env::var("APPDATA") {
+            binary_locations.push(format!("{}\\npm\\claude.cmd", appdata));
+        }
+        if let Ok(userprofile) = std::env::var("USERPROFILE") {
+            binary_locations.push(format!("{}\\AppData\\Roaming\\npm\\claude.cmd", userprofile));
+            binary_locations.push(format!("{}\\.local\\bin\\claude.exe", userprofile));
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        binary_locations.push("/usr/local/bin/claude".to_string());           // Homebrew default
+        binary_locations.push("/opt/homebrew/bin/claude".to_string());        // Apple Silicon Homebrew
+        if let Ok(home) = std::env::var("HOME") {
+            binary_locations.push(format!("{}/.local/bin/claude", home));  // npm global default
+            binary_locations.push(format!("{}/bin/claude", home));         // user bin
+        }
     }
 
     for location in &binary_locations {
@@ -656,7 +674,13 @@ pub fn run_agent_diagnostics() -> CommandResult<AgentDiagnostics> {
     }
 
     // Check 2: Verify Claude config directory exists (Claude CLI manages its own authentication)
-    if let Some(ref home) = home_dir {
+    // Use platform-appropriate home directory
+    #[cfg(target_os = "windows")]
+    let home_for_config = std::env::var("USERPROFILE").ok();
+    #[cfg(not(target_os = "windows"))]
+    let home_for_config = home_dir.clone();
+
+    if let Some(ref home) = home_for_config {
         let claude_config = std::path::Path::new(home).join(".claude");
         diagnostics.claude_config_path = Some(claude_config.to_string_lossy().to_string());
 
