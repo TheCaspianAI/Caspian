@@ -1,8 +1,8 @@
-import { projects, worktrees } from "lib/local-db";
+import { repositories, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
-import { workspaceInitManager } from "main/lib/workspace-init-manager";
+import { nodeInitManager } from "main/lib/node-init-manager";
 import {
 	branchExistsOnRemote,
 	createWorktree,
@@ -16,9 +16,9 @@ import {
 } from "./git";
 import { copyCaspianConfigToWorktree } from "./setup";
 
-export interface WorkspaceInitParams {
-	workspaceId: string;
-	projectId: string;
+export interface NodeInitParams {
+	nodeId: string;
+	repositoryId: string;
 	worktreeId: string;
 	worktreePath: string;
 	branch: string;
@@ -33,14 +33,14 @@ export interface WorkspaceInitParams {
 }
 
 /**
- * Background initialization for workspace worktree.
+ * Background initialization for node worktree.
  * This runs after the fast-path mutation returns, streaming progress to the renderer.
  *
  * Does NOT throw - errors are communicated via progress events.
  */
-export async function initializeWorkspaceWorktree({
-	workspaceId,
-	projectId,
+export async function initializeNodeWorktree({
+	nodeId,
+	repositoryId,
 	worktreeId,
 	worktreePath,
 	branch,
@@ -49,28 +49,28 @@ export async function initializeWorkspaceWorktree({
 	mainRepoPath,
 	useExistingBranch,
 	skipWorktreeCreation,
-}: WorkspaceInitParams): Promise<void> {
-	const manager = workspaceInitManager;
+}: NodeInitParams): Promise<void> {
+	const manager = nodeInitManager;
 
 	try {
-		// Acquire per-project lock to prevent concurrent git operations
-		await manager.acquireProjectLock(projectId);
+		// Acquire per-repository lock to prevent concurrent git operations
+		await manager.acquireProjectLock(repositoryId);
 
 		// Check cancellation before starting (use durable cancellation check)
-		// Note: We don't emit "failed" progress for cancellations because the workspace
+		// Note: We don't emit "failed" progress for cancellations because the node
 		// is being deleted. Emitting would trigger a refetch race condition where the
-		// workspace temporarily reappears. finalizeJob() in the finally block will
+		// node temporarily reappears. finalizeJob() in the finally block will
 		// still unblock waitForInit() callers.
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			return;
 		}
 
 		if (useExistingBranch) {
 			if (skipWorktreeCreation) {
-				manager.markWorktreeCreated(workspaceId);
+				manager.markWorktreeCreated(nodeId);
 			} else {
 				manager.updateProgress(
-					workspaceId,
+					nodeId,
 					"creating_worktree",
 					"Creating git worktree...",
 				);
@@ -79,15 +79,15 @@ export async function initializeWorkspaceWorktree({
 					branch,
 					worktreePath,
 				});
-				manager.markWorktreeCreated(workspaceId);
+				manager.markWorktreeCreated(nodeId);
 			}
 
-			if (manager.isCancellationRequested(workspaceId)) {
+			if (manager.isCancellationRequested(nodeId)) {
 				try {
 					await removeWorktree(mainRepoPath, worktreePath);
 				} catch (e) {
 					console.error(
-						"[workspace-init] Failed to cleanup worktree after cancel:",
+						"[node-init] Failed to cleanup worktree after cancel:",
 						e,
 					);
 				}
@@ -95,25 +95,25 @@ export async function initializeWorkspaceWorktree({
 			}
 
 			manager.updateProgress(
-				workspaceId,
+				nodeId,
 				"copying_config",
 				"Copying configuration...",
 			);
 			copyCaspianConfigToWorktree(mainRepoPath, worktreePath);
 
-			if (manager.isCancellationRequested(workspaceId)) {
+			if (manager.isCancellationRequested(nodeId)) {
 				try {
 					await removeWorktree(mainRepoPath, worktreePath);
 				} catch (e) {
 					console.error(
-						"[workspace-init] Failed to cleanup worktree after cancel:",
+						"[node-init] Failed to cleanup worktree after cancel:",
 						e,
 					);
 				}
 				return;
 			}
 
-			manager.updateProgress(workspaceId, "finalizing", "Finalizing setup...");
+			manager.updateProgress(nodeId, "finalizing", "Finalizing setup...");
 			localDb
 				.update(worktrees)
 				.set({
@@ -126,11 +126,11 @@ export async function initializeWorkspaceWorktree({
 				.where(eq(worktrees.id, worktreeId))
 				.run();
 
-			manager.updateProgress(workspaceId, "ready", "Ready");
+			manager.updateProgress(nodeId, "ready", "Ready");
 
-			track("workspace_initialized", {
-				workspace_id: workspaceId,
-				project_id: projectId,
+			track("node_initialized", {
+				node_id: nodeId,
+				repository_id: repositoryId,
 				branch,
 				base_branch: branch, // For existing branch, base = branch
 				use_existing_branch: true,
@@ -139,22 +139,22 @@ export async function initializeWorkspaceWorktree({
 			return;
 		}
 
-		manager.updateProgress(workspaceId, "syncing", "Syncing with remote...");
+		manager.updateProgress(nodeId, "syncing", "Syncing with remote...");
 		const remoteDefaultBranch = await refreshDefaultBranch(mainRepoPath);
 
 		let effectiveBaseBranch = baseBranch;
 
 		if (remoteDefaultBranch) {
-			const project = localDb
+			const repository = localDb
 				.select()
-				.from(projects)
-				.where(eq(projects.id, projectId))
+				.from(repositories)
+				.where(eq(repositories.id, repositoryId))
 				.get();
-			if (project && remoteDefaultBranch !== project.defaultBranch) {
+			if (repository && remoteDefaultBranch !== repository.defaultBranch) {
 				localDb
-					.update(projects)
+					.update(repositories)
 					.set({ defaultBranch: remoteDefaultBranch })
-					.where(eq(projects.id, projectId))
+					.where(eq(repositories.id, repositoryId))
 					.run();
 			}
 
@@ -162,7 +162,7 @@ export async function initializeWorkspaceWorktree({
 			// update the worktree record so retries use the correct branch
 			if (!baseBranchWasExplicit && remoteDefaultBranch !== baseBranch) {
 				console.log(
-					`[workspace-init] Auto-updating baseBranch from "${baseBranch}" to "${remoteDefaultBranch}" for workspace ${workspaceId}`,
+					`[node-init] Auto-updating baseBranch from "${baseBranch}" to "${remoteDefaultBranch}" for node ${nodeId}`,
 				);
 				effectiveBaseBranch = remoteDefaultBranch;
 				localDb
@@ -173,12 +173,12 @@ export async function initializeWorkspaceWorktree({
 			}
 		}
 
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			return;
 		}
 
 		manager.updateProgress(
-			workspaceId,
+			nodeId,
 			"verifying",
 			"Verifying base branch...",
 		);
@@ -198,7 +198,7 @@ export async function initializeWorkspaceWorktree({
 				const originRef = `origin/${effectiveBaseBranch}`;
 				if (await refExistsLocally(mainRepoPath, originRef)) {
 					console.log(
-						`[workspace-init] ${reason}. Using local tracking ref: ${originRef}`,
+						`[node-init] ${reason}. Using local tracking ref: ${originRef}`,
 					);
 					return { ref: originRef };
 				}
@@ -207,7 +207,7 @@ export async function initializeWorkspaceWorktree({
 			// Try local branch
 			if (await refExistsLocally(mainRepoPath, effectiveBaseBranch)) {
 				console.log(
-					`[workspace-init] ${reason}. Using local branch: ${effectiveBaseBranch}`,
+					`[node-init] ${reason}. Using local branch: ${effectiveBaseBranch}`,
 				);
 				return { ref: effectiveBaseBranch };
 			}
@@ -215,7 +215,7 @@ export async function initializeWorkspaceWorktree({
 			// Only try fallback branches if the base branch was auto-derived
 			if (baseBranchWasExplicit) {
 				console.log(
-					`[workspace-init] ${reason}. Base branch "${effectiveBaseBranch}" was explicitly set, not using fallback.`,
+					`[node-init] ${reason}. Base branch "${effectiveBaseBranch}" was explicitly set, not using fallback.`,
 				);
 				return null;
 			}
@@ -229,14 +229,14 @@ export async function initializeWorkspaceWorktree({
 					const fallbackOriginRef = `origin/${branch}`;
 					if (await refExistsLocally(mainRepoPath, fallbackOriginRef)) {
 						console.log(
-							`[workspace-init] ${reason}. Using fallback tracking ref: ${fallbackOriginRef}`,
+							`[node-init] ${reason}. Using fallback tracking ref: ${fallbackOriginRef}`,
 						);
 						return { ref: fallbackOriginRef, fallbackBranch: branch };
 					}
 				}
 				if (await refExistsLocally(mainRepoPath, branch)) {
 					console.log(
-						`[workspace-init] ${reason}. Using fallback local branch: ${branch}`,
+						`[node-init] ${reason}. Using fallback local branch: ${branch}`,
 					);
 					return { ref: branch, fallbackBranch: branch };
 				}
@@ -248,7 +248,7 @@ export async function initializeWorkspaceWorktree({
 		// Helper to update baseBranch when fallback is used
 		const applyFallbackBranch = (fallbackBranch: string) => {
 			console.log(
-				`[workspace-init] Updating baseBranch from "${effectiveBaseBranch}" to "${fallbackBranch}" for workspace ${workspaceId}`,
+				`[node-init] Updating baseBranch from "${effectiveBaseBranch}" to "${fallbackBranch}" for node ${nodeId}`,
 			);
 			effectiveBaseBranch = fallbackBranch;
 			localDb
@@ -268,11 +268,11 @@ export async function initializeWorkspaceWorktree({
 			if (branchCheck.status === "error") {
 				const sanitizedError = sanitizeGitError(branchCheck.message);
 				console.warn(
-					`[workspace-init] Cannot verify remote branch: ${sanitizedError}. Falling back to local ref.`,
+					`[node-init] Cannot verify remote branch: ${sanitizedError}. Falling back to local ref.`,
 				);
 
 				manager.updateProgress(
-					workspaceId,
+					nodeId,
 					"verifying",
 					"Using local reference (remote unavailable)",
 					sanitizedError,
@@ -284,7 +284,7 @@ export async function initializeWorkspaceWorktree({
 				);
 				if (!localResult) {
 					manager.updateProgress(
-						workspaceId,
+						nodeId,
 						"failed",
 						"No local reference available",
 						baseBranchWasExplicit
@@ -296,7 +296,7 @@ export async function initializeWorkspaceWorktree({
 				if (localResult.fallbackBranch) {
 					applyFallbackBranch(localResult.fallbackBranch);
 					manager.updateProgress(
-						workspaceId,
+						nodeId,
 						"verifying",
 						`Using "${localResult.fallbackBranch}" branch`,
 						`Branch "${baseBranch}" not found locally. Using "${localResult.fallbackBranch}" instead.`,
@@ -305,10 +305,10 @@ export async function initializeWorkspaceWorktree({
 				startPoint = localResult.ref;
 			} else if (branchCheck.status === "not_found") {
 				manager.updateProgress(
-					workspaceId,
+					nodeId,
 					"failed",
 					"Branch does not exist on remote",
-					`Branch "${effectiveBaseBranch}" does not exist on origin. Please delete this workspace and try again with a different base branch.`,
+					`Branch "${effectiveBaseBranch}" does not exist on origin. Please delete this node and try again with a different base branch.`,
 				);
 				return;
 			} else {
@@ -321,7 +321,7 @@ export async function initializeWorkspaceWorktree({
 			);
 			if (!localResult) {
 				manager.updateProgress(
-					workspaceId,
+					nodeId,
 					"failed",
 					"No local reference available",
 					baseBranchWasExplicit
@@ -333,7 +333,7 @@ export async function initializeWorkspaceWorktree({
 			if (localResult.fallbackBranch) {
 				applyFallbackBranch(localResult.fallbackBranch);
 				manager.updateProgress(
-					workspaceId,
+					nodeId,
 					"verifying",
 					`Using "${localResult.fallbackBranch}" branch`,
 					`Branch "${baseBranch}" not found locally. Using "${localResult.fallbackBranch}" instead.`,
@@ -342,12 +342,12 @@ export async function initializeWorkspaceWorktree({
 			startPoint = localResult.ref;
 		}
 
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			return;
 		}
 
 		manager.updateProgress(
-			workspaceId,
+			nodeId,
 			"fetching",
 			"Fetching latest changes...",
 		);
@@ -359,7 +359,7 @@ export async function initializeWorkspaceWorktree({
 				const originRef = `origin/${effectiveBaseBranch}`;
 				if (!(await refExistsLocally(mainRepoPath, originRef))) {
 					console.warn(
-						`[workspace-init] Fetch failed and local ref "${originRef}" doesn't exist. Attempting local fallback.`,
+						`[node-init] Fetch failed and local ref "${originRef}" doesn't exist. Attempting local fallback.`,
 					);
 					const localResult = await resolveLocalStartPoint(
 						"Fetch failed and remote tracking ref unavailable",
@@ -372,7 +372,7 @@ export async function initializeWorkspaceWorktree({
 								: String(fetchError),
 						);
 						manager.updateProgress(
-							workspaceId,
+							nodeId,
 							"failed",
 							"Cannot fetch branch",
 							baseBranchWasExplicit
@@ -388,7 +388,7 @@ export async function initializeWorkspaceWorktree({
 					if (localResult.fallbackBranch) {
 						applyFallbackBranch(localResult.fallbackBranch);
 						manager.updateProgress(
-							workspaceId,
+							nodeId,
 							"fetching",
 							`Using "${localResult.fallbackBranch}" branch`,
 							`Could not fetch "${baseBranch}". Using local "${localResult.fallbackBranch}" branch instead.`,
@@ -399,24 +399,24 @@ export async function initializeWorkspaceWorktree({
 			}
 		}
 
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			return;
 		}
 
 		manager.updateProgress(
-			workspaceId,
+			nodeId,
 			"creating_worktree",
 			"Creating git worktree...",
 		);
 		await createWorktree(mainRepoPath, branch, worktreePath, startPoint);
-		manager.markWorktreeCreated(workspaceId);
+		manager.markWorktreeCreated(nodeId);
 
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
 			} catch (e) {
 				console.error(
-					"[workspace-init] Failed to cleanup worktree after cancel:",
+					"[node-init] Failed to cleanup worktree after cancel:",
 					e,
 				);
 			}
@@ -424,25 +424,25 @@ export async function initializeWorkspaceWorktree({
 		}
 
 		manager.updateProgress(
-			workspaceId,
+			nodeId,
 			"copying_config",
 			"Copying configuration...",
 		);
 		copyCaspianConfigToWorktree(mainRepoPath, worktreePath);
 
-		if (manager.isCancellationRequested(workspaceId)) {
+		if (manager.isCancellationRequested(nodeId)) {
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
 			} catch (e) {
 				console.error(
-					"[workspace-init] Failed to cleanup worktree after cancel:",
+					"[node-init] Failed to cleanup worktree after cancel:",
 					e,
 				);
 			}
 			return;
 		}
 
-		manager.updateProgress(workspaceId, "finalizing", "Finalizing setup...");
+		manager.updateProgress(nodeId, "finalizing", "Finalizing setup...");
 
 		localDb
 			.update(worktrees)
@@ -456,44 +456,44 @@ export async function initializeWorkspaceWorktree({
 			.where(eq(worktrees.id, worktreeId))
 			.run();
 
-		manager.updateProgress(workspaceId, "ready", "Ready");
+		manager.updateProgress(nodeId, "ready", "Ready");
 
-		track("workspace_initialized", {
-			workspace_id: workspaceId,
-			project_id: projectId,
+		track("node_initialized", {
+			node_id: nodeId,
+			repository_id: repositoryId,
 			branch,
 			base_branch: effectiveBaseBranch,
 		});
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		console.error(
-			`[workspace-init] Failed to initialize ${workspaceId}:`,
+			`[node-init] Failed to initialize ${nodeId}:`,
 			errorMessage,
 		);
 
-		if (manager.wasWorktreeCreated(workspaceId)) {
+		if (manager.wasWorktreeCreated(nodeId)) {
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
 				console.log(
-					`[workspace-init] Cleaned up partial worktree at ${worktreePath}`,
+					`[node-init] Cleaned up partial worktree at ${worktreePath}`,
 				);
 			} catch (cleanupError) {
 				console.error(
-					"[workspace-init] Failed to cleanup partial worktree:",
+					"[node-init] Failed to cleanup partial worktree:",
 					cleanupError,
 				);
 			}
 		}
 
 		manager.updateProgress(
-			workspaceId,
+			nodeId,
 			"failed",
 			"Initialization failed",
 			errorMessage,
 		);
 	} finally {
 		// Always finalize the job to unblock waitForInit() callers (e.g., delete mutation)
-		manager.finalizeJob(workspaceId);
-		manager.releaseProjectLock(projectId);
+		manager.finalizeJob(nodeId);
+		manager.releaseProjectLock(repositoryId);
 	}
 }

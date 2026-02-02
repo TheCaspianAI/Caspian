@@ -17,7 +17,7 @@ import { createSettingsRouter } from "./settings";
 import { createTerminalRouter } from "./terminal";
 import { createUiStateRouter } from "./ui-state";
 import { createWindowRouter } from "./window";
-import { createWorkspacesRouter } from "./workspaces";
+import { createNodesRouter } from "./nodes";
 
 export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 	return router({
@@ -26,7 +26,7 @@ export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 		cache: createCacheRouter(),
 		window: createWindowRouter(getWindow),
 		projects: createProjectsRouter(getWindow),
-		workspaces: createWorkspacesRouter(),
+		nodes: createNodesRouter(),
 		terminal: createTerminalRouter(),
 		changes: createChangesRouter(),
 		filesystem: createFilesystemRouter(),

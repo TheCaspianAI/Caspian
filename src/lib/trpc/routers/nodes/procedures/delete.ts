@@ -1,19 +1,19 @@
 import type { SelectWorktree } from "lib/local-db";
 import { track } from "main/lib/analytics";
-import { workspaceInitManager } from "main/lib/workspace-init-manager";
-import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
+import { nodeInitManager } from "main/lib/node-init-manager";
+import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
-	clearWorkspaceDeletingStatus,
-	deleteWorkspace,
+	clearNodeDeletingStatus,
+	deleteNode,
 	deleteWorktreeRecord,
-	getProject,
-	getWorkspace,
+	getRepository,
+	getNode,
 	getWorktree,
-	hideProjectIfNoWorkspaces,
-	markWorkspaceAsDeleting,
-	updateActiveWorkspaceIfRemoved,
+	hideRepositoryIfNoNodes,
+	markNodeAsDeleting,
+	updateActiveNodeIfRemoved,
 } from "../utils/db-helpers";
 import {
 	hasUncommittedChanges,
@@ -34,40 +34,40 @@ export const createDeleteProcedures = () => {
 				}),
 			)
 			.query(async ({ input }) => {
-				const workspace = getWorkspace(input.id);
+				const node = getNode(input.id);
 
-				if (!workspace) {
+				if (!node) {
 					return {
 						canDelete: false,
-						reason: "Workspace not found",
-						workspace: null,
+						reason: "Node not found",
+						node: null,
 						activeTerminalCount: 0,
 						hasChanges: false,
 						hasUnpushedCommits: false,
 					};
 				}
 
-				if (workspace.deletingAt) {
+				if (node.deletingAt) {
 					return {
 						canDelete: false,
 						reason: "Deletion already in progress",
-						workspace: null,
+						node: null,
 						activeTerminalCount: 0,
 						hasChanges: false,
 						hasUnpushedCommits: false,
 					};
 				}
 
-				const activeTerminalCount = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
-					.terminal.getSessionCountByWorkspaceId(input.id);
+				const activeTerminalCount = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
+					.terminal.getSessionCountByNodeId(input.id);
 
-				// Branch workspaces are non-destructive to close - no git checks needed
-				if (workspace.type === "branch") {
+				// Branch nodes are non-destructive to close - no git checks needed
+				if (node.type === "branch") {
 					return {
 						canDelete: true,
 						reason: null,
-						workspace,
+						node,
 						warning: null,
 						activeTerminalCount,
 						hasChanges: false,
@@ -80,7 +80,7 @@ export const createDeleteProcedures = () => {
 					return {
 						canDelete: true,
 						reason: null,
-						workspace,
+						node,
 						warning: null,
 						activeTerminalCount,
 						hasChanges: false,
@@ -88,15 +88,15 @@ export const createDeleteProcedures = () => {
 					};
 				}
 
-				const worktree = workspace.worktreeId
-					? getWorktree(workspace.worktreeId)
+				const worktree = node.worktreeId
+					? getWorktree(node.worktreeId)
 					: null;
-				const project = getProject(workspace.projectId);
+				const repository = getRepository(node.repositoryId);
 
-				if (worktree && project) {
+				if (worktree && repository) {
 					try {
 						const exists = await worktreeExists(
-							project.mainRepoPath,
+							repository.mainRepoPath,
 							worktree.path,
 						);
 
@@ -104,7 +104,7 @@ export const createDeleteProcedures = () => {
 							return {
 								canDelete: true,
 								reason: null,
-								workspace,
+								node,
 								warning:
 									"Worktree not found in git (may have been manually removed)",
 								activeTerminalCount,
@@ -121,7 +121,7 @@ export const createDeleteProcedures = () => {
 						return {
 							canDelete: true,
 							reason: null,
-							workspace,
+							node,
 							warning: null,
 							activeTerminalCount,
 							hasChanges,
@@ -131,7 +131,7 @@ export const createDeleteProcedures = () => {
 						return {
 							canDelete: false,
 							reason: `Failed to check worktree status: ${error instanceof Error ? error.message : String(error)}`,
-							workspace,
+							node,
 							activeTerminalCount,
 							hasChanges: false,
 							hasUnpushedCommits: false,
@@ -142,7 +142,7 @@ export const createDeleteProcedures = () => {
 				return {
 					canDelete: true,
 					reason: null,
-					workspace,
+					node,
 					warning: "No associated worktree found",
 					activeTerminalCount,
 					hasChanges: false,
@@ -153,69 +153,70 @@ export const createDeleteProcedures = () => {
 		delete: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.mutation(async ({ input }) => {
-				const workspace = getWorkspace(input.id);
+				const node = getNode(input.id);
 
-				if (!workspace) {
-					return { success: false, error: "Workspace not found" };
+				if (!node) {
+					return { success: false, error: "Node not found" };
 				}
 
-				markWorkspaceAsDeleting(input.id);
-				updateActiveWorkspaceIfRemoved(input.id);
+				markNodeAsDeleting(input.id);
+				updateActiveNodeIfRemoved(input.id);
 
 				// Wait for any ongoing init to complete to avoid racing git operations
-				if (workspaceInitManager.isInitializing(input.id)) {
+				if (nodeInitManager.isInitializing(input.id)) {
 					console.log(
-						`[workspace/delete] Cancelling init for ${input.id}, waiting for completion...`,
+						`[node/delete] Cancelling init for ${input.id}, waiting for completion...`,
 					);
-					workspaceInitManager.cancel(input.id);
+					nodeInitManager.cancel(input.id);
 					try {
-						await workspaceInitManager.waitForInit(input.id, 30000);
+						await nodeInitManager.waitForInit(input.id, 30000);
 					} catch (error) {
-						// Clear deleting status so workspace reappears in UI
+						// Clear deleting status so node reappears in UI
 						console.error(
-							`[workspace/delete] Failed to wait for init cancellation:`,
+							`[node/delete] Failed to wait for init cancellation:`,
 							error,
 						);
-						clearWorkspaceDeletingStatus(input.id);
+						clearNodeDeletingStatus(input.id);
 						return {
 							success: false,
 							error:
-								"Failed to cancel workspace initialization. Please try again.",
+								"Failed to cancel node initialization. Please try again.",
 						};
 					}
 				}
 
-				// Kill all terminal processes in this workspace first
-				const terminalResult = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
-					.terminal.killByWorkspaceId(input.id);
+				// Kill all terminal processes in this node first
+				const terminalResult = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
+					.terminal.killByNodeId(input.id);
 
-				const project = getProject(workspace.projectId);
+				const repository = getRepository(node.repositoryId);
 
 				let worktree: SelectWorktree | undefined;
 
-				if (workspace.type === "worktree" && workspace.worktreeId) {
-					worktree = getWorktree(workspace.worktreeId);
+				if (node.type === "worktree" && node.worktreeId) {
+					worktree = getWorktree(node.worktreeId);
 
-					if (worktree && project) {
+					if (worktree && repository) {
 						// Prevents racing with concurrent init operations
-						await workspaceInitManager.acquireProjectLock(project.id);
+						await nodeInitManager.acquireRepositoryLock(repository.id);
 
 						try {
 							const exists = await worktreeExists(
-								project.mainRepoPath,
+								repository.mainRepoPath,
 								worktree.path,
 							);
 
 							if (exists) {
 								const teardownResult = await runTeardown(
-									project.mainRepoPath,
+									repository.mainRepoPath,
 									worktree.path,
-									workspace.name,
+									node.name,
+									node.customTeardownScript,
 								);
 								if (!teardownResult.success) {
 									console.error(
-										`Teardown failed for workspace ${workspace.name}:`,
+										`Teardown failed for node ${node.name}:`,
 										teardownResult.error,
 									);
 								}
@@ -223,7 +224,7 @@ export const createDeleteProcedures = () => {
 
 							try {
 								if (exists) {
-									await removeWorktree(project.mainRepoPath, worktree.path);
+									await removeWorktree(repository.mainRepoPath, worktree.path);
 								} else {
 									console.warn(
 										`Worktree ${worktree.path} not found in git, skipping removal`,
@@ -233,26 +234,26 @@ export const createDeleteProcedures = () => {
 								const errorMessage =
 									error instanceof Error ? error.message : String(error);
 								console.error("Failed to remove worktree:", errorMessage);
-								clearWorkspaceDeletingStatus(input.id);
+								clearNodeDeletingStatus(input.id);
 								return {
 									success: false,
 									error: `Failed to remove worktree: ${errorMessage}`,
 								};
 							}
 						} finally {
-							workspaceInitManager.releaseProjectLock(project.id);
+							nodeInitManager.releaseRepositoryLock(repository.id);
 						}
 					}
 				}
 
-				deleteWorkspace(input.id);
+				deleteNode(input.id);
 
 				if (worktree) {
 					deleteWorktreeRecord(worktree.id);
 				}
 
-				if (project) {
-					hideProjectIfNoWorkspaces(workspace.projectId);
+				if (repository) {
+					hideRepositoryIfNoNodes(node.repositoryId);
 				}
 
 				const terminalWarning =
@@ -260,10 +261,10 @@ export const createDeleteProcedures = () => {
 						? `${terminalResult.failed} terminal process(es) may still be running`
 						: undefined;
 
-				track("workspace_deleted", { workspace_id: input.id });
+				track("node_deleted", { node_id: input.id });
 
 				// Clear after cleanup so cancellation signals remain visible during deletion
-				workspaceInitManager.clearJob(input.id);
+				nodeInitManager.clearJob(input.id);
 
 				return { success: true, terminalWarning };
 			}),
@@ -271,31 +272,31 @@ export const createDeleteProcedures = () => {
 		close: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.mutation(async ({ input }) => {
-				const workspace = getWorkspace(input.id);
+				const node = getNode(input.id);
 
-				if (!workspace) {
-					throw new Error("Workspace not found");
+				if (!node) {
+					throw new Error("Node not found");
 				}
 
-				const terminalResult = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
-					.terminal.killByWorkspaceId(input.id);
+				const terminalResult = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
+					.terminal.killByNodeId(input.id);
 
-				deleteWorkspace(input.id); // keeps worktree on disk
-				hideProjectIfNoWorkspaces(workspace.projectId);
-				updateActiveWorkspaceIfRemoved(input.id);
+				deleteNode(input.id); // keeps worktree on disk
+				hideRepositoryIfNoNodes(node.repositoryId);
+				updateActiveNodeIfRemoved(input.id);
 
 				const terminalWarning =
 					terminalResult.failed > 0
 						? `${terminalResult.failed} terminal process(es) may still be running`
 						: undefined;
 
-				track("workspace_closed", { workspace_id: input.id });
+				track("node_closed", { node_id: input.id });
 
 				return { success: true, terminalWarning };
 			}),
 
-		// Check if a closed worktree (no active workspace) can be deleted
+		// Check if a closed worktree (no active node) can be deleted
 		canDeleteWorktree: publicProcedure
 			.input(
 				z.object({
@@ -316,12 +317,12 @@ export const createDeleteProcedures = () => {
 					};
 				}
 
-				const project = getProject(worktree.projectId);
+				const repository = getRepository(worktree.repositoryId);
 
-				if (!project) {
+				if (!repository) {
 					return {
 						canDelete: false,
-						reason: "Project not found",
+						reason: "Repository not found",
 						worktree,
 						hasChanges: false,
 						hasUnpushedCommits: false,
@@ -341,7 +342,7 @@ export const createDeleteProcedures = () => {
 
 				try {
 					const exists = await worktreeExists(
-						project.mainRepoPath,
+						repository.mainRepoPath,
 						worktree.path,
 					);
 
@@ -381,7 +382,7 @@ export const createDeleteProcedures = () => {
 				}
 			}),
 
-		// Delete a closed worktree (no active workspace) by worktree ID
+		// Delete a closed worktree (no active node) by worktree ID
 		deleteWorktree: publicProcedure
 			.input(z.object({ worktreeId: z.string() }))
 			.mutation(async ({ input }) => {
@@ -391,24 +392,24 @@ export const createDeleteProcedures = () => {
 					return { success: false, error: "Worktree not found" };
 				}
 
-				const project = getProject(worktree.projectId);
+				const repository = getRepository(worktree.repositoryId);
 
-				if (!project) {
-					return { success: false, error: "Project not found" };
+				if (!repository) {
+					return { success: false, error: "Repository not found" };
 				}
 
-				// Acquire project lock to prevent racing with concurrent operations
-				await workspaceInitManager.acquireProjectLock(project.id);
+				// Acquire repository lock to prevent racing with concurrent operations
+				await nodeInitManager.acquireRepositoryLock(repository.id);
 
 				try {
 					const exists = await worktreeExists(
-						project.mainRepoPath,
+						repository.mainRepoPath,
 						worktree.path,
 					);
 
 					if (exists) {
 						const teardownResult = await runTeardown(
-							project.mainRepoPath,
+							repository.mainRepoPath,
 							worktree.path,
 							worktree.branch,
 						);
@@ -422,7 +423,7 @@ export const createDeleteProcedures = () => {
 
 					try {
 						if (exists) {
-							await removeWorktree(project.mainRepoPath, worktree.path);
+							await removeWorktree(repository.mainRepoPath, worktree.path);
 						} else {
 							console.warn(
 								`Worktree ${worktree.path} not found in git, skipping removal`,
@@ -438,11 +439,11 @@ export const createDeleteProcedures = () => {
 						};
 					}
 				} finally {
-					workspaceInitManager.releaseProjectLock(project.id);
+					nodeInitManager.releaseRepositoryLock(repository.id);
 				}
 
 				deleteWorktreeRecord(input.worktreeId);
-				hideProjectIfNoWorkspaces(worktree.projectId);
+				hideRepositoryIfNoNodes(worktree.repositoryId);
 
 				track("worktree_deleted", { worktree_id: input.worktreeId });
 

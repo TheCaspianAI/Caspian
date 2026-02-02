@@ -1,46 +1,46 @@
 import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
-import { workspaceInitManager } from "main/lib/workspace-init-manager";
-import type { WorkspaceInitProgress } from "shared/types/workspace-init";
+import { nodeInitManager } from "main/lib/node-init-manager";
+import type { NodeInitProgress } from "shared/types/node-init";
 
-export type WorkspaceUsabilityReason =
+export type NodeUsabilityReason =
 	| "initializing"
 	| "failed"
 	| "path_missing"
 	| "not_found";
 
-export interface WorkspaceUsabilityCheck {
+export interface NodeUsabilityCheck {
 	usable: boolean;
-	reason?: WorkspaceUsabilityReason;
-	progress?: WorkspaceInitProgress;
+	reason?: NodeUsabilityReason;
+	progress?: NodeInitProgress;
 }
 
 /**
- * Check if a workspace is usable for operations requiring the worktree path.
+ * Check if a node is usable for operations requiring the worktree path.
  * Returns detailed status for UI to display appropriate state.
  *
- * A workspace is NOT usable if:
+ * A node is NOT usable if:
  * - It is currently initializing (git operations in progress)
  * - Its initialization failed (needs retry or delete)
  * - The worktree path doesn't exist on disk
  */
-export function checkWorkspaceUsability(
-	workspaceId: string,
+export function checkNodeUsability(
+	nodeId: string,
 	worktreePath: string | null | undefined,
-): WorkspaceUsabilityCheck {
-	if (workspaceInitManager.isInitializing(workspaceId)) {
+): NodeUsabilityCheck {
+	if (nodeInitManager.isInitializing(nodeId)) {
 		return {
 			usable: false,
 			reason: "initializing",
-			progress: workspaceInitManager.getProgress(workspaceId),
+			progress: nodeInitManager.getProgress(nodeId),
 		};
 	}
 
-	if (workspaceInitManager.hasFailed(workspaceId)) {
+	if (nodeInitManager.hasFailed(nodeId)) {
 		return {
 			usable: false,
 			reason: "failed",
-			progress: workspaceInitManager.getProgress(workspaceId),
+			progress: nodeInitManager.getProgress(nodeId),
 		};
 	}
 
@@ -56,49 +56,49 @@ export function checkWorkspaceUsability(
 }
 
 /**
- * Throws TRPCError if workspace is not usable.
+ * Throws TRPCError if node is not usable.
  * Use this as a guard in tRPC procedures that require the worktree to exist.
  *
  * The error includes a `cause` object with details that the frontend can use
  * to display appropriate UI (e.g., progress view for initializing, error for failed).
  */
-export function assertWorkspaceUsable(
-	workspaceId: string,
+export function assertNodeUsable(
+	nodeId: string,
 	worktreePath: string | null | undefined,
 ): void {
-	const check = checkWorkspaceUsability(workspaceId, worktreePath);
+	const check = checkNodeUsability(nodeId, worktreePath);
 
 	if (!check.usable) {
 		switch (check.reason) {
 			case "initializing":
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: "Workspace is still initializing",
+					message: "Node is still initializing",
 					cause: { reason: "initializing", progress: check.progress },
 				});
 			case "failed":
 				throw new TRPCError({
 					code: "PRECONDITION_FAILED",
-					message: "Workspace initialization failed",
+					message: "Node initialization failed",
 					cause: { reason: "failed", progress: check.progress },
 				});
 			case "path_missing":
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Workspace path does not exist",
+					message: "Node path does not exist",
 					cause: { reason: "path_missing" },
 				});
 			default:
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
-					message: "Workspace is not usable",
+					message: "Node is not usable",
 				});
 		}
 	}
 }
 
 /**
- * Check if a workspace usability error indicates the workspace is initializing.
+ * Check if a node usability error indicates the node is initializing.
  * Useful for frontend to determine whether to show progress UI.
  */
 export function isInitializingError(error: unknown): boolean {
@@ -110,7 +110,7 @@ export function isInitializingError(error: unknown): boolean {
 }
 
 /**
- * Check if a workspace usability error indicates the workspace failed to initialize.
+ * Check if a node usability error indicates the node failed to initialize.
  * Useful for frontend to determine whether to show error UI with retry option.
  */
 export function isFailedError(error: unknown): boolean {

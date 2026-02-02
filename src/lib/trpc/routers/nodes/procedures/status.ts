@@ -1,12 +1,12 @@
-import { workspaces } from "lib/local-db";
+import { nodes } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
-	getWorkspaceNotDeleting,
-	setLastActiveWorkspace,
-	touchWorkspace,
+	getNodeNotDeleting,
+	setLastActiveNode,
+	touchNode,
 } from "../utils/db-helpers";
 
 export const createStatusProcedures = () => {
@@ -14,21 +14,21 @@ export const createStatusProcedures = () => {
 		reorder: publicProcedure
 			.input(
 				z.object({
-					projectId: z.string(),
+					repositoryId: z.string(),
 					fromIndex: z.number(),
 					toIndex: z.number(),
 				}),
 			)
 			.mutation(({ input }) => {
-				const { projectId, fromIndex, toIndex } = input;
+				const { repositoryId, fromIndex, toIndex } = input;
 
-				const projectWorkspaces = localDb
+				const repositoryNodes = localDb
 					.select()
-					.from(workspaces)
+					.from(nodes)
 					.where(
 						and(
-							eq(workspaces.projectId, projectId),
-							isNull(workspaces.deletingAt),
+							eq(nodes.repositoryId, repositoryId),
+							isNull(nodes.deletingAt),
 						),
 					)
 					.all()
@@ -36,21 +36,21 @@ export const createStatusProcedures = () => {
 
 				if (
 					fromIndex < 0 ||
-					fromIndex >= projectWorkspaces.length ||
+					fromIndex >= repositoryNodes.length ||
 					toIndex < 0 ||
-					toIndex >= projectWorkspaces.length
+					toIndex >= repositoryNodes.length
 				) {
 					throw new Error("Invalid fromIndex or toIndex");
 				}
 
-				const [removed] = projectWorkspaces.splice(fromIndex, 1);
-				projectWorkspaces.splice(toIndex, 0, removed);
+				const [removed] = repositoryNodes.splice(fromIndex, 1);
+				repositoryNodes.splice(toIndex, 0, removed);
 
-				for (let i = 0; i < projectWorkspaces.length; i++) {
+				for (let i = 0; i < repositoryNodes.length; i++) {
 					localDb
-						.update(workspaces)
+						.update(nodes)
 						.set({ tabOrder: i })
-						.where(eq(workspaces.id, projectWorkspaces[i].id))
+						.where(eq(nodes.id, repositoryNodes[i].id))
 						.run();
 				}
 
@@ -67,14 +67,14 @@ export const createStatusProcedures = () => {
 				}),
 			)
 			.mutation(({ input }) => {
-				const workspace = getWorkspaceNotDeleting(input.id);
-				if (!workspace) {
+				const node = getNodeNotDeleting(input.id);
+				if (!node) {
 					throw new Error(
-						`Workspace ${input.id} not found or is being deleted`,
+						`Node ${input.id} not found or is being deleted`,
 					);
 				}
 
-				touchWorkspace(input.id, {
+				touchNode(input.id, {
 					...(input.patch.name !== undefined && { name: input.patch.name }),
 				});
 
@@ -84,35 +84,35 @@ export const createStatusProcedures = () => {
 		setUnread: publicProcedure
 			.input(z.object({ id: z.string(), isUnread: z.boolean() }))
 			.mutation(({ input }) => {
-				const workspace = getWorkspaceNotDeleting(input.id);
-				if (!workspace) {
+				const node = getNodeNotDeleting(input.id);
+				if (!node) {
 					throw new Error(
-						`Workspace ${input.id} not found or is being deleted`,
+						`Node ${input.id} not found or is being deleted`,
 					);
 				}
 
 				localDb
-					.update(workspaces)
+					.update(nodes)
 					.set({ isUnread: input.isUnread })
-					.where(eq(workspaces.id, input.id))
+					.where(eq(nodes.id, input.id))
 					.run();
 
 				return { success: true, isUnread: input.isUnread };
 			}),
 
 		setActive: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.mutation(({ input }) => {
-				const workspace = getWorkspaceNotDeleting(input.workspaceId);
-				if (!workspace) {
+				const node = getNodeNotDeleting(input.nodeId);
+				if (!node) {
 					throw new Error(
-						`Workspace ${input.workspaceId} not found or is being deleted`,
+						`Node ${input.nodeId} not found or is being deleted`,
 					);
 				}
 
-				setLastActiveWorkspace(input.workspaceId);
+				setLastActiveNode(input.nodeId);
 
-				return { success: true, workspaceId: input.workspaceId };
+				return { success: true, nodeId: input.nodeId };
 			}),
 	});
 };

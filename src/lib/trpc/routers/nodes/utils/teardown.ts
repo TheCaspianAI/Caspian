@@ -41,16 +41,24 @@ function loadSetupConfig(mainRepoPath: string): SetupConfig | null {
 export async function runTeardown(
 	mainRepoPath: string,
 	worktreePath: string,
-	workspaceName: string,
+	nodeName: string,
+	customTeardownScript?: string | null,
 ): Promise<TeardownResult> {
-	// Load config from the main repo (where .caspian/config.json lives)
-	const config = loadSetupConfig(mainRepoPath);
+	// Use custom teardown script if provided, otherwise load from repository config
+	let commands: string[];
 
-	if (!config?.teardown || config.teardown.length === 0) {
-		return { success: true };
+	if (customTeardownScript?.trim()) {
+		commands = [customTeardownScript.trim()];
+	} else {
+		// Load config from the main repo (where .caspian/config.json lives)
+		const config = loadSetupConfig(mainRepoPath);
+		if (!config?.teardown || config.teardown.length === 0) {
+			return { success: true };
+		}
+		commands = config.teardown;
 	}
 
-	const command = config.teardown.join(" && ");
+	const command = commands.join(" && ");
 
 	try {
 		const shellEnv = await getShellEnvironment();
@@ -60,7 +68,7 @@ export async function runTeardown(
 			timeout: TEARDOWN_TIMEOUT_MS,
 			env: {
 				...shellEnv,
-				CASPIAN_WORKSPACE_NAME: workspaceName,
+				CASPIAN_NODE_NAME: nodeName,
 				CASPIAN_ROOT_PATH: mainRepoPath,
 			},
 		});
@@ -69,7 +77,7 @@ export async function runTeardown(
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		console.error(
-			`Teardown failed for workspace ${workspaceName}:`,
+			`Teardown failed for node ${nodeName}:`,
 			errorMessage,
 		);
 		return {

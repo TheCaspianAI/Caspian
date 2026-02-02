@@ -1,13 +1,13 @@
-import { workspaces, worktrees } from "lib/local-db";
+import { nodes, worktrees } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
-	getProject,
-	getWorkspace,
+	getRepository,
+	getNode,
 	getWorktree,
-	updateProjectDefaultBranch,
+	updateRepositoryDefaultBranch,
 } from "../utils/db-helpers";
 import {
 	checkNeedsRebase,
@@ -20,46 +20,46 @@ import { fetchGitHubPRStatus } from "../utils/github";
 export const createGitStatusProcedures = () => {
 	return router({
 		refreshGitStatus: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.mutation(async ({ input }) => {
-				const workspace = getWorkspace(input.workspaceId);
-				if (!workspace) {
-					throw new Error(`Workspace ${input.workspaceId} not found`);
+				const node = getNode(input.nodeId);
+				if (!node) {
+					throw new Error(`Node ${input.nodeId} not found`);
 				}
 
-				const worktree = workspace.worktreeId
-					? getWorktree(workspace.worktreeId)
+				const worktree = node.worktreeId
+					? getWorktree(node.worktreeId)
 					: null;
 				if (!worktree) {
 					throw new Error(
-						`Worktree for workspace ${input.workspaceId} not found`,
+						`Worktree for node ${input.nodeId} not found`,
 					);
 				}
 
-				const project = getProject(workspace.projectId);
-				if (!project) {
-					throw new Error(`Project ${workspace.projectId} not found`);
+				const repository = getRepository(node.repositoryId);
+				if (!repository) {
+					throw new Error(`Repository ${node.repositoryId} not found`);
 				}
 
 				// Sync with remote in case the default branch changed (e.g. master -> main)
 				const remoteDefaultBranch = await refreshDefaultBranch(
-					project.mainRepoPath,
+					repository.mainRepoPath,
 				);
 
-				let defaultBranch = project.defaultBranch;
+				let defaultBranch = repository.defaultBranch;
 				if (!defaultBranch) {
-					defaultBranch = await getDefaultBranch(project.mainRepoPath);
+					defaultBranch = await getDefaultBranch(repository.mainRepoPath);
 				}
 				if (remoteDefaultBranch && remoteDefaultBranch !== defaultBranch) {
 					defaultBranch = remoteDefaultBranch;
 				}
 
-				if (defaultBranch !== project.defaultBranch) {
-					updateProjectDefaultBranch(project.id, defaultBranch);
+				if (defaultBranch !== repository.defaultBranch) {
+					updateRepositoryDefaultBranch(repository.id, defaultBranch);
 				}
 
 				// Fetch default branch to get latest
-				await fetchDefaultBranch(project.mainRepoPath, defaultBranch);
+				await fetchDefaultBranch(repository.mainRepoPath, defaultBranch);
 
 				// Check if worktree branch is behind origin/{defaultBranch}
 				const needsRebase = await checkNeedsRebase(
@@ -84,15 +84,15 @@ export const createGitStatusProcedures = () => {
 			}),
 
 		getGitHubStatus: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.query(async ({ input }) => {
-				const workspace = getWorkspace(input.workspaceId);
-				if (!workspace) {
+				const node = getNode(input.nodeId);
+				if (!node) {
 					return null;
 				}
 
-				const worktree = workspace.worktreeId
-					? getWorktree(workspace.worktreeId)
+				const worktree = node.worktreeId
+					? getWorktree(node.worktreeId)
 					: null;
 				if (!worktree) {
 					return null;
@@ -114,15 +114,15 @@ export const createGitStatusProcedures = () => {
 			}),
 
 		getWorktreeInfo: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.query(({ input }) => {
-				const workspace = getWorkspace(input.workspaceId);
-				if (!workspace) {
+				const node = getNode(input.nodeId);
+				if (!node) {
 					return null;
 				}
 
-				const worktree = workspace.worktreeId
-					? getWorktree(workspace.worktreeId)
+				const worktree = node.worktreeId
+					? getWorktree(node.worktreeId)
 					: null;
 				if (!worktree) {
 					return null;
@@ -139,30 +139,30 @@ export const createGitStatusProcedures = () => {
 				};
 			}),
 
-		getWorktreesByProject: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+		getWorktreesByRepository: publicProcedure
+			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
-				const projectWorktrees = localDb
+				const repositoryWorktrees = localDb
 					.select()
 					.from(worktrees)
-					.where(eq(worktrees.projectId, input.projectId))
+					.where(eq(worktrees.repositoryId, input.repositoryId))
 					.all();
 
-				return projectWorktrees.map((wt) => {
-					const workspace = localDb
+				return repositoryWorktrees.map((wt) => {
+					const node = localDb
 						.select()
-						.from(workspaces)
+						.from(nodes)
 						.where(
 							and(
-								eq(workspaces.worktreeId, wt.id),
-								isNull(workspaces.deletingAt),
+								eq(nodes.worktreeId, wt.id),
+								isNull(nodes.deletingAt),
 							),
 						)
 						.get();
 					return {
 						...wt,
-						hasActiveWorkspace: workspace !== undefined,
-						workspace: workspace ?? null,
+						hasActiveNode: node !== undefined,
+						node: node ?? null,
 					};
 				});
 			}),

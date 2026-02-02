@@ -1,37 +1,37 @@
-import { projects, workspaces, worktrees } from "lib/local-db";
+import { repositories, nodes, worktrees } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import { getWorkspace } from "../utils/db-helpers";
+import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
-import { getWorkspacePath } from "../utils/worktree";
+import { getNodePath } from "../utils/worktree";
 
 type WorktreePathMap = Map<string, string>;
 
-/** Returns workspace IDs in sidebar visual order (by project.tabOrder, then workspace.tabOrder). */
-function getWorkspacesInVisualOrder(): string[] {
-	const activeProjects = localDb
+/** Returns node IDs in sidebar visual order (by repository.tabOrder, then node.tabOrder). */
+function getNodesInVisualOrder(): string[] {
+	const activeRepositories = localDb
 		.select()
-		.from(projects)
-		.where(isNotNull(projects.tabOrder))
+		.from(repositories)
+		.where(isNotNull(repositories.tabOrder))
 		.all()
 		.sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0));
 
-	const allWorkspaces = localDb
+	const allNodes = localDb
 		.select()
-		.from(workspaces)
-		.where(isNull(workspaces.deletingAt))
+		.from(nodes)
+		.where(isNull(nodes.deletingAt))
 		.all();
 
 	const orderedIds: string[] = [];
-	for (const project of activeProjects) {
-		const projectWorkspaces = allWorkspaces
-			.filter((w) => w.projectId === project.id)
+	for (const repository of activeRepositories) {
+		const repositoryNodes = allNodes
+			.filter((n) => n.repositoryId === repository.id)
 			.sort((a, b) => a.tabOrder - b.tabOrder);
-		for (const ws of projectWorkspaces) {
-			orderedIds.push(ws.id);
+		for (const n of repositoryNodes) {
+			orderedIds.push(n.id);
 		}
 	}
 
@@ -43,36 +43,36 @@ export const createQueryProcedures = () => {
 		get: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.query(async ({ input }) => {
-				const workspace = getWorkspace(input.id);
-				if (!workspace) {
+				const node = getNode(input.id);
+				if (!node) {
 					throw new TRPCError({
 						code: "NOT_FOUND",
-						message: `Workspace ${input.id} not found`,
+						message: `Node ${input.id} not found`,
 					});
 				}
 
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, workspace.projectId))
+					.from(repositories)
+					.where(eq(repositories.id, node.repositoryId))
 					.get();
-				const worktree = workspace.worktreeId
+				const worktree = node.worktreeId
 					? localDb
 							.select()
 							.from(worktrees)
-							.where(eq(worktrees.id, workspace.worktreeId))
+							.where(eq(worktrees.id, node.worktreeId))
 							.get()
 					: null;
 
 				// Detect and persist base branch for existing worktrees that don't have it
 				// We use undefined to mean "not yet attempted" and null to mean "attempted but not found"
 				let baseBranch = worktree?.baseBranch;
-				if (worktree && baseBranch === undefined && project) {
+				if (worktree && baseBranch === undefined && repository) {
 					// Only attempt detection if there's a remote origin
-					const hasRemote = await hasOriginRemote(project.mainRepoPath);
+					const hasRemote = await hasOriginRemote(repository.mainRepoPath);
 					if (hasRemote) {
 						try {
-							const defaultBranch = project.defaultBranch || "main";
+							const defaultBranch = repository.defaultBranch || "main";
 							const detected = await detectBaseBranch(
 								worktree.path,
 								worktree.branch,
@@ -106,14 +106,14 @@ export const createQueryProcedures = () => {
 				}
 
 				return {
-					...workspace,
-					type: workspace.type as "worktree" | "branch",
-					worktreePath: getWorkspacePath(workspace) ?? "",
-					project: project
+					...node,
+					type: node.type as "worktree" | "branch",
+					worktreePath: getNodePath(node) ?? "",
+					repository: repository
 						? {
-								id: project.id,
-								name: project.name,
-								mainRepoPath: project.mainRepoPath,
+								id: repository.id,
+								name: repository.name,
+								mainRepoPath: repository.mainRepoPath,
 							}
 						: null,
 					worktree: worktree
@@ -130,17 +130,17 @@ export const createQueryProcedures = () => {
 		getAll: publicProcedure.query(() => {
 			return localDb
 				.select()
-				.from(workspaces)
-				.where(isNull(workspaces.deletingAt))
+				.from(nodes)
+				.where(isNull(nodes.deletingAt))
 				.all()
 				.sort((a, b) => a.tabOrder - b.tabOrder);
 		}),
 
 		getAllGrouped: publicProcedure.query(() => {
-			const activeProjects = localDb
+			const activeRepositories = localDb
 				.select()
-				.from(projects)
-				.where(isNotNull(projects.tabOrder))
+				.from(repositories)
+				.where(isNotNull(repositories.tabOrder))
 				.all();
 
 			// Preload all worktrees once to avoid N+1 queries in the loop below
@@ -152,7 +152,7 @@ export const createQueryProcedures = () => {
 			const groupsMap = new Map<
 				string,
 				{
-					project: {
+					repository: {
 						id: string;
 						name: string;
 						color: string;
@@ -160,9 +160,9 @@ export const createQueryProcedures = () => {
 						githubOwner: string | null;
 						mainRepoPath: string;
 					};
-					workspaces: Array<{
+					nodes: Array<{
 						id: string;
-						projectId: string;
+						repositoryId: string;
 						worktreeId: string | null;
 						worktreePath: string;
 						type: "worktree" | "branch";
@@ -177,83 +177,83 @@ export const createQueryProcedures = () => {
 				}
 			>();
 
-			for (const project of activeProjects) {
-				groupsMap.set(project.id, {
-					project: {
-						id: project.id,
-						name: project.name,
-						color: project.color,
+			for (const repository of activeRepositories) {
+				groupsMap.set(repository.id, {
+					repository: {
+						id: repository.id,
+						name: repository.name,
+						color: repository.color,
 						// biome-ignore lint/style/noNonNullAssertion: filter guarantees tabOrder is not null
-						tabOrder: project.tabOrder!,
-						githubOwner: project.githubOwner ?? null,
-						mainRepoPath: project.mainRepoPath,
+						tabOrder: repository.tabOrder!,
+						githubOwner: repository.githubOwner ?? null,
+						mainRepoPath: repository.mainRepoPath,
 					},
-					workspaces: [],
+					nodes: [],
 				});
 			}
 
-			const allWorkspaces = localDb
+			const allNodes = localDb
 				.select()
-				.from(workspaces)
-				.where(isNull(workspaces.deletingAt))
+				.from(nodes)
+				.where(isNull(nodes.deletingAt))
 				.all()
 				.sort((a, b) => a.tabOrder - b.tabOrder);
 
-			for (const workspace of allWorkspaces) {
-				const group = groupsMap.get(workspace.projectId);
+			for (const node of allNodes) {
+				const group = groupsMap.get(node.repositoryId);
 				if (group) {
-					// Resolve path from preloaded data instead of per-workspace DB queries
+					// Resolve path from preloaded data instead of per-node DB queries
 					let worktreePath = "";
-					if (workspace.type === "worktree" && workspace.worktreeId) {
-						worktreePath = worktreePathMap.get(workspace.worktreeId) ?? "";
-					} else if (workspace.type === "branch") {
-						worktreePath = group.project.mainRepoPath;
+					if (node.type === "worktree" && node.worktreeId) {
+						worktreePath = worktreePathMap.get(node.worktreeId) ?? "";
+					} else if (node.type === "branch") {
+						worktreePath = group.repository.mainRepoPath;
 					}
 
-					group.workspaces.push({
-						...workspace,
-						type: workspace.type as "worktree" | "branch",
+					group.nodes.push({
+						...node,
+						type: node.type as "worktree" | "branch",
 						worktreePath,
-						isUnread: workspace.isUnread ?? false,
+						isUnread: node.isUnread ?? false,
 					});
 				}
 			}
 
 			return Array.from(groupsMap.values()).sort(
-				(a, b) => a.project.tabOrder - b.project.tabOrder,
+				(a, b) => a.repository.tabOrder - b.repository.tabOrder,
 			);
 		}),
 
-		getPreviousWorkspace: publicProcedure
+		getPreviousNode: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.query(({ input }) => {
-				const orderedWorkspaceIds = getWorkspacesInVisualOrder();
-				if (orderedWorkspaceIds.length === 0) return null;
+				const orderedNodeIds = getNodesInVisualOrder();
+				if (orderedNodeIds.length === 0) return null;
 
-				const currentIndex = orderedWorkspaceIds.indexOf(input.id);
+				const currentIndex = orderedNodeIds.indexOf(input.id);
 				if (currentIndex === -1) return null;
 
 				const prevIndex =
 					currentIndex === 0
-						? orderedWorkspaceIds.length - 1
+						? orderedNodeIds.length - 1
 						: currentIndex - 1;
-				return orderedWorkspaceIds[prevIndex];
+				return orderedNodeIds[prevIndex];
 			}),
 
-		getNextWorkspace: publicProcedure
+		getNextNode: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.query(({ input }) => {
-				const orderedWorkspaceIds = getWorkspacesInVisualOrder();
-				if (orderedWorkspaceIds.length === 0) return null;
+				const orderedNodeIds = getNodesInVisualOrder();
+				if (orderedNodeIds.length === 0) return null;
 
-				const currentIndex = orderedWorkspaceIds.indexOf(input.id);
+				const currentIndex = orderedNodeIds.indexOf(input.id);
 				if (currentIndex === -1) return null;
 
 				const nextIndex =
-					currentIndex === orderedWorkspaceIds.length - 1
+					currentIndex === orderedNodeIds.length - 1
 						? 0
 						: currentIndex + 1;
-				return orderedWorkspaceIds[nextIndex];
+				return orderedNodeIds[nextIndex];
 			}),
 	});
 };

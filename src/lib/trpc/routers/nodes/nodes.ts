@@ -8,18 +8,18 @@ import { createQueryProcedures } from "./procedures/query";
 import { createStatusProcedures } from "./procedures/status";
 
 /**
- * Workspaces router - manages workspace lifecycle, git operations, and status.
+ * Nodes router - manages node lifecycle, git operations, and status.
  *
  * Procedures are organized into logical groups:
- * - create: create, createBranchWorkspace, openWorktree
+ * - create: create, createBranchNode, openWorktree
  * - delete: delete, close, canDelete
  * - query: get, getAll, getAllGrouped
- * - branch: getBranches, switchBranchWorkspace
- * - git-status: refreshGitStatus, getGitHubStatus, getWorktreeInfo, getWorktreesByProject
+ * - branch: getBranches, switchBranchNode
+ * - git-status: refreshGitStatus, getGitHubStatus, getWorktreeInfo, getWorktreesByRepository
  * - status: reorder, update, setUnread
  * - init: onInitProgress, retryInit, getInitProgress, getSetupCommands
  */
-export const createWorkspacesRouter = () => {
+export const createNodesRouter = () => {
 	return mergeRouters(
 		createCreateProcedures(),
 		createDeleteProcedures(),
@@ -31,4 +31,4 @@ export const createWorkspacesRouter = () => {
 	);
 };
 
-export type WorkspacesRouter = ReturnType<typeof createWorkspacesRouter>;
+export type NodesRouter = ReturnType<typeof createNodesRouter>;
