@@ -1,1 +1,0 @@
-export { SlashCommand } from "./SlashCommand";

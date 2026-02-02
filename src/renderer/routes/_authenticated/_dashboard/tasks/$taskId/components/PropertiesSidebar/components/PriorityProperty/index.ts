@@ -1,1 +1,0 @@
-export { PriorityProperty } from "./PriorityProperty";

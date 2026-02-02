@@ -1,1 +1,0 @@
-export { BacklogIcon } from "./BacklogIcon";

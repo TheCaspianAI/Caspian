@@ -4,7 +4,6 @@ import {
 	HiOutlineBell,
 	HiOutlineCommandLine,
 	HiOutlinePaintBrush,
-	HiOutlinePuzzlePiece,
 	HiOutlineSparkles,
 } from "react-icons/hi2";
 import { LuKeyboard } from "react-icons/lu";
@@ -19,8 +18,7 @@ type SettingsRoute =
 	| "/settings/ringtones"
 	| "/settings/keyboard"
 	| "/settings/behavior"
-	| "/settings/terminal"
-	| "/settings/integrations";
+	| "/settings/terminal";
 
 const GENERAL_SECTIONS: {
 	id: SettingsRoute;
@@ -57,12 +55,6 @@ const GENERAL_SECTIONS: {
 		section: "terminal",
 		label: "Terminal",
 		icon: <HiOutlineCommandLine className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/integrations",
-		section: "integrations",
-		label: "Integrations",
-		icon: <HiOutlinePuzzlePiece className="h-4 w-4" />,
 	},
 ];
 

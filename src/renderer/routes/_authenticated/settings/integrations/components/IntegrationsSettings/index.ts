@@ -1,1 +1,0 @@
-export { IntegrationsSettings } from "./IntegrationsSettings";

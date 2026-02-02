@@ -1,1 +1,0 @@
-export { StatusProperty } from "./StatusProperty";
