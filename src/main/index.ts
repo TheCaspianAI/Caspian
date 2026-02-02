@@ -2,10 +2,6 @@ import path from "node:path";
 import { settings } from "lib/local-db";
 import { app, BrowserWindow, dialog } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
-import {
-	handleAuthCallback,
-	parseAuthDeepLink,
-} from "lib/trpc/routers/auth/utils/auth-functions";
 import { DEFAULT_CONFIRM_ON_QUIT, PROTOCOL_SCHEME } from "shared/constants";
 import { setupAgentHooks } from "./lib/agent-setup";
 import { initAppState } from "./lib/app-state";
@@ -39,22 +35,10 @@ if (process.defaultApp) {
 async function processDeepLink(url: string): Promise<void> {
 	console.log("[main] Processing deep link:", url);
 
-	// Try auth deep link first (special handling)
-	const authParams = parseAuthDeepLink(url);
-	if (authParams) {
-		const result = await handleAuthCallback(authParams);
-		if (result.success) {
-			focusMainWindow();
-		} else {
-			console.error("[main] Auth deep link failed:", result.error);
-		}
-		return;
-	}
-
-	// For all other deep links, extract path and navigate in renderer
+	// Extract path and navigate in renderer
 	// e.g. caspian://tasks/my-slug -> /tasks/my-slug
 	// e.g. caspian://settings/integrations -> /settings/integrations
-	const path = `/${url.split("://")[1]}`;
+	const deepLinkPath = `/${url.split("://")[1]}`;
 
 	focusMainWindow();
 
@@ -63,7 +47,7 @@ async function processDeepLink(url: string): Promise<void> {
 	if (windows.length > 0) {
 		const mainWindow = windows[0];
 		// Send navigation request to renderer
-		mainWindow.webContents.send("deep-link-navigate", path);
+		mainWindow.webContents.send("deep-link-navigate", deepLinkPath);
 	}
 }
 

@@ -52,7 +52,7 @@ function DashboardLayout() {
 	// Global hotkeys for dashboard
 	useAppHotkey(
 		"OPEN_SETTINGS",
-		() => navigate({ to: "/settings/account" }),
+		() => navigate({ to: "/settings/appearance" }),
 		undefined,
 		[navigate],
 	);

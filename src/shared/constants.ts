@@ -1,4 +1,3 @@
-import { PROTOCOL_SCHEMES } from "shared/shared-constants";
 import { env } from "./env.shared";
 
 export const PLATFORM = {

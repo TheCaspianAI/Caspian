@@ -1,7 +1,7 @@
 import { eq } from "@tanstack/db";
 import { useLiveQuery } from "@tanstack/react-db";
 import { useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useCreateWorkspace } from "renderer/react-query/workspaces/useCreateWorkspace";
 import { useDeleteWorkspace } from "renderer/react-query/workspaces/useDeleteWorkspace";
@@ -13,13 +13,23 @@ import { executeTool, type ToolContext } from "./tools";
 
 const processingCommands = new Set<string>();
 
+// Generate a simple device ID for local use
+function getLocalDeviceId(): string {
+	let deviceId = localStorage.getItem("caspian-device-id");
+	if (!deviceId) {
+		deviceId = `device-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+		localStorage.setItem("caspian-device-id", deviceId);
+	}
+	return deviceId;
+}
+
 export function useCommandWatcher() {
-	const { data: deviceInfo } = electronTrpc.auth.getDeviceInfo.useQuery();
+	const [deviceId] = useState(() => getLocalDeviceId());
 	const collections = useCollections();
 	const navigate = useNavigate();
 
 	const organizationId = MOCK_ORG_ID;
-	const shouldWatch = !!deviceInfo;
+	const shouldWatch = true;
 
 	const createWorktree = useCreateWorkspace({ skipNavigation: true });
 	const setActive = electronTrpc.workspaces.setActive.useMutation();
@@ -86,7 +96,7 @@ export function useCommandWatcher() {
 			try {
 				collections.agentCommands.update(commandId, (draft) => {
 					draft.status = "claimed";
-					draft.claimedBy = deviceInfo?.deviceId ?? null;
+					draft.claimedBy = deviceId;
 					draft.claimedAt = new Date();
 				});
 
@@ -126,22 +136,17 @@ export function useCommandWatcher() {
 				processingCommands.delete(commandId);
 			}
 		},
-		[collections.agentCommands, deviceInfo?.deviceId, toolContext],
+		[collections.agentCommands, deviceId, toolContext],
 	);
 
 	useEffect(() => {
-		if (
-			!shouldWatch ||
-			!deviceInfo?.deviceId ||
-			!pendingCommands ||
-			!organizationId
-		) {
+		if (!shouldWatch || !deviceId || !pendingCommands || !organizationId) {
 			return;
 		}
 
 		const now = new Date();
 		const commandsForThisDevice = pendingCommands.filter((cmd) => {
-			if (cmd.targetDeviceId !== deviceInfo.deviceId) return false;
+			if (cmd.targetDeviceId !== deviceId) return false;
 			if (processingCommands.has(cmd.id)) return false;
 
 			// Security: verify org matches (don't trust Electric filtering alone)
@@ -166,7 +171,7 @@ export function useCommandWatcher() {
 		}
 	}, [
 		shouldWatch,
-		deviceInfo?.deviceId,
+		deviceId,
 		organizationId,
 		pendingCommands,
 		processCommand,
@@ -174,11 +179,10 @@ export function useCommandWatcher() {
 	]);
 
 	return {
-		isWatching: shouldWatch && !!deviceInfo?.deviceId,
-		deviceId: deviceInfo?.deviceId,
+		isWatching: shouldWatch && !!deviceId,
+		deviceId,
 		pendingCount:
-			pendingCommands?.filter(
-				(cmd) => cmd.targetDeviceId === deviceInfo?.deviceId,
-			).length ?? 0,
+			pendingCommands?.filter((cmd) => cmd.targetDeviceId === deviceId)
+				.length ?? 0,
 	};
 }
