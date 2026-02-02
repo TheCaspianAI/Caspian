@@ -367,6 +367,15 @@ export const useTabsStore = create<TabsStore>()(
 					const tab = state.tabs.find((t) => t.id === tabId);
 					if (!tab) return;
 
+					// Early return if layout hasn't changed (prevents infinite loops)
+					// For simple string layouts (single pane), use reference equality
+					// For complex layouts, compare stringified versions
+					if (typeof layout === "string" && typeof tab.layout === "string") {
+						if (layout === tab.layout) return;
+					} else if (JSON.stringify(layout) === JSON.stringify(tab.layout)) {
+						return;
+					}
+
 					const newPaneIds = new Set(extractPaneIdsFromLayout(layout));
 					const oldPaneIds = new Set(extractPaneIdsFromLayout(tab.layout));
 

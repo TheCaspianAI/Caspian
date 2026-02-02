@@ -33,7 +33,7 @@ const fileViewerStateSchema = z.object({
 const paneSchema = z.object({
 	id: z.string(),
 	tabId: z.string(),
-	type: z.enum(["terminal", "webview", "file-viewer"]),
+	type: z.enum(["terminal", "webview", "file-viewer", "kanban"]),
 	name: z.string(),
 	isNew: z.boolean().optional(),
 	status: z.enum(["idle", "working", "permission", "review"]).optional(),
