@@ -3,6 +3,8 @@ import { cn } from "ui/lib/utils";
 import { LuTerminal } from "react-icons/lu";
 import type { AgentCardData, AgentStatus } from "./types";
 
+const MAX_ACTIVITY_ITEMS = 3;
+
 interface AgentCardProps {
   agent: AgentCardData;
   onDoubleClick: () => void;
@@ -25,8 +27,18 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
     setIsExpanded(!isExpanded);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setIsExpanded(!isExpanded);
+    }
+  };
+
   return (
     <div
+      role="article"
+      tabIndex={0}
+      aria-expanded={isExpanded}
       className={cn(
         "rounded-lg border bg-card p-3 transition-all cursor-pointer",
         "hover:border-primary/50",
@@ -35,6 +47,7 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
       )}
       onClick={handleClick}
       onDoubleClick={onDoubleClick}
+      onKeyDown={handleKeyDown}
     >
       {/* Collapsed State */}
       <div className="flex items-start justify-between gap-2">
@@ -76,8 +89,8 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
                 Activity
               </div>
               <div className="space-y-1">
-                {agent.activity.slice(0, 3).map((action, i) => (
-                  <div key={i} className="text-xs text-foreground/80 truncate">
+                {agent.activity.slice(0, MAX_ACTIVITY_ITEMS).map((action, i) => (
+                  <div key={`${i}-${action.slice(0, 20)}`} className="text-xs text-foreground/80 truncate">
                     {action}
                   </div>
                 ))}
