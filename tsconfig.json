@@ -1,0 +1,45 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "esnext",
+		"lib": ["esnext", "dom", "dom.iterable"],
+		"allowJs": true,
+		"resolveJsonModule": true,
+		"moduleDetection": "force",
+		"isolatedModules": true,
+		"incremental": true,
+		"tsBuildInfoFile": ".cache/tsbuildinfo.json",
+		"strict": true,
+		"noUncheckedIndexedAccess": false,
+		"checkJs": true,
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
+		"noEmit": true,
+		"jsx": "react-jsx",
+		"importHelpers": true,
+		"sourceMap": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["bun-types"],
+		"baseUrl": ".",
+		"paths": {
+			"*": ["src/*"],
+			"~/*": ["./*"]
+		}
+	},
+	"include": [
+		"./src",
+		"electron.vite.config.ts",
+		"electron-builder.ts",
+		"index.d.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"dist-electron",
+		"release",
+		"src/**/templates/**"
+	]
+}
