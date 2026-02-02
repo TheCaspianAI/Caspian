@@ -1,7 +1,7 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
 import { useMatchRoute, useNavigate, useParams } from "@tanstack/react-router";
-import { LuLayers, LuLayoutGrid, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
+import { LuLayers, LuLayoutGrid, LuList, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
@@ -20,9 +20,36 @@ export function NodeSidebarHeader({
 	const { toggleCollapsed } = useNodeSidebarStore();
 	const { workspaceId } = useParams({ strict: false });
 	const openKanbanDashboard = useTabsStore((s) => s.openKanbanDashboard);
+	const getActiveTab = useTabsStore((s) => s.getActiveTab);
+	const panes = useTabsStore((s) => s.panes);
+	const focusedPaneIds = useTabsStore((s) => s.focusedPaneIds);
+	const setActiveTab = useTabsStore((s) => s.setActiveTab);
+	const tabs = useTabsStore((s) => s.tabs);
 
 	// Derive active state from route
 	const isNodesListOpen = !!matchRoute({ to: "/workspaces" });
+
+	// Check if currently viewing kanban
+	const activeTab = workspaceId ? getActiveTab(workspaceId) : null;
+	const focusedPaneId = activeTab ? focusedPaneIds[activeTab.id] : null;
+	const focusedPane = focusedPaneId ? panes[focusedPaneId] : null;
+	const isKanbanView = focusedPane?.type === "kanban";
+
+	// Switch to list view (find a non-kanban tab or the first terminal tab)
+	const handleListViewClick = () => {
+		if (!workspaceId) return;
+
+		// Find a non-kanban tab for this workspace
+		const workspaceTabs = tabs.filter((t) => t.nodeId === workspaceId);
+		const nonKanbanTab = workspaceTabs.find((t) => {
+			const tabPanes = Object.values(panes).filter((p) => p.tabId === t.id);
+			return !tabPanes.some((p) => p.type === "kanban");
+		});
+
+		if (nonKanbanTab) {
+			setActiveTab(nonKanbanTab.id);
+		}
+	};
 
 	const handleNodesClick = () => {
 		if (isNodesListOpen) {
@@ -74,17 +101,40 @@ export function NodeSidebarHeader({
 					<TooltipTrigger asChild>
 						<button
 							type="button"
+							onClick={handleListViewClick}
+							className={cn(
+								"flex items-center justify-center size-8 rounded-md transition-colors",
+								!isKanbanView
+									? "text-foreground bg-accent"
+									: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+							)}
+						>
+							<LuList className="size-4" strokeWidth={STROKE_WIDTH} />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="left">List View</TooltipContent>
+				</Tooltip>
+
+				<Tooltip delayDuration={300}>
+					<TooltipTrigger asChild>
+						<button
+							type="button"
 							onClick={() => {
 								if (workspaceId) {
 									openKanbanDashboard(workspaceId);
 								}
 							}}
-							className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+							className={cn(
+								"flex items-center justify-center size-8 rounded-md transition-colors",
+								isKanbanView
+									? "text-foreground bg-accent"
+									: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+							)}
 						>
 							<LuLayoutGrid className="size-4" strokeWidth={STROKE_WIDTH} />
 						</button>
 					</TooltipTrigger>
-					<TooltipContent side="left">Tree View</TooltipContent>
+					<TooltipContent side="left">Kanban View</TooltipContent>
 				</Tooltip>
 
 				<Tooltip delayDuration={300}>
@@ -133,26 +183,55 @@ export function NodeSidebarHeader({
 					</TooltipContent>
 				</Tooltip>
 			</div>
-			<button
-				type="button"
-				onClick={() => {
-					if (workspaceId) {
-						openKanbanDashboard(workspaceId);
-					}
-				}}
-				className={cn(
-					"group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg transition-all duration-200",
-					"text-muted-foreground hover:text-foreground hover:bg-accent/40",
-				)}
-			>
-				<div className={cn(
-					"flex items-center justify-center size-6 rounded-md transition-colors",
-					"bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
-				)}>
-					<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
-				</div>
-				<span className="text-sm font-medium flex-1 text-left">Tree View</span>
-			</button>
+
+			{/* Views Section */}
+			<div className="flex flex-col gap-0.5">
+				<span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider px-2.5 mb-1">Views</span>
+				<button
+					type="button"
+					onClick={handleListViewClick}
+					className={cn(
+						"group flex items-center gap-2.5 px-2.5 py-1.5 w-full rounded-lg transition-all duration-200",
+						!isKanbanView
+							? "text-foreground bg-accent/80 shadow-sm"
+							: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
+					)}
+				>
+					<div className={cn(
+						"flex items-center justify-center size-5 rounded-md transition-colors",
+						!isKanbanView
+							? "bg-primary/15 text-primary"
+							: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
+					)}>
+						<LuList className="size-3" strokeWidth={STROKE_WIDTH} />
+					</div>
+					<span className="text-sm font-medium flex-1 text-left">List View</span>
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						if (workspaceId) {
+							openKanbanDashboard(workspaceId);
+						}
+					}}
+					className={cn(
+						"group flex items-center gap-2.5 px-2.5 py-1.5 w-full rounded-lg transition-all duration-200",
+						isKanbanView
+							? "text-foreground bg-accent/80 shadow-sm"
+							: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
+					)}
+				>
+					<div className={cn(
+						"flex items-center justify-center size-5 rounded-md transition-colors",
+						isKanbanView
+							? "bg-primary/15 text-primary"
+							: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
+					)}>
+						<LuLayoutGrid className="size-3" strokeWidth={STROKE_WIDTH} />
+					</div>
+					<span className="text-sm font-medium flex-1 text-left">Kanban View</span>
+				</button>
+			</div>
 
 			<button
 				type="button"
