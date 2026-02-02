@@ -7,7 +7,6 @@ import {
 } from "ui/components/ui/select";
 import {
 	type MarkdownStyle,
-	SYSTEM_THEME_ID,
 	useMarkdownStyle,
 	useSetMarkdownStyle,
 	useSetTheme,
@@ -20,7 +19,6 @@ import {
 	SETTING_ITEM_ID,
 	type SettingItemId,
 } from "../../../utils/settings-search";
-import { SystemThemeCard } from "./components/SystemThemeCard";
 import { ThemeCard } from "./components/ThemeCard";
 
 interface AppearanceSettingsProps {
@@ -54,7 +52,7 @@ export function AppearanceSettings({ visibleItems }: AppearanceSettingsProps) {
 			<div className="mb-8">
 				<h2 className="text-xl font-semibold">Appearance</h2>
 				<p className="text-sm text-muted-foreground mt-1">
-					Customize how Caspian looks on your device
+					Configure visual preferences for the Caspian interface
 				</p>
 			</div>
 
@@ -62,12 +60,8 @@ export function AppearanceSettings({ visibleItems }: AppearanceSettingsProps) {
 				{/* Theme Section */}
 				{showTheme && (
 					<div>
-						<h3 className="text-sm font-medium mb-4">Theme</h3>
+						<h3 className="text-sm font-medium mb-4">Interface Theme</h3>
 						<div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-							<SystemThemeCard
-								isSelected={activeThemeId === SYSTEM_THEME_ID}
-								onSelect={() => setTheme(SYSTEM_THEME_ID)}
-							/>
 							{allThemes.map((theme) => (
 								<ThemeCard
 									key={theme.id}
@@ -82,9 +76,9 @@ export function AppearanceSettings({ visibleItems }: AppearanceSettingsProps) {
 
 				{showMarkdown && (
 					<div className={showTheme ? "pt-6 border-t" : ""}>
-						<h3 className="text-sm font-medium mb-2">Markdown Style</h3>
+						<h3 className="text-sm font-medium mb-2">Markdown Rendering</h3>
 						<p className="text-sm text-muted-foreground mb-4">
-							Rendering style for markdown files when viewing rendered content
+							Configure how markdown content is displayed
 						</p>
 						<Select
 							value={markdownStyle}
