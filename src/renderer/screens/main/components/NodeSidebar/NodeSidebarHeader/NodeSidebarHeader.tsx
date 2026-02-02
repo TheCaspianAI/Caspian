@@ -2,7 +2,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/toolti
 import { cn } from "ui/lib/utils";
 import { useMatchRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { LuChevronRight, LuLayers, LuLayoutGrid, LuList, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
@@ -78,12 +78,24 @@ export function NodeSidebarHeader({
 		}
 	};
 
-	// Auto-expand Views when in kanban view
+	// Track previous kanban view state
+	const wasKanbanViewRef = useRef(isKanbanView);
+
+	// Auto-expand Views when in kanban view, expand sidebar when exiting kanban
 	useEffect(() => {
 		if (isKanbanView) {
 			setIsViewsExpanded(true);
 		}
-	}, [isKanbanView]);
+
+		// If we just exited kanban view (was true, now false), expand sidebar
+		if (wasKanbanViewRef.current && !isKanbanView) {
+			if (isSidebarCollapsed()) {
+				toggleCollapsed();
+			}
+		}
+
+		wasKanbanViewRef.current = isKanbanView;
+	}, [isKanbanView, isSidebarCollapsed, toggleCollapsed]);
 
 	const handleNodesClick = () => {
 		if (isNodesListOpen) {
