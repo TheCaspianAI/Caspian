@@ -33,7 +33,9 @@ function formatDuration(startTime: number): string {
 
 export function useKanbanData() {
 	const { data: groupedData } = electronTrpc.nodes.getAllGrouped.useQuery();
-	const { panes, tabs } = useTabsStore((s) => ({ panes: s.panes, tabs: s.tabs }));
+	// Use separate selectors to avoid creating new object references on every render
+	const panes = useTabsStore((s) => s.panes);
+	const tabs = useTabsStore((s) => s.tabs);
 
 	const agents = useMemo<AgentCardData[]>(() => {
 		if (!groupedData) return [];

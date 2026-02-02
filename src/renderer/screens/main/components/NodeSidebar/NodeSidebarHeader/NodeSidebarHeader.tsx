@@ -74,6 +74,23 @@ export function NodeSidebarHeader({
 					<TooltipTrigger asChild>
 						<button
 							type="button"
+							onClick={() => {
+								if (workspaceId) {
+									openKanbanDashboard(workspaceId);
+								}
+							}}
+							className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+						>
+							<LuLayoutGrid className="size-4" strokeWidth={STROKE_WIDTH} />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="left">Tree View</TooltipContent>
+				</Tooltip>
+
+				<Tooltip delayDuration={300}>
+					<TooltipTrigger asChild>
+						<button
+							type="button"
 							onClick={handleNodesClick}
 							className={cn(
 								"flex items-center justify-center size-8 rounded-md transition-colors",
@@ -88,23 +105,6 @@ export function NodeSidebarHeader({
 					<TooltipContent side="left">Nodes</TooltipContent>
 				</Tooltip>
 
-				<Tooltip delayDuration={300}>
-					<TooltipTrigger asChild>
-						<button
-							type="button"
-							onClick={() => {
-								if (workspaceId) {
-									openKanbanDashboard(workspaceId);
-								}
-							}}
-							className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-						>
-							<LuLayoutGrid className="size-4" strokeWidth={STROKE_WIDTH} />
-						</button>
-					</TooltipTrigger>
-					<TooltipContent side="left">Tree View</TooltipContent>
-				</Tooltip>
-
 				<NewNodeButton isCollapsed />
 			</div>
 		);
@@ -112,27 +112,6 @@ export function NodeSidebarHeader({
 
 	return (
 		<div className="flex flex-col gap-1.5 border-b border-border/50 px-2.5 pt-3 pb-2.5">
-			<button
-				type="button"
-				onClick={handleNodesClick}
-				className={cn(
-					"group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg transition-all duration-200",
-					isNodesListOpen
-						? "text-foreground bg-accent/80 shadow-sm"
-						: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
-				)}
-			>
-				<div className={cn(
-					"flex items-center justify-center size-6 rounded-md transition-colors",
-					isNodesListOpen
-						? "bg-primary/15 text-primary"
-						: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
-				)}>
-					<LuLayers className="size-3.5" strokeWidth={STROKE_WIDTH} />
-				</div>
-				<span className="text-sm font-medium flex-1 text-left">Nodes</span>
-			</button>
-
 			<button
 				type="button"
 				onClick={() => {
@@ -152,6 +131,27 @@ export function NodeSidebarHeader({
 					<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
 				</div>
 				<span className="text-sm font-medium flex-1 text-left">Tree View</span>
+			</button>
+
+			<button
+				type="button"
+				onClick={handleNodesClick}
+				className={cn(
+					"group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg transition-all duration-200",
+					isNodesListOpen
+						? "text-foreground bg-accent/80 shadow-sm"
+						: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
+				)}
+			>
+				<div className={cn(
+					"flex items-center justify-center size-6 rounded-md transition-colors",
+					isNodesListOpen
+						? "bg-primary/15 text-primary"
+						: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
+				)}>
+					<LuLayers className="size-3.5" strokeWidth={STROKE_WIDTH} />
+				</div>
+				<span className="text-sm font-medium flex-1 text-left">Nodes</span>
 			</button>
 
 			<NewNodeButton />

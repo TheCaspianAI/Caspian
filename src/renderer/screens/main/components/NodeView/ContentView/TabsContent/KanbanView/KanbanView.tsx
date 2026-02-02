@@ -7,11 +7,10 @@ import { useKanbanData } from "./useKanbanData";
 export function KanbanView() {
   const navigate = useNavigate();
   const { columns } = useKanbanData();
-  const { setActiveTab, setFocusedPane, tabs } = useTabsStore((s) => ({
-    setActiveTab: s.setActiveTab,
-    setFocusedPane: s.setFocusedPane,
-    tabs: s.tabs,
-  }));
+  // Use separate selectors to avoid creating new object references on every render
+  const setActiveTab = useTabsStore((s) => s.setActiveTab);
+  const setFocusedPane = useTabsStore((s) => s.setFocusedPane);
+  const tabs = useTabsStore((s) => s.tabs);
 
   const handleAgentDoubleClick = useCallback(
     (nodeId: string) => {
