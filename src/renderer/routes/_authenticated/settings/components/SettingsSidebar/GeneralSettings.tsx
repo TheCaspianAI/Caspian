@@ -1,12 +1,11 @@
 import { cn } from "ui/lib/utils";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import {
-	HiOutlineBell,
+	HiOutlineAdjustmentsHorizontal,
 	HiOutlineCommandLine,
 	HiOutlinePaintBrush,
-	HiOutlineSparkles,
+	HiOutlineSignal,
 } from "react-icons/hi2";
-import { LuKeyboard } from "react-icons/lu";
 import type { SettingsSection } from "renderer/stores/settings-state";
 
 interface GeneralSettingsProps {
@@ -15,10 +14,9 @@ interface GeneralSettingsProps {
 
 type SettingsRoute =
 	| "/settings/appearance"
-	| "/settings/ringtones"
-	| "/settings/keyboard"
-	| "/settings/behavior"
-	| "/settings/terminal";
+	| "/settings/preferences"
+	| "/settings/presets"
+	| "/settings/sessions";
 
 const GENERAL_SECTIONS: {
 	id: SettingsRoute;
@@ -33,28 +31,22 @@ const GENERAL_SECTIONS: {
 		icon: <HiOutlinePaintBrush className="h-4 w-4" />,
 	},
 	{
-		id: "/settings/ringtones",
-		section: "ringtones",
-		label: "Notifications",
-		icon: <HiOutlineBell className="h-4 w-4" />,
+		id: "/settings/preferences",
+		section: "preferences",
+		label: "Preferences",
+		icon: <HiOutlineAdjustmentsHorizontal className="h-4 w-4" />,
 	},
 	{
-		id: "/settings/keyboard",
-		section: "keyboard",
-		label: "Keyboard",
-		icon: <LuKeyboard className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/behavior",
-		section: "behavior",
-		label: "Features",
-		icon: <HiOutlineSparkles className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/terminal",
-		section: "terminal",
-		label: "Terminal",
+		id: "/settings/presets",
+		section: "presets",
+		label: "Presets",
 		icon: <HiOutlineCommandLine className="h-4 w-4" />,
+	},
+	{
+		id: "/settings/sessions",
+		section: "sessions",
+		label: "Sessions",
+		icon: <HiOutlineSignal className="h-4 w-4" />,
 	},
 ];
 

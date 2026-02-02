@@ -5,41 +5,41 @@ import { HiChevronDown, HiChevronRight } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { getMatchCountBySection } from "../../utils/settings-search";
 
-interface ProjectsSettingsProps {
+interface RepositoriesSettingsProps {
 	searchQuery: string;
 }
 
-export function ProjectsSettings({ searchQuery }: ProjectsSettingsProps) {
+export function RepositoriesSettings({ searchQuery }: RepositoriesSettingsProps) {
 	const { data: groups = [] } =
-		electronTrpc.workspaces.getAllGrouped.useQuery();
+		electronTrpc.nodes.getAllGrouped.useQuery();
 	const matchRoute = useMatchRoute();
-	const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+	const [expandedRepositories, setExpandedRepositories] = useState<Set<string>>(
 		new Set(),
 	);
 
-	// Check if project/workspace sections have matches during search
+	// Check if repository/node sections have matches during search
 	const matchCounts = useMemo(() => {
 		if (!searchQuery) return null;
 		return getMatchCountBySection(searchQuery);
 	}, [searchQuery]);
 
-	const hasProjectMatches = (matchCounts?.project ?? 0) > 0;
-	const hasWorkspaceMatches = (matchCounts?.workspace ?? 0) > 0;
-	const hasAnyMatches = hasProjectMatches || hasWorkspaceMatches;
+	const hasRepositoryMatches = (matchCounts?.repository ?? 0) > 0;
+	const hasNodeMatches = (matchCounts?.node ?? 0) > 0;
+	const hasAnyMatches = hasRepositoryMatches || hasNodeMatches;
 
-	const toggleProject = (projectId: string) => {
-		setExpandedProjects((prev) => {
+	const toggleRepository = (repositoryId: string) => {
+		setExpandedRepositories((prev) => {
 			const next = new Set(prev);
-			if (next.has(projectId)) {
-				next.delete(projectId);
+			if (next.has(repositoryId)) {
+				next.delete(repositoryId);
 			} else {
-				next.add(projectId);
+				next.add(repositoryId);
 			}
 			return next;
 		});
 	};
 
-	// Hide projects section when searching and no matches
+	// Hide repositories section when searching and no matches
 	if (searchQuery && !hasAnyMatches) {
 		return null;
 	}
@@ -51,55 +51,55 @@ export function ProjectsSettings({ searchQuery }: ProjectsSettingsProps) {
 	return (
 		<div className="mb-4">
 			<h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider px-3 mb-2">
-				Projects
+				Repositories
 				{searchQuery && hasAnyMatches && (
 					<span className="ml-2 text-xs bg-accent/50 px-1.5 py-0.5 rounded">
-						{(matchCounts?.project ?? 0) + (matchCounts?.workspace ?? 0)}
+						{(matchCounts?.repository ?? 0) + (matchCounts?.node ?? 0)}
 					</span>
 				)}
 			</h2>
 			<nav className="flex flex-col gap-0.5">
 				{groups.map((group) => {
-					const isProjectActive = matchRoute({
-						to: "/settings/project/$projectId",
-						params: { projectId: group.project.id },
+					const isRepositoryActive = matchRoute({
+						to: "/settings/repository/$repositoryId",
+						params: { repositoryId: group.repository.id },
 					});
 
 					return (
-						<div key={group.project.id}>
-							{/* Project header */}
+						<div key={group.repository.id}>
+							{/* Repository header */}
 							<div
 								className={cn(
 									"flex items-center h-8 rounded-md transition-colors",
-									isProjectActive
+									isRepositoryActive
 										? "bg-accent text-accent-foreground"
 										: "hover:bg-accent/50",
 								)}
 							>
 								<Link
-									to="/settings/project/$projectId"
-									params={{ projectId: group.project.id }}
+									to="/settings/repository/$repositoryId"
+									params={{ repositoryId: group.repository.id }}
 									className="flex-1 flex items-center gap-2 pl-3 pr-1 h-full text-sm text-left"
 								>
 									<div
 										className="w-2 h-2 rounded-full shrink-0"
-										style={{ backgroundColor: group.project.color }}
+										style={{ backgroundColor: group.repository.color }}
 									/>
 									<span className="flex-1 truncate font-medium">
-										{group.project.name}
+										{group.repository.name}
 									</span>
 								</Link>
 								<button
 									type="button"
-									onClick={() => toggleProject(group.project.id)}
+									onClick={() => toggleRepository(group.repository.id)}
 									className={cn(
 										"px-2 h-full flex items-center",
-										isProjectActive
+										isRepositoryActive
 											? "text-accent-foreground"
 											: "text-muted-foreground",
 									)}
 								>
-									{expandedProjects.has(group.project.id) ? (
+									{expandedRepositories.has(group.repository.id) ? (
 										<HiChevronDown className="h-3.5 w-3.5" />
 									) : (
 										<HiChevronRight className="h-3.5 w-3.5" />
@@ -107,28 +107,28 @@ export function ProjectsSettings({ searchQuery }: ProjectsSettingsProps) {
 								</button>
 							</div>
 
-							{/* Workspaces */}
-							{expandedProjects.has(group.project.id) && (
+							{/* Nodes */}
+							{expandedRepositories.has(group.repository.id) && (
 								<div className="ml-4 border-l border-border pl-2 mt-0.5 mb-1">
-									{group.workspaces.map((workspace) => {
-										const isWorkspaceActive = matchRoute({
-											to: "/settings/workspace/$workspaceId",
-											params: { workspaceId: workspace.id },
+									{group.nodes.map((node) => {
+										const isNodeActive = matchRoute({
+											to: "/settings/node/$nodeId",
+											params: { nodeId: node.id },
 										});
 
 										return (
 											<Link
-												key={workspace.id}
-												to="/settings/workspace/$workspaceId"
-												params={{ workspaceId: workspace.id }}
+												key={node.id}
+												to="/settings/node/$nodeId"
+												params={{ nodeId: node.id }}
 												className={cn(
 													"flex items-center gap-2 px-2 py-1 text-sm w-full text-left rounded-md transition-colors",
-													isWorkspaceActive
+													isNodeActive
 														? "bg-accent text-accent-foreground"
 														: "text-muted-foreground hover:bg-accent/50 hover:text-accent-foreground",
 												)}
 											>
-												<span className="truncate">{workspace.name}</span>
+												<span className="truncate">{node.name}</span>
 											</Link>
 										);
 									})}
