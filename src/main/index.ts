@@ -36,8 +36,7 @@ async function processDeepLink(url: string): Promise<void> {
 	console.log("[main] Processing deep link:", url);
 
 	// Extract path and navigate in renderer
-	// e.g. caspian://tasks/my-slug -> /tasks/my-slug
-	// e.g. caspian://settings/integrations -> /settings/integrations
+	// e.g. caspian://settings/appearance -> /settings/appearance
 	const deepLinkPath = `/${url.split("://")[1]}`;
 
 	focusMainWindow();

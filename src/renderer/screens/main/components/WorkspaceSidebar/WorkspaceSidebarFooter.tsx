@@ -122,27 +122,30 @@ export function WorkspaceSidebarFooter({
 
 	return (
 		<>
-			<div className="border-t border-border p-2">
+			<div className="border-t border-border/50 px-2.5 py-2.5">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							variant="ghost"
 							size="sm"
-							className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+							className="w-full justify-start gap-2.5 text-muted-foreground hover:text-foreground hover:bg-accent/40 rounded-lg h-9 px-2.5 transition-all duration-200 group"
 							disabled={isLoading}
 						>
-							<LuFolderPlus className="w-4 h-4" strokeWidth={STROKE_WIDTH} />
-							<span>Add repository</span>
+							<div className="flex items-center justify-center size-6 rounded-md bg-muted/30 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+								<LuFolderPlus className="w-3.5 h-3.5" strokeWidth={STROKE_WIDTH} />
+							</div>
+							<span className="text-sm">Add repository</span>
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent side="top" align="start">
-						<DropdownMenuItem onClick={handleOpenProject} disabled={isLoading}>
+					<DropdownMenuContent side="top" align="start" className="w-48">
+						<DropdownMenuItem onClick={handleOpenProject} disabled={isLoading} className="gap-2.5 py-2">
 							<LuFolderOpen className="size-4" strokeWidth={STROKE_WIDTH} />
 							Open project
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => setIsCloneDialogOpen(true)}
 							disabled={isLoading}
+							className="gap-2.5 py-2"
 						>
 							<LuFolderGit className="size-4" strokeWidth={STROKE_WIDTH} />
 							Clone repo

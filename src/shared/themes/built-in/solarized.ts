@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * Solarized Dark theme - Precision colors for machines and people
+ * https://ethanschoonover.com/solarized/
+ */
+export const solarizedTheme: Theme = {
+	id: "solarized",
+	name: "Solarized Dark",
+	author: "Ethan Schoonover",
+	type: "dark",
+	isBuiltIn: true,
+	description: "Precision colors for machines and people",
+
+	ui: {
+		background: "#002b36",
+		foreground: "#839496",
+		card: "#073642",
+		cardForeground: "#839496",
+		popover: "#073642",
+		popoverForeground: "#839496",
+		primary: "#268bd2",
+		primaryForeground: "#fdf6e3",
+		secondary: "#073642",
+		secondaryForeground: "#839496",
+		muted: "#073642",
+		mutedForeground: "#657b83",
+		accent: "#094959",
+		accentForeground: "#839496",
+		tertiary: "#001f27",
+		tertiaryActive: "#073642",
+		destructive: "#dc322f",
+		destructiveForeground: "#fdf6e3",
+		border: "#094959",
+		input: "#094959",
+		ring: "#268bd2",
+		sidebar: "#001f27",
+		sidebarForeground: "#839496",
+		sidebarPrimary: "#268bd2",
+		sidebarPrimaryForeground: "#fdf6e3",
+		sidebarAccent: "#073642",
+		sidebarAccentForeground: "#839496",
+		sidebarBorder: "#094959",
+		sidebarRing: "#268bd2",
+		chart1: "#dc322f",
+		chart2: "#859900",
+		chart3: "#268bd2",
+		chart4: "#b58900",
+		chart5: "#d33682",
+	},
+
+	terminal: {
+		background: "#002b36",
+		foreground: "#839496",
+		cursor: "#839496",
+		cursorAccent: "#002b36",
+		selectionBackground: "rgba(7, 54, 66, 0.6)",
+
+		black: "#073642",
+		red: "#dc322f",
+		green: "#859900",
+		yellow: "#b58900",
+		blue: "#268bd2",
+		magenta: "#d33682",
+		cyan: "#2aa198",
+		white: "#eee8d5",
+
+		brightBlack: "#002b36",
+		brightRed: "#cb4b16",
+		brightGreen: "#586e75",
+		brightYellow: "#657b83",
+		brightBlue: "#839496",
+		brightMagenta: "#6c71c4",
+		brightCyan: "#93a1a1",
+		brightWhite: "#fdf6e3",
+	},
+};

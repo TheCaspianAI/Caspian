@@ -54,19 +54,24 @@ export function WorkspaceSidebarHeader({
 	}
 
 	return (
-		<div className="flex flex-col gap-1 border-b border-border px-2 pt-2 pb-2">
+		<div className="flex flex-col gap-1.5 border-b border-border/50 px-2.5 pt-3 pb-2.5">
 			<button
 				type="button"
 				onClick={handleWorkspacesClick}
 				className={cn(
-					"flex items-center gap-2 px-2 py-1.5 w-full rounded-md transition-colors",
+					"group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg transition-all duration-200",
 					isWorkspacesListOpen
-						? "text-foreground bg-accent"
-						: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+						? "text-foreground bg-accent/80 shadow-sm"
+						: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
 				)}
 			>
-				<div className="flex items-center justify-center size-5">
-					<LuLayers className="size-4" strokeWidth={STROKE_WIDTH} />
+				<div className={cn(
+					"flex items-center justify-center size-6 rounded-md transition-colors",
+					isWorkspacesListOpen
+						? "bg-primary/15 text-primary"
+						: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
+				)}>
+					<LuLayers className="size-3.5" strokeWidth={STROKE_WIDTH} />
 				</div>
 				<span className="text-sm font-medium flex-1 text-left">Workspaces</span>
 			</button>

@@ -95,11 +95,7 @@ export function ResizablePanel({
 
 	return (
 		<div
-			className={cn(
-				"relative h-full shrink-0 overflow-hidden border-border",
-				handleSide === "right" ? "border-r" : "border-l",
-				className,
-			)}
+			className={cn("relative h-full shrink-0 overflow-hidden", className)}
 			style={{ width }}
 		>
 			{children}
@@ -113,13 +109,14 @@ export function ResizablePanel({
 				tabIndex={0}
 				onMouseDown={handleMouseDown}
 				className={cn(
-					"absolute top-0 w-5 h-full cursor-col-resize z-10",
-					"after:absolute after:top-0 after:w-1 after:h-full after:transition-colors",
-					"hover:after:bg-border focus:outline-none focus:after:bg-border",
-					isResizing && "after:bg-border",
+					"absolute top-0 w-4 h-full cursor-col-resize z-10 group",
+					"after:absolute after:top-1/2 after:-translate-y-1/2 after:w-0.5 after:h-8 after:rounded-full after:transition-all after:opacity-0",
+					"hover:after:opacity-100 hover:after:bg-border/60",
+					"focus:outline-none focus:after:opacity-100 focus:after:bg-primary/40",
+					isResizing && "after:opacity-100 after:bg-primary/60 after:h-16",
 					handleSide === "left"
-						? "-left-2 after:right-2"
-						: "-right-2 after:left-2",
+						? "-left-2 after:right-1.5"
+						: "-right-2 after:left-1.5",
 				)}
 			/>
 		</div>

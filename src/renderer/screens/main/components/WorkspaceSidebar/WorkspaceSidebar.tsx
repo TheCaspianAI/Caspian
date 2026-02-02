@@ -49,10 +49,31 @@ export function WorkspaceSidebar({
 				))}
 
 				{groups.length === 0 && !isCollapsed && (
-					<div className="flex flex-col items-center justify-center h-32 text-muted-foreground text-sm">
-						<span>No workspaces yet</span>
-						<span className="text-xs mt-1 text-muted-foreground/60">
-							Add project or drag a Git repo folder here
+					<div className="flex flex-col items-center justify-center py-8 px-4">
+						<div className="relative mb-4">
+							{/* Decorative ring */}
+							<div className="absolute inset-0 rounded-full bg-primary/5 animate-pulse" />
+							<div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+								<svg
+									className="w-5 h-5 text-primary/60"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={1.5}
+										d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+									/>
+								</svg>
+							</div>
+						</div>
+						<span className="text-sm font-medium text-foreground/80 mb-1">
+							No workspaces yet
+						</span>
+						<span className="text-xs text-muted-foreground/60 text-center leading-relaxed max-w-[180px]">
+							Open a project or drag a Git repository here to get started
 						</span>
 					</div>
 				)}

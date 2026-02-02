@@ -1,6 +1,6 @@
 import { cn } from "ui/lib/utils";
 import { HiCheck } from "react-icons/hi2";
-import { darkTheme, lightTheme } from "shared/themes";
+import { draculaTheme, githubLightTheme } from "shared/themes";
 
 interface SystemThemeCardProps {
 	isSelected: boolean;
@@ -11,8 +11,8 @@ export function SystemThemeCard({
 	isSelected,
 	onSelect,
 }: SystemThemeCardProps) {
-	const darkTerminal = darkTheme.terminal;
-	const lightTerminal = lightTheme.terminal;
+	const darkTerminal = draculaTheme.terminal;
+	const lightTerminal = githubLightTheme.terminal;
 
 	if (!darkTerminal || !lightTerminal) {
 		return null;

@@ -21,7 +21,7 @@ export function TopBar() {
 				<div
 					className="no-drag flex items-center gap-2 h-full"
 					style={{
-						paddingLeft: isMac ? "76px" : "12px",
+						paddingLeft: isMac ? "68px" : "12px",
 					}}
 				>
 					<SidebarToggle />

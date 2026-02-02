@@ -69,13 +69,13 @@ export function NewWorkspaceButton({
 		<button
 			type="button"
 			onClick={handleClick}
-			className="group flex items-center gap-2 px-2 py-1.5 w-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-md transition-colors"
+			className="group flex items-center gap-2.5 px-2.5 py-2 w-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/40 rounded-lg transition-all duration-200"
 		>
-			<div className="flex items-center justify-center size-5 rounded bg-accent">
-				<LuPlus className="size-3" strokeWidth={STROKE_WIDTH_THICK} />
+			<div className="flex items-center justify-center size-6 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors">
+				<LuPlus className="size-3.5" strokeWidth={STROKE_WIDTH_THICK} />
 			</div>
 			<span className="flex-1 text-left">New Workspace</span>
-			<span className="text-[10px] text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity font-mono tabular-nums shrink-0">
+			<span className="text-[10px] text-muted-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity font-mono tabular-nums shrink-0 bg-muted/30 px-1.5 py-0.5 rounded">
 				{shortcutText}
 			</span>
 		</button>

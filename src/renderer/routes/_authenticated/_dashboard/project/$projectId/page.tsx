@@ -161,42 +161,46 @@ function ProjectPage() {
 				{/* Main content */}
 				<div className="flex-1 flex items-center justify-center py-12">
 					{/* biome-ignore lint/a11y/noStaticElementInteractions: Form container handles Enter key for submission */}
-					<div className="w-full max-w-xl" onKeyDown={handleKeyDown}>
+					<div
+						className="w-full max-w-xl text-center"
+						onKeyDown={handleKeyDown}
+					>
 						{/* Project context */}
-						<div className="flex items-center gap-2 mb-6">
-							<span className="text-sm text-muted-foreground">
+						<div className="flex items-center justify-center gap-2 mb-8">
+							<span className="text-sm text-muted-foreground/80">
 								{project.name}
 							</span>
 							<span className="text-muted-foreground/30">·</span>
-							<span className="text-sm text-muted-foreground/70 font-mono">
+							<span className="text-sm text-muted-foreground/60 font-mono">
 								{branchData?.defaultBranch ?? "main"}
 							</span>
 						</div>
 
 						{/* Headline */}
-						<h1 className="text-4xl font-semibold text-foreground tracking-tight mb-3">
+						<h1 className="text-3xl font-normal text-foreground tracking-tight mb-4">
 							What are you building?
 						</h1>
 
 						{/* Subtext */}
-						<p className="text-lg text-muted-foreground mb-10">
-							Each workspace is an isolated copy of your codebase. Work on
-							multiple tasks without conflicts.
+						<p className="text-base text-muted-foreground/80 mb-16">
+							Each workspace is an isolated copy of your codebase.
+							<br />
+							Work on multiple tasks without conflicts.
 						</p>
 
 						{/* Form */}
-						<div className="space-y-4 max-w-md">
-							<div className="space-y-1.5">
+						<div className="space-y-5 max-w-md mx-auto">
+							<div className="space-y-2">
 								<label
 									htmlFor="task-title"
-									className="text-sm text-muted-foreground"
+									className="block text-sm text-muted-foreground/70"
 								>
 									Name your task
 								</label>
 								<Input
 									id="task-title"
 									ref={titleInputRef}
-									className="h-12 text-base"
+									className="h-12 text-base text-center"
 									placeholder="e.g. Add dark mode, Fix checkout bug"
 									value={title}
 									onChange={(e) => setTitle(e.target.value)}
@@ -204,22 +208,22 @@ function ProjectPage() {
 							</div>
 
 							<p
-								className={`text-sm text-muted-foreground flex items-center gap-2 transition-opacity ${title ? "opacity-100" : "opacity-0"}`}
+								className={`text-sm text-muted-foreground/70 flex items-center justify-center gap-2 transition-opacity duration-300 ${title ? "opacity-100" : "opacity-0"}`}
 							>
 								<GoGitBranch className="size-3.5" />
 								<span className="font-mono">
 									{generateBranchFromTitle({ title, authorPrefix }) ||
 										"branch-name"}
 								</span>
-								<span className="text-muted-foreground/50">
+								<span className="text-muted-foreground/40">
 									from {effectiveBaseBranch}
 								</span>
 							</p>
 
 							<Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-								<CollapsibleTrigger className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+								<CollapsibleTrigger className="flex items-center justify-center gap-1 text-sm text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-200 w-full">
 									<HiChevronDown
-										className={`size-3.5 transition-transform ${showAdvanced ? "" : "-rotate-90"}`}
+										className={`size-3.5 transition-transform duration-200 ${showAdvanced ? "" : "-rotate-90"}`}
 									/>
 									Advanced
 								</CollapsibleTrigger>
@@ -229,11 +233,14 @@ function ProjectPage() {
 											initial={{ height: 0, opacity: 0 }}
 											animate={{ height: "auto", opacity: 1 }}
 											exit={{ height: 0, opacity: 0 }}
-											transition={{ duration: 0.2, ease: "easeInOut" }}
+											transition={{
+												duration: 0.3,
+												ease: [0.4, 0, 0.2, 1],
+											}}
 											className="overflow-hidden"
 										>
-											<div className="pt-4 space-y-2">
-												<span className="text-sm text-muted-foreground">
+											<div className="pt-4 space-y-2 text-left">
+												<span className="text-sm text-muted-foreground/70">
 													Change base branch
 												</span>
 												{isBranchesError ? (
@@ -330,8 +337,9 @@ function ProjectPage() {
 							</Collapsible>
 
 							<Button
+								variant="secondary"
 								size="lg"
-								className="w-full"
+								className="w-full mt-2"
 								onClick={handleCreateWorkspace}
 								disabled={createWorkspace.isPending || isBranchesError}
 							>
