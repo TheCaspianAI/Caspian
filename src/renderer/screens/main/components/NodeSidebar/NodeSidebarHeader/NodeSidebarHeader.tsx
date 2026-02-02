@@ -184,53 +184,47 @@ export function NodeSidebarHeader({
 				</Tooltip>
 			</div>
 
-			{/* Views Section */}
-			<div className="flex flex-col gap-0.5">
-				<span className="text-[10px] font-medium text-muted-foreground/50 uppercase tracking-wider px-2.5 mb-1">Views</span>
-				<button
-					type="button"
-					onClick={handleListViewClick}
-					className={cn(
-						"group flex items-center gap-2.5 px-2.5 py-1.5 w-full rounded-lg transition-all duration-200",
-						!isKanbanView
-							? "text-foreground bg-accent/80 shadow-sm"
-							: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
-					)}
-				>
-					<div className={cn(
-						"flex items-center justify-center size-5 rounded-md transition-colors",
-						!isKanbanView
-							? "bg-primary/15 text-primary"
-							: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
-					)}>
-						<LuList className="size-3" strokeWidth={STROKE_WIDTH} />
+			{/* Views - Top level item with sub-items */}
+			<div className="flex flex-col">
+				<div className="flex items-center gap-2.5 px-2.5 py-2 text-muted-foreground">
+					<div className="flex items-center justify-center size-6 rounded-md bg-muted/30">
+						<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
 					</div>
-					<span className="text-sm font-medium flex-1 text-left">List View</span>
-				</button>
-				<button
-					type="button"
-					onClick={() => {
-						if (workspaceId) {
-							openKanbanDashboard(workspaceId);
-						}
-					}}
-					className={cn(
-						"group flex items-center gap-2.5 px-2.5 py-1.5 w-full rounded-lg transition-all duration-200",
-						isKanbanView
-							? "text-foreground bg-accent/80 shadow-sm"
-							: "text-muted-foreground hover:text-foreground hover:bg-accent/40",
-					)}
-				>
-					<div className={cn(
-						"flex items-center justify-center size-5 rounded-md transition-colors",
-						isKanbanView
-							? "bg-primary/15 text-primary"
-							: "bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
-					)}>
-						<LuLayoutGrid className="size-3" strokeWidth={STROKE_WIDTH} />
-					</div>
-					<span className="text-sm font-medium flex-1 text-left">Kanban View</span>
-				</button>
+					<span className="text-sm font-medium">Views</span>
+				</div>
+				{/* Sub-items - indented */}
+				<div className="flex flex-col gap-0.5 pl-4">
+					<button
+						type="button"
+						onClick={handleListViewClick}
+						className={cn(
+							"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
+							!isKanbanView
+								? "text-foreground bg-accent/60"
+								: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
+						)}
+					>
+						<LuList className="size-3.5" strokeWidth={STROKE_WIDTH} />
+						<span className="flex-1 text-left">List View</span>
+					</button>
+					<button
+						type="button"
+						onClick={() => {
+							if (workspaceId) {
+								openKanbanDashboard(workspaceId);
+							}
+						}}
+						className={cn(
+							"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
+							isKanbanView
+								? "text-foreground bg-accent/60"
+								: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
+						)}
+					>
+						<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
+						<span className="flex-1 text-left">Kanban View</span>
+					</button>
+				</div>
 			</div>
 
 			<button
