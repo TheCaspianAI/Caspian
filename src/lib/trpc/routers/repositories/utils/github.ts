@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { execWithShellEnv } from "../../workspaces/utils/shell-env";
+import { execWithShellEnv } from "../../nodes/utils/shell-env";
 
 const GHRepoOwnerResponseSchema = z.object({
 	owner: z.object({

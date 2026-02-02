@@ -11,7 +11,7 @@ import { createHotkeysRouter } from "./hotkeys";
 import { createMenuRouter } from "./menu";
 import { createNotificationsRouter } from "./notifications";
 import { createPortsRouter } from "./ports";
-import { createProjectsRouter } from "./projects";
+import { createRepositoriesRouter } from "./repositories";
 import { createRingtoneRouter } from "./ringtone";
 import { createSettingsRouter } from "./settings";
 import { createTerminalRouter } from "./terminal";
@@ -25,7 +25,7 @@ export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 		autoUpdate: createAutoUpdateRouter(),
 		cache: createCacheRouter(),
 		window: createWindowRouter(getWindow),
-		projects: createProjectsRouter(getWindow),
+		repositories: createRepositoriesRouter(getWindow),
 		nodes: createNodesRouter(),
 		terminal: createTerminalRouter(),
 		changes: createChangesRouter(),

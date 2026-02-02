@@ -3,10 +3,10 @@ import { access } from "node:fs/promises";
 import { basename, join } from "node:path";
 import {
 	BRANCH_PREFIX_MODES,
-	projects,
-	type SelectProject,
+	repositories,
+	type SelectRepository,
 	settings,
-	workspaces,
+	nodes,
 } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull, not } from "drizzle-orm";
@@ -20,11 +20,11 @@ import simpleGit from "simple-git";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import {
-	activateProject,
-	getBranchWorkspace,
-	setLastActiveWorkspace,
-	touchWorkspace,
-} from "../workspaces/utils/db-helpers";
+	activateRepository,
+	getBranchNode,
+	setLastActiveNode,
+	touchNode,
+} from "../nodes/utils/db-helpers";
 import {
 	getCurrentBranch,
 	getDefaultBranch,
@@ -32,15 +32,15 @@ import {
 	getGitRoot,
 	refreshDefaultBranch,
 	sanitizeAuthorPrefix,
-} from "../workspaces/utils/git";
-import { getDefaultProjectColor } from "./utils/colors";
+} from "../nodes/utils/git";
+import { getDefaultRepositoryColor } from "./utils/colors";
 import { fetchGitHubOwner, getGitHubAvatarUrl } from "./utils/github";
 
-type Project = SelectProject;
+type Repository = SelectRepository;
 
 // Return types for openNew procedure
 type OpenNewCanceled = { canceled: true };
-type OpenNewSuccess = { canceled: false; project: Project };
+type OpenNewSuccess = { canceled: false; repository: Repository };
 type OpenNewNeedsGitInit = {
 	canceled: false;
 	needsGitInit: true;
@@ -54,72 +54,72 @@ export type OpenNewResult =
 	| OpenNewError;
 
 /**
- * Creates or updates a project record in the database.
- * If a project with the same mainRepoPath exists, updates lastOpenedAt.
- * Otherwise, creates a new project.
+ * Creates or updates a repository record in the database.
+ * If a repository with the same mainRepoPath exists, updates lastOpenedAt.
+ * Otherwise, creates a new repository.
  */
-function upsertProject(mainRepoPath: string, defaultBranch: string): Project {
+function upsertRepository(mainRepoPath: string, defaultBranch: string): Repository {
 	const name = basename(mainRepoPath);
 
 	const existing = localDb
 		.select()
-		.from(projects)
-		.where(eq(projects.mainRepoPath, mainRepoPath))
+		.from(repositories)
+		.where(eq(repositories.mainRepoPath, mainRepoPath))
 		.get();
 
 	if (existing) {
 		localDb
-			.update(projects)
+			.update(repositories)
 			.set({ lastOpenedAt: Date.now(), defaultBranch })
-			.where(eq(projects.id, existing.id))
+			.where(eq(repositories.id, existing.id))
 			.run();
 		return { ...existing, lastOpenedAt: Date.now(), defaultBranch };
 	}
 
-	const project = localDb
-		.insert(projects)
+	const repository = localDb
+		.insert(repositories)
 		.values({
 			mainRepoPath,
 			name,
-			color: getDefaultProjectColor(),
+			color: getDefaultRepositoryColor(),
 			defaultBranch,
 		})
 		.returning()
 		.get();
 
-	return project;
+	return repository;
 }
 
 /**
- * Ensures a project has a main (branch) workspace.
+ * Ensures a repository has a main (branch) node.
  * If one doesn't exist, creates it automatically.
- * This is called after opening/creating a project to provide a default workspace.
+ * This is called after opening/creating a repository to provide a default node.
  */
-async function ensureMainWorkspace(project: Project): Promise<void> {
-	const existingBranchWorkspace = getBranchWorkspace(project.id);
+async function ensureMainNode(repository: Repository): Promise<void> {
+	const existingBranchNode = getBranchNode(repository.id);
 
-	// If branch workspace already exists, just touch it and return
-	if (existingBranchWorkspace) {
-		touchWorkspace(existingBranchWorkspace.id);
-		setLastActiveWorkspace(existingBranchWorkspace.id);
+	// If branch node already exists, just touch it and return
+	if (existingBranchNode) {
+		touchNode(existingBranchNode.id);
+		setLastActiveNode(existingBranchNode.id);
 		return;
 	}
 
 	// Get current branch from main repo
-	const branch = await getCurrentBranch(project.mainRepoPath);
+	const branch = await getCurrentBranch(repository.mainRepoPath);
 	if (!branch) {
 		console.warn(
-			`[ensureMainWorkspace] Could not determine current branch for project ${project.id}`,
+			`[ensureMainNode] Could not determine current branch for repository ${repository.id}`,
 		);
 		return;
 	}
 
-	// Insert new branch workspace with conflict handling for race conditions
-	// The unique partial index (projectId WHERE type='branch') prevents duplicates
+	// Insert new branch node with conflict handling for race conditions
+	// The unique partial index (repositoryId WHERE type='branch') prevents duplicates
 	const insertResult = localDb
-		.insert(workspaces)
+		.insert(nodes)
 		.values({
-			projectId: project.id,
+			repositoryId: repository.id,
 			type: "branch",
 			branch,
 			name: branch,
@@ -131,48 +131,48 @@ async function ensureMainWorkspace(project: Project): Promise<void> {
 
 	const wasExisting = insertResult.length === 0;
 
-	// Only shift existing workspaces if we successfully inserted
+	// Only shift existing nodes if we successfully inserted
 	if (!wasExisting) {
-		const newWorkspaceId = insertResult[0].id;
-		const projectWorkspaces = localDb
+		const newNodeId = insertResult[0].id;
+		const repositoryNodes = localDb
 			.select()
-			.from(workspaces)
+			.from(nodes)
 			.where(
 				and(
-					eq(workspaces.projectId, project.id),
-					not(eq(workspaces.id, newWorkspaceId)),
-					isNull(workspaces.deletingAt),
+					eq(nodes.repositoryId, repository.id),
+					not(eq(nodes.id, newNodeId)),
+					isNull(nodes.deletingAt),
 				),
 			)
 			.all();
 
-		for (const ws of projectWorkspaces) {
+		for (const node of repositoryNodes) {
 			localDb
-				.update(workspaces)
-				.set({ tabOrder: ws.tabOrder + 1 })
-				.where(eq(workspaces.id, ws.id))
+				.update(nodes)
+				.set({ tabOrder: node.tabOrder + 1 })
+				.where(eq(nodes.id, node.id))
 				.run();
 		}
 	}
 
-	// Get the workspace (either newly created or existing from race condition)
-	const workspace = insertResult[0] ?? getBranchWorkspace(project.id);
+	// Get the node (either newly created or existing from race condition)
+	const node = insertResult[0] ?? getBranchNode(repository.id);
 
-	if (!workspace) {
+	if (!node) {
 		console.warn(
-			`[ensureMainWorkspace] Failed to create or find branch workspace for project ${project.id}`,
+			`[ensureMainNode] Failed to create or find branch node for repository ${repository.id}`,
 		);
 		return;
 	}
 
-	setLastActiveWorkspace(workspace.id);
+	setLastActiveNode(node.id);
 
 	if (!wasExisting) {
-		activateProject(project);
+		activateRepository(repository);
 
-		track("workspace_opened", {
-			workspace_id: workspace.id,
-			project_id: project.id,
+		track("node_opened", {
+			node_id: node.id,
+			repository_id: repository.id,
 			type: "branch",
 			was_existing: false,
 			auto_created: true,
@@ -241,37 +241,37 @@ function extractRepoName(urlInput: string): string | null {
 	return repoSegment;
 }
 
-export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
+export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) => {
 	return router({
 		get: publicProcedure
 			.input(z.object({ id: z.string() }))
-			.query(({ input }): Project => {
-				const project = localDb
+			.query(({ input }): Repository => {
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
 
-				if (!project) {
+				if (!repository) {
 					throw new TRPCError({
 						code: "NOT_FOUND",
-						message: `Project ${input.id} not found`,
+						message: `Repository ${input.id} not found`,
 					});
 				}
 
-				return project;
+				return repository;
 			}),
 
-		getRecents: publicProcedure.query((): Project[] => {
+		getRecents: publicProcedure.query((): Repository[] => {
 			return localDb
 				.select()
-				.from(projects)
-				.orderBy(desc(projects.lastOpenedAt))
+				.from(repositories)
+				.orderBy(desc(repositories.lastOpenedAt))
 				.all();
 		}),
 
 		getBranches: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+			.input(z.object({ repositoryId: z.string() }))
 			.query(
 				async ({
 					input,
@@ -284,16 +284,16 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 					}>;
 					defaultBranch: string;
 				}> => {
-					const project = localDb
+					const repository = localDb
 						.select()
-						.from(projects)
-						.where(eq(projects.id, input.projectId))
+						.from(repositories)
+						.where(eq(repositories.id, input.repositoryId))
 						.get();
-					if (!project) {
-						throw new Error(`Project ${input.projectId} not found`);
+					if (!repository) {
+						throw new Error(`Repository ${input.repositoryId} not found`);
 					}
 
-					const git = simpleGit(project.mainRepoPath);
+					const git = simpleGit(repository.mainRepoPath);
 
 					// Check if origin remote exists
 					let hasOrigin = false;
@@ -426,19 +426,19 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 
 					// Sync with remote in case the default branch changed (e.g. master -> main)
 					const remoteDefaultBranch = await refreshDefaultBranch(
-						project.mainRepoPath,
+						repository.mainRepoPath,
 					);
 
 					const defaultBranch =
 						remoteDefaultBranch ||
-						project.defaultBranch ||
-						(await getDefaultBranch(project.mainRepoPath));
+						repository.defaultBranch ||
+						(await getDefaultBranch(repository.mainRepoPath));
 
-					if (defaultBranch !== project.defaultBranch) {
+					if (defaultBranch !== repository.defaultBranch) {
 						localDb
-							.update(projects)
+							.update(repositories)
 							.set({ defaultBranch })
-							.where(eq(projects.id, input.projectId))
+							.where(eq(repositories.id, input.repositoryId))
 							.run();
 					}
 
@@ -460,7 +460,7 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 			}
 			const result = await dialog.showOpenDialog(window, {
 				properties: ["openDirectory"],
-				title: "Open Project",
+				title: "Open Repository",
 			});
 
 			if (result.canceled || result.filePaths.length === 0) {
@@ -482,19 +482,19 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 			}
 
 			const defaultBranch = await getDefaultBranch(mainRepoPath);
-			const project = upsertProject(mainRepoPath, defaultBranch);
+			const repository = upsertRepository(mainRepoPath, defaultBranch);
 
-			// Auto-create main workspace if it doesn't exist
-			await ensureMainWorkspace(project);
+			// Auto-create main node if it doesn't exist
+			await ensureMainNode(repository);
 
-			track("project_opened", {
-				project_id: project.id,
+			track("repository_opened", {
+				repository_id: repository.id,
 				method: "open",
 			});
 
 			return {
 				canceled: false,
-				project,
+				repository,
 			};
 		}),
 
@@ -537,19 +537,19 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 				}
 
 				const defaultBranch = await getDefaultBranch(mainRepoPath);
-				const project = upsertProject(mainRepoPath, defaultBranch);
+				const repository = upsertRepository(mainRepoPath, defaultBranch);
 
-				// Auto-create main workspace if it doesn't exist
-				await ensureMainWorkspace(project);
+				// Auto-create main node if it doesn't exist
+				await ensureMainNode(repository);
 
-				track("project_opened", {
-					project_id: project.id,
+				track("repository_opened", {
+					repository_id: repository.id,
 					method: "drop",
 				});
 
 				return {
 					canceled: false,
-					project,
+					repository,
 				};
 			}),
 
@@ -595,17 +595,17 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 				const branchSummary = await git.branch();
 				const defaultBranch = branchSummary.current || "main";
 
-				const project = upsertProject(input.path, defaultBranch);
+				const repository = upsertRepository(input.path, defaultBranch);
 
-				// Auto-create main workspace if it doesn't exist
-				await ensureMainWorkspace(project);
+				// Auto-create main node if it doesn't exist
+				await ensureMainNode(repository);
 
-				track("project_opened", {
-					project_id: project.id,
+				track("repository_opened", {
+					repository_id: repository.id,
 					method: "init",
 				});
 
-				return { project };
+				return { repository };
 			}),
 
 		cloneRepo: publicProcedure
@@ -657,50 +657,50 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 
 					const clonePath = join(targetDir, repoName);
 
-					// Check if we already have a project for this path
-					const existingProject = localDb
+					// Check if we already have a repository for this path
+					const existingRepository = localDb
 						.select()
-						.from(projects)
-						.where(eq(projects.mainRepoPath, clonePath))
+						.from(repositories)
+						.where(eq(repositories.mainRepoPath, clonePath))
 						.get();
 
-					if (existingProject) {
+					if (existingRepository) {
 						// Verify the filesystem path still exists
 						try {
 							await access(clonePath);
-							// Directory exists - update lastOpenedAt and return existing project
+							// Directory exists - update lastOpenedAt and return existing repository
 							localDb
-								.update(projects)
+								.update(repositories)
 								.set({ lastOpenedAt: Date.now() })
-								.where(eq(projects.id, existingProject.id))
+								.where(eq(repositories.id, existingRepository.id))
 								.run();
 
-							// Auto-create main workspace if it doesn't exist
-							await ensureMainWorkspace({
-								...existingProject,
+							// Auto-create main node if it doesn't exist
+							await ensureMainNode({
+								...existingRepository,
 								lastOpenedAt: Date.now(),
 							});
 
-							track("project_opened", {
-								project_id: existingProject.id,
+							track("repository_opened", {
+								repository_id: existingRepository.id,
 								method: "clone",
 							});
 
 							return {
 								canceled: false as const,
 								success: true as const,
-								project: { ...existingProject, lastOpenedAt: Date.now() },
+								repository: { ...existingRepository, lastOpenedAt: Date.now() },
 							};
 						} catch {
-							// Directory is missing - remove the stale project record and continue with clone
+							// Directory is missing - remove the stale repository record and continue with clone
 							localDb
-								.delete(projects)
-								.where(eq(projects.id, existingProject.id))
+								.delete(repositories)
+								.where(eq(repositories.id, existingRepository.id))
 								.run();
 						}
 					}
 
-					// Check if target directory already exists (but not our project)
+					// Check if target directory already exists (but not our repository)
 					if (existsSync(clonePath)) {
 						return {
 							canceled: false as const,
@@ -713,32 +713,32 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 					const git = simpleGit();
 					await git.clone(input.url, clonePath);
 
-					// Create new project
+					// Create new repository
 					const name = basename(clonePath);
 					const defaultBranch = await getDefaultBranch(clonePath);
-					const project = localDb
-						.insert(projects)
+					const repository = localDb
+						.insert(repositories)
 						.values({
 							mainRepoPath: clonePath,
 							name,
-							color: getDefaultProjectColor(),
+							color: getDefaultRepositoryColor(),
 							defaultBranch,
 						})
 						.returning()
 						.get();
 
-					// Auto-create main workspace if it doesn't exist
-					await ensureMainWorkspace(project);
+					// Auto-create main node if it doesn't exist
+					await ensureMainNode(repository);
 
-					track("project_opened", {
-						project_id: project.id,
+					track("repository_opened", {
+						repository_id: repository.id,
 						method: "clone",
 					});
 
 					return {
 						canceled: false as const,
 						success: true as const,
-						project,
+						repository,
 					};
 				} catch (error) {
 					const errorMessage =
@@ -761,7 +761,7 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 							.string()
 							.refine(
 								(value) => PROJECT_COLOR_VALUES.includes(value),
-								"Invalid project color",
+								"Invalid repository color",
 							)
 							.optional(),
 						branchPrefixMode: z.enum(BRANCH_PREFIX_MODES).nullable().optional(),
@@ -770,17 +770,17 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 				}),
 			)
 			.mutation(({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
-				if (!project) {
-					throw new Error(`Project ${input.id} not found`);
+				if (!repository) {
+					throw new Error(`Repository ${input.id} not found`);
 				}
 
 				localDb
-					.update(projects)
+					.update(repositories)
 					.set({
 						...(input.patch.name !== undefined && { name: input.patch.name }),
 						...(input.patch.color !== undefined && {
@@ -794,7 +794,7 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 						}),
 						lastOpenedAt: Date.now(),
 					})
-					.where(eq(projects.id, input.id))
+					.where(eq(repositories.id, input.id))
 					.run();
 
 				return { success: true };
@@ -810,31 +810,31 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 			.mutation(({ input }) => {
 				const { fromIndex, toIndex } = input;
 
-				const activeProjects = localDb
+				const activeRepositories = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.tabOrder, projects.tabOrder)) // Just get all with non-null tabOrder
+					.from(repositories)
+					.where(eq(repositories.tabOrder, repositories.tabOrder)) // Just get all with non-null tabOrder
 					.all()
-					.filter((p) => p.tabOrder !== null)
+					.filter((r) => r.tabOrder !== null)
 					.sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0));
 
 				if (
 					fromIndex < 0 ||
-					fromIndex >= activeProjects.length ||
+					fromIndex >= activeRepositories.length ||
 					toIndex < 0 ||
-					toIndex >= activeProjects.length
+					toIndex >= activeRepositories.length
 				) {
 					throw new Error("Invalid fromIndex or toIndex");
 				}
 
-				const [removed] = activeProjects.splice(fromIndex, 1);
-				activeProjects.splice(toIndex, 0, removed);
+				const [removed] = activeRepositories.splice(fromIndex, 1);
+				activeRepositories.splice(toIndex, 0, removed);
 
-				for (let i = 0; i < activeProjects.length; i++) {
+				for (let i = 0; i < activeRepositories.length; i++) {
 					localDb
-						.update(projects)
+						.update(repositories)
 						.set({ tabOrder: i })
-						.where(eq(projects.id, activeProjects[i].id))
+						.where(eq(repositories.id, activeRepositories[i].id))
 						.run();
 				}
 
@@ -844,43 +844,43 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 		refreshDefaultBranch: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.mutation(async ({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
 
-				if (!project) {
-					throw new Error(`Project ${input.id} not found`);
+				if (!repository) {
+					throw new Error(`Repository ${input.id} not found`);
 				}
 
 				const remoteDefaultBranch = await refreshDefaultBranch(
-					project.mainRepoPath,
+					repository.mainRepoPath,
 				);
 
 				if (
 					remoteDefaultBranch &&
-					remoteDefaultBranch !== project.defaultBranch
+					remoteDefaultBranch !== repository.defaultBranch
 				) {
 					localDb
-						.update(projects)
+						.update(repositories)
 						.set({ defaultBranch: remoteDefaultBranch })
-						.where(eq(projects.id, input.id))
+						.where(eq(repositories.id, input.id))
 						.run();
 
 					return {
 						success: true,
 						defaultBranch: remoteDefaultBranch,
 						changed: true,
-						previousBranch: project.defaultBranch,
+						previousBranch: repository.defaultBranch,
 					};
 				}
 
 				// Ensure we always return a valid default branch
 				const defaultBranch =
-					project.defaultBranch ??
+					repository.defaultBranch ??
 					remoteDefaultBranch ??
-					(await getDefaultBranch(project.mainRepoPath));
+					(await getDefaultBranch(repository.mainRepoPath));
 
 				return {
 					success: true,
@@ -892,62 +892,62 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 		close: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.mutation(async ({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
 
-				if (!project) {
-					throw new Error("Project not found");
+				if (!repository) {
+					throw new Error("Repository not found");
 				}
 
-				const projectWorkspaces = localDb
+				const repositoryNodes = localDb
 					.select()
-					.from(workspaces)
-					.where(eq(workspaces.projectId, input.id))
+					.from(nodes)
+					.where(eq(nodes.repositoryId, input.id))
 					.all();
 
 				let totalFailed = 0;
 				const registry = getWorkspaceRuntimeRegistry();
-				for (const workspace of projectWorkspaces) {
-					const terminal = registry.getForWorkspaceId(workspace.id).terminal;
-					const terminalResult = await terminal.killByWorkspaceId(workspace.id);
+				for (const node of repositoryNodes) {
+					const terminal = registry.getForWorkspaceId(node.id).terminal;
+					const terminalResult = await terminal.killByWorkspaceId(node.id);
 					totalFailed += terminalResult.failed;
 				}
 
-				const closedWorkspaceIds = projectWorkspaces.map((w) => w.id);
+				const closedNodeIds = repositoryNodes.map((n) => n.id);
 
-				if (closedWorkspaceIds.length > 0) {
+				if (closedNodeIds.length > 0) {
 					localDb
-						.delete(workspaces)
-						.where(inArray(workspaces.id, closedWorkspaceIds))
+						.delete(nodes)
+						.where(inArray(nodes.id, closedNodeIds))
 						.run();
 				}
 
-				// Hide the project by setting tabOrder to null
+				// Hide the repository by setting tabOrder to null
 				localDb
-					.update(projects)
+					.update(repositories)
 					.set({ tabOrder: null })
-					.where(eq(projects.id, input.id))
+					.where(eq(repositories.id, input.id))
 					.run();
 
-				// Update active workspace if it was in this project
+				// Update active node if it was in this repository
 				const currentSettings = localDb.select().from(settings).get();
 				if (
-					currentSettings?.lastActiveWorkspaceId &&
-					closedWorkspaceIds.includes(currentSettings.lastActiveWorkspaceId)
+					currentSettings?.lastActiveNodeId &&
+					closedNodeIds.includes(currentSettings.lastActiveNodeId)
 				) {
-					const remainingWorkspaces = localDb
+					const remainingNodes = localDb
 						.select()
-						.from(workspaces)
-						.orderBy(desc(workspaces.lastOpenedAt))
+						.from(nodes)
+						.orderBy(desc(nodes.lastOpenedAt))
 						.all();
 
 					localDb
 						.update(settings)
 						.set({
-							lastActiveWorkspaceId: remainingWorkspaces[0]?.id ?? null,
+							lastActiveNodeId: remainingNodes[0]?.id ?? null,
 						})
 						.where(eq(settings.id, 1))
 						.run();
@@ -958,7 +958,7 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 						? `${totalFailed} terminal process(es) may still be running`
 						: undefined;
 
-				track("project_closed", { project_id: input.id });
+				track("repository_closed", { repository_id: input.id });
 
 				return { success: true, terminalWarning };
 			}),
@@ -966,33 +966,33 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 		getGitHubAvatar: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.query(async ({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
 
-				if (!project) {
-					console.log("[getGitHubAvatar] Project not found:", input.id);
+				if (!repository) {
+					console.log("[getGitHubAvatar] Repository not found:", input.id);
 					return null;
 				}
 
-				if (project.githubOwner) {
+				if (repository.githubOwner) {
 					console.log(
 						"[getGitHubAvatar] Using cached owner:",
-						project.githubOwner,
+						repository.githubOwner,
 					);
 					return {
-						owner: project.githubOwner,
-						avatarUrl: getGitHubAvatarUrl(project.githubOwner),
+						owner: repository.githubOwner,
+						avatarUrl: getGitHubAvatarUrl(repository.githubOwner),
 					};
 				}
 
 				console.log(
 					"[getGitHubAvatar] Fetching owner for:",
-					project.mainRepoPath,
+					repository.mainRepoPath,
 				);
-				const owner = await fetchGitHubOwner(project.mainRepoPath);
+				const owner = await fetchGitHubOwner(repository.mainRepoPath);
 
 				if (!owner) {
 					console.log("[getGitHubAvatar] Failed to fetch owner");
@@ -1002,9 +1002,9 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 				console.log("[getGitHubAvatar] Fetched owner:", owner);
 
 				localDb
-					.update(projects)
+					.update(repositories)
 					.set({ githubOwner: owner })
-					.where(eq(projects.id, input.id))
+					.where(eq(repositories.id, input.id))
 					.run();
 
 				return {
@@ -1016,17 +1016,17 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 		getGitAuthor: publicProcedure
 			.input(z.object({ id: z.string() }))
 			.query(async ({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.id))
+					.from(repositories)
+					.where(eq(repositories.id, input.id))
 					.get();
 
-				if (!project) {
+				if (!repository) {
 					return null;
 				}
 
-				const authorName = await getGitAuthorName(project.mainRepoPath);
+				const authorName = await getGitAuthorName(repository.mainRepoPath);
 				if (!authorName) {
 					return null;
 				}
@@ -1039,4 +1039,4 @@ export const createProjectsRouter = (getWindow: () => BrowserWindow | null) => {
 	});
 };
 
-export type ProjectsRouter = ReturnType<typeof createProjectsRouter>;
+export type RepositoriesRouter = ReturnType<typeof createRepositoriesRouter>;
