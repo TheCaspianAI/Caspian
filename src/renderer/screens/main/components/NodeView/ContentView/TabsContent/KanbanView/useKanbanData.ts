@@ -33,11 +33,20 @@ function formatDuration(startTime: number): string {
 
 export function useKanbanData() {
 	const { data: groupedData } = electronTrpc.nodes.getAllGrouped.useQuery();
-	const panes = useTabsStore((s) => s.panes);
-	const tabs = useTabsStore((s) => s.tabs);
+	const { panes, tabs } = useTabsStore((s) => ({ panes: s.panes, tabs: s.tabs }));
 
 	const agents = useMemo<AgentCardData[]>(() => {
 		if (!groupedData) return [];
+
+		// Pre-compute panes by tab ID for O(1) lookup
+		const panesByTabId = new Map<string, Array<{ id: string; status: PaneStatus | undefined }>>();
+		for (const pane of Object.values(panes)) {
+			if (pane.type === "terminal") {
+				const existing = panesByTabId.get(pane.tabId) || [];
+				existing.push({ id: pane.id, status: pane.status });
+				panesByTabId.set(pane.tabId, existing);
+			}
+		}
 
 		const result: AgentCardData[] = [];
 
@@ -46,9 +55,7 @@ export function useKanbanData() {
 				// Find panes for this node
 				const nodeTabs = tabs.filter((t) => t.nodeId === node.id);
 				const nodePaneIds = nodeTabs.flatMap((t) =>
-					Object.values(panes)
-						.filter((p) => p.tabId === t.id && p.type === "terminal")
-						.map((p) => p.id)
+					(panesByTabId.get(t.id) || []).map((p) => p.id)
 				);
 
 				// Get highest priority status from all panes
