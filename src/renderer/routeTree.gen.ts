@@ -24,6 +24,7 @@ import { Route as AuthenticatedSettingsBehaviorPageRouteImport } from './routes/
 import { Route as AuthenticatedSettingsAppearancePageRouteImport } from './routes/_authenticated/settings/appearance/page'
 import { Route as AuthenticatedDashboardWorkspacesPageRouteImport } from './routes/_authenticated/_dashboard/workspaces/page'
 import { Route as AuthenticatedDashboardWorkspacePageRouteImport } from './routes/_authenticated/_dashboard/workspace/page'
+import { Route as AuthenticatedDashboardDashboardPageRouteImport } from './routes/_authenticated/_dashboard/dashboard/page'
 import { Route as AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport } from './routes/_authenticated/settings/repository/$repositoryId/page'
 import { Route as AuthenticatedSettingsNodeNodeIdPageRouteImport } from './routes/_authenticated/settings/node/$nodeId/page'
 import { Route as AuthenticatedDashboardWorkspaceWorkspaceIdPageRouteImport } from './routes/_authenticated/_dashboard/workspace/$workspaceId/page'
@@ -115,6 +116,12 @@ const AuthenticatedDashboardWorkspacePageRoute =
     path: '/workspace/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
   } as any)
+const AuthenticatedDashboardDashboardPageRoute =
+  AuthenticatedDashboardDashboardPageRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedDashboardLayoutRoute,
+  } as any)
 const AuthenticatedSettingsRepositoryRepositoryIdPageRoute =
   AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport.update({
     id: '/repository/$repositoryId/',
@@ -144,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PageRoute
   '/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
   '/settings/': typeof AuthenticatedSettingsPageRoute
+  '/dashboard/': typeof AuthenticatedDashboardDashboardPageRoute
   '/workspace/': typeof AuthenticatedDashboardWorkspacePageRoute
   '/workspaces/': typeof AuthenticatedDashboardWorkspacesPageRoute
   '/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
@@ -162,6 +170,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PageRoute
   '/settings': typeof AuthenticatedSettingsPageRoute
+  '/dashboard': typeof AuthenticatedDashboardDashboardPageRoute
   '/workspace': typeof AuthenticatedDashboardWorkspacePageRoute
   '/workspaces': typeof AuthenticatedDashboardWorkspacesPageRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearancePageRoute
@@ -184,6 +193,7 @@ export interface FileRoutesById {
   '/_authenticated/_dashboard': typeof AuthenticatedDashboardLayoutRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
   '/_authenticated/settings/': typeof AuthenticatedSettingsPageRoute
+  '/_authenticated/_dashboard/dashboard/': typeof AuthenticatedDashboardDashboardPageRoute
   '/_authenticated/_dashboard/workspace/': typeof AuthenticatedDashboardWorkspacePageRoute
   '/_authenticated/_dashboard/workspaces/': typeof AuthenticatedDashboardWorkspacesPageRoute
   '/_authenticated/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/'
     | '/settings'
     | '/settings/'
+    | '/dashboard/'
     | '/workspace/'
     | '/workspaces/'
     | '/settings/appearance/'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/settings'
+    | '/dashboard'
     | '/workspace'
     | '/workspaces'
     | '/settings/appearance'
@@ -244,6 +256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/_dashboard'
     | '/_authenticated/settings'
     | '/_authenticated/settings/'
+    | '/_authenticated/_dashboard/dashboard/'
     | '/_authenticated/_dashboard/workspace/'
     | '/_authenticated/_dashboard/workspaces/'
     | '/_authenticated/settings/appearance/'
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardWorkspacePageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
     }
+    '/_authenticated/_dashboard/dashboard/': {
+      id: '/_authenticated/_dashboard/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardDashboardPageRouteImport
+      parentRoute: typeof AuthenticatedDashboardLayoutRoute
+    }
     '/_authenticated/settings/repository/$repositoryId/': {
       id: '/_authenticated/settings/repository/$repositoryId/'
       path: '/repository/$repositoryId'
@@ -404,6 +424,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedDashboardLayoutRouteChildren {
+  AuthenticatedDashboardDashboardPageRoute: typeof AuthenticatedDashboardDashboardPageRoute
   AuthenticatedDashboardWorkspacePageRoute: typeof AuthenticatedDashboardWorkspacePageRoute
   AuthenticatedDashboardWorkspacesPageRoute: typeof AuthenticatedDashboardWorkspacesPageRoute
   AuthenticatedDashboardProjectProjectIdPageRoute: typeof AuthenticatedDashboardProjectProjectIdPageRoute
@@ -412,6 +433,8 @@ interface AuthenticatedDashboardLayoutRouteChildren {
 
 const AuthenticatedDashboardLayoutRouteChildren: AuthenticatedDashboardLayoutRouteChildren =
   {
+    AuthenticatedDashboardDashboardPageRoute:
+      AuthenticatedDashboardDashboardPageRoute,
     AuthenticatedDashboardWorkspacePageRoute:
       AuthenticatedDashboardWorkspacePageRoute,
     AuthenticatedDashboardWorkspacesPageRoute:
