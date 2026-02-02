@@ -4,12 +4,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/toolti
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	LuChevronsDownUp,
-	LuEye,
-	LuEyeOff,
-	LuFilePlus,
-	LuFolderPlus,
+	LuFile,
+	LuFolder,
 	LuRefreshCw,
 	LuX,
+	LuCircleDot,
 } from "react-icons/lu";
 import { SEARCH_DEBOUNCE_MS } from "../../constants";
 
@@ -111,7 +110,7 @@ export function FileTreeToolbar({
 							className="size-6"
 							onClick={onNewFile}
 						>
-							<LuFilePlus className="size-3.5" />
+							<LuFile className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">New File</TooltipContent>
@@ -125,7 +124,7 @@ export function FileTreeToolbar({
 							className="size-6"
 							onClick={onNewFolder}
 						>
-							<LuFolderPlus className="size-3.5" />
+							<LuFolder className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">New Folder</TooltipContent>
@@ -138,18 +137,14 @@ export function FileTreeToolbar({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="size-6"
+							className={`size-6 ${showHiddenFiles ? "text-primary" : ""}`}
 							onClick={onToggleHiddenFiles}
 						>
-							{showHiddenFiles ? (
-								<LuEye className="size-3.5" />
-							) : (
-								<LuEyeOff className="size-3.5" />
-							)}
+							<LuCircleDot className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">
-						{showHiddenFiles ? "Hide Hidden Files" : "Show Hidden Files"}
+						{showHiddenFiles ? "Hide Dotfiles" : "Show Dotfiles"}
 					</TooltipContent>
 				</Tooltip>
 
