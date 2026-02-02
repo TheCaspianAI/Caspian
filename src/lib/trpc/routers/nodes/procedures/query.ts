@@ -159,6 +159,7 @@ export const createQueryProcedures = () => {
 						tabOrder: number;
 						githubOwner: string | null;
 						mainRepoPath: string;
+						defaultBranch: string;
 					};
 					nodes: Array<{
 						id: string;
@@ -187,6 +188,7 @@ export const createQueryProcedures = () => {
 						tabOrder: repository.tabOrder!,
 						githubOwner: repository.githubOwner ?? null,
 						mainRepoPath: repository.mainRepoPath,
+						defaultBranch: repository.defaultBranch ?? "main",
 					},
 					nodes: [],
 				});

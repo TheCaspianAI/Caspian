@@ -105,6 +105,9 @@ export function useKanbanData() {
 						highestStatus === "working"
 							? formatDuration(node.updatedAt)
 							: undefined,
+					gitInfo: {
+						baseBranch: group.repository.defaultBranch,
+					},
 				});
 			}
 		}
