@@ -15,6 +15,39 @@
  * - Generous spacing, visual breathing room
  */
 
+/* Satoshi Font Family */
+@font-face {
+	font-family: 'Satoshi';
+	src: url('./assets/fonts/Satoshi-Variable.woff2') format('woff2');
+	font-weight: 300 900;
+	font-display: swap;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Satoshi';
+	src: url('./assets/fonts/Satoshi-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-display: swap;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Satoshi';
+	src: url('./assets/fonts/Satoshi-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-display: swap;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Satoshi';
+	src: url('./assets/fonts/Satoshi-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-display: swap;
+	font-style: normal;
+}
+
 :root {
 	/* Base palette - dark with pink undertone */
 	--background: oklch(0.09 0.015 328);
@@ -138,6 +171,13 @@
 
 	body {
 		@apply bg-background text-foreground;
+		font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	}
+
+	html {
+		/* Larger base font size - makes all rem values scale up */
+		/* Default is 16px, 17px = ~6% larger across the board */
+		font-size: 17px;
 	}
 
 	html, body {
