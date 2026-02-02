@@ -3,12 +3,9 @@ import { Link, useMatchRoute } from "@tanstack/react-router";
 import {
 	HiOutlineBell,
 	HiOutlineCommandLine,
-	HiOutlineDevicePhoneMobile,
-	HiOutlineKey,
 	HiOutlinePaintBrush,
 	HiOutlinePuzzlePiece,
 	HiOutlineSparkles,
-	HiOutlineUser,
 } from "react-icons/hi2";
 import { LuKeyboard } from "react-icons/lu";
 import type { SettingsSection } from "renderer/stores/settings-state";
@@ -18,15 +15,12 @@ interface GeneralSettingsProps {
 }
 
 type SettingsRoute =
-	| "/settings/account"
 	| "/settings/appearance"
 	| "/settings/ringtones"
 	| "/settings/keyboard"
 	| "/settings/behavior"
 	| "/settings/terminal"
-	| "/settings/integrations"
-	| "/settings/devices"
-	| "/settings/api-keys";
+	| "/settings/integrations";
 
 const GENERAL_SECTIONS: {
 	id: SettingsRoute;
@@ -34,12 +28,6 @@ const GENERAL_SECTIONS: {
 	label: string;
 	icon: React.ReactNode;
 }[] = [
-	{
-		id: "/settings/account",
-		section: "account",
-		label: "Account",
-		icon: <HiOutlineUser className="h-4 w-4" />,
-	},
 	{
 		id: "/settings/appearance",
 		section: "appearance",
@@ -75,18 +63,6 @@ const GENERAL_SECTIONS: {
 		section: "integrations",
 		label: "Integrations",
 		icon: <HiOutlinePuzzlePiece className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/devices",
-		section: "devices",
-		label: "Devices",
-		icon: <HiOutlineDevicePhoneMobile className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/api-keys",
-		section: "apikeys",
-		label: "API Keys",
-		icon: <HiOutlineKey className="h-4 w-4" />,
 	},
 ];
 
