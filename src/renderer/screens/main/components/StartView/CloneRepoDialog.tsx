@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useCreateWorkspace } from "renderer/react-query/workspaces";
+import { useCreateNode } from "renderer/react-query/nodes";
 
 interface CloneRepoDialogProps {
 	isOpen: boolean;
@@ -15,8 +15,8 @@ export function CloneRepoDialog({
 }: CloneRepoDialogProps) {
 	const [url, setUrl] = useState("");
 	const utils = electronTrpc.useUtils();
-	const cloneRepo = electronTrpc.projects.cloneRepo.useMutation();
-	const createWorkspace = useCreateWorkspace();
+	const cloneRepo = electronTrpc.repositories.cloneRepo.useMutation();
+	const createNode = useCreateNode();
 
 	const handleClone = async () => {
 		if (!url.trim()) {
@@ -27,16 +27,21 @@ export function CloneRepoDialog({
 		cloneRepo.mutate(
 			{ url: url.trim() },
 			{
-				onSuccess: (result) => {
+				onSuccess: (result: {
+					canceled?: boolean;
+					success?: boolean;
+					repository?: { id: string };
+					error?: string;
+				}) => {
 					// User canceled the directory picker - silent no-op
 					if (result.canceled) {
 						return;
 					}
 
-					if (result.success && result.project) {
-						// Invalidate recents so the new/updated project appears
-						utils.projects.getRecents.invalidate();
-						createWorkspace.mutate({ projectId: result.project.id });
+					if (result.success && result.repository) {
+						// Invalidate recents so the new/updated repository appears
+						utils.repositories.getRecents.invalidate();
+						createNode.mutate({ repositoryId: result.repository.id });
 						onClose();
 						setUrl("");
 					} else if (!result.success) {
@@ -53,7 +58,7 @@ export function CloneRepoDialog({
 
 	if (!isOpen) return null;
 
-	const isLoading = cloneRepo.isPending || createWorkspace.isPending;
+	const isLoading = cloneRepo.isPending || createNode.isPending;
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">

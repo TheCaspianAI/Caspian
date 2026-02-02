@@ -3,54 +3,54 @@ import type { CommandResult, ToolContext, ToolDefinition } from "./types";
 
 const schema = z
 	.object({
-		workspaceId: z.string().optional(),
-		workspaceName: z.string().optional(),
+		nodeId: z.string().optional(),
+		nodeName: z.string().optional(),
 	})
-	.refine((data) => data.workspaceId || data.workspaceName, {
-		message: "Must provide workspaceId or workspaceName",
+	.refine((data) => data.nodeId || data.nodeName, {
+		message: "Must provide nodeId or nodeName",
 	});
 
 async function execute(
 	params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	let targetWorkspaceId = params.workspaceId;
+	let targetNodeId = params.nodeId;
 
 	// Look up by name if no ID provided
-	if (!targetWorkspaceId && params.workspaceName) {
-		const workspaces = ctx.getWorkspaces();
-		if (!workspaces) {
-			return { success: false, error: "Failed to get workspaces" };
+	if (!targetNodeId && params.nodeName) {
+		const nodes = ctx.getNodes();
+		if (!nodes) {
+			return { success: false, error: "Failed to get nodes" };
 		}
 
-		const searchName = params.workspaceName.toLowerCase();
-		const found = workspaces.find(
-			(ws) =>
-				ws.name.toLowerCase() === searchName ||
-				ws.branch.toLowerCase() === searchName,
+		const searchName = params.nodeName.toLowerCase();
+		const found = nodes.find(
+			(n) =>
+				n.name.toLowerCase() === searchName ||
+				n.branch.toLowerCase() === searchName,
 		);
 
 		if (!found) {
 			return {
 				success: false,
-				error: `Workspace "${params.workspaceName}" not found`,
+				error: `Node "${params.nodeName}" not found`,
 			};
 		}
-		targetWorkspaceId = found.id;
+		targetNodeId = found.id;
 	}
 
-	if (!targetWorkspaceId) {
+	if (!targetNodeId) {
 		return {
 			success: false,
-			error: "Could not determine workspace to navigate to",
+			error: "Could not determine node to navigate to",
 		};
 	}
 
 	try {
-		await ctx.navigateToWorkspace(targetWorkspaceId);
+		await ctx.navigateToNode(targetNodeId);
 		return {
 			success: true,
-			data: { workspaceId: targetWorkspaceId },
+			data: { nodeId: targetNodeId },
 		};
 	} catch (error) {
 		return {
@@ -60,8 +60,8 @@ async function execute(
 	}
 }
 
-export const navigateToWorkspace: ToolDefinition<typeof schema> = {
-	name: "navigate_to_workspace",
+export const navigateToNode: ToolDefinition<typeof schema> = {
+	name: "navigate_to_node",
 	schema,
 	execute,
 };

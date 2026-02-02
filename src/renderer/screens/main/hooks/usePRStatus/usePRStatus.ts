@@ -2,7 +2,7 @@ import type { GitHubStatus } from "lib/local-db";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 
 interface UsePRStatusOptions {
-	workspaceId: string | undefined;
+	nodeId: string | undefined;
 	enabled?: boolean;
 	refetchInterval?: number;
 }
@@ -16,11 +16,11 @@ interface UsePRStatusResult {
 }
 
 /**
- * Hook to fetch and manage GitHub PR status for a workspace.
+ * Hook to fetch and manage GitHub PR status for a node.
  * Returns PR info, loading state, and refetch function.
  */
 export function usePRStatus({
-	workspaceId,
+	nodeId,
 	enabled = true,
 	refetchInterval,
 }: UsePRStatusOptions): UsePRStatusResult {
@@ -28,10 +28,10 @@ export function usePRStatus({
 		data: githubStatus,
 		isLoading,
 		refetch,
-	} = electronTrpc.workspaces.getGitHubStatus.useQuery(
-		{ workspaceId: workspaceId ?? "" },
+	} = electronTrpc.nodes.getGitHubStatus.useQuery(
+		{ nodeId: nodeId ?? "" },
 		{
-			enabled: enabled && !!workspaceId,
+			enabled: enabled && !!nodeId,
 			refetchInterval,
 		},
 	);

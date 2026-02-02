@@ -1,28 +1,28 @@
-import { createWorkspace } from "./create-worktree";
-import { deleteWorkspace } from "./delete-workspace";
+import { createNode } from "./create-worktree";
+import { deleteNode } from "./delete-workspace";
 import { getAppContext } from "./get-app-context";
-import { listProjects } from "./list-projects";
-import { listWorkspaces } from "./list-workspaces";
-import { navigateToWorkspace } from "./navigate-to-workspace";
+import { listRepositories } from "./list-projects";
+import { listNodes } from "./list-workspaces";
+import { navigateToNode } from "./navigate-to-workspace";
 import { startClaudeSession } from "./start-claude-session";
 import { startClaudeSubagent } from "./start-claude-subagent";
-import { switchWorkspace } from "./switch-workspace";
+import { switchNode } from "./switch-workspace";
 import type { CommandResult, ToolContext, ToolDefinition } from "./types";
-import { updateWorkspace } from "./update-workspace";
+import { updateNode } from "./update-workspace";
 
 // Registry of all available tools
 // biome-ignore lint/suspicious/noExplicitAny: Tool schemas vary
 const tools: ToolDefinition<any>[] = [
-	createWorkspace,
-	deleteWorkspace,
+	createNode,
+	deleteNode,
 	getAppContext,
-	listProjects,
-	listWorkspaces,
-	navigateToWorkspace,
+	listRepositories,
+	listNodes,
+	navigateToNode,
 	startClaudeSession,
 	startClaudeSubagent,
-	switchWorkspace,
-	updateWorkspace,
+	switchNode,
+	updateNode,
 ];
 
 // Map for O(1) lookup by name

@@ -25,7 +25,7 @@ export function SidebarControl() {
 
 	// Get active workspace for file opening
 	const { workspaceId } = useParams({ strict: false });
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery(
+	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
 	);

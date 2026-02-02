@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 
 export interface UseTerminalConnectionOptions {
-	workspaceId: string;
+	nodeId: string;
 }
 
 /**
@@ -18,7 +18,7 @@ export interface UseTerminalConnectionOptions {
  * direct access to xterm refs for event handling. Keep that in the component.
  */
 export function useTerminalConnection({
-	workspaceId,
+	nodeId,
 }: UseTerminalConnectionOptions) {
 	const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -31,9 +31,9 @@ export function useTerminalConnection({
 	const clearScrollbackMutation =
 		electronTrpc.terminal.clearScrollback.useMutation();
 
-	// Query for workspace cwd
-	const { data: workspaceCwd } =
-		electronTrpc.terminal.getWorkspaceCwd.useQuery(workspaceId);
+	// Query for node cwd
+	const { data: nodeCwd } =
+		electronTrpc.terminal.getNodeCwd.useQuery(nodeId);
 
 	// Stable refs to mutation functions - these don't change identity on re-render
 	const createOrAttachRef = useRef(createOrAttachMutation.mutate);
@@ -54,8 +54,8 @@ export function useTerminalConnection({
 		connectionError,
 		setConnectionError,
 
-		// Workspace CWD from query
-		workspaceCwd,
+		// Node CWD from query
+		nodeCwd,
 
 		// Stable refs to mutation functions (use these in effects/callbacks)
 		refs: {

@@ -7,30 +7,30 @@ async function execute(
 	_params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	const projects = ctx.getProjects();
+	const repositories = ctx.getRepositories();
 
-	if (!projects) {
-		return { success: false, error: "Projects not available" };
+	if (!repositories) {
+		return { success: false, error: "Repositories not available" };
 	}
 
 	return {
 		success: true,
 		data: {
-			projects: projects.map((p) => ({
-				id: p.id,
-				name: p.name,
-				mainRepoPath: p.mainRepoPath,
-				defaultBranch: p.defaultBranch,
-				color: p.color,
-				lastOpenedAt: p.lastOpenedAt,
-				tabOrder: p.tabOrder,
+			repositories: repositories.map((r) => ({
+				id: r.id,
+				name: r.name,
+				mainRepoPath: r.mainRepoPath,
+				defaultBranch: r.defaultBranch,
+				color: r.color,
+				lastOpenedAt: r.lastOpenedAt,
+				tabOrder: r.tabOrder,
 			})),
 		},
 	};
 }
 
-export const listProjects: ToolDefinition<typeof schema> = {
-	name: "list_projects",
+export const listRepositories: ToolDefinition<typeof schema> = {
+	name: "list_repositories",
 	schema,
 	execute,
 };

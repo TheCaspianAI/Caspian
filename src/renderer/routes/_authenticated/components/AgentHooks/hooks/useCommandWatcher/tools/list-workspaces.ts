@@ -7,20 +7,20 @@ async function execute(
 	_params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	const workspaces = ctx.getWorkspaces();
+	const nodes = ctx.getNodes();
 
-	if (!workspaces) {
-		return { success: false, error: "Failed to get workspaces" };
+	if (!nodes) {
+		return { success: false, error: "Failed to get nodes" };
 	}
 
 	return {
 		success: true,
-		data: { workspaces: workspaces as unknown as Record<string, unknown>[] },
+		data: { nodes: nodes as unknown as Record<string, unknown>[] },
 	};
 }
 
-export const listWorkspaces: ToolDefinition<typeof schema> = {
-	name: "list_workspaces",
+export const listNodes: ToolDefinition<typeof schema> = {
+	name: "list_nodes",
 	schema,
 	execute,
 };

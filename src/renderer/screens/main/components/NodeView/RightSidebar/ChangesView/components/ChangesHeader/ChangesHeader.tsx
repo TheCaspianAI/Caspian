@@ -187,9 +187,9 @@ function RefreshButton({ onRefresh }: { onRefresh: () => void }) {
 	);
 }
 
-function PRStatusLink({ workspaceId }: { workspaceId?: string }) {
+function PRStatusLink({ nodeId }: { nodeId?: string }) {
 	const { pr, isLoading } = usePRStatus({
-		workspaceId,
+		nodeId,
 		refetchInterval: 10000,
 	});
 
@@ -238,7 +238,7 @@ export function ChangesHeader({
 			/>
 			<ViewModeToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
 			<RefreshButton onRefresh={onRefresh} />
-			<PRStatusLink workspaceId={workspaceId} />
+			<PRStatusLink nodeId={workspaceId} />
 		</div>
 	);
 }

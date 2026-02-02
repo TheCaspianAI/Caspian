@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * Caspian theme - Sleek black with vibrant pink accents
+ * Inspired by the Caspian branding
+ */
+export const caspianTheme: Theme = {
+	id: "caspian",
+	name: "Caspian",
+	author: "Caspian",
+	type: "dark",
+	isBuiltIn: true,
+	description: "Sleek black with vibrant pink accents",
+
+	ui: {
+		background: "#000000",
+		foreground: "#ffffff",
+		card: "#0a0a0a",
+		cardForeground: "#ffffff",
+		popover: "#0a0a0a",
+		popoverForeground: "#ffffff",
+		primary: "#e91e8c",
+		primaryForeground: "#ffffff",
+		secondary: "#141414",
+		secondaryForeground: "#ffffff",
+		muted: "#1a1a1a",
+		mutedForeground: "#888888",
+		accent: "#1f1f1f",
+		accentForeground: "#ffffff",
+		tertiary: "#050505",
+		tertiaryActive: "#141414",
+		destructive: "#ff4d6a",
+		destructiveForeground: "#ffffff",
+		border: "#262626",
+		input: "#262626",
+		ring: "#e91e8c",
+		sidebar: "#050505",
+		sidebarForeground: "#ffffff",
+		sidebarPrimary: "#e91e8c",
+		sidebarPrimaryForeground: "#ffffff",
+		sidebarAccent: "#141414",
+		sidebarAccentForeground: "#ffffff",
+		sidebarBorder: "#262626",
+		sidebarRing: "#e91e8c",
+		chart1: "#e91e8c",
+		chart2: "#ff6eb4",
+		chart3: "#ff9ecf",
+		chart4: "#ffffff",
+		chart5: "#888888",
+	},
+
+	terminal: {
+		background: "#000000",
+		foreground: "#ffffff",
+		cursor: "#e91e8c",
+		cursorAccent: "#000000",
+		selectionBackground: "rgba(233, 30, 140, 0.3)",
+
+		black: "#000000",
+		red: "#ff4d6a",
+		green: "#4ade80",
+		yellow: "#fbbf24",
+		blue: "#60a5fa",
+		magenta: "#e91e8c",
+		cyan: "#22d3ee",
+		white: "#ffffff",
+
+		brightBlack: "#404040",
+		brightRed: "#ff6b84",
+		brightGreen: "#86efac",
+		brightYellow: "#fcd34d",
+		brightBlue: "#93c5fd",
+		brightMagenta: "#ff6eb4",
+		brightCyan: "#67e8f9",
+		brightWhite: "#ffffff",
+	},
+};

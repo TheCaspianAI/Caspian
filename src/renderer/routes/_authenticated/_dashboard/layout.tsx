@@ -6,14 +6,14 @@ import {
 } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
-import { WorkspaceSidebar } from "renderer/screens/main/components/WorkspaceSidebar";
+import { NodeSidebar } from "renderer/screens/main/components/NodeSidebar";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
 import {
-	COLLAPSED_WORKSPACE_SIDEBAR_WIDTH,
-	MAX_WORKSPACE_SIDEBAR_WIDTH,
-	useWorkspaceSidebarStore,
-} from "renderer/stores/workspace-sidebar-state";
+	COLLAPSED_NODE_SIDEBAR_WIDTH,
+	MAX_NODE_SIDEBAR_WIDTH,
+	useNodeSidebarStore,
+} from "renderer/stores/node-sidebar-state";
 import { TopBar } from "./components/TopBar";
 
 export const Route = createFileRoute("/_authenticated/_dashboard")({
@@ -33,21 +33,21 @@ function DashboardLayout() {
 	const currentNodeId =
 		currentNodeMatch !== false ? currentNodeMatch.workspaceId : null;
 
-	const { data: currentNode } = electronTrpc.workspaces.get.useQuery(
+	const { data: currentNode } = electronTrpc.nodes.get.useQuery(
 		{ id: currentNodeId ?? "" },
 		{ enabled: !!currentNodeId },
 	);
 
 	const {
-		isOpen: isWorkspaceSidebarOpen,
-		toggleCollapsed: toggleWorkspaceSidebarCollapsed,
-		setOpen: setWorkspaceSidebarOpen,
-		width: workspaceSidebarWidth,
-		setWidth: setWorkspaceSidebarWidth,
-		isResizing: isWorkspaceSidebarResizing,
-		setIsResizing: setWorkspaceSidebarIsResizing,
-		isCollapsed: isWorkspaceSidebarCollapsed,
-	} = useWorkspaceSidebarStore();
+		isOpen: isNodeSidebarOpen,
+		toggleCollapsed: toggleNodeSidebarCollapsed,
+		setOpen: setNodeSidebarOpen,
+		width: nodeSidebarWidth,
+		setWidth: setNodeSidebarWidth,
+		isResizing: isNodeSidebarResizing,
+		setIsResizing: setNodeSidebarIsResizing,
+		isCollapsed: isNodeSidebarCollapsed,
+	} = useNodeSidebarStore();
 
 	// Global hotkeys for dashboard
 	useAppHotkey(
@@ -65,24 +65,20 @@ function DashboardLayout() {
 	);
 
 	useAppHotkey(
-		"TOGGLE_WORKSPACE_SIDEBAR",
+		"TOGGLE_NODE_SIDEBAR",
 		() => {
-			if (!isWorkspaceSidebarOpen) {
-				setWorkspaceSidebarOpen(true);
+			if (!isNodeSidebarOpen) {
+				setNodeSidebarOpen(true);
 			} else {
-				toggleWorkspaceSidebarCollapsed();
+				toggleNodeSidebarCollapsed();
 			}
 		},
 		undefined,
-		[
-			isWorkspaceSidebarOpen,
-			setWorkspaceSidebarOpen,
-			toggleWorkspaceSidebarCollapsed,
-		],
+		[isNodeSidebarOpen, setNodeSidebarOpen, toggleNodeSidebarCollapsed],
 	);
 
 	useAppHotkey(
-		"NEW_WORKSPACE",
+		"NEW_NODE",
 		() => openNewNodeModal(currentNode?.repositoryId),
 		undefined,
 		[openNewNodeModal, currentNode?.repositoryId],
@@ -95,18 +91,18 @@ function DashboardLayout() {
 				<div className="flex-1 rounded-xl overflow-hidden glass">
 					<Outlet />
 				</div>
-				{isWorkspaceSidebarOpen && (
+				{isNodeSidebarOpen && (
 					<ResizablePanel
-						width={workspaceSidebarWidth}
-						onWidthChange={setWorkspaceSidebarWidth}
-						isResizing={isWorkspaceSidebarResizing}
-						onResizingChange={setWorkspaceSidebarIsResizing}
-						minWidth={COLLAPSED_WORKSPACE_SIDEBAR_WIDTH}
-						maxWidth={MAX_WORKSPACE_SIDEBAR_WIDTH}
+						width={nodeSidebarWidth}
+						onWidthChange={setNodeSidebarWidth}
+						isResizing={isNodeSidebarResizing}
+						onResizingChange={setNodeSidebarIsResizing}
+						minWidth={COLLAPSED_NODE_SIDEBAR_WIDTH}
+						maxWidth={MAX_NODE_SIDEBAR_WIDTH}
 						handleSide="left"
 						clampWidth={false}
 					>
-						<WorkspaceSidebar isCollapsed={isWorkspaceSidebarCollapsed()} />
+						<NodeSidebar isCollapsed={isNodeSidebarCollapsed()} />
 					</ResizablePanel>
 				)}
 			</div>

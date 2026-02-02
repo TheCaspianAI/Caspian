@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useRef } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { navigateToWorkspace } from "renderer/routes/_authenticated/_dashboard/utils/workspace-navigation";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { NOTIFICATION_EVENTS } from "shared/constants";
 import { debugLog } from "shared/debug";
 import { useTabsStore } from "./store";
@@ -36,12 +36,12 @@ export function useAgentHookListener() {
 	const navigate = useNavigate();
 
 	// Ref avoids stale closure; parsed from URL since hook runs in _authenticated/layout
-	const currentWorkspaceIdRef = useRef<string | null>(null);
+	const currentNodeIdRef = useRef<string | null>(null);
 	try {
 		const match = window.location.pathname.match(/\/workspace\/([^/]+)/);
-		currentWorkspaceIdRef.current = match ? match[1] : null;
+		currentNodeIdRef.current = match ? match[1] : null;
 	} catch {
-		currentWorkspaceIdRef.current = null;
+		currentNodeIdRef.current = null;
 	}
 
 	electronTrpc.notifications.subscribe.useSubscription(undefined, {
@@ -52,7 +52,7 @@ export function useAgentHookListener() {
 			const target = resolveNotificationTarget(event.data, state);
 			if (!target) return;
 
-			const { paneId, workspaceId } = target;
+			const { paneId, nodeId } = target;
 
 			if (event.type === NOTIFICATION_EVENTS.AGENT_LIFECYCLE) {
 				if (!paneId) return;
@@ -67,10 +67,10 @@ export function useAgentHookListener() {
 				} else if (eventType === "PermissionRequest") {
 					state.setPaneStatus(paneId, "permission");
 				} else if (eventType === "Stop") {
-					const activeTabId = state.activeTabIds[workspaceId];
+					const activeTabId = state.activeTabIds[nodeId];
 					const pane = state.panes[paneId];
 					const isInActiveTab =
-						currentWorkspaceIdRef.current === workspaceId &&
+						currentNodeIdRef.current === nodeId &&
 						pane?.tabId === activeTabId;
 
 					debugLog("agent-hooks", "Stop event:", {
@@ -94,7 +94,7 @@ export function useAgentHookListener() {
 					state.setPaneStatus(paneId, "idle");
 				}
 			} else if (event.type === NOTIFICATION_EVENTS.FOCUS_TAB) {
-				navigateToWorkspace(workspaceId, navigate);
+				navigateToNode(nodeId, navigate);
 
 				// Re-fetch state after navigation since router nav is async but state updates are immediate
 				const freshState = useTabsStore.getState();
@@ -104,9 +104,9 @@ export function useAgentHookListener() {
 				if (!tabIdToActivate) return;
 
 				const freshTab = freshState.tabs.find((t) => t.id === tabIdToActivate);
-				if (!freshTab || freshTab.workspaceId !== workspaceId) return;
+				if (!freshTab || freshTab.nodeId !== nodeId) return;
 
-				freshState.setActiveTab(workspaceId, tabIdToActivate);
+				freshState.setActiveTab(nodeId, tabIdToActivate);
 
 				const paneIdToFocus = freshTarget?.paneId ?? event.data?.paneId;
 				if (paneIdToFocus && freshState.panes[paneIdToFocus]) {

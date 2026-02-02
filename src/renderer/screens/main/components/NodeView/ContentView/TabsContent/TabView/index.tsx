@@ -37,15 +37,15 @@ export function TabView({ tab }: TabViewProps) {
 	const allPanes = useTabsStore((s) => s.panes);
 
 	// Get workspace path for file viewer panes
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery(
-		{ id: tab.workspaceId },
-		{ enabled: !!tab.workspaceId },
+	const { data: workspace } = electronTrpc.nodes.get.useQuery(
+		{ id: tab.nodeId },
+		{ enabled: !!tab.nodeId },
 	);
 	const worktreePath = workspace?.worktreePath ?? "";
 
-	// Get tabs in the same workspace for move targets
-	const workspaceTabs = allTabs.filter(
-		(t) => t.workspaceId === tab.workspaceId,
+	// Get tabs in the same node for move targets
+	const nodeTabs = allTabs.filter(
+		(t) => t.nodeId === tab.nodeId,
 	);
 
 	// Extract pane IDs from layout
@@ -150,7 +150,7 @@ export function TabView({ tab }: TabViewProps) {
 						splitPaneVertical={splitPaneVertical}
 						removePane={removePane}
 						setFocusedPane={setFocusedPane}
-						availableTabs={workspaceTabs}
+						availableTabs={nodeTabs}
 						onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
 						onMoveToNewTab={() => movePaneToNewTab(paneId)}
 					/>
@@ -164,13 +164,13 @@ export function TabView({ tab }: TabViewProps) {
 					path={path}
 					isActive={isActive}
 					tabId={tab.id}
-					workspaceId={tab.workspaceId}
+					nodeId={tab.nodeId}
 					splitPaneAuto={splitPaneAuto}
 					splitPaneHorizontal={splitPaneHorizontal}
 					splitPaneVertical={splitPaneVertical}
 					removePane={removePane}
 					setFocusedPane={setFocusedPane}
-					availableTabs={workspaceTabs}
+					availableTabs={nodeTabs}
 					onMoveToTab={(targetTabId) => movePaneToTab(paneId, targetTabId)}
 					onMoveToNewTab={() => movePaneToNewTab(paneId)}
 				/>
@@ -180,14 +180,14 @@ export function TabView({ tab }: TabViewProps) {
 			tabPanes,
 			focusedPaneId,
 			tab.id,
-			tab.workspaceId,
+			tab.nodeId,
 			worktreePath,
 			splitPaneAuto,
 			splitPaneHorizontal,
 			splitPaneVertical,
 			removePane,
 			setFocusedPane,
-			workspaceTabs,
+			nodeTabs,
 			movePaneToTab,
 			movePaneToNewTab,
 		],

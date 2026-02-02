@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { workspaces, worktrees } from "lib/local-db";
+import { nodes, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import type { BrowserWindow } from "electron";
 import { Notification } from "electron";
@@ -33,24 +33,24 @@ import { getWorkspaceRuntimeRegistry } from "../lib/workspace-runtime";
 // Singleton IPC handler to prevent duplicate handlers on window reopen (macOS)
 let ipcHandler: ReturnType<typeof createIPCHandler> | null = null;
 
-function getWorkspaceNameFromDb(workspaceId: string | undefined): string {
-	if (!workspaceId) return "Workspace";
+function getNodeNameFromDb(nodeId: string | undefined): string {
+	if (!nodeId) return "Workspace";
 	try {
-		const workspace = localDb
+		const node = localDb
 			.select()
-			.from(workspaces)
-			.where(eq(workspaces.id, workspaceId))
+			.from(nodes)
+			.where(eq(nodes.id, nodeId))
 			.get();
-		const worktree = workspace?.worktreeId
+		const worktree = node?.worktreeId
 			? localDb
 					.select()
 					.from(worktrees)
-					.where(eq(worktrees.id, workspace.worktreeId))
+					.where(eq(worktrees.id, node.worktreeId))
 					.get()
 			: undefined;
-		return getWorkspaceName({ workspace, worktree });
+		return getWorkspaceName({ workspace: node, worktree });
 	} catch (error) {
-		console.error("[notifications] Failed to get workspace name:", error);
+		console.error("[notifications] Failed to get node name:", error);
 		return "Workspace";
 	}
 }
@@ -82,7 +82,7 @@ export async function MainWindow() {
 		autoHideMenuBar: true,
 		frame: false,
 		titleBarStyle: "hidden",
-		trafficLightPosition: { x: 16, y: 18 },
+		trafficLightPosition: { x: 22, y: 16 },
 		webPreferences: {
 			preload: join(__dirname, "../preload/index.js"),
 			webviewTag: true,
@@ -127,7 +127,7 @@ export async function MainWindow() {
 			// Skip notification if user is already viewing this pane (Slack pattern)
 			if (
 				window.isFocused() &&
-				event.workspaceId &&
+				event.nodeId &&
 				event.tabId &&
 				event.paneId
 			) {
@@ -137,7 +137,7 @@ export async function MainWindow() {
 					),
 					tabsState: appState.data?.tabsState,
 					pane: {
-						workspaceId: event.workspaceId,
+						workspaceId: event.nodeId,
 						tabId: event.tabId,
 						paneId: event.paneId,
 					},
@@ -147,7 +147,7 @@ export async function MainWindow() {
 
 			if (!Notification.isSupported()) return;
 
-			const workspaceName = getWorkspaceNameFromDb(event.workspaceId);
+			const nodeName = getNodeNameFromDb(event.nodeId);
 			const title = getNotificationTitle({
 				tabId: event.tabId,
 				paneId: event.paneId,
@@ -158,8 +158,8 @@ export async function MainWindow() {
 			const isPermissionRequest = event.eventType === "PermissionRequest";
 			const notification = new Notification({
 				title: isPermissionRequest
-					? `Input Needed — ${workspaceName}`
-					: `Agent Complete — ${workspaceName}`,
+					? `Input Needed — ${nodeName}`
+					: `Agent Complete — ${nodeName}`,
 				body: isPermissionRequest
 					? `"${title}" needs your attention`
 					: `"${title}" has finished its task`,
@@ -174,7 +174,7 @@ export async function MainWindow() {
 				notificationsEmitter.emit(NOTIFICATION_EVENTS.FOCUS_TAB, {
 					paneId: event.paneId,
 					tabId: event.tabId,
-					workspaceId: event.workspaceId,
+					nodeId: event.nodeId,
 				});
 			});
 

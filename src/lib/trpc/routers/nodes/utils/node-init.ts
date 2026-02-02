@@ -54,7 +54,7 @@ export async function initializeNodeWorktree({
 
 	try {
 		// Acquire per-repository lock to prevent concurrent git operations
-		await manager.acquireProjectLock(repositoryId);
+		await manager.acquireRepositoryLock(repositoryId);
 
 		// Check cancellation before starting (use durable cancellation check)
 		// Note: We don't emit "failed" progress for cancellations because the node
@@ -494,6 +494,6 @@ export async function initializeNodeWorktree({
 	} finally {
 		// Always finalize the job to unblock waitForInit() callers (e.g., delete mutation)
 		manager.finalizeJob(nodeId);
-		manager.releaseProjectLock(repositoryId);
+		manager.releaseRepositoryLock(repositoryId);
 	}
 }

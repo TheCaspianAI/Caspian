@@ -17,17 +17,14 @@ import {
 	updateThemeClass,
 } from "./utils";
 
-/** Special theme ID for system preference (follows OS dark/light mode) */
-export const SYSTEM_THEME_ID = "system";
-
 interface ThemeState {
-	/** Current active theme ID (can be "system" or a specific theme ID) */
+	/** Current active theme ID */
 	activeThemeId: string;
 
 	/** List of custom (user-imported) themes */
 	customThemes: Theme[];
 
-	/** The currently active theme object (resolved from system preference if needed) */
+	/** The currently active theme object */
 	activeTheme: Theme | null;
 
 	/** Terminal theme in xterm.js format (derived from activeTheme) */
@@ -36,7 +33,7 @@ interface ThemeState {
 	/** Monaco editor theme (derived from activeTheme) */
 	monacoTheme: MonacoTheme | null;
 
-	/** Set the active theme by ID (can be "system" or a specific theme ID) */
+	/** Set the active theme by ID */
 	setTheme: (themeId: string) => void;
 
 	/** Add a custom theme */
@@ -50,27 +47,6 @@ interface ThemeState {
 
 	/** Initialize theme on app start (called after hydration) */
 	initializeTheme: () => void;
-}
-
-/**
- * Get the system preferred theme type (dark or light)
- */
-function getSystemPreferredThemeType(): "dark" | "light" {
-	if (typeof window === "undefined") return "dark";
-	return window.matchMedia("(prefers-color-scheme: dark)").matches
-		? "dark"
-		: "light";
-}
-
-/**
- * Resolve a theme ID to the actual theme ID to use.
- * If "system" is passed, resolves to "dark" or "light" based on OS preference.
- */
-function resolveThemeId(themeId: string): string {
-	if (themeId === SYSTEM_THEME_ID) {
-		return getSystemPreferredThemeType();
-	}
-	return themeId;
 }
 
 /**
@@ -135,20 +111,18 @@ export const useThemeStore = create<ThemeState>()(
 
 				setTheme: (themeId: string) => {
 					const state = get();
-					// Resolve system theme to actual theme ID
-					const resolvedId = resolveThemeId(themeId);
-					const theme = findTheme(resolvedId, state.customThemes);
+					const theme = findTheme(themeId, state.customThemes);
 
 					if (!theme) {
-						console.error(`Theme not found: ${resolvedId}`);
+						console.error(`Theme not found: ${themeId}`);
 						return;
 					}
 
 					const { terminalTheme, monacoTheme } = applyTheme(theme);
 
 					set({
-						activeThemeId: themeId, // Store the original ID (could be "system")
-						activeTheme: theme, // Store the resolved theme
+						activeThemeId: themeId,
+						activeTheme: theme,
 						terminalTheme,
 						monacoTheme,
 					});
@@ -189,8 +163,7 @@ export const useThemeStore = create<ThemeState>()(
 
 				initializeTheme: () => {
 					const state = get();
-					const resolvedId = resolveThemeId(state.activeThemeId);
-					const theme = findTheme(resolvedId, state.customThemes);
+					const theme = findTheme(state.activeThemeId, state.customThemes);
 
 					if (theme) {
 						const { terminalTheme, monacoTheme } = applyTheme(theme);
@@ -201,21 +174,6 @@ export const useThemeStore = create<ThemeState>()(
 						});
 					} else {
 						state.setTheme(DEFAULT_THEME_ID);
-					}
-
-					// Set up listener for OS theme preference changes
-					if (typeof window !== "undefined") {
-						const mediaQuery = window.matchMedia(
-							"(prefers-color-scheme: dark)",
-						);
-						const handleChange = () => {
-							const currentState = get();
-							// Only update if system theme is selected
-							if (currentState.activeThemeId === SYSTEM_THEME_ID) {
-								currentState.setTheme(SYSTEM_THEME_ID);
-							}
-						};
-						mediaQuery.addEventListener("change", handleChange);
 					}
 				},
 			}),

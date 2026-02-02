@@ -1,4 +1,4 @@
-import { useWorkspaceInitStore } from "renderer/stores/workspace-init";
+import { useNodeInitStore } from "renderer/stores/node-init";
 import { z } from "zod";
 import type { CommandResult, ToolContext, ToolDefinition } from "./types";
 
@@ -11,44 +11,44 @@ async function execute(
 	params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	// 1. Derive projectId from current workspace or most recent
-	const workspaces = ctx.getWorkspaces();
-	if (!workspaces || workspaces.length === 0) {
-		return { success: false, error: "No workspaces available" };
+	// 1. Derive repositoryId from current node or most recent
+	const nodes = ctx.getNodes();
+	if (!nodes || nodes.length === 0) {
+		return { success: false, error: "No nodes available" };
 	}
 
-	let projectId: string | null = null;
-	const activeWorkspaceId = ctx.getActiveWorkspaceId();
-	if (activeWorkspaceId) {
-		const activeWorkspace = workspaces.find(
-			(ws) => ws.id === activeWorkspaceId,
+	let repositoryId: string | null = null;
+	const activeNodeId = ctx.getActiveNodeId();
+	if (activeNodeId) {
+		const activeNode = nodes.find(
+			(n) => n.id === activeNodeId,
 		);
-		if (activeWorkspace) {
-			projectId = activeWorkspace.projectId;
+		if (activeNode) {
+			repositoryId = activeNode.repositoryId;
 		}
 	}
 
-	if (!projectId) {
-		const sorted = [...workspaces].sort(
+	if (!repositoryId) {
+		const sorted = [...nodes].sort(
 			(a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0),
 		);
-		projectId = sorted[0].projectId;
+		repositoryId = sorted[0].repositoryId;
 	}
 
 	try {
-		// 2. Create workspace
+		// 2. Create node
 		const result = await ctx.createWorktree.mutateAsync({
-			projectId,
+			repositoryId,
 			name: params.name,
 			branchName: params.name,
 		});
 
 		// 3. Append command to pending terminal setup
-		const store = useWorkspaceInitStore.getState();
-		const pending = store.pendingTerminalSetups[result.workspace.id];
+		const store = useNodeInitStore.getState();
+		const pending = store.pendingTerminalSetups[result.node.id];
 		store.addPendingTerminalSetup({
-			workspaceId: result.workspace.id,
-			projectId: pending?.projectId ?? projectId,
+			nodeId: result.node.id,
+			repositoryId: pending?.repositoryId ?? repositoryId,
 			initialCommands: [...(pending?.initialCommands ?? []), params.command],
 			defaultPreset: pending?.defaultPreset ?? null,
 		});
@@ -56,8 +56,8 @@ async function execute(
 		return {
 			success: true,
 			data: {
-				workspaceId: result.workspace.id,
-				branch: result.workspace.branch,
+				nodeId: result.node.id,
+				branch: result.node.branch,
 			},
 		};
 	} catch (error) {

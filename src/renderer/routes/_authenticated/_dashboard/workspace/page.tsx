@@ -18,31 +18,31 @@ function LoadingSpinner() {
 
 function WorkspaceIndexPage() {
 	const navigate = useNavigate();
-	const { data: workspaces, isLoading } =
-		electronTrpc.workspaces.getAllGrouped.useQuery();
+	const { data: nodes, isLoading } =
+		electronTrpc.nodes.getAllGrouped.useQuery();
 
-	const allWorkspaces = workspaces?.flatMap((group) => group.workspaces) ?? [];
-	const hasNoWorkspaces = !isLoading && allWorkspaces.length === 0;
+	const allNodes = nodes?.flatMap((group: { nodes: Array<{ id: string }> }) => group.nodes) ?? [];
+	const hasNoNodes = !isLoading && allNodes.length === 0;
 
 	useEffect(() => {
-		if (isLoading || !workspaces) return;
-		if (allWorkspaces.length === 0) return; // Show StartView instead
+		if (isLoading || !nodes) return;
+		if (allNodes.length === 0) return; // Show StartView instead
 
-		// Try to restore last viewed workspace
-		const lastViewedId = localStorage.getItem("lastViewedWorkspaceId");
-		const targetWorkspace =
-			allWorkspaces.find((w) => w.id === lastViewedId) ?? allWorkspaces[0];
+		// Try to restore last viewed node
+		const lastViewedId = localStorage.getItem("lastViewedNodeId");
+		const targetNode =
+			allNodes.find((n: { id: string }) => n.id === lastViewedId) ?? allNodes[0];
 
-		if (targetWorkspace) {
+		if (targetNode) {
 			navigate({
 				to: "/workspace/$workspaceId",
-				params: { workspaceId: targetWorkspace.id },
+				params: { workspaceId: targetNode.id },
 				replace: true,
 			});
 		}
-	}, [workspaces, isLoading, navigate, allWorkspaces]);
+	}, [nodes, isLoading, navigate, allNodes]);
 
-	if (hasNoWorkspaces) {
+	if (hasNoNodes) {
 		return <StartView />;
 	}
 

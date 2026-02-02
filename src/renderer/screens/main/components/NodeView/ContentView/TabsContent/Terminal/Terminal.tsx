@@ -29,7 +29,7 @@ import type {
 } from "./types";
 import { shellEscapePaths } from "./utils";
 
-export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
+export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 	const pane = useTabsStore((s) => s.panes[paneId]);
 	const paneInitialCommands = pane?.initialCommands;
 	const paneInitialCwd = pane?.initialCwd;
@@ -57,7 +57,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 	const {
 		connectionError,
 		setConnectionError,
-		workspaceCwd,
+		nodeCwd,
 		refs: {
 			createOrAttach: createOrAttachRef,
 			write: writeRef,
@@ -65,13 +65,13 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 			detach: detachRef,
 			clearScrollback: clearScrollbackRef,
 		},
-	} = useTerminalConnection({ workspaceId });
+	} = useTerminalConnection({ nodeId });
 
 	// Terminal CWD management
 	const { updateCwdFromData } = useTerminalCwd({
 		paneId,
 		initialCwd: paneInitialCwd,
-		workspaceCwd,
+		nodeCwd,
 	});
 
 	// Terminal modes tracking
@@ -85,8 +85,8 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 
 	// File link click handler
 	const { handleFileLinkClick } = useFileLinkClick({
-		workspaceId,
-		workspaceCwd,
+		nodeId,
+		nodeCwd,
 	});
 
 	// Refs for stream event handlers (populated after useTerminalStream)
@@ -108,7 +108,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 		paneInitialCommandsRef,
 		paneInitialCwdRef,
 		clearPaneInitialDataRef,
-		workspaceCwdRef,
+		nodeCwdRef,
 		handleFileLinkClickRef,
 		debouncedSetTabAutoTitleRef,
 		handleTerminalFocusRef,
@@ -124,7 +124,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 		paneInitialCommands,
 		paneInitialCwd,
 		clearPaneInitialData,
-		workspaceCwd,
+		nodeCwd,
 		handleFileLinkClick,
 		setTabAutoTitle,
 		setFocusedPane,
@@ -164,7 +164,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 	} = useTerminalColdRestore({
 		paneId,
 		tabId,
-		workspaceId,
+		nodeId,
 		xtermRef,
 		fitAddonRef,
 		isStreamReadyRef,
@@ -224,7 +224,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 	const { xtermInstance, restartTerminal } = useTerminalLifecycle({
 		paneId,
 		tabIdRef,
-		workspaceId,
+		nodeId,
 		terminalRef,
 		xtermRef,
 		fitAddonRef,
@@ -237,7 +237,7 @@ export const Terminal = ({ paneId, tabId, workspaceId }: TerminalProps) => {
 		isRestoredModeRef,
 		connectionErrorRef,
 		initialThemeRef,
-		workspaceCwdRef,
+		nodeCwdRef,
 		handleFileLinkClickRef,
 		paneInitialCommandsRef,
 		paneInitialCwdRef,

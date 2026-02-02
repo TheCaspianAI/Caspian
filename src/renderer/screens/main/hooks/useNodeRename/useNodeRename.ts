@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useUpdateWorkspace } from "renderer/react-query/workspaces/useUpdateWorkspace";
+import { useUpdateNode } from "renderer/react-query/nodes/useUpdateNode";
 
-export function useWorkspaceRename(workspaceId: string, workspaceName: string) {
+export function useNodeRename(nodeId: string, nodeName: string) {
 	const [isRenaming, setIsRenaming] = useState(false);
-	const [renameValue, setRenameValue] = useState(workspaceName);
+	const [renameValue, setRenameValue] = useState(nodeName);
 	const inputRef = useRef<HTMLInputElement | null>(null);
-	const updateWorkspace = useUpdateWorkspace();
+	const updateNode = useUpdateNode();
 
 	// Select input text when rename mode is activated
 	useEffect(() => {
@@ -14,10 +14,10 @@ export function useWorkspaceRename(workspaceId: string, workspaceName: string) {
 		}
 	}, [isRenaming]);
 
-	// Sync rename value when workspace name changes
+	// Sync rename value when node name changes
 	useEffect(() => {
-		setRenameValue(workspaceName);
-	}, [workspaceName]);
+		setRenameValue(nodeName);
+	}, [nodeName]);
 
 	const startRename = () => {
 		setIsRenaming(true);
@@ -25,19 +25,19 @@ export function useWorkspaceRename(workspaceId: string, workspaceName: string) {
 
 	const submitRename = () => {
 		const trimmedValue = renameValue.trim();
-		if (trimmedValue && trimmedValue !== workspaceName) {
-			updateWorkspace.mutate({
-				id: workspaceId,
+		if (trimmedValue && trimmedValue !== nodeName) {
+			updateNode.mutate({
+				id: nodeId,
 				patch: { name: trimmedValue },
 			});
 		} else {
-			setRenameValue(workspaceName);
+			setRenameValue(nodeName);
 		}
 		setIsRenaming(false);
 	};
 
 	const cancelRename = () => {
-		setRenameValue(workspaceName);
+		setRenameValue(nodeName);
 		setIsRenaming(false);
 	};
 

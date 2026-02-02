@@ -1,10 +1,10 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { LuPanelLeft, LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
-import { useWorkspaceSidebarStore } from "renderer/stores";
+import { useNodeSidebarStore } from "renderer/stores";
 
 export function SidebarToggle() {
-	const { isCollapsed, toggleCollapsed } = useWorkspaceSidebarStore();
+	const { isCollapsed, toggleCollapsed } = useNodeSidebarStore();
 	const collapsed = isCollapsed();
 
 	const getToggleIcon = (isHovering: boolean) => {
@@ -39,7 +39,7 @@ export function SidebarToggle() {
 			<TooltipContent side="right">
 				<HotkeyTooltipContent
 					label="Toggle sidebar"
-					hotkeyId="TOGGLE_WORKSPACE_SIDEBAR"
+					hotkeyId="TOGGLE_NODE_SIDEBAR"
 				/>
 			</TooltipContent>
 		</Tooltip>

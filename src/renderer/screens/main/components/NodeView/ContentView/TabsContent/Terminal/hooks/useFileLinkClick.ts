@@ -5,8 +5,8 @@ import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { useTabsStore } from "renderer/stores/tabs/store";
 
 export interface UseFileLinkClickOptions {
-	workspaceId: string;
-	workspaceCwd: string | null | undefined;
+	nodeId: string;
+	nodeCwd: string | null | undefined;
 }
 
 export interface UseFileLinkClickReturn {
@@ -21,8 +21,8 @@ export interface UseFileLinkClickReturn {
  * - External editor (VS Code, etc.)
  */
 export function useFileLinkClick({
-	workspaceId,
-	workspaceCwd,
+	nodeId,
+	nodeCwd,
 }: UseFileLinkClickOptions): UseFileLinkClickReturn {
 	const addFileViewerPane = useTabsStore((s) => s.addFileViewerPane);
 
@@ -41,7 +41,7 @@ export function useFileLinkClick({
 						path,
 						line,
 						column,
-						cwd: workspaceCwd ?? undefined,
+						cwd: nodeCwd ?? undefined,
 					})
 					.catch((error) => {
 						console.error(
@@ -58,11 +58,11 @@ export function useFileLinkClick({
 			};
 
 			if (behavior === "file-viewer") {
-				// If workspaceCwd is not loaded yet, fall back to external editor
+				// If nodeCwd is not loaded yet, fall back to external editor
 				// This prevents confusing errors when the workspace is still initializing
-				if (!workspaceCwd) {
+				if (!nodeCwd) {
 					console.warn(
-						"[Terminal] workspaceCwd not loaded, falling back to external editor",
+						"[Terminal] nodeCwd not loaded, falling back to external editor",
 					);
 					openInExternalEditor();
 					return;
@@ -73,10 +73,10 @@ export function useFileLinkClick({
 				let filePath = path;
 				// Use path boundary check to avoid incorrect prefix stripping
 				// e.g., /repo vs /repo-other should not match
-				if (path === workspaceCwd) {
+				if (path === nodeCwd) {
 					filePath = ".";
-				} else if (path.startsWith(`${workspaceCwd}/`)) {
-					filePath = path.slice(workspaceCwd.length + 1);
+				} else if (path.startsWith(`${nodeCwd}/`)) {
+					filePath = path.slice(nodeCwd.length + 1);
 				} else if (path.startsWith("/")) {
 					// Absolute path outside workspace - show warning and don't attempt to open
 					toast.warning("File is outside the workspace", {
@@ -85,12 +85,12 @@ export function useFileLinkClick({
 					});
 					return;
 				}
-				addFileViewerPane(workspaceId, { filePath, line, column });
+				addFileViewerPane(nodeId, { filePath, line, column });
 			} else {
 				openInExternalEditor();
 			}
 		},
-		[terminalLinkBehavior, workspaceId, workspaceCwd, addFileViewerPane],
+		[terminalLinkBehavior, nodeId, nodeCwd, addFileViewerPane],
 	);
 
 	return {

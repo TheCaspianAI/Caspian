@@ -1,31 +1,31 @@
 import { EventEmitter } from "node:events";
 import type {
-	WorkspaceInitProgress,
-	WorkspaceInitStep,
-} from "shared/types/workspace-init";
+	NodeInitProgress,
+	NodeInitStep,
+} from "shared/types/node-init";
 
 interface InitJob {
-	workspaceId: string;
-	projectId: string;
-	progress: WorkspaceInitProgress;
+	nodeId: string;
+	repositoryId: string;
+	progress: NodeInitProgress;
 	cancelled: boolean;
 	worktreeCreated: boolean; // Track for cleanup on failure
 }
 
 /**
- * Manages workspace initialization jobs with:
+ * Manages node initialization jobs with:
  * - Progress tracking and streaming via EventEmitter
  * - Cancellation support
- * - Per-project mutex to prevent concurrent git operations
+ * - Per-repository mutex to prevent concurrent git operations
  *
  * This is an in-memory manager - state is NOT persisted across app restarts.
- * If the app restarts during initialization, the workspace may be left in
+ * If the app restarts during initialization, the node may be left in
  * an incomplete state requiring manual cleanup (documented limitation).
  */
-class WorkspaceInitManager extends EventEmitter {
+class NodeInitManager extends EventEmitter {
 	private jobs = new Map<string, InitJob>();
-	private projectLocks = new Map<string, Promise<void>>();
-	private projectLockResolvers = new Map<string, () => void>();
+	private repositoryLocks = new Map<string, Promise<void>>();
+	private repositoryLockResolvers = new Map<string, () => void>();
 
 	// Coordination state that persists even after job progress is cleared
 	private donePromises = new Map<string, Promise<void>>();
@@ -33,10 +33,10 @@ class WorkspaceInitManager extends EventEmitter {
 	private cancellations = new Set<string>();
 
 	/**
-	 * Check if a workspace is currently initializing
+	 * Check if a node is currently initializing
 	 */
-	isInitializing(workspaceId: string): boolean {
-		const job = this.jobs.get(workspaceId);
+	isInitializing(nodeId: string): boolean {
+		const job = this.jobs.get(nodeId);
 		return (
 			job !== undefined &&
 			job.progress.step !== "ready" &&
@@ -45,60 +45,60 @@ class WorkspaceInitManager extends EventEmitter {
 	}
 
 	/**
-	 * Check if a workspace has failed initialization
+	 * Check if a node has failed initialization
 	 */
-	hasFailed(workspaceId: string): boolean {
-		const job = this.jobs.get(workspaceId);
+	hasFailed(nodeId: string): boolean {
+		const job = this.jobs.get(nodeId);
 		return job?.progress.step === "failed";
 	}
 
 	/**
-	 * Get current progress for a workspace
+	 * Get current progress for a node
 	 */
-	getProgress(workspaceId: string): WorkspaceInitProgress | undefined {
-		return this.jobs.get(workspaceId)?.progress;
+	getProgress(nodeId: string): NodeInitProgress | undefined {
+		return this.jobs.get(nodeId)?.progress;
 	}
 
 	/**
-	 * Get all workspaces currently initializing or failed
+	 * Get all nodes currently initializing or failed
 	 */
-	getAllProgress(): WorkspaceInitProgress[] {
+	getAllProgress(): NodeInitProgress[] {
 		return Array.from(this.jobs.values()).map((job) => job.progress);
 	}
 
 	/**
 	 * Start tracking a new initialization job
 	 */
-	startJob(workspaceId: string, projectId: string): void {
-		if (this.jobs.has(workspaceId)) {
+	startJob(nodeId: string, repositoryId: string): void {
+		if (this.jobs.has(nodeId)) {
 			console.warn(
-				`[workspace-init] Job already exists for ${workspaceId}, clearing old job`,
+				`[node-init] Job already exists for ${nodeId}, clearing old job`,
 			);
-			this.jobs.delete(workspaceId);
+			this.jobs.delete(nodeId);
 		}
 
 		// Clear any stale cancellation state from previous attempt
-		this.cancellations.delete(workspaceId);
+		this.cancellations.delete(nodeId);
 
 		// Create done promise for coordination (allows delete to wait for init completion)
 		let resolve: () => void;
 		const promise = new Promise<void>((r) => {
 			resolve = r;
 		});
-		this.donePromises.set(workspaceId, promise);
+		this.donePromises.set(nodeId, promise);
 		// biome-ignore lint/style/noNonNullAssertion: resolve is assigned in Promise constructor
-		this.doneResolvers.set(workspaceId, resolve!);
+		this.doneResolvers.set(nodeId, resolve!);
 
-		const progress: WorkspaceInitProgress = {
-			workspaceId,
-			projectId,
+		const progress: NodeInitProgress = {
+			nodeId,
+			repositoryId,
 			step: "pending",
 			message: "Preparing...",
 		};
 
-		this.jobs.set(workspaceId, {
-			workspaceId,
-			projectId,
+		this.jobs.set(nodeId, {
+			nodeId,
+			repositoryId,
 			progress,
 			cancelled: false,
 			worktreeCreated: false,
@@ -111,14 +111,14 @@ class WorkspaceInitManager extends EventEmitter {
 	 * Update progress for an initialization job
 	 */
 	updateProgress(
-		workspaceId: string,
-		step: WorkspaceInitStep,
+		nodeId: string,
+		step: NodeInitStep,
 		message: string,
 		error?: string,
 	): void {
-		const job = this.jobs.get(workspaceId);
+		const job = this.jobs.get(nodeId);
 		if (!job) {
-			console.warn(`[workspace-init] No job found for ${workspaceId}`);
+			console.warn(`[node-init] No job found for ${nodeId}`);
 			return;
 		}
 
@@ -134,8 +134,8 @@ class WorkspaceInitManager extends EventEmitter {
 		// Clean up ready jobs after a delay
 		if (step === "ready") {
 			const timer = setTimeout(() => {
-				if (this.jobs.get(workspaceId)?.progress.step === "ready") {
-					this.jobs.delete(workspaceId);
+				if (this.jobs.get(nodeId)?.progress.step === "ready") {
+					this.jobs.delete(nodeId);
 				}
 			}, 2000);
 			timer.unref();
@@ -145,8 +145,8 @@ class WorkspaceInitManager extends EventEmitter {
 	/**
 	 * Mark that the worktree has been created (for cleanup tracking)
 	 */
-	markWorktreeCreated(workspaceId: string): void {
-		const job = this.jobs.get(workspaceId);
+	markWorktreeCreated(nodeId: string): void {
+		const job = this.jobs.get(nodeId);
 		if (job) {
 			job.worktreeCreated = true;
 		}
@@ -155,8 +155,8 @@ class WorkspaceInitManager extends EventEmitter {
 	/**
 	 * Check if worktree was created (for cleanup decisions)
 	 */
-	wasWorktreeCreated(workspaceId: string): boolean {
-		return this.jobs.get(workspaceId)?.worktreeCreated ?? false;
+	wasWorktreeCreated(nodeId: string): boolean {
+		return this.jobs.get(nodeId)?.worktreeCreated ?? false;
 	}
 
 	/**
@@ -165,43 +165,43 @@ class WorkspaceInitManager extends EventEmitter {
 	 * The Set persists even after job is cleared, preventing the race where
 	 * clearJob() removes the cancellation signal before init can observe it.
 	 */
-	cancel(workspaceId: string): void {
+	cancel(nodeId: string): void {
 		// Add to durable cancellations set (survives clearJob)
-		this.cancellations.add(workspaceId);
+		this.cancellations.add(nodeId);
 
-		const job = this.jobs.get(workspaceId);
+		const job = this.jobs.get(nodeId);
 		if (job) {
 			job.cancelled = true;
 		}
-		console.log(`[workspace-init] Cancelled job for ${workspaceId}`);
+		console.log(`[node-init] Cancelled job for ${nodeId}`);
 	}
 
 	/**
 	 * Check if a job has been cancelled (legacy - checks job record only).
 	 * @deprecated Use isCancellationRequested() for race-safe cancellation checks.
 	 */
-	isCancelled(workspaceId: string): boolean {
-		return this.jobs.get(workspaceId)?.cancelled ?? false;
+	isCancelled(nodeId: string): boolean {
+		return this.jobs.get(nodeId)?.cancelled ?? false;
 	}
 
 	/**
-	 * Check if cancellation has been requested for a workspace.
+	 * Check if cancellation has been requested for a node.
 	 * This checks the durable cancellations Set, which persists even after
 	 * the job record is cleared. Use this in init flow for race-safe checks.
 	 */
-	isCancellationRequested(workspaceId: string): boolean {
-		return this.cancellations.has(workspaceId);
+	isCancellationRequested(nodeId: string): boolean {
+		return this.cancellations.has(nodeId);
 	}
 
 	/**
 	 * Clear a job (called before retry or after delete).
 	 * Also cleans up coordination state (done promise, cancellation).
 	 */
-	clearJob(workspaceId: string): void {
-		this.jobs.delete(workspaceId);
-		this.donePromises.delete(workspaceId);
-		this.doneResolvers.delete(workspaceId);
-		this.cancellations.delete(workspaceId);
+	clearJob(nodeId: string): void {
+		this.jobs.delete(nodeId);
+		this.donePromises.delete(nodeId);
+		this.doneResolvers.delete(nodeId);
+		this.cancellations.delete(nodeId);
 	}
 
 	/**
@@ -209,19 +209,19 @@ class WorkspaceInitManager extends EventEmitter {
 	 * MUST be called in all init exit paths (success, failure, cancellation).
 	 * This allows waitForInit() to unblock.
 	 */
-	finalizeJob(workspaceId: string): void {
-		const resolve = this.doneResolvers.get(workspaceId);
+	finalizeJob(nodeId: string): void {
+		const resolve = this.doneResolvers.get(nodeId);
 		if (resolve) {
 			resolve();
-			console.log(`[workspace-init] Finalized job for ${workspaceId}`);
+			console.log(`[node-init] Finalized job for ${nodeId}`);
 		}
 
 		// Clean up coordination state to prevent memory leaks
 		// This is safe because waitForInit() either:
 		// 1. Already resolved (promise completed)
 		// 2. Will return immediately (promise no longer in map)
-		this.donePromises.delete(workspaceId);
-		this.doneResolvers.delete(workspaceId);
+		this.donePromises.delete(nodeId);
+		this.doneResolvers.delete(nodeId);
 		// Note: Don't clear cancellations here - clearJob handles that
 		// to allow cancellation signal to persist through async cleanup
 	}
@@ -230,18 +230,18 @@ class WorkspaceInitManager extends EventEmitter {
 	 * Wait for an init job to complete (success, failure, or cancellation).
 	 * Returns immediately if no init is in progress.
 	 *
-	 * @param workspaceId - The workspace to wait for
+	 * @param nodeId - The node to wait for
 	 * @param timeoutMs - Maximum time to wait (default 30s). On timeout, returns without error.
 	 */
-	async waitForInit(workspaceId: string, timeoutMs = 30000): Promise<void> {
-		const promise = this.donePromises.get(workspaceId);
+	async waitForInit(nodeId: string, timeoutMs = 30000): Promise<void> {
+		const promise = this.donePromises.get(nodeId);
 		if (!promise) {
 			// No init in progress or already completed
 			return;
 		}
 
 		console.log(
-			`[workspace-init] Waiting for init to complete: ${workspaceId}`,
+			`[node-init] Waiting for init to complete: ${nodeId}`,
 		);
 
 		await Promise.race([
@@ -249,7 +249,7 @@ class WorkspaceInitManager extends EventEmitter {
 			new Promise<void>((resolve) => {
 				setTimeout(() => {
 					console.warn(
-						`[workspace-init] Wait timed out after ${timeoutMs}ms for ${workspaceId}`,
+						`[node-init] Wait timed out after ${timeoutMs}ms for ${nodeId}`,
 					);
 					resolve();
 				}, timeoutMs);
@@ -258,14 +258,14 @@ class WorkspaceInitManager extends EventEmitter {
 	}
 
 	/**
-	 * Acquire per-project lock for git operations.
-	 * Only one git operation per project at a time.
+	 * Acquire per-repository lock for git operations.
+	 * Only one git operation per repository at a time.
 	 * This prevents race conditions and git lock conflicts.
 	 */
-	async acquireProjectLock(projectId: string): Promise<void> {
+	async acquireRepositoryLock(repositoryId: string): Promise<void> {
 		// Wait for any existing lock to be released
-		while (this.projectLocks.has(projectId)) {
-			await this.projectLocks.get(projectId);
+		while (this.repositoryLocks.has(repositoryId)) {
+			await this.repositoryLocks.get(repositoryId);
 		}
 
 		// Create a new lock
@@ -274,30 +274,30 @@ class WorkspaceInitManager extends EventEmitter {
 			resolve = r;
 		});
 
-		this.projectLocks.set(projectId, promise);
+		this.repositoryLocks.set(repositoryId, promise);
 		// biome-ignore lint/style/noNonNullAssertion: resolve is assigned in Promise constructor
-		this.projectLockResolvers.set(projectId, resolve!);
+		this.repositoryLockResolvers.set(repositoryId, resolve!);
 	}
 
 	/**
-	 * Release per-project lock
+	 * Release per-repository lock
 	 */
-	releaseProjectLock(projectId: string): void {
-		const resolve = this.projectLockResolvers.get(projectId);
+	releaseRepositoryLock(repositoryId: string): void {
+		const resolve = this.repositoryLockResolvers.get(repositoryId);
 		if (resolve) {
-			this.projectLocks.delete(projectId);
-			this.projectLockResolvers.delete(projectId);
+			this.repositoryLocks.delete(repositoryId);
+			this.repositoryLockResolvers.delete(repositoryId);
 			resolve();
 		}
 	}
 
 	/**
-	 * Check if a project has an active lock
+	 * Check if a repository has an active lock
 	 */
-	hasProjectLock(projectId: string): boolean {
-		return this.projectLocks.has(projectId);
+	hasRepositoryLock(repositoryId: string): boolean {
+		return this.repositoryLocks.has(repositoryId);
 	}
 }
 
-/** Singleton workspace initialization manager instance */
-export const workspaceInitManager = new WorkspaceInitManager();
+/** Singleton node initialization manager instance */
+export const nodeInitManager = new NodeInitManager();

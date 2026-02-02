@@ -17,7 +17,7 @@ import {
 import { DEFAULT_RINGTONE_ID, RINGTONES } from "shared/ringtones";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import { getGitAuthorName, getGitHubUsername } from "../workspaces/utils/git";
+import { getGitAuthorName, getGitHubUsername } from "../nodes/utils/git";
 
 const VALID_RINGTONE_IDS = RINGTONES.map((r) => r.id);
 

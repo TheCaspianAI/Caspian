@@ -7,12 +7,12 @@ interface TabsState {
 }
 
 interface ResolvedTarget extends NotificationIds {
-	workspaceId: string; // Required in resolved target
+	nodeId: string; // Required in resolved target
 }
 
 /**
  * Resolves notification target IDs by looking up missing values from state.
- * Priority: event data > pane's tab > tab's workspace
+ * Priority: event data > pane's tab > tab's node
  */
 export function resolveNotificationTarget(
 	ids: NotificationIds | undefined,
@@ -20,7 +20,7 @@ export function resolveNotificationTarget(
 ): ResolvedTarget | null {
 	if (!ids) return null;
 
-	const { paneId, tabId, workspaceId } = ids;
+	const { paneId, tabId, nodeId } = ids;
 
 	const pane = paneId ? state.panes[paneId] : undefined;
 
@@ -31,14 +31,14 @@ export function resolveNotificationTarget(
 		? state.tabs.find((t) => t.id === resolvedTabId)
 		: undefined;
 
-	// Resolve workspaceId: prefer event, fallback to tab's workspace
-	const resolvedWorkspaceId = workspaceId || tab?.workspaceId;
+	// Resolve nodeId: prefer event, fallback to tab's node
+	const resolvedNodeId = nodeId || tab?.nodeId;
 
-	if (!resolvedWorkspaceId) return null;
+	if (!resolvedNodeId) return null;
 
 	return {
 		paneId,
 		tabId: resolvedTabId,
-		workspaceId: resolvedWorkspaceId,
+		nodeId: resolvedNodeId,
 	};
 }

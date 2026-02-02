@@ -29,7 +29,7 @@ import type { NewItemMode } from "./types";
 
 export function FilesView() {
 	const { workspaceId } = useParams({ strict: false });
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery(
+	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
 	);

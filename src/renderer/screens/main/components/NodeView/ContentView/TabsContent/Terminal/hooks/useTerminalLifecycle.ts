@@ -84,7 +84,7 @@ function waitForAttachClear(paneId: string, waiter: () => void): () => void {
 export interface UseTerminalLifecycleOptions {
 	paneId: string;
 	tabIdRef: MutableRefObject<string>;
-	workspaceId: string;
+	nodeId: string;
 	terminalRef: RefObject<HTMLDivElement | null>;
 	xtermRef: MutableRefObject<XTerm | null>;
 	fitAddonRef: MutableRefObject<FitAddon | null>;
@@ -97,7 +97,7 @@ export interface UseTerminalLifecycleOptions {
 	isRestoredModeRef: MutableRefObject<boolean>;
 	connectionErrorRef: MutableRefObject<string | null>;
 	initialThemeRef: MutableRefObject<ITheme | null>;
-	workspaceCwdRef: MutableRefObject<string | null>;
+	nodeCwdRef: MutableRefObject<string | null>;
 	handleFileLinkClickRef: MutableRefObject<
 		(path: string, line?: number, column?: number) => void
 	>;
@@ -137,7 +137,7 @@ export interface UseTerminalLifecycleReturn {
 export function useTerminalLifecycle({
 	paneId,
 	tabIdRef,
-	workspaceId,
+	nodeId,
 	terminalRef,
 	xtermRef,
 	fitAddonRef,
@@ -150,7 +150,7 @@ export function useTerminalLifecycle({
 	isRestoredModeRef,
 	connectionErrorRef,
 	initialThemeRef,
-	workspaceCwdRef,
+	nodeCwdRef,
 	handleFileLinkClickRef,
 	paneInitialCommandsRef,
 	paneInitialCwdRef,
@@ -211,7 +211,7 @@ export function useTerminalLifecycle({
 			renderer,
 			cleanup: cleanupQuerySuppression,
 		} = createTerminalInstance(container, {
-			cwd: workspaceCwdRef.current ?? undefined,
+			cwd: nodeCwdRef.current ?? undefined,
 			initialTheme: initialThemeRef.current,
 			onFileLinkClick: (path, line, column) =>
 				handleFileLinkClickRef.current(path, line, column),
@@ -276,7 +276,7 @@ export function useTerminalLifecycle({
 				{
 					paneId,
 					tabId: tabIdRef.current,
-					workspaceId,
+					nodeId,
 					cols: xterm.cols,
 					rows: xterm.rows,
 					allowKilled: true,
@@ -386,7 +386,7 @@ export function useTerminalLifecycle({
 						{
 							paneId,
 							tabId: tabIdRef.current,
-							workspaceId,
+							nodeId,
 							cols: xterm.cols,
 							rows: xterm.rows,
 							initialCommands,
@@ -591,7 +591,7 @@ export function useTerminalLifecycle({
 		};
 	}, [
 		paneId,
-		workspaceId,
+		nodeId,
 		maybeApplyInitialState,
 		flushPendingEvents,
 		setConnectionError,

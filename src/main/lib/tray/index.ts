@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { workspaces } from "lib/local-db";
+import { nodes } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import {
 	app,
@@ -111,9 +111,9 @@ function openTerminalSettings(): void {
 	menuEmitter.emit("open-settings", "terminal");
 }
 
-function openSessionInCaspian(workspaceId: string): void {
+function openSessionInCaspian(nodeId: string): void {
 	showWindow();
-	menuEmitter.emit("open-workspace", workspaceId);
+	menuEmitter.emit("open-node", nodeId);
 }
 
 async function killAllSessions(): Promise<void> {
@@ -146,16 +146,16 @@ async function killSession(paneId: string): Promise<void> {
 	await updateTrayMenu();
 }
 
-function getWorkspaceName(workspaceId: string): string {
+function getNodeName(nodeId: string): string {
 	try {
-		const workspace = localDb
-			.select({ name: workspaces.name })
-			.from(workspaces)
-			.where(eq(workspaces.id, workspaceId))
+		const node = localDb
+			.select({ name: nodes.name })
+			.from(nodes)
+			.where(eq(nodes.id, nodeId))
 			.get();
-		return workspace?.name || workspaceId.slice(0, 8);
+		return node?.name || nodeId.slice(0, 8);
 	} catch {
-		return workspaceId.slice(0, 8);
+		return nodeId.slice(0, 8);
 	}
 }
 
@@ -176,31 +176,34 @@ function buildSessionsSubmenu(
 	if (aliveSessions.length === 0) {
 		menuItems.push({ label: "No active sessions", enabled: false });
 	} else {
-		const byWorkspace = new Map<string, ListSessionsResponse["sessions"]>();
+		// Note: session.workspaceId comes from daemon protocol (terminal-host types)
+		// but represents what we call "nodeId" in the app
+		const byNode = new Map<string, ListSessionsResponse["sessions"]>();
 		for (const session of aliveSessions) {
-			const existing = byWorkspace.get(session.workspaceId) || [];
+			const existing = byNode.get(session.workspaceId) || [];
 			existing.push(session);
-			byWorkspace.set(session.workspaceId, existing);
+			byNode.set(session.workspaceId, existing);
 		}
 
 		let isFirst = true;
-		for (const [workspaceId, workspaceSessions] of byWorkspace) {
-			const workspaceName = getWorkspaceName(workspaceId);
+		for (const [nodeId, nodeSessions] of byNode) {
+			const nodeName = getNodeName(nodeId);
 
 			if (!isFirst) {
 				menuItems.push({ type: "separator" });
 			}
 			menuItems.push({
-				label: workspaceName,
+				label: nodeName,
 				enabled: false,
 			});
 
-			for (const session of workspaceSessions) {
+			for (const session of nodeSessions) {
 				menuItems.push({
 					label: formatSessionLabel(session),
 					submenu: [
 						{
 							label: "Open in Caspian",
+							// session.workspaceId is nodeId in daemon protocol
 							click: () => openSessionInCaspian(session.workspaceId),
 						},
 						{

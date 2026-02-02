@@ -1,4 +1,4 @@
-import type { SelectProject, SelectWorkspace } from "lib/local-db";
+import type { SelectRepository, SelectNode } from "lib/local-db";
 import type { electronTrpc } from "renderer/lib/electron-trpc";
 import type { z } from "zod";
 
@@ -42,21 +42,21 @@ export function buildBulkResult<T>({
 // Available mutations and queries passed to tool handlers
 export interface ToolContext {
 	// Mutations
-	createWorktree: ReturnType<typeof electronTrpc.workspaces.create.useMutation>;
-	setActive: ReturnType<typeof electronTrpc.workspaces.setActive.useMutation>;
-	deleteWorkspace: ReturnType<
-		typeof electronTrpc.workspaces.delete.useMutation
+	createWorktree: ReturnType<typeof electronTrpc.nodes.create.useMutation>;
+	setActive: ReturnType<typeof electronTrpc.nodes.setActive.useMutation>;
+	deleteNode: ReturnType<
+		typeof electronTrpc.nodes.delete.useMutation
 	>;
-	updateWorkspace: ReturnType<
-		typeof electronTrpc.workspaces.update.useMutation
+	updateNode: ReturnType<
+		typeof electronTrpc.nodes.update.useMutation
 	>;
 	// Query helpers
-	refetchWorkspaces: () => Promise<unknown>;
-	getWorkspaces: () => SelectWorkspace[] | undefined;
-	getProjects: () => SelectProject[] | undefined;
-	getActiveWorkspaceId: () => string | null;
+	refetchNodes: () => Promise<unknown>;
+	getNodes: () => SelectNode[] | undefined;
+	getRepositories: () => SelectRepository[] | undefined;
+	getActiveNodeId: () => string | null;
 	// Navigation
-	navigateToWorkspace: (workspaceId: string) => Promise<void>;
+	navigateToNode: (nodeId: string) => Promise<void>;
 }
 
 // Tool definition with schema and execute function

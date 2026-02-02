@@ -1,31 +1,27 @@
 import type { Theme } from "../types";
-import { catppuccinTheme } from "./catppuccin";
-import { draculaTheme } from "./dracula";
+import { caspianTheme } from "./caspian";
+import { everforestTheme } from "./everforest";
+import { githubDarkTheme } from "./github-dark";
 import { githubLightTheme } from "./github-light";
-import { gruvboxTheme } from "./gruvbox";
 import { nordTheme } from "./nord";
 import { rosePineTheme } from "./rose-pine";
-import { solarizedTheme } from "./solarized";
-import { tokyoNightTheme } from "./tokyo-night";
 
 /**
  * All built-in themes
  */
 export const builtInThemes: Theme[] = [
-	draculaTheme,
+	caspianTheme,
 	nordTheme,
-	catppuccinTheme,
-	tokyoNightTheme,
-	gruvboxTheme,
-	rosePineTheme,
-	solarizedTheme,
+	githubDarkTheme,
 	githubLightTheme,
+	rosePineTheme,
+	everforestTheme,
 ];
 
 /**
  * Default theme ID
  */
-export const DEFAULT_THEME_ID = "dracula";
+export const DEFAULT_THEME_ID = "nord";
 
 /**
  * Get a built-in theme by ID
@@ -36,12 +32,10 @@ export function getBuiltInTheme(id: string): Theme | undefined {
 
 // Re-export individual themes
 export {
-	catppuccinTheme,
-	draculaTheme,
+	caspianTheme,
+	everforestTheme,
+	githubDarkTheme,
 	githubLightTheme,
-	gruvboxTheme,
 	nordTheme,
 	rosePineTheme,
-	solarizedTheme,
-	tokyoNightTheme,
 };

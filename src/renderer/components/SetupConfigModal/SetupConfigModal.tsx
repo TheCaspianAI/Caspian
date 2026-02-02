@@ -12,7 +12,7 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import {
 	useCloseConfigModal,
 	useConfigModalOpen,
-	useConfigModalProjectId,
+	useConfigModalRepositoryId,
 } from "renderer/stores/config-modal";
 import { EXTERNAL_LINKS } from "shared/constants";
 
@@ -23,21 +23,21 @@ const CONFIG_TEMPLATE = `{
 
 export function SetupConfigModal() {
 	const isOpen = useConfigModalOpen();
-	const projectId = useConfigModalProjectId();
+	const repositoryId = useConfigModalRepositoryId();
 	const closeModal = useCloseConfigModal();
 
-	const { data: project } = electronTrpc.projects.get.useQuery(
-		{ id: projectId ?? "" },
-		{ enabled: !!projectId },
+	const { data: repository } = electronTrpc.repositories.get.useQuery(
+		{ id: repositoryId ?? "" },
+		{ enabled: !!repositoryId },
 	);
 
 	const { data: configFilePath } =
 		electronTrpc.config.getConfigFilePath.useQuery(
-			{ projectId: projectId ?? "" },
-			{ enabled: !!projectId },
+			{ repositoryId: repositoryId ?? "" },
+			{ enabled: !!repositoryId },
 		);
 
-	const projectName = project?.name ?? "your-project";
+	const repositoryName = repository?.name ?? "your-repository";
 
 	const handleLearnMore = () => {
 		window.open(EXTERNAL_LINKS.SETUP_TEARDOWN_SCRIPTS, "_blank");
@@ -58,7 +58,7 @@ export function SetupConfigModal() {
 					{/* Header */}
 					<div className="flex items-center justify-between gap-6 px-4 py-3 border-b border-border">
 						<span className="text-sm text-muted-foreground font-mono">
-							{projectName}/.caspian/config.json
+							{repositoryName}/.caspian/config.json
 						</span>
 						<OpenInButton
 							path={configFilePath ?? undefined}

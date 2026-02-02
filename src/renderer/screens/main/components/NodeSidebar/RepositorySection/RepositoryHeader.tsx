@@ -101,7 +101,7 @@ export function RepositoryHeader({
 					navigateToNode(otherNode.id, navigate);
 				} else {
 					// No other nodes exist - go to node index
-					navigate({ to: "/node" });
+					navigate({ to: "/workspace" });
 				}
 			}
 

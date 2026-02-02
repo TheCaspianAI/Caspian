@@ -2,7 +2,7 @@ import type { ChangedFile, GitChangesStatus } from "shared/changes-types";
 import simpleGit from "simple-git";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import { getStatusNoLock } from "../workspaces/utils/git";
+import { getStatusNoLock } from "../nodes/utils/git";
 import { assertRegisteredWorktree, secureFs } from "./security";
 import { applyNumstatToFiles } from "./utils/apply-numstat";
 import {

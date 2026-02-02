@@ -10,15 +10,15 @@ async function execute(
 	params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	const activeWorkspaceId = ctx.getActiveWorkspaceId();
-	if (!activeWorkspaceId) {
-		return { success: false, error: "No active workspace" };
+	const activeNodeId = ctx.getActiveNodeId();
+	if (!activeNodeId) {
+		return { success: false, error: "No active node" };
 	}
 
 	const tabsStore = useTabsStore.getState();
-	const activeTabId = tabsStore.activeTabIds[activeWorkspaceId];
+	const activeTabId = tabsStore.activeTabIds[activeNodeId];
 	if (!activeTabId) {
-		return { success: false, error: "No active tab in workspace" };
+		return { success: false, error: "No active tab in node" };
 	}
 
 	const paneId = tabsStore.addPane(activeTabId, {
@@ -31,7 +31,7 @@ async function execute(
 
 	return {
 		success: true,
-		data: { workspaceId: activeWorkspaceId, paneId },
+		data: { nodeId: activeNodeId, paneId },
 	};
 }
 

@@ -4,22 +4,13 @@ import {
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuSeparator,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { toast } from "ui/components/ui/sonner";
 import { cn } from "ui/lib/utils";
 import { useState } from "react";
 import { LuCopy, LuExternalLink } from "react-icons/lu";
-import jetbrainsIcon from "renderer/assets/app-icons/jetbrains.svg";
-import vscodeIcon from "renderer/assets/app-icons/vscode.svg";
-import {
-	APP_OPTIONS,
-	JETBRAINS_OPTIONS,
-	VSCODE_OPTIONS,
-} from "renderer/components/OpenInButton";
+import { APP_OPTIONS } from "renderer/components/OpenInButton";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 
 interface ClickablePathProps {
@@ -88,60 +79,6 @@ export function ClickablePath({ path, className }: ClickablePathProps) {
 						)}
 					</DropdownMenuItem>
 				))}
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="flex items-center gap-2">
-						<img
-							src={vscodeIcon}
-							alt="VS Code"
-							className="size-4 object-contain"
-						/>
-						<span>VS Code</span>
-					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="w-48">
-						{VSCODE_OPTIONS.map((app) => (
-							<DropdownMenuItem
-								key={app.id}
-								onClick={() => handleOpenIn(app.id)}
-								className="flex items-center gap-2"
-							>
-								<img src={app.icon} alt="" className="size-4 object-contain" />
-								<span>{app.label}</span>
-								{app.id === lastUsedApp && (
-									<span className="ml-auto text-xs text-muted-foreground">
-										Default
-									</span>
-								)}
-							</DropdownMenuItem>
-						))}
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
-				<DropdownMenuSub>
-					<DropdownMenuSubTrigger className="flex items-center gap-2">
-						<img
-							src={jetbrainsIcon}
-							alt="JetBrains"
-							className="size-4 object-contain"
-						/>
-						<span>JetBrains</span>
-					</DropdownMenuSubTrigger>
-					<DropdownMenuSubContent className="w-48">
-						{JETBRAINS_OPTIONS.map((app) => (
-							<DropdownMenuItem
-								key={app.id}
-								onClick={() => handleOpenIn(app.id)}
-								className="flex items-center gap-2"
-							>
-								<img src={app.icon} alt="" className="size-4 object-contain" />
-								<span>{app.label}</span>
-								{app.id === lastUsedApp && (
-									<span className="ml-auto text-xs text-muted-foreground">
-										Default
-									</span>
-								)}
-							</DropdownMenuItem>
-						))}
-					</DropdownMenuSubContent>
-				</DropdownMenuSub>
 				<DropdownMenuSeparator />
 				<DropdownMenuItem
 					onClick={handleCopyPath}

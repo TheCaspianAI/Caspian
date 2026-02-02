@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * Everforest theme - A green based earthy color scheme
+ * https://github.com/sainnhe/everforest
+ */
+export const everforestTheme: Theme = {
+	id: "everforest",
+	name: "Everforest",
+	author: "sainnhe",
+	type: "dark",
+	isBuiltIn: true,
+	description: "A green based earthy color scheme",
+
+	ui: {
+		background: "#1e2326",
+		foreground: "#d3c6aa",
+		card: "#272e33",
+		cardForeground: "#d3c6aa",
+		popover: "#272e33",
+		popoverForeground: "#d3c6aa",
+		primary: "#a7c080",
+		primaryForeground: "#1e2326",
+		secondary: "#272e33",
+		secondaryForeground: "#d3c6aa",
+		muted: "#2e383c",
+		mutedForeground: "#859289",
+		accent: "#374145",
+		accentForeground: "#d3c6aa",
+		tertiary: "#1a1f22",
+		tertiaryActive: "#272e33",
+		destructive: "#e67e80",
+		destructiveForeground: "#1e2326",
+		border: "#414b50",
+		input: "#414b50",
+		ring: "#a7c080",
+		sidebar: "#1a1f22",
+		sidebarForeground: "#d3c6aa",
+		sidebarPrimary: "#a7c080",
+		sidebarPrimaryForeground: "#1e2326",
+		sidebarAccent: "#272e33",
+		sidebarAccentForeground: "#d3c6aa",
+		sidebarBorder: "#414b50",
+		sidebarRing: "#a7c080",
+		chart1: "#e67e80",
+		chart2: "#a7c080",
+		chart3: "#7fbbb3",
+		chart4: "#dbbc7f",
+		chart5: "#d699b6",
+	},
+
+	terminal: {
+		background: "#1e2326",
+		foreground: "#d3c6aa",
+		cursor: "#e69875",
+		cursorAccent: "#1e2326",
+		selectionBackground: "rgba(76, 55, 67, 0.5)",
+
+		black: "#272e33",
+		red: "#e67e80",
+		green: "#a7c080",
+		yellow: "#dbbc7f",
+		blue: "#7fbbb3",
+		magenta: "#d699b6",
+		cyan: "#83c092",
+		white: "#d3c6aa",
+
+		brightBlack: "#414b50",
+		brightRed: "#f85552",
+		brightGreen: "#8da101",
+		brightYellow: "#dfa000",
+		brightBlue: "#3a94c5",
+		brightMagenta: "#df69ba",
+		brightCyan: "#35a77c",
+		brightWhite: "#fffbef",
+	},
+};

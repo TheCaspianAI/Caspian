@@ -98,8 +98,8 @@ export function NodeListItem({
 
 	// Derive isActive from route
 	const isActive = !!matchRoute({
-		to: "/node/$nodeId",
-		params: { nodeId: id },
+		to: "/workspace/$workspaceId",
+		params: { workspaceId: id },
 	});
 	const openInFinder = electronTrpc.external.openInFinder.useMutation({
 		onError: (error) => toast.error(`Failed to open: ${error.message}`),

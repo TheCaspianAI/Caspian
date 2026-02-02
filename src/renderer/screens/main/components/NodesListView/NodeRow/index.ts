@@ -1,1 +1,1 @@
-export * from "./WorkspaceRow";
+export * from "./NodeRow";

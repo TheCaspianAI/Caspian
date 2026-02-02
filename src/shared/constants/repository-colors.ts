@@ -1,8 +1,8 @@
 /** Special value representing "no custom color" - uses default gray border */
-export const PROJECT_COLOR_DEFAULT = "default";
+export const REPOSITORY_COLOR_DEFAULT = "default";
 
-export const PROJECT_COLORS: { name: string; value: string }[] = [
-	{ name: "Default", value: PROJECT_COLOR_DEFAULT },
+export const REPOSITORY_COLORS: { name: string; value: string }[] = [
+	{ name: "Default", value: REPOSITORY_COLOR_DEFAULT },
 	{ name: "Blue", value: "#3b82f6" },
 	{ name: "Green", value: "#22c55e" },
 	{ name: "Yellow", value: "#eab308" },
@@ -13,4 +13,4 @@ export const PROJECT_COLORS: { name: string; value: string }[] = [
 	{ name: "Slate", value: "#64748b" },
 ] as const;
 
-export const PROJECT_COLOR_VALUES = PROJECT_COLORS.map((color) => color.value);
+export const REPOSITORY_COLOR_VALUES = REPOSITORY_COLORS.map((color) => color.value);

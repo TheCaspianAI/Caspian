@@ -7,19 +7,19 @@ import type {
 } from "./types";
 import { buildBulkResult } from "./types";
 
-const workspaceInputSchema = z.object({
+const nodeInputSchema = z.object({
 	name: z.string().optional(),
 	branchName: z.string().optional(),
 	baseBranch: z.string().optional(),
 });
 
 const schema = z.object({
-	workspaces: z.array(workspaceInputSchema).min(1).max(5),
+	nodes: z.array(nodeInputSchema).min(1).max(5),
 });
 
-interface CreatedWorkspace {
-	workspaceId: string;
-	workspaceName: string;
+interface CreatedNode {
+	nodeId: string;
+	nodeName: string;
 	branch: string;
 }
 
@@ -27,48 +27,48 @@ async function execute(
 	params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	// Derive projectId from current workspace or use the only available project
-	const workspaces = ctx.getWorkspaces();
-	if (!workspaces || workspaces.length === 0) {
-		return { success: false, error: "No workspaces available" };
+	// Derive repositoryId from current node or use the only available repository
+	const nodes = ctx.getNodes();
+	if (!nodes || nodes.length === 0) {
+		return { success: false, error: "No nodes available" };
 	}
 
-	// Try to get from current workspace first
-	let projectId: string | null = null;
-	const activeWorkspaceId = ctx.getActiveWorkspaceId();
-	if (activeWorkspaceId) {
-		const activeWorkspace = workspaces.find(
-			(ws) => ws.id === activeWorkspaceId,
+	// Try to get from current node first
+	let repositoryId: string | null = null;
+	const activeNodeId = ctx.getActiveNodeId();
+	if (activeNodeId) {
+		const activeNode = nodes.find(
+			(n) => n.id === activeNodeId,
 		);
-		if (activeWorkspace) {
-			projectId = activeWorkspace.projectId;
+		if (activeNode) {
+			repositoryId = activeNode.repositoryId;
 		}
 	}
 
-	// Fall back to the most recently used workspace's project
-	if (!projectId) {
-		const sorted = [...workspaces].sort(
+	// Fall back to the most recently used node's repository
+	if (!repositoryId) {
+		const sorted = [...nodes].sort(
 			(a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0),
 		);
-		projectId = sorted[0].projectId;
+		repositoryId = sorted[0].repositoryId;
 	}
 
-	const created: CreatedWorkspace[] = [];
+	const created: CreatedNode[] = [];
 	const errors: BulkItemError[] = [];
 
-	for (const [i, input] of params.workspaces.entries()) {
+	for (const [i, input] of params.nodes.entries()) {
 		try {
 			const result = await ctx.createWorktree.mutateAsync({
-				projectId,
+				repositoryId,
 				name: input.name,
 				branchName: input.branchName,
 				baseBranch: input.baseBranch,
 			});
 
 			created.push({
-				workspaceId: result.workspace.id,
-				workspaceName: result.workspace.name,
-				branch: result.workspace.branch,
+				nodeId: result.node.id,
+				nodeName: result.node.name,
+				branch: result.node.branch,
 			});
 		} catch (error) {
 			errors.push({
@@ -76,7 +76,7 @@ async function execute(
 				name: input.name,
 				branchName: input.branchName,
 				error:
-					error instanceof Error ? error.message : "Failed to create workspace",
+					error instanceof Error ? error.message : "Failed to create node",
 			});
 		}
 	}
@@ -85,13 +85,13 @@ async function execute(
 		items: created,
 		errors,
 		itemKey: "created",
-		allFailedMessage: "All workspace creations failed",
-		total: params.workspaces.length,
+		allFailedMessage: "All node creations failed",
+		total: params.nodes.length,
 	});
 }
 
-export const createWorkspace: ToolDefinition<typeof schema> = {
-	name: "create_workspace",
+export const createNode: ToolDefinition<typeof schema> = {
+	name: "create_node",
 	schema,
 	execute,
 };

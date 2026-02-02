@@ -231,7 +231,7 @@ export function useHotkeysByCategory(options?: {
 			HotkeyCategory,
 			Array<HotkeyDefinition & { id: HotkeyId }>
 		> = {
-			Workspace: [],
+			Node: [],
 			Layout: [],
 			Terminal: [],
 			Window: [],

@@ -11,21 +11,21 @@ import {
 } from "shared/constants";
 
 export interface ConfigFilePreviewProps {
-	projectId: string;
-	projectName: string;
+	repositoryId: string;
+	repositoryName: string;
 	configFilePath?: string;
 	className?: string;
 }
 
 export function ConfigFilePreview({
-	projectId,
-	projectName,
+	repositoryId,
+	repositoryName,
 	configFilePath,
 	className,
 }: ConfigFilePreviewProps) {
 	const { data: configData } = electronTrpc.config.getConfigContent.useQuery(
-		{ projectId },
-		{ enabled: !!projectId },
+		{ repositoryId },
+		{ enabled: !!repositoryId },
 	);
 
 	const handleLearnMore = () => {
@@ -47,7 +47,7 @@ export function ConfigFilePreview({
 			>
 				<div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
 					<span className="text-sm text-muted-foreground font-mono truncate">
-						{projectName}/{REPOSITORY_CASPIAN_DIR_NAME}/{CONFIG_FILE_NAME}
+						{repositoryName}/{REPOSITORY_CASPIAN_DIR_NAME}/{CONFIG_FILE_NAME}
 					</span>
 					<OpenInButton path={configFilePath} label={CONFIG_FILE_NAME} />
 				</div>

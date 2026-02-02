@@ -26,4 +26,4 @@ yarn-error.log*
 electron.vite.config.*.mjs
 
 # TanStack Router generated file
-routeTree.gen.ts
+routeTree.gen.tsrelease/

@@ -1,2 +1,2 @@
 export { usePRStatus } from "./usePRStatus";
-export { useWorkspaceRename } from "./useWorkspaceRename";
+export { useNodeRename } from "./useNodeRename/useNodeRename";

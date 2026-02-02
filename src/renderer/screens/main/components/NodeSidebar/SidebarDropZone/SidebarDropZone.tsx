@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { type ReactNode, useCallback, useEffect, useState } from "react";
 import { LuFolderPlus, LuLoader, LuX } from "react-icons/lu";
-import { useOpenFromPath } from "renderer/react-query/projects";
+import { useOpenFromPath } from "renderer/react-query/repositories";
 import { InitGitDialog } from "../../StartView/InitGitDialog";
 
 interface SidebarDropZoneProps {
@@ -138,15 +138,15 @@ export function SidebarDropZone({ children, className }: SidebarDropZoneProps) {
 						}
 
 						// Navigate to project view
-						if ("project" in result && result.project) {
+						if ("repository" in result && result.repository) {
 							navigate({
 								to: "/project/$projectId",
-								params: { projectId: result.project.id },
+								params: { projectId: result.repository.id },
 							});
 						}
 					},
 					onError: (err) => {
-						setError(err.message || "Failed to open project");
+						setError(err.message || "Failed to open repository");
 					},
 				},
 			);

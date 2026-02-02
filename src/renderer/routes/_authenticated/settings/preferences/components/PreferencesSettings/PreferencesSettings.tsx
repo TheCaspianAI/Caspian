@@ -51,7 +51,7 @@ import { resolveBranchPrefix, sanitizeSegment } from "shared/utils/branch";
 import { BRANCH_PREFIX_MODE_LABELS } from "../../../utils/branch-prefix";
 
 const CATEGORY_ORDER: HotkeyCategory[] = [
-	"Workspace",
+	"Node",
 	"Terminal",
 	"Layout",
 	"Window",

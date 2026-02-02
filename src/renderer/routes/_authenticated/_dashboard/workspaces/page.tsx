@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { WorkspacesListView } from "renderer/screens/main/components/WorkspacesListView";
+import { NodesListView } from "renderer/screens/main/components/NodesListView/NodesListView";
 
 export const Route = createFileRoute("/_authenticated/_dashboard/workspaces/")({
 	component: WorkspacesPage,
 });
 
 function WorkspacesPage() {
-	return <WorkspacesListView />;
+	return <NodesListView />;
 }

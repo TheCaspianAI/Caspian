@@ -18,7 +18,7 @@ import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
-import { useCreateWorkspace } from "renderer/react-query/workspaces";
+import { useCreateNode } from "renderer/react-query/nodes";
 import { NotFound } from "renderer/routes/not-found";
 
 export const Route = createFileRoute(
@@ -28,14 +28,14 @@ export const Route = createFileRoute(
 	notFoundComponent: NotFound,
 	loader: async ({ params, context }) => {
 		const queryKey = [
-			["projects", "get"],
+			["repositories", "get"],
 			{ input: { id: params.projectId }, type: "query" },
 		];
 
 		try {
 			await context.queryClient.ensureQueryData({
 				queryKey,
-				queryFn: () => trpcClient.projects.get.query({ id: params.projectId }),
+				queryFn: () => trpcClient.repositories.get.query({ id: params.projectId }),
 			});
 		} catch (error) {
 			if (error instanceof Error && error.message.includes("not found")) {
@@ -75,23 +75,23 @@ function generateBranchFromTitle({
 function ProjectPage() {
 	const { projectId } = Route.useParams();
 
-	const { data: project } = electronTrpc.projects.get.useQuery({
+	const { data: project } = electronTrpc.repositories.get.useQuery({
 		id: projectId,
 	});
 	const {
 		data: branchData,
 		isLoading: isBranchesLoading,
 		isError: isBranchesError,
-	} = electronTrpc.projects.getBranches.useQuery(
-		{ projectId },
+	} = electronTrpc.repositories.getBranches.useQuery(
+		{ repositoryId: projectId },
 		{ enabled: !!projectId },
 	);
-	const { data: gitAuthor } = electronTrpc.projects.getGitAuthor.useQuery(
+	const { data: gitAuthor } = electronTrpc.repositories.getGitAuthor.useQuery(
 		{ id: projectId },
 		{ enabled: !!projectId },
 	);
 
-	const createWorkspace = useCreateWorkspace();
+	const createNode = useCreateNode();
 	const authorPrefix = gitAuthor?.prefix;
 
 	const [title, setTitle] = useState("");
@@ -120,33 +120,33 @@ function ProjectPage() {
 	}, []);
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter" && !e.shiftKey && !createWorkspace.isPending) {
+		if (e.key === "Enter" && !e.shiftKey && !createNode.isPending) {
 			e.preventDefault();
-			handleCreateWorkspace();
+			handleCreateNode();
 		}
 	};
 
-	const handleCreateWorkspace = async () => {
-		const workspaceName = title.trim() || undefined;
+	const handleCreateNode = async () => {
+		const nodeName = title.trim() || undefined;
 		const generatedBranchName = generateBranchFromTitle({
 			title,
 			authorPrefix,
 		});
 
 		try {
-			await createWorkspace.mutateAsync({
-				projectId,
-				name: workspaceName,
+			await createNode.mutateAsync({
+				repositoryId: projectId,
+				name: nodeName,
 				branchName: generatedBranchName || undefined,
 				baseBranch: effectiveBaseBranch || undefined,
 			});
 
-			toast.success("Workspace created", {
+			toast.success("Node created", {
 				description: "Setting up in the background...",
 			});
 		} catch (err) {
 			toast.error(
-				err instanceof Error ? err.message : "Failed to create workspace",
+				err instanceof Error ? err.message : "Failed to create node",
 			);
 		}
 	};
@@ -340,10 +340,10 @@ function ProjectPage() {
 								variant="secondary"
 								size="lg"
 								className="w-full mt-2"
-								onClick={handleCreateWorkspace}
-								disabled={createWorkspace.isPending || isBranchesError}
+								onClick={handleCreateNode}
+								disabled={createNode.isPending || isBranchesError}
 							>
-								{createWorkspace.isPending ? "Creating..." : "Create workspace"}
+								{createNode.isPending ? "Creating..." : "Create node"}
 							</Button>
 						</div>
 					</div>

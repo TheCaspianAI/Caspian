@@ -1,7 +1,7 @@
 export interface TerminalProps {
 	paneId: string;
 	tabId: string;
-	workspaceId: string;
+	nodeId: string;
 }
 
 export type TerminalExitReason = "killed" | "exited" | "error";
@@ -60,7 +60,7 @@ export interface ColdRestoreState {
 export interface CreateOrAttachInput {
 	paneId: string;
 	tabId: string;
-	workspaceId: string;
+	nodeId: string;
 	cols?: number;
 	rows?: number;
 	cwd?: string;

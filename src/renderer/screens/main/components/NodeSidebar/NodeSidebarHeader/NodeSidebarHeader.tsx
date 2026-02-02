@@ -19,14 +19,14 @@ export function NodeSidebarHeader({
 	const { toggleCollapsed } = useNodeSidebarStore();
 
 	// Derive active state from route
-	const isNodesListOpen = !!matchRoute({ to: "/nodes" });
+	const isNodesListOpen = !!matchRoute({ to: "/workspaces" });
 
 	const handleNodesClick = () => {
 		if (isNodesListOpen) {
 			// Navigate back to node view
-			navigate({ to: "/node" });
+			navigate({ to: "/workspace" });
 		} else {
-			navigate({ to: "/nodes" });
+			navigate({ to: "/workspaces" });
 		}
 	};
 

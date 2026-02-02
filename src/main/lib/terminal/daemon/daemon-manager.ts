@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { workspaces } from "lib/local-db";
+import { nodes } from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { appState } from "main/lib/app-state";
 import { localDb } from "main/lib/local-db";
@@ -89,17 +89,17 @@ export class DaemonTerminalManager extends EventEmitter {
 				`[DaemonTerminalManager] Found ${response.sessions.length} sessions from previous run`,
 			);
 
-			const validWorkspaceIds = new Set(
+			const validNodeIds = new Set(
 				localDb
-					.select({ id: workspaces.id })
-					.from(workspaces)
+					.select({ id: nodes.id })
+					.from(nodes)
 					.all()
 					.map((w) => w.id),
 			);
 
 			let orphanedCount = 0;
 			for (const session of response.sessions) {
-				if (!validWorkspaceIds.has(session.workspaceId)) {
+				if (!validNodeIds.has(session.workspaceId)) {
 					console.log(
 						`[DaemonTerminalManager] Killing orphaned session ${session.sessionId} (workspace deleted)`,
 					);
@@ -113,7 +113,7 @@ export class DaemonTerminalManager extends EventEmitter {
 			// applies when the daemon does not have a session).
 			const preservedSessions = response.sessions.filter(
 				(session) =>
-					validWorkspaceIds.has(session.workspaceId) && session.isAlive,
+					validNodeIds.has(session.workspaceId) && session.isAlive,
 			);
 			this.daemonAliveSessionIds = new Set(
 				preservedSessions.map((session) => session.sessionId),

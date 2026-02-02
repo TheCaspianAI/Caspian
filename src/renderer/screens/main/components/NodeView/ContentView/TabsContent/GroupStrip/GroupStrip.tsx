@@ -26,7 +26,7 @@ import { useTabsStore } from "renderer/stores/tabs/store";
 import { useTabsWithPresets } from "renderer/stores/tabs/useTabsWithPresets";
 import {
 	isLastPaneInTab,
-	resolveActiveTabIdForWorkspace,
+	resolveActiveTabIdForNode,
 } from "renderer/stores/tabs/utils";
 import { type ActivePaneStatus, pickHigherStatus } from "shared/tabs-types";
 import { PresetMenuItemShortcut } from "./components/PresetMenuItemShortcut";
@@ -56,15 +56,15 @@ export function GroupStrip() {
 	const tabs = useMemo(
 		() =>
 			activeWorkspaceId
-				? allTabs.filter((tab) => tab.workspaceId === activeWorkspaceId)
+				? allTabs.filter((tab) => tab.nodeId === activeWorkspaceId)
 				: [],
 		[activeWorkspaceId, allTabs],
 	);
 
 	const activeTabId = useMemo(() => {
 		if (!activeWorkspaceId) return null;
-		return resolveActiveTabIdForWorkspace({
-			workspaceId: activeWorkspaceId,
+		return resolveActiveTabIdForNode({
+			nodeId: activeWorkspaceId,
 			tabs: allTabs,
 			activeTabIds,
 			tabHistoryStacks,

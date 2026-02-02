@@ -67,17 +67,17 @@ export function mapEventType(
 }
 
 /**
- * Resolves paneId from tabId or workspaceId using synced tabs state.
+ * Resolves paneId from tabId or nodeId using synced tabs state.
  * Falls back to focused pane in active tab.
  *
  * If a paneId is provided but doesn't exist in state (stale reference),
- * we fall through to tabId/workspaceId resolution instead of returning
+ * we fall through to tabId/nodeId resolution instead of returning
  * an invalid paneId that would corrupt the store.
  */
 function resolvePaneId(
 	paneId: string | undefined,
 	tabId: string | undefined,
-	workspaceId: string | undefined,
+	nodeId: string | undefined,
 ): string | undefined {
 	try {
 		const tabsState = appState.data.tabsState;
@@ -97,9 +97,9 @@ function resolvePaneId(
 			}
 		}
 
-		// Try to resolve from workspaceId
-		if (workspaceId) {
-			const activeTabId = tabsState.activeTabIds?.[workspaceId];
+		// Try to resolve from nodeId
+		if (nodeId) {
+			const activeTabId = tabsState.activeTabIds?.[nodeId];
 			if (activeTabId) {
 				const focusedPaneId = tabsState.focusedPaneIds?.[activeTabId];
 				if (focusedPaneId && tabsState.panes?.[focusedPaneId]) {
@@ -119,11 +119,15 @@ app.get("/hook/complete", (req, res) => {
 	const {
 		paneId,
 		tabId,
-		workspaceId,
+		workspaceId, // Legacy alias for nodeId - keep for backwards compatibility
+		nodeId: nodeIdParam,
 		eventType,
 		env: clientEnv,
 		version,
 	} = req.query;
+
+	// Support both nodeId and legacy workspaceId parameter
+	const nodeId = (nodeIdParam ?? workspaceId) as string | undefined;
 
 	// Environment validation: detect dev/prod cross-talk
 	// We still return success to not block the agent, but log a warning
@@ -156,13 +160,13 @@ app.get("/hook/complete", (req, res) => {
 	const resolvedPaneId = resolvePaneId(
 		paneId as string | undefined,
 		tabId as string | undefined,
-		workspaceId as string | undefined,
+		nodeId,
 	);
 
 	const event: AgentLifecycleEvent = {
 		paneId: resolvedPaneId,
 		tabId: tabId as string | undefined,
-		workspaceId: workspaceId as string | undefined,
+		nodeId,
 		eventType: mappedEventType,
 	};
 

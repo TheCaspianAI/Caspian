@@ -34,7 +34,7 @@ import { Input } from "ui/components/ui/input";
 import { HiOutlineFolder, HiOutlinePencilSquare } from "react-icons/hi2";
 import { LuGitBranch } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useWorkspaceRename } from "renderer/screens/main/hooks/useWorkspaceRename";
+import { useNodeRename } from "renderer/screens/main/hooks/useNodeRename";
 import { ClickablePath } from "../../components/ClickablePath";
 
 function NodeSettingsPage() {
@@ -43,7 +43,7 @@ function NodeSettingsPage() {
 		id: nodeId,
 	});
 
-	const rename = useWorkspaceRename(node?.id ?? "", node?.name ?? "");
+	const rename = useNodeRename(node?.id ?? "", node?.name ?? "");
 
 	// Node is guaranteed to exist here because loader handles 404s
 	if (!node) {

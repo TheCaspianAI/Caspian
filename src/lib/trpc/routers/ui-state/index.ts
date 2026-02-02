@@ -75,7 +75,7 @@ const tabSchema = z.object({
 	id: z.string(),
 	name: z.string(),
 	userTitle: z.string().optional(),
-	workspaceId: z.string(),
+	nodeId: z.string(),
 	createdAt: z.number(),
 	layout: mosaicNodeSchema,
 });

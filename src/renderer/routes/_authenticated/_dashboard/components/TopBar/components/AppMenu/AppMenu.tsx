@@ -11,9 +11,8 @@ import {
   DropdownMenuShortcut,
 } from "ui/components/ui/dropdown-menu";
 import { useNavigate } from "@tanstack/react-router";
-import { FaDiscord, FaGithub, FaXTwitter } from "react-icons/fa6";
+import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import {
-  HiOutlineBookOpen,
   HiOutlineChatBubbleLeftRight,
   HiOutlineCog6Tooth,
   HiOutlineEnvelope,
@@ -57,10 +56,6 @@ export function AppMenu() {
         <DropdownMenuSeparator />
 
         {/* Help & Support */}
-        <DropdownMenuItem onClick={() => openExternal(COMPANY.DOCS_URL)}>
-          <HiOutlineBookOpen className="h-4 w-4" />
-          Documentation
-        </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => navigate({ to: "/settings/keyboard" })}
         >
@@ -85,10 +80,6 @@ export function AppMenu() {
             <DropdownMenuItem onClick={() => openExternal(COMPANY.GITHUB_URL)}>
               <FaGithub className="h-4 w-4" />
               GitHub
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => openExternal(COMPANY.DISCORD_URL)}>
-              <FaDiscord className="h-4 w-4" />
-              Discord
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => openExternal(COMPANY.X_URL)}>
               <FaXTwitter className="h-4 w-4" />X

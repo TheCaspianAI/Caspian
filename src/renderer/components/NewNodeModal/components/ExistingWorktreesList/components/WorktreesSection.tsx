@@ -6,7 +6,7 @@ interface Worktree {
 	id: string;
 	branch: string;
 	createdAt: number;
-	hasActiveWorkspace: boolean;
+	hasActiveNode: boolean;
 }
 
 interface WorktreesSectionProps {

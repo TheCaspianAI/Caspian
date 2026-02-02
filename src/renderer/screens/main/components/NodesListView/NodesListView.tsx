@@ -227,7 +227,7 @@ export function NodesListView() {
 				<Button
 					variant="ghost"
 					size="icon"
-					onClick={() => navigate({ to: "/node" })}
+					onClick={() => navigate({ to: "/workspace" })}
 					className="size-7 text-foreground/60 hover:text-foreground shrink-0"
 				>
 					<LuX className="size-4" />

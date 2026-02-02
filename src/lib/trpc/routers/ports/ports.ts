@@ -1,4 +1,4 @@
-import { workspaces } from "lib/local-db";
+import { nodes } from "lib/local-db";
 import { observable } from "@trpc/server/observable";
 import { eq } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
@@ -11,7 +11,7 @@ import { portManager } from "main/lib/terminal/port-manager";
 import type { DetectedPort, StaticPort } from "shared/types";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import { getWorkspacePath } from "../workspaces/utils/worktree";
+import { getNodePath } from "../nodes/utils/worktree";
 
 type PortEvent =
 	| { type: "add"; port: DetectedPort }
@@ -57,46 +57,46 @@ export const createPortsRouter = () => {
 			),
 
 		hasStaticConfig: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.query(({ input }): { hasStatic: boolean } => {
-				const workspace = localDb
+				const node = localDb
 					.select()
-					.from(workspaces)
-					.where(eq(workspaces.id, input.workspaceId))
+					.from(nodes)
+					.where(eq(nodes.id, input.nodeId))
 					.get();
 
-				if (!workspace) {
+				if (!node) {
 					return { hasStatic: false };
 				}
 
-				const workspacePath = getWorkspacePath(workspace);
-				if (!workspacePath) {
+				const nodePath = getNodePath(node);
+				if (!nodePath) {
 					return { hasStatic: false };
 				}
 
-				return { hasStatic: hasStaticPortsConfig(workspacePath) };
+				return { hasStatic: hasStaticPortsConfig(nodePath) };
 			}),
 
 		getStatic: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.query(
 				({ input }): { ports: StaticPort[] | null; error: string | null } => {
-					const workspace = localDb
+					const node = localDb
 						.select()
-						.from(workspaces)
-						.where(eq(workspaces.id, input.workspaceId))
+						.from(nodes)
+						.where(eq(nodes.id, input.nodeId))
 						.get();
 
-					if (!workspace) {
-						return { ports: null, error: "Workspace not found" };
+					if (!node) {
+						return { ports: null, error: "Node not found" };
 					}
 
-					const workspacePath = getWorkspacePath(workspace);
-					if (!workspacePath) {
-						return { ports: null, error: "Workspace path not found" };
+					const nodePath = getNodePath(node);
+					if (!nodePath) {
+						return { ports: null, error: "Node path not found" };
 					}
 
-					const result = loadStaticPorts(workspacePath);
+					const result = loadStaticPorts(nodePath);
 
 					if (!result.exists) {
 						return { ports: null, error: null };
@@ -106,44 +106,44 @@ export const createPortsRouter = () => {
 						return { ports: null, error: result.error };
 					}
 
-					const portsWithWorkspace: StaticPort[] =
+					const portsWithNode: StaticPort[] =
 						result.ports?.map((p) => ({
 							...p,
-							workspaceId: input.workspaceId,
+							nodeId: input.nodeId,
 						})) ?? [];
 
-					return { ports: portsWithWorkspace, error: null };
+					return { ports: portsWithNode, error: null };
 				},
 			),
 
 		getAllStatic: publicProcedure.query(
 			(): {
 				ports: StaticPort[];
-				errors: Array<{ workspaceId: string; error: string }>;
+				errors: Array<{ nodeId: string; error: string }>;
 			} => {
-				const allWorkspaces = localDb.select().from(workspaces).all();
+				const allNodes = localDb.select().from(nodes).all();
 				const allPorts: StaticPort[] = [];
-				const errors: Array<{ workspaceId: string; error: string }> = [];
+				const errors: Array<{ nodeId: string; error: string }> = [];
 
-				for (const workspace of allWorkspaces) {
-					const workspacePath = getWorkspacePath(workspace);
-					if (!workspacePath) continue;
+				for (const node of allNodes) {
+					const nodePath = getNodePath(node);
+					if (!nodePath) continue;
 
-					const result = loadStaticPorts(workspacePath);
+					const result = loadStaticPorts(nodePath);
 
 					if (!result.exists) continue;
 
 					if (result.error) {
-						errors.push({ workspaceId: workspace.id, error: result.error });
+						errors.push({ nodeId: node.id, error: result.error });
 						continue;
 					}
 
 					if (result.ports) {
-						const portsWithWorkspace = result.ports.map((p) => ({
+						const portsWithNode = result.ports.map((p) => ({
 							...p,
-							workspaceId: workspace.id,
+							nodeId: node.id,
 						}));
-						allPorts.push(...portsWithWorkspace);
+						allPorts.push(...portsWithNode);
 					}
 				}
 
@@ -152,28 +152,28 @@ export const createPortsRouter = () => {
 		),
 
 		subscribeStatic: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+			.input(z.object({ nodeId: z.string() }))
 			.subscription(({ input }) => {
 				return observable<{ type: "change" }>((emit) => {
-					const workspace = localDb
+					const node = localDb
 						.select()
-						.from(workspaces)
-						.where(eq(workspaces.id, input.workspaceId))
+						.from(nodes)
+						.where(eq(nodes.id, input.nodeId))
 						.get();
 
-					if (!workspace) {
+					if (!node) {
 						return () => {};
 					}
 
-					const workspacePath = getWorkspacePath(workspace);
-					if (!workspacePath) {
+					const nodePath = getNodePath(node);
+					if (!nodePath) {
 						return () => {};
 					}
 
-					staticPortsWatcher.watch(input.workspaceId, workspacePath);
+					staticPortsWatcher.watch(input.nodeId, nodePath);
 
-					const onChange = (changedWorkspaceId: string) => {
-						if (changedWorkspaceId === input.workspaceId) {
+					const onChange = (changedNodeId: string) => {
+						if (changedNodeId === input.nodeId) {
 							emit.next({ type: "change" });
 						}
 					};
@@ -182,7 +182,7 @@ export const createPortsRouter = () => {
 
 					return () => {
 						staticPortsWatcher.off("change", onChange);
-						staticPortsWatcher.unwatch(input.workspaceId);
+						staticPortsWatcher.unwatch(input.nodeId);
 					};
 				});
 			}),

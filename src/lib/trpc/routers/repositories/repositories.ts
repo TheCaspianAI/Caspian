@@ -15,7 +15,7 @@ import { dialog } from "electron";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
 import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
-import { PROJECT_COLOR_VALUES } from "shared/constants/project-colors";
+import { REPOSITORY_COLOR_VALUES } from "shared/constants/repository-colors";
 import simpleGit from "simple-git";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
@@ -760,7 +760,7 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						color: z
 							.string()
 							.refine(
-								(value) => PROJECT_COLOR_VALUES.includes(value),
+								(value) => REPOSITORY_COLOR_VALUES.includes(value),
 								"Invalid repository color",
 							)
 							.optional(),

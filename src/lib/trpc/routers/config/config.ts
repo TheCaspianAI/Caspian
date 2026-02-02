@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { projects } from "lib/local-db";
+import { repositories } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
@@ -41,66 +41,66 @@ export const createConfigRouter = () => {
 	return router({
 		// Check if we should show the config toast for a project
 		shouldShowConfigToast: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.projectId))
+					.from(repositories)
+					.where(eq(repositories.id, input.repositoryId))
 					.get();
-				if (!project) {
+				if (!repository) {
 					return false;
 				}
 
 				// Don't show if already dismissed or if config exists
-				if (project.configToastDismissed) {
+				if (repository.configToastDismissed) {
 					return false;
 				}
 
-				return !configExists(project.mainRepoPath);
+				return !configExists(repository.mainRepoPath);
 			}),
 
 		// Mark the config toast as dismissed for a project
 		dismissConfigToast: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+			.input(z.object({ repositoryId: z.string() }))
 			.mutation(({ input }) => {
 				localDb
-					.update(projects)
+					.update(repositories)
 					.set({ configToastDismissed: true })
-					.where(eq(projects.id, input.projectId))
+					.where(eq(repositories.id, input.repositoryId))
 					.run();
 				return { success: true };
 			}),
 
 		// Get the config file path (creates it if it doesn't exist)
 		getConfigFilePath: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.projectId))
+					.from(repositories)
+					.where(eq(repositories.id, input.repositoryId))
 					.get();
-				if (!project) {
+				if (!repository) {
 					return null;
 				}
-				return ensureConfigExists(project.mainRepoPath);
+				return ensureConfigExists(repository.mainRepoPath);
 			}),
 
 		// Get the config file content
 		getConfigContent: publicProcedure
-			.input(z.object({ projectId: z.string() }))
+			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.projectId))
+					.from(repositories)
+					.where(eq(repositories.id, input.repositoryId))
 					.get();
-				if (!project) {
+				if (!repository) {
 					return { content: null, exists: false };
 				}
 
-				const configPath = getConfigPath(project.mainRepoPath);
+				const configPath = getConfigPath(repository.mainRepoPath);
 				if (!existsSync(configPath)) {
 					return { content: null, exists: false };
 				}
@@ -117,22 +117,22 @@ export const createConfigRouter = () => {
 		updateConfig: publicProcedure
 			.input(
 				z.object({
-					projectId: z.string(),
+					repositoryId: z.string(),
 					setup: z.array(z.string()),
 					teardown: z.array(z.string()),
 				}),
 			)
 			.mutation(({ input }) => {
-				const project = localDb
+				const repository = localDb
 					.select()
-					.from(projects)
-					.where(eq(projects.id, input.projectId))
+					.from(repositories)
+					.where(eq(repositories.id, input.repositoryId))
 					.get();
-				if (!project) {
-					throw new Error("Project not found");
+				if (!repository) {
+					throw new Error("Repository not found");
 				}
 
-				const configPath = ensureConfigExists(project.mainRepoPath);
+				const configPath = ensureConfigExists(repository.mainRepoPath);
 
 				// Read and parse existing config, preserving other fields
 				let existingConfig: Record<string, unknown> = {};

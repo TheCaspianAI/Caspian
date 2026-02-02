@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
 
 export type SettingsSection =
-	| "project"
-	| "workspace"
+	| "repository"
+	| "node"
 	| "appearance"
 	| "keyboard"
 	| "terminal"
@@ -12,8 +12,8 @@ export interface OpenSettingsEvent {
 	section?: SettingsSection;
 }
 
-export interface OpenWorkspaceEvent {
-	workspaceId: string;
+export interface OpenNodeEvent {
+	nodeId: string;
 }
 
 export const menuEmitter = new EventEmitter();

@@ -8,41 +8,41 @@ import type {
 import { buildBulkResult } from "./types";
 
 const schema = z.object({
-	workspaceIds: z.array(z.string().uuid()).min(1).max(5),
+	nodeIds: z.array(z.string().uuid()).min(1).max(5),
 });
 
-interface DeletedWorkspace {
-	workspaceId: string;
+interface DeletedNode {
+	nodeId: string;
 }
 
 async function execute(
 	params: z.infer<typeof schema>,
 	ctx: ToolContext,
 ): Promise<CommandResult> {
-	const deleted: DeletedWorkspace[] = [];
+	const deleted: DeletedNode[] = [];
 	const errors: BulkItemError[] = [];
 
-	for (const [i, workspaceId] of params.workspaceIds.entries()) {
+	for (const [i, nodeId] of params.nodeIds.entries()) {
 		try {
-			const result = await ctx.deleteWorkspace.mutateAsync({
-				id: workspaceId,
+			const result = await ctx.deleteNode.mutateAsync({
+				id: nodeId,
 			});
 
 			if (!result.success) {
 				errors.push({
 					index: i,
-					workspaceId,
+					nodeId,
 					error: result.error ?? "Delete failed",
 				});
 			} else {
-				deleted.push({ workspaceId });
+				deleted.push({ nodeId });
 			}
 		} catch (error) {
 			errors.push({
 				index: i,
-				workspaceId,
+				nodeId,
 				error:
-					error instanceof Error ? error.message : "Failed to delete workspace",
+					error instanceof Error ? error.message : "Failed to delete node",
 			});
 		}
 	}
@@ -51,13 +51,13 @@ async function execute(
 		items: deleted,
 		errors,
 		itemKey: "deleted",
-		allFailedMessage: "All workspace deletions failed",
-		total: params.workspaceIds.length,
+		allFailedMessage: "All node deletions failed",
+		total: params.nodeIds.length,
 	});
 }
 
-export const deleteWorkspace: ToolDefinition<typeof schema> = {
-	name: "delete_workspace",
+export const deleteNode: ToolDefinition<typeof schema> = {
+	name: "delete_node",
 	schema,
 	execute,
 };

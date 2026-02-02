@@ -19,7 +19,7 @@ export interface UseTerminalRefsOptions {
 	paneInitialCommands?: string[];
 	paneInitialCwd?: string;
 	clearPaneInitialData: (paneId: string) => void;
-	workspaceCwd: string | null | undefined;
+	nodeCwd: string | null | undefined;
 	handleFileLinkClick: (path: string, line?: number, column?: number) => void;
 	setTabAutoTitle: (tabId: string, title: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
@@ -32,7 +32,7 @@ export interface UseTerminalRefsReturn {
 	paneInitialCommandsRef: MutableRefObject<string[] | undefined>;
 	paneInitialCwdRef: MutableRefObject<string | undefined>;
 	clearPaneInitialDataRef: MutableRefObject<(paneId: string) => void>;
-	workspaceCwdRef: MutableRefObject<string | null>;
+	nodeCwdRef: MutableRefObject<string | null>;
 	handleFileLinkClickRef: MutableRefObject<
 		(path: string, line?: number, column?: number) => void
 	>;
@@ -52,7 +52,7 @@ export function useTerminalRefs({
 	paneInitialCommands,
 	paneInitialCwd,
 	clearPaneInitialData,
-	workspaceCwd,
+	nodeCwd,
 	handleFileLinkClick,
 	setTabAutoTitle,
 	setFocusedPane,
@@ -69,8 +69,8 @@ export function useTerminalRefs({
 	paneInitialCwdRef.current = paneInitialCwd;
 	clearPaneInitialDataRef.current = clearPaneInitialData;
 
-	const workspaceCwdRef = useRef<string | null>(workspaceCwd ?? null);
-	workspaceCwdRef.current = workspaceCwd ?? null;
+	const nodeCwdRef = useRef<string | null>(nodeCwd ?? null);
+	nodeCwdRef.current = nodeCwd ?? null;
 
 	const handleFileLinkClickRef = useRef(handleFileLinkClick);
 	handleFileLinkClickRef.current = handleFileLinkClick;
@@ -109,7 +109,7 @@ export function useTerminalRefs({
 		paneInitialCommandsRef,
 		paneInitialCwdRef,
 		clearPaneInitialDataRef,
-		workspaceCwdRef,
+		nodeCwdRef,
 		handleFileLinkClickRef,
 		debouncedSetTabAutoTitleRef,
 		handleTerminalFocusRef,

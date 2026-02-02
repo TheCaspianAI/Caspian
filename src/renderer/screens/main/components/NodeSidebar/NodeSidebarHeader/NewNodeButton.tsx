@@ -25,11 +25,11 @@ export function NewNodeButton({
 	// Derive current node from route to pre-select repository in modal
 	const matchRoute = useMatchRoute();
 	const currentNodeMatch = matchRoute({
-		to: "/node/$nodeId",
+		to: "/workspace/$workspaceId",
 		fuzzy: true,
 	});
 	const currentNodeId = currentNodeMatch
-		? currentNodeMatch.nodeId
+		? currentNodeMatch.workspaceId
 		: null;
 
 	const { data: currentNode } = electronTrpc.nodes.get.useQuery(

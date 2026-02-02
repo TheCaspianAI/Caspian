@@ -2,13 +2,12 @@ import { useParams } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { OpenInMenuButton } from "./components/OpenInMenuButton";
 import { AppMenu } from "./components/AppMenu";
-import { SidebarToggle } from "./components/SidebarToggle";
 import { WindowControls } from "./components/WindowControls";
 
 export function TopBar() {
 	const { data: platform } = electronTrpc.window.getPlatform.useQuery();
 	const { workspaceId } = useParams({ strict: false });
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery(
+	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
 	);
@@ -16,16 +15,10 @@ export function TopBar() {
 	const isMac = platform === undefined || platform === "darwin";
 
 	return (
-		<div className="drag w-full px-3 pt-2 pb-1">
-			<div className="glass h-11 w-full flex items-center justify-between rounded-xl">
-				<div
-					className="no-drag flex items-center gap-2 h-full"
-					style={{
-						paddingLeft: isMac ? "68px" : "12px",
-					}}
-				>
-					<SidebarToggle />
-				</div>
+		<div className="drag w-full px-3 pt-1.5 pb-1">
+			<div className="glass h-9 w-full flex items-center justify-between rounded-lg">
+				{/* Spacer for Mac traffic lights */}
+				<div style={{ width: isMac ? "62px" : "10px" }} />
 
 				<div className="flex-1" />
 

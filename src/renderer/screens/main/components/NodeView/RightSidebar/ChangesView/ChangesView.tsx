@@ -33,7 +33,7 @@ interface ChangesViewProps {
 
 export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const { workspaceId } = useParams({ strict: false });
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery(
+	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
 	);
@@ -61,8 +61,8 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	);
 
 	const { data: githubStatus, refetch: refetchGithubStatus } =
-		electronTrpc.workspaces.getGitHubStatus.useQuery(
-			{ workspaceId: workspaceId ?? "" },
+		electronTrpc.nodes.getGitHubStatus.useQuery(
+			{ nodeId: workspaceId ?? "" },
 			{
 				enabled: !!workspaceId,
 				refetchInterval: 10000,

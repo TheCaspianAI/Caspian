@@ -2,7 +2,7 @@ import { cn } from "ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { LuFolderGit, LuFolderOpen, LuX } from "react-icons/lu";
-import { useOpenFromPath, useOpenNew } from "renderer/react-query/projects";
+import { useOpenFromPath, useOpenNew } from "renderer/react-query/repositories";
 import { CloneRepoDialog } from "./CloneRepoDialog";
 import { InitGitDialog } from "./InitGitDialog";
 
@@ -61,10 +61,10 @@ export function StartView() {
 					return;
 				}
 
-				if ("project" in result && result.project) {
+				if ("repository" in result && result.repository) {
 					navigate({
 						to: "/project/$projectId",
-						params: { projectId: result.project.id },
+						params: { projectId: result.repository.id },
 					});
 				}
 			},
@@ -149,15 +149,15 @@ export function StartView() {
 							return;
 						}
 
-						if ("project" in result && result.project) {
+						if ("repository" in result && result.repository) {
 							navigate({
 								to: "/project/$projectId",
-								params: { projectId: result.project.id },
+								params: { projectId: result.repository.id },
 							});
 						}
 					},
 					onError: (err) => {
-						setError(err.message || "Failed to open project");
+						setError(err.message || "Failed to open repository");
 					},
 				},
 			);

@@ -1,7 +1,7 @@
 import { useParams } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTabsStore } from "renderer/stores/tabs/store";
-import { resolveActiveTabIdForWorkspace } from "renderer/stores/tabs/utils";
+import { resolveActiveTabIdForNode } from "renderer/stores/tabs/utils";
 import { EmptyTabView } from "./EmptyTabView";
 import { TabView } from "./TabView";
 
@@ -14,8 +14,8 @@ export function TabsContent() {
 	const activeTabId = useMemo(() => {
 		if (!activeWorkspaceId) return null;
 
-		const resolvedActiveTabId = resolveActiveTabIdForWorkspace({
-			workspaceId: activeWorkspaceId,
+		const resolvedActiveTabId = resolveActiveTabIdForNode({
+			nodeId: activeWorkspaceId,
 			tabs: allTabs,
 			activeTabIds,
 			tabHistoryStacks,
@@ -23,7 +23,7 @@ export function TabsContent() {
 		if (!resolvedActiveTabId) return null;
 
 		const tab = allTabs.find((t) => t.id === resolvedActiveTabId) || null;
-		if (!tab || tab.workspaceId !== activeWorkspaceId) return null;
+		if (!tab || tab.nodeId !== activeWorkspaceId) return null;
 		return resolvedActiveTabId;
 	}, [activeWorkspaceId, activeTabIds, allTabs, tabHistoryStacks]);
 

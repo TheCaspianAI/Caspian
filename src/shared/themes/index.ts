@@ -3,16 +3,13 @@
 // Built-in themes
 export {
 	builtInThemes,
-	catppuccinTheme,
 	DEFAULT_THEME_ID,
-	draculaTheme,
+	everforestTheme,
 	getBuiltInTheme,
+	githubDarkTheme,
 	githubLightTheme,
-	gruvboxTheme,
 	nordTheme,
 	rosePineTheme,
-	solarizedTheme,
-	tokyoNightTheme,
 } from "./built-in";
 export type { TerminalColors, Theme, ThemeMetadata, UIColors } from "./types";
 export {

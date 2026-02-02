@@ -1,9 +1,9 @@
-import { PROJECT_COLOR_DEFAULT } from "shared/constants/project-colors";
+import { REPOSITORY_COLOR_DEFAULT } from "shared/constants/repository-colors";
 
 /**
  * Returns the default color for new repositories.
  * Repositories start with no custom color (gray border).
  */
 export function getDefaultRepositoryColor(): string {
-	return PROJECT_COLOR_DEFAULT;
+	return REPOSITORY_COLOR_DEFAULT;
 }

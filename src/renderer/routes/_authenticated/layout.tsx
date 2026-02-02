@@ -8,10 +8,10 @@ import { NewNodeModal } from "renderer/components/NewNodeModal";
 import { useUpdateListener } from "renderer/components/UpdateToast";
 import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { WorkspaceInitEffects } from "renderer/screens/main/components/WorkspaceInitEffects";
+import { NodeInitEffects } from "renderer/screens/main/components/NodeInitEffects";
 import { useHotkeysSync } from "renderer/stores/hotkeys";
 import { useAgentHookListener } from "renderer/stores/tabs/useAgentHookListener";
-import { useWorkspaceInitStore } from "renderer/stores/workspace-init";
+import { useNodeInitStore } from "renderer/stores/node-init";
 import { AgentHooks } from "./components/AgentHooks";
 import { CollectionsProvider } from "./providers/CollectionsProvider";
 
@@ -28,19 +28,19 @@ function AuthenticatedLayout() {
 	useUpdateListener();
 	useHotkeysSync();
 
-	// Workspace initialization progress subscription
-	const updateInitProgress = useWorkspaceInitStore((s) => s.updateProgress);
-	electronTrpc.workspaces.onInitProgress.useSubscription(undefined, {
+	// Node initialization progress subscription
+	const updateInitProgress = useNodeInitStore((s) => s.updateProgress);
+	electronTrpc.nodes.onInitProgress.useSubscription(undefined, {
 		onData: (progress) => {
 			updateInitProgress(progress);
 			if (progress.step === "ready" || progress.step === "failed") {
-				// Invalidate both the grouped list AND the specific workspace
-				utils.workspaces.getAllGrouped.invalidate();
-				utils.workspaces.get.invalidate({ id: progress.workspaceId });
+				// Invalidate both the grouped list AND the specific node
+				utils.nodes.getAllGrouped.invalidate();
+				utils.nodes.get.invalidate({ id: progress.nodeId });
 			}
 		},
 		onError: (error) => {
-			console.error("[workspace-init-subscription] Subscription error:", error);
+			console.error("[node-init-subscription] Subscription error:", error);
 		},
 	});
 
@@ -50,8 +50,8 @@ function AuthenticatedLayout() {
 			if (event.type === "open-settings") {
 				const section = event.data.section || "appearance";
 				navigate({ to: `/settings/${section}` as "/settings/appearance" });
-			} else if (event.type === "open-workspace") {
-				navigate({ to: `/workspace/${event.data.workspaceId}` });
+			} else if (event.type === "open-node") {
+				navigate({ to: `/workspace/${event.data.nodeId}` });
 			}
 		},
 	});
@@ -61,7 +61,7 @@ function AuthenticatedLayout() {
 			<CollectionsProvider>
 				<AgentHooks />
 				<Outlet />
-				<WorkspaceInitEffects />
+				<NodeInitEffects />
 				<NewNodeModal />
 			</CollectionsProvider>
 		</DndProvider>

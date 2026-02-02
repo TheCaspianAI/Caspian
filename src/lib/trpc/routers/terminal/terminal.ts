@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { projects, workspaces, worktrees } from "lib/local-db";
+import { repositories, nodes, worktrees } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { eq } from "drizzle-orm";
@@ -14,8 +14,8 @@ import { getTerminalHostClient } from "main/lib/terminal-host/client";
 import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import { assertWorkspaceUsable } from "../workspaces/utils/usability";
-import { getWorkspacePath } from "../workspaces/utils/worktree";
+import { assertNodeUsable } from "../nodes/utils/usability";
+import { getNodePath } from "../nodes/utils/worktree";
 import { resolveCwd } from "./utils";
 
 const DEBUG_TERMINAL = process.env.CASPIAN_TERMINAL_DEBUG === "1";
@@ -61,7 +61,7 @@ export const createTerminalRouter = () => {
 				z.object({
 					paneId: SAFE_ID,
 					tabId: z.string(),
-					workspaceId: SAFE_ID,
+					nodeId: SAFE_ID,
 					cols: z.number().optional(),
 					rows: z.number().optional(),
 					cwd: z.string().optional(),
@@ -76,7 +76,7 @@ export const createTerminalRouter = () => {
 				const {
 					paneId,
 					tabId,
-					workspaceId,
+					nodeId,
 					cols,
 					rows,
 					cwd: cwdOverride,
@@ -85,24 +85,24 @@ export const createTerminalRouter = () => {
 					allowKilled,
 				} = input;
 
-				const workspace = localDb
+				const node = localDb
 					.select()
-					.from(workspaces)
-					.where(eq(workspaces.id, workspaceId))
+					.from(nodes)
+					.where(eq(nodes.id, nodeId))
 					.get();
-				const workspacePath = workspace
-					? (getWorkspacePath(workspace) ?? undefined)
+				const nodePath = node
+					? (getNodePath(node) ?? undefined)
 					: undefined;
-				if (workspace?.type === "worktree") {
-					assertWorkspaceUsable(workspaceId, workspacePath);
+				if (node?.type === "worktree") {
+					assertNodeUsable(nodeId, nodePath);
 				}
-				const cwd = resolveCwd(cwdOverride, workspacePath);
+				const cwd = resolveCwd(cwdOverride, nodePath);
 
 				if (DEBUG_TERMINAL) {
 					console.log("[Terminal Router] createOrAttach called:", {
 						paneId,
-						workspaceId,
-						workspacePath,
+						nodeId,
+						nodePath,
 						cwdOverride,
 						resolvedCwd: cwd,
 						cols,
@@ -110,11 +110,11 @@ export const createTerminalRouter = () => {
 					});
 				}
 
-				const project = workspace
+				const repository = node
 					? localDb
 							.select()
-							.from(projects)
-							.where(eq(projects.id, workspace.projectId))
+							.from(repositories)
+							.where(eq(repositories.id, node.repositoryId))
 							.get()
 					: undefined;
 
@@ -122,10 +122,10 @@ export const createTerminalRouter = () => {
 					const result = await terminal.createOrAttach({
 						paneId,
 						tabId,
-						workspaceId,
-						workspaceName: workspace?.name,
-						workspacePath,
-						rootPath: project?.mainRepoPath,
+						workspaceId: nodeId,
+						workspaceName: node?.name,
+						workspacePath: nodePath,
+						rootPath: repository?.mainRepoPath,
 						cwd,
 						cols,
 						rows,
@@ -166,7 +166,7 @@ export const createTerminalRouter = () => {
 								"[Terminal Router] createOrAttach blocked (killed):",
 								{
 									paneId,
-									workspaceId,
+									nodeId,
 								},
 							);
 						}
@@ -344,12 +344,12 @@ export const createTerminalRouter = () => {
 			return { killedCount, remainingCount };
 		}),
 
-		killDaemonSessionsForWorkspace: publicProcedure
-			.input(z.object({ workspaceId: z.string() }))
+		killDaemonSessionsForNode: publicProcedure
+			.input(z.object({ nodeId: z.string() }))
 			.mutation(async ({ input }) => {
 				const { sessions } = await terminal.management.listSessions();
 				const toKill = sessions.filter(
-					(session) => session.workspaceId === input.workspaceId,
+					(session) => session.workspaceId === input.nodeId,
 				);
 
 				if (toKill.length > 0) {
@@ -361,10 +361,10 @@ export const createTerminalRouter = () => {
 						if (result.status === "rejected") {
 							const paneId = paneIds[index];
 							logger.error(
-								`[killDaemonSessionsForWorkspace] terminal.kill failed for paneId=${paneId}`,
+								`[killDaemonSessionsForNode] terminal.kill failed for paneId=${paneId}`,
 								{
 									paneId,
-									workspaceId: input.workspaceId,
+									nodeId: input.nodeId,
 									reason: result.reason,
 								},
 							);
@@ -429,26 +429,26 @@ export const createTerminalRouter = () => {
 				return terminal.getSession(paneId);
 			}),
 
-		getWorkspaceCwd: publicProcedure
+		getNodeCwd: publicProcedure
 			.input(z.string())
-			.query(({ input: workspaceId }) => {
-				const workspace = localDb
+			.query(({ input: nodeId }) => {
+				const node = localDb
 					.select()
-					.from(workspaces)
-					.where(eq(workspaces.id, workspaceId))
+					.from(nodes)
+					.where(eq(nodes.id, nodeId))
 					.get();
-				if (!workspace) {
+				if (!node) {
 					return null;
 				}
 
-				if (!workspace.worktreeId) {
+				if (!node.worktreeId) {
 					return null;
 				}
 
 				const worktree = localDb
 					.select()
 					.from(worktrees)
-					.where(eq(worktrees.id, workspace.worktreeId))
+					.where(eq(worktrees.id, node.worktreeId))
 					.get();
 				return worktree?.path ?? null;
 			}),

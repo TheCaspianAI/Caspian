@@ -7,11 +7,15 @@ import { devtools } from "zustand/middleware";
  */
 export type SettingsSection =
 	| "appearance"
-	| "preferences"  // combines ringtones + keyboard + behavior
-	| "presets"      // was terminal (partial)
-	| "sessions"     // was terminal (partial)
-	| "repository"   // was project
-	| "node";        // was workspace
+	| "preferences"   // main preferences page
+	| "ringtones"     // notification sounds
+	| "keyboard"      // keyboard shortcuts
+	| "behavior"      // general behavior settings
+	| "presets"       // terminal presets
+	| "terminal"      // terminal settings page
+	| "sessions"      // terminal sessions
+	| "repository"    // was project
+	| "node";         // was workspace
 
 interface SettingsState {
 	activeSection: SettingsSection;

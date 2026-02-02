@@ -1,7 +1,7 @@
 import { Button } from "ui/components/ui/button";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useCreateWorkspace } from "renderer/react-query/workspaces";
+import { useCreateNode } from "renderer/react-query/nodes";
 
 function getBasename(path: string): string {
 	// Handle both Unix and Windows paths
@@ -31,8 +31,8 @@ export function InitGitDialog({
 	onError,
 }: InitGitDialogProps) {
 	const utils = electronTrpc.useUtils();
-	const initGitAndOpen = electronTrpc.projects.initGitAndOpen.useMutation();
-	const createWorkspace = useCreateWorkspace();
+	const initGitAndOpen = electronTrpc.repositories.initGitAndOpen.useMutation();
+	const createNode = useCreateNode();
 
 	// Track the entire async sequence to keep modal locked
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -118,18 +118,18 @@ export function InitGitDialog({
 				return;
 			}
 
-			if (!result.project) {
-				onError("Unexpected error: project was not created");
+			if (!result.repository) {
+				onError("Unexpected error: repository was not created");
 				return;
 			}
 
 			// Invalidate cache in background - don't block the primary workflow
-			utils.projects.getRecents.invalidate().catch(console.error);
+			utils.repositories.getRecents.invalidate().catch(console.error);
 
 			try {
-				await createWorkspace.mutateAsync({ projectId: result.project.id });
+				await createNode.mutateAsync({ repositoryId: result.repository.id });
 			} catch (err) {
-				onError(`Failed to create workspace: ${getErrorMessage(err)}`);
+				onError(`Failed to create node: ${getErrorMessage(err)}`);
 				return;
 			}
 

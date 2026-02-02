@@ -3,11 +3,11 @@ import { useCallback, useMemo } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { usePresets } from "renderer/react-query/presets";
-import { navigateToWorkspace } from "renderer/routes/_authenticated/_dashboard/utils/workspace-navigation";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { usePresetHotkeys } from "renderer/routes/_authenticated/_dashboard/workspace/$workspaceId/hooks/usePresetHotkeys";
 import { NotFound } from "renderer/routes/not-found";
-import { WorkspaceInitializingView } from "renderer/screens/main/components/WorkspaceView/WorkspaceInitializingView";
-import { WorkspaceLayout } from "renderer/screens/main/components/WorkspaceView/WorkspaceLayout";
+import { NodeInitializingView } from "renderer/screens/main/components/NodeView/NodeInitializingView/NodeInitializingView";
+import { NodeLayout } from "renderer/screens/main/components/NodeView/NodeLayout/NodeLayout";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { SidebarMode, useSidebarStore } from "renderer/stores/sidebar-state";
 import { getPaneDimensions } from "renderer/stores/tabs/pane-refs";
@@ -19,12 +19,12 @@ import {
 	getFirstPaneId,
 	getNextPaneId,
 	getPreviousPaneId,
-	resolveActiveTabIdForWorkspace,
+	resolveActiveTabIdForNode,
 } from "renderer/stores/tabs/utils";
 import {
-	useHasWorkspaceFailed,
-	useIsWorkspaceInitializing,
-} from "renderer/stores/workspace-init";
+	useHasNodeFailed,
+	useIsNodeInitializing,
+} from "renderer/stores/node-init";
 
 export const Route = createFileRoute(
 	"/_authenticated/_dashboard/workspace/$workspaceId/",
@@ -33,7 +33,7 @@ export const Route = createFileRoute(
 	notFoundComponent: NotFound,
 	loader: async ({ params, context }) => {
 		const queryKey = [
-			["workspaces", "get"],
+			["nodes", "get"],
 			{ input: { id: params.workspaceId }, type: "query" },
 		];
 
@@ -41,10 +41,10 @@ export const Route = createFileRoute(
 			await context.queryClient.ensureQueryData({
 				queryKey,
 				queryFn: () =>
-					trpcClient.workspaces.get.query({ id: params.workspaceId }),
+					trpcClient.nodes.get.query({ id: params.workspaceId }),
 			});
 		} catch (error) {
-			// If workspace not found, throw notFound() to render 404 page
+			// If node not found, throw notFound() to render 404 page
 			if (error instanceof Error && error.message.includes("not found")) {
 				throw notFound();
 			}
@@ -56,14 +56,14 @@ export const Route = createFileRoute(
 
 function WorkspacePage() {
 	const { workspaceId } = Route.useParams();
-	const { data: workspace } = electronTrpc.workspaces.get.useQuery({
+	const { data: workspace } = electronTrpc.nodes.get.useQuery({
 		id: workspaceId,
 	});
 	const navigate = useNavigate();
 
-	// Check if workspace is initializing or failed
-	const isInitializing = useIsWorkspaceInitializing(workspaceId);
-	const hasFailed = useHasWorkspaceFailed(workspaceId);
+	// Check if node is initializing or failed
+	const isInitializing = useIsNodeInitializing(workspaceId);
+	const hasFailed = useHasNodeFailed(workspaceId);
 
 	// Check for incomplete init after app restart
 	const gitStatus = workspace?.worktree?.gitStatus;
@@ -72,9 +72,9 @@ function WorkspacePage() {
 		(gitStatus === null || gitStatus === undefined);
 
 	// Show full-screen initialization view for:
-	// - Actively initializing workspaces (shows progress)
-	// - Failed workspaces (shows error with retry)
-	// - Interrupted workspaces that aren't currently initializing (shows resume option)
+	// - Actively initializing nodes (shows progress)
+	// - Failed nodes (shows error with retry)
+	// - Interrupted nodes that aren't currently initializing (shows resume option)
 	const showInitView = isInitializing || hasFailed || hasIncompleteInit;
 
 	const allTabs = useTabsStore((s) => s.tabs);
@@ -98,13 +98,13 @@ function WorkspacePage() {
 	const setSidebarMode = useSidebarStore((s) => s.setMode);
 
 	const tabs = useMemo(
-		() => allTabs.filter((tab) => tab.workspaceId === workspaceId),
+		() => allTabs.filter((tab) => tab.nodeId === workspaceId),
 		[workspaceId, allTabs],
 	);
 
 	const activeTabId = useMemo(() => {
-		return resolveActiveTabIdForWorkspace({
-			workspaceId,
+		return resolveActiveTabIdForNode({
+			nodeId: workspaceId,
 			tabs,
 			activeTabIds,
 			tabHistoryStacks,
@@ -333,52 +333,52 @@ function WorkspacePage() {
 		],
 	);
 
-	// Navigate to previous workspace (⌘↑)
-	const getPreviousWorkspace =
-		electronTrpc.workspaces.getPreviousWorkspace.useQuery(
+	// Navigate to previous node (⌘↑)
+	const getPreviousNode =
+		electronTrpc.nodes.getPreviousNode.useQuery(
 			{ id: workspaceId },
 			{ enabled: !!workspaceId },
 		);
 	useAppHotkey(
-		"PREV_WORKSPACE",
+		"PREV_NODE",
 		() => {
-			const prevWorkspaceId = getPreviousWorkspace.data;
-			if (prevWorkspaceId) {
-				navigateToWorkspace(prevWorkspaceId, navigate);
+			const prevNodeId = getPreviousNode.data;
+			if (prevNodeId) {
+				navigateToNode(prevNodeId, navigate);
 			}
 		},
 		undefined,
-		[getPreviousWorkspace.data, navigate],
+		[getPreviousNode.data, navigate],
 	);
 
-	// Navigate to next workspace (⌘↓)
-	const getNextWorkspace = electronTrpc.workspaces.getNextWorkspace.useQuery(
+	// Navigate to next node (⌘↓)
+	const getNextNode = electronTrpc.nodes.getNextNode.useQuery(
 		{ id: workspaceId },
 		{ enabled: !!workspaceId },
 	);
 	useAppHotkey(
-		"NEXT_WORKSPACE",
+		"NEXT_NODE",
 		() => {
-			const nextWorkspaceId = getNextWorkspace.data;
-			if (nextWorkspaceId) {
-				navigateToWorkspace(nextWorkspaceId, navigate);
+			const nextNodeId = getNextNode.data;
+			if (nextNodeId) {
+				navigateToNode(nextNodeId, navigate);
 			}
 		},
 		undefined,
-		[getNextWorkspace.data, navigate],
+		[getNextNode.data, navigate],
 	);
 
 	return (
 		<div className="flex-1 h-full flex flex-col overflow-hidden">
 			<div className="flex-1 min-h-0 flex overflow-hidden">
 				{showInitView ? (
-					<WorkspaceInitializingView
-						workspaceId={workspaceId}
-						workspaceName={workspace?.name ?? "Workspace"}
+					<NodeInitializingView
+						nodeId={workspaceId}
+						nodeName={workspace?.name ?? "Node"}
 						isInterrupted={hasIncompleteInit && !isInitializing}
 					/>
 				) : (
-					<WorkspaceLayout />
+					<NodeLayout />
 				)}
 			</div>
 		</div>

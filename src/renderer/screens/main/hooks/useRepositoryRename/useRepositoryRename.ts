@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { useUpdateProject } from "renderer/react-query/projects/useUpdateProject";
+import { useUpdateRepository } from "renderer/react-query/repositories/useUpdateRepository";
 
-export function useProjectRename(projectId: string, projectName: string) {
+export function useRepositoryRename(repositoryId: string, repositoryName: string) {
 	const [isRenaming, setIsRenaming] = useState(false);
-	const [renameValue, setRenameValue] = useState(projectName);
-	const updateProject = useUpdateProject();
+	const [renameValue, setRenameValue] = useState(repositoryName);
+	const updateRepository = useUpdateRepository();
 
 	useEffect(() => {
-		setRenameValue(projectName);
-	}, [projectName]);
+		setRenameValue(repositoryName);
+	}, [repositoryName]);
 
 	const startRename = () => {
 		setIsRenaming(true);
@@ -16,19 +16,19 @@ export function useProjectRename(projectId: string, projectName: string) {
 
 	const submitRename = () => {
 		const trimmedValue = renameValue.trim();
-		if (trimmedValue && trimmedValue !== projectName) {
-			updateProject.mutate({
-				id: projectId,
+		if (trimmedValue && trimmedValue !== repositoryName) {
+			updateRepository.mutate({
+				id: repositoryId,
 				patch: { name: trimmedValue },
 			});
 		} else {
-			setRenameValue(projectName);
+			setRenameValue(repositoryName);
 		}
 		setIsRenaming(false);
 	};
 
 	const cancelRename = () => {
-		setRenameValue(projectName);
+		setRenameValue(repositoryName);
 		setIsRenaming(false);
 	};
 

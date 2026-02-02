@@ -4,22 +4,22 @@ import type {
 } from "@tanstack/react-router";
 
 /**
- * Navigate to a workspace and update localStorage to remember it as the last viewed workspace.
- * This ensures the workspace will be restored when the app is reopened.
+ * Navigate to a node and update localStorage to remember it as the last viewed node.
+ * This ensures the node will be restored when the app is reopened.
  *
- * @param workspaceId - The ID of the workspace to navigate to
+ * @param nodeId - The ID of the node to navigate to
  * @param navigate - The navigate function from useNavigate()
  * @param options - Optional navigation options (replace, resetScroll, etc.)
  */
-export function navigateToWorkspace(
-	workspaceId: string,
+export function navigateToNode(
+	nodeId: string,
 	navigate: UseNavigateResult<string>,
 	options?: Omit<NavigateOptions, "to" | "params">,
 ): Promise<void> {
-	localStorage.setItem("lastViewedWorkspaceId", workspaceId);
+	localStorage.setItem("lastViewedNodeId", nodeId);
 	return navigate({
 		to: "/workspace/$workspaceId",
-		params: { workspaceId },
+		params: { workspaceId: nodeId },
 		...options,
 	});
 }

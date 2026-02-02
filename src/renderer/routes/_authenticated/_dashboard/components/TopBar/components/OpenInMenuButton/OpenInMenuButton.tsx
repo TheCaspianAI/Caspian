@@ -5,9 +5,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
-	DropdownMenuSub,
-	DropdownMenuSubContent,
-	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { toast } from "ui/components/ui/sonner";
@@ -16,14 +13,7 @@ import { cn } from "ui/lib/utils";
 import { memo, useCallback, useMemo } from "react";
 import { HiChevronDown } from "react-icons/hi2";
 import { LuCopy } from "react-icons/lu";
-import jetbrainsIcon from "renderer/assets/app-icons/jetbrains.svg";
-import vscodeIcon from "renderer/assets/app-icons/vscode.svg";
-import {
-	APP_OPTIONS,
-	getAppOption,
-	JETBRAINS_OPTIONS,
-	VSCODE_OPTIONS,
-} from "renderer/components/OpenInButton";
+import { APP_OPTIONS, getAppOption } from "renderer/components/OpenInButton";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useHotkeyText } from "renderer/stores/hotkeys";
 
@@ -161,61 +151,6 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 							)}
 						</DropdownMenuItem>
 					))}
-					<DropdownMenuSub>
-						<DropdownMenuSubTrigger>
-							<img
-								src={vscodeIcon}
-								alt=""
-								className="size-4 object-contain mr-2"
-							/>
-							VS Code
-						</DropdownMenuSubTrigger>
-						<DropdownMenuSubContent className="w-40">
-							{VSCODE_OPTIONS.map((app) => (
-								<DropdownMenuItem
-									key={app.id}
-									onClick={() => handleOpenInOtherApp(app.id)}
-								>
-									<img
-										src={app.icon}
-										alt=""
-										className="size-4 object-contain mr-2"
-									/>
-									{app.label}
-									{app.id === lastUsedApp && showOpenInShortcut && (
-										<DropdownMenuShortcut>
-											{openInShortcut}
-										</DropdownMenuShortcut>
-									)}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuSubContent>
-					</DropdownMenuSub>
-					<DropdownMenuSub>
-						<DropdownMenuSubTrigger>
-							<img
-								src={jetbrainsIcon}
-								alt=""
-								className="size-4 object-contain mr-2"
-							/>
-							JetBrains
-						</DropdownMenuSubTrigger>
-						<DropdownMenuSubContent className="w-40">
-							{JETBRAINS_OPTIONS.map((app) => (
-								<DropdownMenuItem
-									key={app.id}
-									onClick={() => handleOpenInOtherApp(app.id)}
-								>
-									<img
-										src={app.icon}
-										alt=""
-										className="size-4 object-contain mr-2"
-									/>
-									{app.label}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuSubContent>
-					</DropdownMenuSub>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onClick={handleCopyPath}>
 						<LuCopy className="size-4 mr-2" />

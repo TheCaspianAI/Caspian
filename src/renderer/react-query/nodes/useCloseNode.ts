@@ -99,8 +99,8 @@ export function useCloseNode(
 				if (targetNodeId) {
 					navigateToNode(targetNodeId, navigate);
 				} else {
-					// No other nodes, navigate to node index (shows StartView)
-					navigate({ to: "/node" });
+					// No other nodes, navigate to workspace index (shows StartView)
+					navigate({ to: "/workspace" });
 				}
 			}
 

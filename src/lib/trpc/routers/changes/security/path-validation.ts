@@ -1,5 +1,5 @@
 import { isAbsolute, normalize, resolve, sep } from "node:path";
-import { projects, worktrees } from "lib/local-db";
+import { repositories, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 
@@ -72,14 +72,14 @@ export function assertRegisteredWorktree(workspacePath: string): void {
 		return;
 	}
 
-	// Check projects.mainRepoPath for branch workspaces
-	const projectExists = localDb
+	// Check repositories.mainRepoPath for branch nodes
+	const repositoryExists = localDb
 		.select()
-		.from(projects)
-		.where(eq(projects.mainRepoPath, workspacePath))
+		.from(repositories)
+		.where(eq(repositories.mainRepoPath, workspacePath))
 		.get();
 
-	if (projectExists) {
+	if (repositoryExists) {
 		return;
 	}
 
