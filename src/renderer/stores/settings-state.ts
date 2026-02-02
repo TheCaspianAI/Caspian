@@ -6,17 +6,11 @@ import { devtools } from "zustand/middleware";
  * General sections are the main categories, project/workspace are dynamic.
  */
 export type SettingsSection =
-	| "account"
-	| "organization"
 	| "appearance"
 	| "ringtones"
 	| "keyboard"
 	| "behavior"
 	| "terminal"
-	| "integrations"
-	| "billing"
-	| "devices"
-	| "apikeys"
 	| "project"
 	| "workspace";
 
@@ -38,7 +32,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
 	devtools(
 		(set) => ({
-			activeSection: "account",
+			activeSection: "appearance",
 			activeProjectId: null,
 			activeWorkspaceId: null,
 			searchQuery: "",
@@ -64,7 +58,7 @@ export const useSettingsStore = create<SettingsState>()(
 			openSettings: (section) =>
 				set({
 					isOpen: true,
-					activeSection: section ?? "account",
+					activeSection: section ?? "appearance",
 				}),
 
 			closeSettings: () =>

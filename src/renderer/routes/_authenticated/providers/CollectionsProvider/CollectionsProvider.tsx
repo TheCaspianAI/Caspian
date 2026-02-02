@@ -1,20 +1,17 @@
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-import { MOCK_ORG_ID } from "shared/constants";
-import { getCollections } from "./collections";
+import { createContext, type ReactNode, useContext } from "react";
 
-type Collections = ReturnType<typeof getCollections>;
+/**
+ * Collections context - currently stubbed since cloud features are disabled.
+ * Kept for future cloud functionality.
+ */
+
+type Collections = Record<string, never>;
 
 const CollectionsContext = createContext<Collections | null>(null);
 
 export function CollectionsProvider({ children }: { children: ReactNode }) {
-	const activeOrganizationId = MOCK_ORG_ID;
-
-	const collections = useMemo(() => {
-		return getCollections(activeOrganizationId);
-	}, [activeOrganizationId]);
-
 	return (
-		<CollectionsContext.Provider value={collections}>
+		<CollectionsContext.Provider value={{}}>
 			{children}
 		</CollectionsContext.Provider>
 	);
