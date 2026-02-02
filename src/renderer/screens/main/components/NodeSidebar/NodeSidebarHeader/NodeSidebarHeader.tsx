@@ -112,6 +112,27 @@ export function NodeSidebarHeader({
 
 	return (
 		<div className="flex flex-col gap-1.5 border-b border-border/50 px-2.5 pt-3 pb-2.5">
+			<div className="flex items-center justify-between mb-1">
+				<span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider px-2.5">Navigation</span>
+				<Tooltip delayDuration={300}>
+					<TooltipTrigger asChild>
+						<button
+							type="button"
+							onClick={toggleCollapsed}
+							className="group flex items-center justify-center size-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+						>
+							<span className="group-hover:hidden">{getToggleIcon(false)}</span>
+							<span className="hidden group-hover:block">{getToggleIcon(true)}</span>
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="left">
+						<HotkeyTooltipContent
+							label="Collapse sidebar"
+							hotkeyId="TOGGLE_NODE_SIDEBAR"
+						/>
+					</TooltipContent>
+				</Tooltip>
+			</div>
 			<button
 				type="button"
 				onClick={() => {
