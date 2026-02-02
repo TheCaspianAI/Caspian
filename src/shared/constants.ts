@@ -28,8 +28,8 @@ export const CASPIAN_DIR_NAME =
 // Deep link protocol scheme (environment-aware)
 export const PROTOCOL_SCHEME =
 	env.NODE_ENV === "development" ? "caspian-dev" : "caspian";
-// Project-level directory name (always .caspian, not conditional)
-export const PROJECT_CASPIAN_DIR_NAME = ".caspian";
+// Repository-level directory name (always .caspian, not conditional)
+export const REPOSITORY_CASPIAN_DIR_NAME = ".caspian";
 export const WORKTREES_DIR_NAME = "worktrees";
 export const CONFIG_FILE_NAME = "config.json";
 export const PORTS_FILE_NAME = "ports.json";

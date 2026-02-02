@@ -1,6 +1,6 @@
 import type { Worktree } from "./worktree";
 
-export interface Workspace {
+export interface Node {
 	id: string;
 	name: string;
 	repoPath: string;

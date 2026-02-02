@@ -127,7 +127,7 @@ export interface BaseTab {
 	id: string;
 	name: string;
 	userTitle?: string;
-	workspaceId: string;
+	nodeId: string;
 	createdAt: number;
 }
 
@@ -137,7 +137,7 @@ export interface BaseTab {
 export interface BaseTabsState {
 	tabs: BaseTab[];
 	panes: Record<string, Pane>;
-	activeTabIds: Record<string, string | null>; // workspaceId → tabId
+	activeTabIds: Record<string, string | null>; // nodeId → tabId
 	focusedPaneIds: Record<string, string>; // tabId → paneId
-	tabHistoryStacks: Record<string, string[]>; // workspaceId → tabId[] (MRU history)
+	tabHistoryStacks: Record<string, string[]>; // nodeId → tabId[] (MRU history)
 }

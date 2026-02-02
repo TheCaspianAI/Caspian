@@ -17,7 +17,7 @@ export interface Tab {
 }
 
 export interface CreateTabInput {
-	workspaceId: string;
+	nodeId: string;
 	worktreeId: string;
 	parentTabId?: string;
 	name: string;
@@ -27,7 +27,7 @@ export interface CreateTabInput {
 }
 
 export interface UpdatePreviewTabInput {
-	workspaceId: string;
+	nodeId: string;
 	worktreeId: string;
 	tabId: string;
 	url: string;

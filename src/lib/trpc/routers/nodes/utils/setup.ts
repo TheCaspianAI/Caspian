@@ -1,6 +1,6 @@
 import { cpSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { CONFIG_FILE_NAME, PROJECT_CASPIAN_DIR_NAME } from "shared/constants";
+import { CONFIG_FILE_NAME, REPOSITORY_CASPIAN_DIR_NAME } from "shared/constants";
 import type { SetupConfig } from "shared/types";
 
 /**
@@ -12,8 +12,8 @@ export function copyCaspianConfigToWorktree(
 	mainRepoPath: string,
 	worktreePath: string,
 ): void {
-	const mainCaspianDir = join(mainRepoPath, PROJECT_CASPIAN_DIR_NAME);
-	const worktreeCaspianDir = join(worktreePath, PROJECT_CASPIAN_DIR_NAME);
+	const mainCaspianDir = join(mainRepoPath, REPOSITORY_CASPIAN_DIR_NAME);
+	const worktreeCaspianDir = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME);
 
 	// Only copy if it exists in main repo but not in worktree
 	if (existsSync(mainCaspianDir) && !existsSync(worktreeCaspianDir)) {
@@ -21,7 +21,7 @@ export function copyCaspianConfigToWorktree(
 			cpSync(mainCaspianDir, worktreeCaspianDir, { recursive: true });
 		} catch (error) {
 			console.error(
-				`Failed to copy ${PROJECT_CASPIAN_DIR_NAME} to worktree: ${error instanceof Error ? error.message : String(error)}`,
+				`Failed to copy ${REPOSITORY_CASPIAN_DIR_NAME} to worktree: ${error instanceof Error ? error.message : String(error)}`,
 			);
 		}
 	}
@@ -30,7 +30,7 @@ export function copyCaspianConfigToWorktree(
 export function loadSetupConfig(mainRepoPath: string): SetupConfig | null {
 	const configPath = join(
 		mainRepoPath,
-		PROJECT_CASPIAN_DIR_NAME,
+		REPOSITORY_CASPIAN_DIR_NAME,
 		CONFIG_FILE_NAME,
 	);
 

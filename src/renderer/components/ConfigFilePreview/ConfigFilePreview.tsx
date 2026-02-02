@@ -7,7 +7,7 @@ import {
 	CONFIG_FILE_NAME,
 	CONFIG_TEMPLATE,
 	EXTERNAL_LINKS,
-	PROJECT_CASPIAN_DIR_NAME,
+	REPOSITORY_CASPIAN_DIR_NAME,
 } from "shared/constants";
 
 export interface ConfigFilePreviewProps {
@@ -47,7 +47,7 @@ export function ConfigFilePreview({
 			>
 				<div className="flex items-center justify-between gap-4 px-4 py-3 border-b border-border">
 					<span className="text-sm text-muted-foreground font-mono truncate">
-						{projectName}/{PROJECT_CASPIAN_DIR_NAME}/{CONFIG_FILE_NAME}
+						{projectName}/{REPOSITORY_CASPIAN_DIR_NAME}/{CONFIG_FILE_NAME}
 					</span>
 					<OpenInButton path={configFilePath} label={CONFIG_FILE_NAME} />
 				</div>

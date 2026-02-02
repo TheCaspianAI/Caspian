@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
 import { existsSync, type FSWatcher, statSync, watch } from "node:fs";
 import { join } from "node:path";
-import { PORTS_FILE_NAME, PROJECT_CASPIAN_DIR_NAME } from "shared/constants";
+import { PORTS_FILE_NAME, REPOSITORY_CASPIAN_DIR_NAME } from "shared/constants";
 
 /**
  * Watches for changes to ports.json files across workspaces.
@@ -23,10 +23,10 @@ class StaticPortsWatcher extends EventEmitter {
 
 		const portsPath = join(
 			worktreePath,
-			PROJECT_CASPIAN_DIR_NAME,
+			REPOSITORY_CASPIAN_DIR_NAME,
 			PORTS_FILE_NAME,
 		);
-		const caspianDir = join(worktreePath, PROJECT_CASPIAN_DIR_NAME);
+		const caspianDir = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME);
 
 		// Determine what to watch:
 		// 1. If ports.json exists, watch it directly
@@ -65,7 +65,7 @@ class StaticPortsWatcher extends EventEmitter {
 					}
 				} else if (watchingFor === "root") {
 					// Watching worktree root - only care about .caspian dir creation
-					if (filename && filename !== PROJECT_CASPIAN_DIR_NAME) {
+					if (filename && filename !== REPOSITORY_CASPIAN_DIR_NAME) {
 						return;
 					}
 					// .caspian was created, switch to watching it

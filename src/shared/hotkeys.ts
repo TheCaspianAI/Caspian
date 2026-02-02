@@ -8,7 +8,7 @@ import { PLATFORM } from "./constants";
 export type HotkeyPlatform = "darwin" | "win32" | "linux";
 
 export type HotkeyCategory =
-	| "Workspace"
+	| "Node"
 	| "Layout"
 	| "Terminal"
 	| "Window"
@@ -363,61 +363,61 @@ function defineHotkey(def: {
 }
 
 export const HOTKEYS = {
-	// Workspace - switch with ⌘+1-9
-	JUMP_TO_WORKSPACE_1: defineHotkey({
+	// Node - switch with ⌘+1-9
+	JUMP_TO_NODE_1: defineHotkey({
 		keys: "meta+1",
-		label: "Switch to Workspace 1",
-		category: "Workspace",
+		label: "Switch to Node 1",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_2: defineHotkey({
+	JUMP_TO_NODE_2: defineHotkey({
 		keys: "meta+2",
-		label: "Switch to Workspace 2",
-		category: "Workspace",
+		label: "Switch to Node 2",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_3: defineHotkey({
+	JUMP_TO_NODE_3: defineHotkey({
 		keys: "meta+3",
-		label: "Switch to Workspace 3",
-		category: "Workspace",
+		label: "Switch to Node 3",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_4: defineHotkey({
+	JUMP_TO_NODE_4: defineHotkey({
 		keys: "meta+4",
-		label: "Switch to Workspace 4",
-		category: "Workspace",
+		label: "Switch to Node 4",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_5: defineHotkey({
+	JUMP_TO_NODE_5: defineHotkey({
 		keys: "meta+5",
-		label: "Switch to Workspace 5",
-		category: "Workspace",
+		label: "Switch to Node 5",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_6: defineHotkey({
+	JUMP_TO_NODE_6: defineHotkey({
 		keys: "meta+6",
-		label: "Switch to Workspace 6",
-		category: "Workspace",
+		label: "Switch to Node 6",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_7: defineHotkey({
+	JUMP_TO_NODE_7: defineHotkey({
 		keys: "meta+7",
-		label: "Switch to Workspace 7",
-		category: "Workspace",
+		label: "Switch to Node 7",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_8: defineHotkey({
+	JUMP_TO_NODE_8: defineHotkey({
 		keys: "meta+8",
-		label: "Switch to Workspace 8",
-		category: "Workspace",
+		label: "Switch to Node 8",
+		category: "Node",
 	}),
-	JUMP_TO_WORKSPACE_9: defineHotkey({
+	JUMP_TO_NODE_9: defineHotkey({
 		keys: "meta+9",
-		label: "Switch to Workspace 9",
-		category: "Workspace",
+		label: "Switch to Node 9",
+		category: "Node",
 	}),
-	PREV_WORKSPACE: defineHotkey({
+	PREV_NODE: defineHotkey({
 		keys: "meta+alt+up",
-		label: "Previous Workspace",
-		category: "Workspace",
+		label: "Previous Node",
+		category: "Node",
 	}),
-	NEXT_WORKSPACE: defineHotkey({
+	NEXT_NODE: defineHotkey({
 		keys: "meta+alt+down",
-		label: "Next Workspace",
-		category: "Workspace",
+		label: "Next Node",
+		category: "Node",
 	}),
 
 	// Layout
@@ -431,9 +431,9 @@ export const HOTKEYS = {
 		label: "Toggle Expand Sidebar",
 		category: "Layout",
 	}),
-	TOGGLE_WORKSPACE_SIDEBAR: defineHotkey({
+	TOGGLE_NODE_SIDEBAR: defineHotkey({
 		keys: "meta+b",
-		label: "Toggle Workspaces Sidebar",
+		label: "Toggle Nodes Sidebar",
 		category: "Layout",
 	}),
 	SPLIT_RIGHT: defineHotkey({
@@ -557,30 +557,30 @@ export const HOTKEYS = {
 		category: "Terminal",
 	}),
 
-	// Workspace creation
-	NEW_WORKSPACE: defineHotkey({
+	// Node creation
+	NEW_NODE: defineHotkey({
 		keys: "meta+n",
-		label: "New Workspace",
-		category: "Workspace",
-		description: "Open the new workspace modal",
+		label: "New Node",
+		category: "Node",
+		description: "Open the new node modal",
 	}),
-	QUICK_CREATE_WORKSPACE: defineHotkey({
+	QUICK_CREATE_NODE: defineHotkey({
 		keys: "meta+shift+n",
-		label: "Quick Create Workspace",
-		category: "Workspace",
-		description: "Quickly create a workspace in the current project",
+		label: "Quick Create Node",
+		category: "Node",
+		description: "Quickly create a node in the current repository",
 	}),
 	FOCUS_TASK_SEARCH: defineHotkey({
 		keys: "meta+f",
 		label: "Focus Task Search",
-		category: "Workspace",
+		category: "Node",
 		description: "Focus the search input in the tasks view",
 	}),
-	OPEN_PROJECT: defineHotkey({
+	OPEN_REPOSITORY: defineHotkey({
 		keys: "meta+shift+o",
-		label: "Open Project",
-		category: "Workspace",
-		description: "Open an existing project folder",
+		label: "Open Repository",
+		category: "Node",
+		description: "Open an existing repository folder",
 	}),
 
 	// Window
@@ -599,13 +599,13 @@ export const HOTKEYS = {
 		keys: "meta+o",
 		label: "Open in App",
 		category: "Window",
-		description: "Open workspace in external app (Cursor, VS Code, etc.)",
+		description: "Open node in external app (Cursor, VS Code, etc.)",
 	}),
 	COPY_PATH: defineHotkey({
 		keys: "meta+shift+c",
 		label: "Copy Path",
 		category: "Window",
-		description: "Copy the workspace path to the clipboard",
+		description: "Copy the node path to the clipboard",
 	}),
 
 	// Help
@@ -636,7 +636,7 @@ export function getHotkeysByCategory(options?: {
 	includeHidden?: boolean;
 }): Record<HotkeyCategory, HotkeyWithId[]> {
 	const grouped: Record<HotkeyCategory, HotkeyWithId[]> = {
-		Workspace: [],
+		Node: [],
 		Layout: [],
 		Terminal: [],
 		Window: [],
