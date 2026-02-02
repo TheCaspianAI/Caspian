@@ -24,7 +24,7 @@ import {
 	getPaneIdsForTab,
 	isLastPaneInTab,
 	removePaneFromLayout,
-	resolveActiveTabIdForWorkspace,
+	resolveActiveTabIdForNode,
 	resolveFileViewerMode,
 } from "./utils";
 import { killTerminalForPane } from "./utils/terminal-cleanup";
@@ -34,51 +34,51 @@ import { killTerminalForPane } from "./utils/terminal-cleanup";
  * Priority order:
  * 1. Most recently used tab from history stack
  * 2. Next/previous tab by position
- * 3. Any remaining tab in the workspace
+ * 3. Any remaining tab in the node
  */
 const findNextTab = (state: TabsState, tabIdToClose: string): string | null => {
 	const tabToClose = state.tabs.find((t) => t.id === tabIdToClose);
 	if (!tabToClose) return null;
 
-	const workspaceId = tabToClose.workspaceId;
-	const workspaceTabs = state.tabs.filter(
-		(t) => t.workspaceId === workspaceId && t.id !== tabIdToClose,
+	const nodeId = tabToClose.nodeId;
+	const nodeTabs = state.tabs.filter(
+		(t) => t.nodeId === nodeId && t.id !== tabIdToClose,
 	);
 
-	if (workspaceTabs.length === 0) return null;
+	if (nodeTabs.length === 0) return null;
 
 	// Try history first
-	const historyStack = state.tabHistoryStacks[workspaceId] || [];
+	const historyStack = state.tabHistoryStacks[nodeId] || [];
 	for (const historyTabId of historyStack) {
 		if (historyTabId === tabIdToClose) continue;
-		if (workspaceTabs.some((t) => t.id === historyTabId)) {
+		if (nodeTabs.some((t) => t.id === historyTabId)) {
 			return historyTabId;
 		}
 	}
 
 	// Try position-based (next, then previous)
-	const allWorkspaceTabs = state.tabs.filter(
-		(t) => t.workspaceId === workspaceId,
+	const allNodeTabs = state.tabs.filter(
+		(t) => t.nodeId === nodeId,
 	);
-	const currentIndex = allWorkspaceTabs.findIndex((t) => t.id === tabIdToClose);
+	const currentIndex = allNodeTabs.findIndex((t) => t.id === tabIdToClose);
 
 	if (currentIndex !== -1) {
 		const nextIndex = currentIndex + 1;
 		const prevIndex = currentIndex - 1;
 
 		if (
-			nextIndex < allWorkspaceTabs.length &&
-			allWorkspaceTabs[nextIndex].id !== tabIdToClose
+			nextIndex < allNodeTabs.length &&
+			allNodeTabs[nextIndex].id !== tabIdToClose
 		) {
-			return allWorkspaceTabs[nextIndex].id;
+			return allNodeTabs[nextIndex].id;
 		}
-		if (prevIndex >= 0 && allWorkspaceTabs[prevIndex].id !== tabIdToClose) {
-			return allWorkspaceTabs[prevIndex].id;
+		if (prevIndex >= 0 && allNodeTabs[prevIndex].id !== tabIdToClose) {
+			return allNodeTabs[prevIndex].id;
 		}
 	}
 
 	// Fallback to first available
-	return workspaceTabs[0]?.id || null;
+	return nodeTabs[0]?.id || null;
 };
 
 export const useTabsStore = create<TabsStore>()(
@@ -92,17 +92,17 @@ export const useTabsStore = create<TabsStore>()(
 				tabHistoryStacks: {},
 
 				// Tab operations
-				addTab: (workspaceId, options?: CreatePaneOptions) => {
+				addTab: (nodeId, options?: CreatePaneOptions) => {
 					const state = get();
 
 					const { tab, pane } = createTabWithPane(
-						workspaceId,
+						nodeId,
 						state.tabs,
 						options,
 					);
 
-					const currentActiveId = state.activeTabIds[workspaceId];
-					const historyStack = state.tabHistoryStacks[workspaceId] || [];
+					const currentActiveId = state.activeTabIds[nodeId];
+					const historyStack = state.tabHistoryStacks[nodeId] || [];
 					const newHistoryStack = currentActiveId
 						? [
 								currentActiveId,
@@ -115,7 +115,7 @@ export const useTabsStore = create<TabsStore>()(
 						panes: { ...state.panes, [pane.id]: pane },
 						activeTabIds: {
 							...state.activeTabIds,
-							[workspaceId]: tab.id,
+							[nodeId]: tab.id,
 						},
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -123,7 +123,7 @@ export const useTabsStore = create<TabsStore>()(
 						},
 						tabHistoryStacks: {
 							...state.tabHistoryStacks,
-							[workspaceId]: newHistoryStack,
+							[nodeId]: newHistoryStack,
 						},
 					});
 
@@ -131,7 +131,7 @@ export const useTabsStore = create<TabsStore>()(
 				},
 
 				addTabWithMultiplePanes: (
-					workspaceId: string,
+					nodeId: string,
 					options: AddTabWithMultiplePanesOptions,
 				) => {
 					const state = get();
@@ -146,14 +146,14 @@ export const useTabsStore = create<TabsStore>()(
 
 					const paneIds = panes.map((p) => p.id);
 					const layout = buildMultiPaneLayout(paneIds);
-					const workspaceTabs = state.tabs.filter(
-						(t) => t.workspaceId === workspaceId,
+					const nodeTabs = state.tabs.filter(
+						(t) => t.nodeId === nodeId,
 					);
 
 					const tab = {
 						id: tabId,
-						name: generateTabName(workspaceTabs),
-						workspaceId,
+						name: generateTabName(nodeTabs),
+						nodeId,
 						layout,
 						createdAt: Date.now(),
 					};
@@ -163,8 +163,8 @@ export const useTabsStore = create<TabsStore>()(
 						panesRecord[pane.id] = pane;
 					}
 
-					const currentActiveId = state.activeTabIds[workspaceId];
-					const historyStack = state.tabHistoryStacks[workspaceId] || [];
+					const currentActiveId = state.activeTabIds[nodeId];
+					const historyStack = state.tabHistoryStacks[nodeId] || [];
 					const newHistoryStack = currentActiveId
 						? [
 								currentActiveId,
@@ -177,7 +177,7 @@ export const useTabsStore = create<TabsStore>()(
 						panes: { ...state.panes, ...panesRecord },
 						activeTabIds: {
 							...state.activeTabIds,
-							[workspaceId]: tab.id,
+							[nodeId]: tab.id,
 						},
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -185,7 +185,7 @@ export const useTabsStore = create<TabsStore>()(
 						},
 						tabHistoryStacks: {
 							...state.tabHistoryStacks,
-							[workspaceId]: newHistoryStack,
+							[nodeId]: newHistoryStack,
 						},
 					});
 
@@ -213,14 +213,14 @@ export const useTabsStore = create<TabsStore>()(
 
 					const newTabs = state.tabs.filter((t) => t.id !== tabId);
 
-					const workspaceId = tabToRemove.workspaceId;
+					const nodeId = tabToRemove.nodeId;
 					const newActiveTabIds = { ...state.activeTabIds };
 					const newHistoryStack = (
-						state.tabHistoryStacks[workspaceId] || []
+						state.tabHistoryStacks[nodeId] || []
 					).filter((id) => id !== tabId);
 
-					if (state.activeTabIds[workspaceId] === tabId) {
-						newActiveTabIds[workspaceId] = findNextTab(state, tabId);
+					if (state.activeTabIds[nodeId] === tabId) {
+						newActiveTabIds[nodeId] = findNextTab(state, tabId);
 					}
 
 					const newFocusedPaneIds = { ...state.focusedPaneIds };
@@ -233,7 +233,7 @@ export const useTabsStore = create<TabsStore>()(
 						focusedPaneIds: newFocusedPaneIds,
 						tabHistoryStacks: {
 							...state.tabHistoryStacks,
-							[workspaceId]: newHistoryStack,
+							[nodeId]: newHistoryStack,
 						},
 					});
 				},
@@ -258,15 +258,15 @@ export const useTabsStore = create<TabsStore>()(
 					});
 				},
 
-				setActiveTab: (workspaceId, tabId) => {
+				setActiveTab: (nodeId, tabId) => {
 					const state = get();
 					const tab = state.tabs.find((t) => t.id === tabId);
-					if (!tab || tab.workspaceId !== workspaceId) {
+					if (!tab || tab.nodeId !== nodeId) {
 						return;
 					}
 
-					const currentActiveId = state.activeTabIds[workspaceId];
-					const historyStack = state.tabHistoryStacks[workspaceId] || [];
+					const currentActiveId = state.activeTabIds[nodeId];
+					const historyStack = state.tabHistoryStacks[nodeId] || [];
 
 					let newHistoryStack = historyStack.filter((id) => id !== tabId);
 					if (currentActiveId && currentActiveId !== tabId) {
@@ -297,29 +297,29 @@ export const useTabsStore = create<TabsStore>()(
 					set({
 						activeTabIds: {
 							...state.activeTabIds,
-							[workspaceId]: tabId,
+							[nodeId]: tabId,
 						},
 						tabHistoryStacks: {
 							...state.tabHistoryStacks,
-							[workspaceId]: newHistoryStack,
+							[nodeId]: newHistoryStack,
 						},
 						...(hasChanges ? { panes: newPanes } : {}),
 					});
 				},
 
-				reorderTabs: (workspaceId, startIndex, endIndex) => {
+				reorderTabs: (nodeId, startIndex, endIndex) => {
 					const state = get();
-					const workspaceTabs = state.tabs.filter(
-						(t) => t.workspaceId === workspaceId,
+					const nodeTabs = state.tabs.filter(
+						(t) => t.nodeId === nodeId,
 					);
 					const otherTabs = state.tabs.filter(
-						(t) => t.workspaceId !== workspaceId,
+						(t) => t.nodeId !== nodeId,
 					);
 
 					// Prevent corrupting state by splicing undefined elements
 					if (
 						startIndex < 0 ||
-						startIndex >= workspaceTabs.length ||
+						startIndex >= nodeTabs.length ||
 						!Number.isInteger(startIndex)
 					) {
 						return;
@@ -328,11 +328,11 @@ export const useTabsStore = create<TabsStore>()(
 					// Prevent out-of-bounds writes that would insert undefined elements
 					const clampedEndIndex = Math.max(
 						0,
-						Math.min(endIndex, workspaceTabs.length),
+						Math.min(endIndex, nodeTabs.length),
 					);
 
 					// Avoid mutating original state array to prevent side effects elsewhere
-					const reorderedTabs = [...workspaceTabs];
+					const reorderedTabs = [...nodeTabs];
 					const [removed] = reorderedTabs.splice(startIndex, 1);
 					reorderedTabs.splice(clampedEndIndex, 0, removed);
 
@@ -344,21 +344,21 @@ export const useTabsStore = create<TabsStore>()(
 					const tabToMove = state.tabs.find((t) => t.id === tabId);
 					if (!tabToMove) return;
 
-					const workspaceId = tabToMove.workspaceId;
-					const workspaceTabs = state.tabs.filter(
-						(t) => t.workspaceId === workspaceId,
+					const nodeId = tabToMove.nodeId;
+					const nodeTabs = state.tabs.filter(
+						(t) => t.nodeId === nodeId,
 					);
 					const otherTabs = state.tabs.filter(
-						(t) => t.workspaceId !== workspaceId,
+						(t) => t.nodeId !== nodeId,
 					);
 
-					const currentIndex = workspaceTabs.findIndex((t) => t.id === tabId);
+					const currentIndex = nodeTabs.findIndex((t) => t.id === tabId);
 					if (currentIndex === -1) return;
 
-					workspaceTabs.splice(currentIndex, 1);
-					workspaceTabs.splice(targetIndex, 0, tabToMove);
+					nodeTabs.splice(currentIndex, 1);
+					nodeTabs.splice(targetIndex, 0, tabToMove);
 
-					set({ tabs: [...otherTabs, ...workspaceTabs] });
+					set({ tabs: [...otherTabs, ...nodeTabs] });
 				},
 
 				updateTabLayout: (tabId, layout) => {
@@ -481,12 +481,37 @@ export const useTabsStore = create<TabsStore>()(
 				},
 
 				addFileViewerPane: (
-					workspaceId: string,
+					nodeId: string,
 					options: AddFileViewerPaneOptions,
 				) => {
 					const state = get();
-					const resolvedActiveTabId = resolveActiveTabIdForWorkspace({
-						workspaceId,
+
+					// If forceNewTab is true, always create a new tab
+					if (options.forceNewTab) {
+						const { tabId, paneId } = get().addTab(nodeId);
+						const fileViewerPane = createFileViewerPane(tabId, {
+							...options,
+							isPinned: true, // Files opened in new tabs should be pinned
+						});
+						const fileName =
+							options.filePath.split("/").pop() || options.filePath;
+						set((s) => ({
+							tabs: s.tabs.map((t) =>
+								t.id === tabId ? { ...t, name: fileName } : t,
+							),
+							panes: {
+								...s.panes,
+								[paneId]: {
+									...fileViewerPane,
+									id: paneId,
+								},
+							},
+						}));
+						return paneId;
+					}
+
+					const resolvedActiveTabId = resolveActiveTabIdForNode({
+						nodeId,
 						tabs: state.tabs,
 						activeTabIds: state.activeTabIds,
 						tabHistoryStacks: state.tabHistoryStacks,
@@ -497,7 +522,7 @@ export const useTabsStore = create<TabsStore>()(
 
 					// If no active tab, create a new one (this shouldn't normally happen)
 					if (!activeTab) {
-						const { tabId, paneId } = get().addTab(workspaceId);
+						const { tabId, paneId } = get().addTab(nodeId);
 						// Update the pane to be a file-viewer (must use set() to get fresh state after addTab)
 						const fileViewerPane = createFileViewerPane(tabId, options);
 						set((s) => ({
@@ -744,22 +769,22 @@ export const useTabsStore = create<TabsStore>()(
 					});
 				},
 
-				clearWorkspaceAttentionStatus: (workspaceId) => {
+				clearNodeAttentionStatus: (nodeId) => {
 					const state = get();
-					const workspaceTabs = state.tabs.filter(
-						(t) => t.workspaceId === workspaceId,
+					const nodeTabs = state.tabs.filter(
+						(t) => t.nodeId === nodeId,
 					);
-					const workspacePaneIds = workspaceTabs.flatMap((t) =>
+					const nodePaneIds = nodeTabs.flatMap((t) =>
 						extractPaneIdsFromLayout(t.layout),
 					);
 
-					if (workspacePaneIds.length === 0) {
+					if (nodePaneIds.length === 0) {
 						return;
 					}
 
 					const newPanes = { ...state.panes };
 					let hasChanges = false;
-					for (const paneId of workspacePaneIds) {
+					for (const paneId of nodePaneIds) {
 						const currentStatus = newPanes[paneId]?.status;
 						if (currentStatus === "review") {
 							// User acknowledged completion
@@ -972,14 +997,14 @@ export const useTabsStore = create<TabsStore>()(
 				},
 
 				// Query helpers
-				getTabsByWorkspace: (workspaceId) => {
-					return get().tabs.filter((t) => t.workspaceId === workspaceId);
+				getTabsByNode: (nodeId) => {
+					return get().tabs.filter((t) => t.nodeId === nodeId);
 				},
 
-				getActiveTab: (workspaceId) => {
+				getActiveTab: (nodeId) => {
 					const state = get();
-					const activeTabId = resolveActiveTabIdForWorkspace({
-						workspaceId,
+					const activeTabId = resolveActiveTabIdForNode({
+						nodeId,
 						tabs: state.tabs,
 						activeTabIds: state.activeTabIds,
 						tabHistoryStacks: state.tabHistoryStacks,
@@ -1047,43 +1072,43 @@ export const useTabsStore = create<TabsStore>()(
 
 					const mergedState = { ...currentState, ...persisted };
 
-					// Sanitize persisted tab pointers to be workspace-scoped.
-					// This prevents cross-workspace rendering when state is stale/corrupt.
+					// Sanitize persisted tab pointers to be node-scoped.
+					// This prevents cross-node rendering when state is stale/corrupt.
 					const tabIds = new Set(mergedState.tabs.map((t) => t.id));
-					const workspaceTabIdSets = new Map<string, Set<string>>();
+					const nodeTabIdSets = new Map<string, Set<string>>();
 					for (const tab of mergedState.tabs) {
-						let setForWorkspace = workspaceTabIdSets.get(tab.workspaceId);
-						if (!setForWorkspace) {
-							setForWorkspace = new Set();
-							workspaceTabIdSets.set(tab.workspaceId, setForWorkspace);
+						let setForNode = nodeTabIdSets.get(tab.nodeId);
+						if (!setForNode) {
+							setForNode = new Set();
+							nodeTabIdSets.set(tab.nodeId, setForNode);
 						}
-						setForWorkspace.add(tab.id);
+						setForNode.add(tab.id);
 					}
 
-					const workspaceIds = new Set<string>([
+					const nodeIds = new Set<string>([
 						...Object.keys(mergedState.activeTabIds),
 						...Object.keys(mergedState.tabHistoryStacks),
 					]);
 					for (const tab of mergedState.tabs) {
-						workspaceIds.add(tab.workspaceId);
+						nodeIds.add(tab.nodeId);
 					}
 
 					const nextActiveTabIds = { ...mergedState.activeTabIds };
 					const nextHistoryStacks = { ...mergedState.tabHistoryStacks };
 
-					for (const workspaceId of workspaceIds) {
-						nextActiveTabIds[workspaceId] = resolveActiveTabIdForWorkspace({
-							workspaceId,
+					for (const nodeId of nodeIds) {
+						nextActiveTabIds[nodeId] = resolveActiveTabIdForNode({
+							nodeId,
 							tabs: mergedState.tabs,
 							activeTabIds: mergedState.activeTabIds,
 							tabHistoryStacks: mergedState.tabHistoryStacks,
 						});
 
-						const workspaceTabIds = workspaceTabIdSets.get(workspaceId);
-						const history = nextHistoryStacks[workspaceId] ?? [];
-						if (workspaceTabIds && Array.isArray(history)) {
-							nextHistoryStacks[workspaceId] = history.filter((id) =>
-								workspaceTabIds.has(id),
+						const nodeTabIds = nodeTabIdSets.get(nodeId);
+						const history = nextHistoryStacks[nodeId] ?? [];
+						if (nodeTabIds && Array.isArray(history)) {
+							nextHistoryStacks[nodeId] = history.filter((id) =>
+								nodeTabIds.has(id),
 							);
 						}
 					}

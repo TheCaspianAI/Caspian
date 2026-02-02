@@ -33,7 +33,7 @@ export function movePaneToTab(
 		!sourceTab ||
 		!targetTab ||
 		sourceTab.id === targetTabId ||
-		sourceTab.workspaceId !== targetTab.workspaceId
+		sourceTab.nodeId !== targetTab.nodeId
 	)
 		return null;
 
@@ -47,7 +47,7 @@ export function movePaneToTab(
 	const isLastPane = isLastPaneInTab(state.panes, sourceTab.id);
 	const newSourceLayout = removePaneFromLayout(sourceTab.layout, paneId);
 	const newTargetLayout = addPaneToLayout(targetTab.layout, paneId);
-	const workspaceId = sourceTab.workspaceId;
+	const nodeId = sourceTab.nodeId;
 
 	const newTabs = isLastPane
 		? state.tabs
@@ -76,13 +76,13 @@ export function movePaneToTab(
 			...state.panes,
 			[paneId]: { ...pane, tabId: targetTabId },
 		},
-		activeTabIds: { ...state.activeTabIds, [workspaceId]: targetTabId },
+		activeTabIds: { ...state.activeTabIds, [nodeId]: targetTabId },
 		focusedPaneIds: newFocusedPaneIds,
 		tabHistoryStacks: {
 			...state.tabHistoryStacks,
-			[workspaceId]: updateHistoryStack(
-				state.tabHistoryStacks[workspaceId] || [],
-				state.activeTabIds[workspaceId] ?? null,
+			[nodeId]: updateHistoryStack(
+				state.tabHistoryStacks[nodeId] || [],
+				state.activeTabIds[nodeId] ?? null,
 				targetTabId,
 				isLastPane ? sourceTab.id : undefined,
 			),
@@ -105,15 +105,15 @@ export function movePaneToNewTab(
 		return null;
 	}
 
-	const workspaceId = sourceTab.workspaceId;
+	const nodeId = sourceTab.nodeId;
 	const newSourceLayout = removePaneFromLayout(sourceTab.layout, paneId);
 	const newTabId = generateId("tab");
-	const workspaceTabs = state.tabs.filter((t) => t.workspaceId === workspaceId);
+	const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
 
 	const newTab: Tab = {
 		id: newTabId,
-		name: generateTabName(workspaceTabs),
-		workspaceId,
+		name: generateTabName(nodeTabs),
+		nodeId,
 		layout: paneId as MosaicNode<string>,
 		createdAt: Date.now(),
 	};
@@ -135,13 +135,13 @@ export function movePaneToNewTab(
 		result: {
 			tabs: newTabs,
 			panes: { ...state.panes, [paneId]: { ...pane, tabId: newTabId } },
-			activeTabIds: { ...state.activeTabIds, [workspaceId]: newTabId },
+			activeTabIds: { ...state.activeTabIds, [nodeId]: newTabId },
 			focusedPaneIds: newFocusedPaneIds,
 			tabHistoryStacks: {
 				...state.tabHistoryStacks,
-				[workspaceId]: updateHistoryStack(
-					state.tabHistoryStacks[workspaceId] || [],
-					state.activeTabIds[workspaceId] ?? null,
+				[nodeId]: updateHistoryStack(
+					state.tabHistoryStacks[nodeId] || [],
+					state.activeTabIds[nodeId] ?? null,
 					newTabId,
 				),
 			},

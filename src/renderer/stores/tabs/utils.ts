@@ -47,47 +47,47 @@ export const getTabDisplayName = (tab: Tab): string => {
 	return name;
 };
 
-export function resolveActiveTabIdForWorkspace({
-	workspaceId,
+export function resolveActiveTabIdForNode({
+	nodeId,
 	tabs,
 	activeTabIds,
 	tabHistoryStacks,
 }: {
-	workspaceId: string;
+	nodeId: string;
 	tabs: Tab[];
 	activeTabIds: Record<string, string | null | undefined>;
 	tabHistoryStacks: Record<string, string[] | undefined>;
 }): string | null {
-	const workspaceTabIds = new Set<string>();
-	let firstWorkspaceTabId: string | null = null;
+	const nodeTabIds = new Set<string>();
+	let firstNodeTabId: string | null = null;
 
 	for (const tab of tabs) {
-		if (tab.workspaceId !== workspaceId) continue;
-		workspaceTabIds.add(tab.id);
-		if (firstWorkspaceTabId === null) {
-			firstWorkspaceTabId = tab.id;
+		if (tab.nodeId !== nodeId) continue;
+		nodeTabIds.add(tab.id);
+		if (firstNodeTabId === null) {
+			firstNodeTabId = tab.id;
 		}
 	}
 
-	const isWorkspaceTabId = (
+	const isNodeTabId = (
 		tabId: string | null | undefined,
 	): tabId is string => {
-		return typeof tabId === "string" && workspaceTabIds.has(tabId);
+		return typeof tabId === "string" && nodeTabIds.has(tabId);
 	};
 
-	const activeTabId = activeTabIds[workspaceId];
-	if (isWorkspaceTabId(activeTabId)) {
+	const activeTabId = activeTabIds[nodeId];
+	if (isNodeTabId(activeTabId)) {
 		return activeTabId;
 	}
 
-	const historyStack = tabHistoryStacks[workspaceId] ?? [];
+	const historyStack = tabHistoryStacks[nodeId] ?? [];
 	for (const historyTabId of historyStack) {
-		if (isWorkspaceTabId(historyTabId)) {
+		if (isNodeTabId(historyTabId)) {
 			return historyTabId;
 		}
 	}
 
-	return firstWorkspaceTabId;
+	return firstNodeTabId;
 }
 
 /**
@@ -238,22 +238,22 @@ export const generateTabName = (existingTabs: Tab[]): string => {
  * This ensures the invariant that tabs always have at least one pane
  */
 export const createTabWithPane = (
-	workspaceId: string,
+	nodeId: string,
 	existingTabs: Tab[] = [],
 	options?: CreatePaneOptions,
 ): { tab: Tab; pane: Pane } => {
 	const tabId = generateId("tab");
 	const pane = createPane(tabId, "terminal", options);
 
-	// Filter to same workspace for tab naming
-	const workspaceTabs = existingTabs.filter(
-		(t) => t.workspaceId === workspaceId,
+	// Filter to same node for tab naming
+	const nodeTabs = existingTabs.filter(
+		(t) => t.nodeId === nodeId,
 	);
 
 	const tab: Tab = {
 		id: tabId,
-		name: generateTabName(workspaceTabs),
-		workspaceId,
+		name: generateTabName(nodeTabs),
+		nodeId,
 		layout: pane.id, // Single pane = leaf node
 		createdAt: Date.now(),
 	};

@@ -57,6 +57,8 @@ export interface AddFileViewerPaneOptions {
 	column?: number;
 	/** If true, opens pinned (permanent). If false/undefined, opens in preview mode (can be replaced) */
 	isPinned?: boolean;
+	/** If true, always creates a new tab instead of reusing existing panes */
+	forceNewTab?: boolean;
 }
 
 /**
@@ -65,19 +67,19 @@ export interface AddFileViewerPaneOptions {
 export interface TabsStore extends TabsState {
 	// Tab operations
 	addTab: (
-		workspaceId: string,
+		nodeId: string,
 		options?: AddTabOptions,
 	) => { tabId: string; paneId: string };
 	addTabWithMultiplePanes: (
-		workspaceId: string,
+		nodeId: string,
 		options: AddTabWithMultiplePanesOptions,
 	) => { tabId: string; paneIds: string[] };
 	removeTab: (tabId: string) => void;
 	renameTab: (tabId: string, newName: string) => void;
 	setTabAutoTitle: (tabId: string, title: string) => void;
-	setActiveTab: (workspaceId: string, tabId: string) => void;
+	setActiveTab: (nodeId: string, tabId: string) => void;
 	reorderTabs: (
-		workspaceId: string,
+		nodeId: string,
 		startIndex: number,
 		endIndex: number,
 	) => void;
@@ -91,14 +93,14 @@ export interface TabsStore extends TabsState {
 		options: AddTabWithMultiplePanesOptions,
 	) => string[];
 	addFileViewerPane: (
-		workspaceId: string,
+		nodeId: string,
 		options: AddFileViewerPaneOptions,
 	) => string;
 	removePane: (paneId: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
 	markPaneAsUsed: (paneId: string) => void;
 	setPaneStatus: (paneId: string, status: PaneStatus) => void;
-	clearWorkspaceAttentionStatus: (workspaceId: string) => void;
+	clearNodeAttentionStatus: (nodeId: string) => void;
 	updatePaneCwd: (
 		paneId: string,
 		cwd: string | null,
@@ -134,8 +136,8 @@ export interface TabsStore extends TabsState {
 	movePaneToNewTab: (paneId: string) => string;
 
 	// Query helpers
-	getTabsByWorkspace: (workspaceId: string) => Tab[];
-	getActiveTab: (workspaceId: string) => Tab | null;
+	getTabsByNode: (nodeId: string) => Tab[];
+	getActiveTab: (nodeId: string) => Tab | null;
 	getPanesForTab: (tabId: string) => Pane[];
 	getFocusedPane: (tabId: string) => Pane | null;
 }

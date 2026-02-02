@@ -3,8 +3,8 @@ import { devtools } from "zustand/middleware";
 
 interface ConfigModalState {
 	isOpen: boolean;
-	projectId: string | null;
-	openModal: (projectId: string) => void;
+	repositoryId: string | null;
+	openModal: (repositoryId: string) => void;
 	closeModal: () => void;
 }
 
@@ -12,14 +12,14 @@ export const useConfigModalStore = create<ConfigModalState>()(
 	devtools(
 		(set) => ({
 			isOpen: false,
-			projectId: null,
+			repositoryId: null,
 
-			openModal: (projectId) => {
-				set({ isOpen: true, projectId });
+			openModal: (repositoryId) => {
+				set({ isOpen: true, repositoryId });
 			},
 
 			closeModal: () => {
-				set({ isOpen: false, projectId: null });
+				set({ isOpen: false, repositoryId: null });
 			},
 		}),
 		{ name: "ConfigModalStore" },
@@ -29,8 +29,8 @@ export const useConfigModalStore = create<ConfigModalState>()(
 // Convenience hooks
 export const useConfigModalOpen = () =>
 	useConfigModalStore((state) => state.isOpen);
-export const useConfigModalProjectId = () =>
-	useConfigModalStore((state) => state.projectId);
+export const useConfigModalRepositoryId = () =>
+	useConfigModalStore((state) => state.repositoryId);
 export const useOpenConfigModal = () =>
 	useConfigModalStore((state) => state.openModal);
 export const useCloseConfigModal = () =>

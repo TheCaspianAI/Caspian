@@ -3,27 +3,26 @@ import { devtools } from "zustand/middleware";
 
 /**
  * Settings sections available in the settings view.
- * General sections are the main categories, project/workspace are dynamic.
+ * General sections are the main categories, repository/node are dynamic.
  */
 export type SettingsSection =
 	| "appearance"
-	| "ringtones"
-	| "keyboard"
-	| "behavior"
-	| "terminal"
-	| "project"
-	| "workspace";
+	| "preferences"  // combines ringtones + keyboard + behavior
+	| "presets"      // was terminal (partial)
+	| "sessions"     // was terminal (partial)
+	| "repository"   // was project
+	| "node";        // was workspace
 
 interface SettingsState {
 	activeSection: SettingsSection;
-	activeProjectId: string | null;
-	activeWorkspaceId: string | null;
+	activeRepositoryId: string | null;
+	activeNodeId: string | null;
 	searchQuery: string;
 	isOpen: boolean;
 
 	setActiveSection: (section: SettingsSection) => void;
-	setActiveProject: (projectId: string | null) => void;
-	setActiveWorkspace: (workspaceId: string | null) => void;
+	setActiveRepository: (repositoryId: string | null) => void;
+	setActiveNode: (nodeId: string | null) => void;
 	setSearchQuery: (query: string) => void;
 	openSettings: (section?: SettingsSection) => void;
 	closeSettings: () => void;
@@ -33,24 +32,24 @@ export const useSettingsStore = create<SettingsState>()(
 	devtools(
 		(set) => ({
 			activeSection: "appearance",
-			activeProjectId: null,
-			activeWorkspaceId: null,
+			activeRepositoryId: null,
+			activeNodeId: null,
 			searchQuery: "",
 			isOpen: false,
 
 			setActiveSection: (section) => set({ activeSection: section }),
 
-			setActiveProject: (projectId) =>
+			setActiveRepository: (repositoryId) =>
 				set({
-					activeProjectId: projectId,
-					activeWorkspaceId: null,
-					activeSection: "project",
+					activeRepositoryId: repositoryId,
+					activeNodeId: null,
+					activeSection: "repository",
 				}),
 
-			setActiveWorkspace: (workspaceId) =>
+			setActiveNode: (nodeId) =>
 				set({
-					activeWorkspaceId: workspaceId,
-					activeSection: "workspace",
+					activeNodeId: nodeId,
+					activeSection: "node",
 				}),
 
 			setSearchQuery: (query) => set({ searchQuery: query }),
@@ -80,9 +79,9 @@ export const useSettingsSearchQuery = () =>
 	useSettingsStore((state) => state.searchQuery);
 export const useSetSettingsSearchQuery = () =>
 	useSettingsStore((state) => state.setSearchQuery);
-export const useActiveProjectId = () =>
-	useSettingsStore((state) => state.activeProjectId);
-export const useActiveWorkspaceId = () =>
-	useSettingsStore((state) => state.activeWorkspaceId);
+export const useActiveRepositoryId = () =>
+	useSettingsStore((state) => state.activeRepositoryId);
+export const useActiveNodeId = () =>
+	useSettingsStore((state) => state.activeNodeId);
 export const useCloseSettings = () =>
 	useSettingsStore((state) => state.closeSettings);
