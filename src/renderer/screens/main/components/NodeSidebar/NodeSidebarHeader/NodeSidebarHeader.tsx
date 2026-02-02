@@ -1,9 +1,10 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import { useMatchRoute, useNavigate } from "@tanstack/react-router";
-import { LuLayers, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
+import { useMatchRoute, useNavigate, useParams } from "@tanstack/react-router";
+import { LuLayers, LuLayoutGrid, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
+import { useTabsStore } from "renderer/stores/tabs/store";
 import { STROKE_WIDTH } from "../constants";
 import { NewNodeButton } from "./NewNodeButton";
 
@@ -17,6 +18,8 @@ export function NodeSidebarHeader({
 	const navigate = useNavigate();
 	const matchRoute = useMatchRoute();
 	const { toggleCollapsed } = useNodeSidebarStore();
+	const { workspaceId } = useParams({ strict: false });
+	const openKanbanDashboard = useTabsStore((s) => s.openKanbanDashboard);
 
 	// Derive active state from route
 	const isNodesListOpen = !!matchRoute({ to: "/workspaces" });
@@ -85,6 +88,23 @@ export function NodeSidebarHeader({
 					<TooltipContent side="left">Nodes</TooltipContent>
 				</Tooltip>
 
+				<Tooltip delayDuration={300}>
+					<TooltipTrigger asChild>
+						<button
+							type="button"
+							onClick={() => {
+								if (workspaceId) {
+									openKanbanDashboard(workspaceId);
+								}
+							}}
+							className="flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+						>
+							<LuLayoutGrid className="size-4" strokeWidth={STROKE_WIDTH} />
+						</button>
+					</TooltipTrigger>
+					<TooltipContent side="left">Tree View</TooltipContent>
+				</Tooltip>
+
 				<NewNodeButton isCollapsed />
 			</div>
 		);
@@ -111,6 +131,27 @@ export function NodeSidebarHeader({
 					<LuLayers className="size-3.5" strokeWidth={STROKE_WIDTH} />
 				</div>
 				<span className="text-sm font-medium flex-1 text-left">Nodes</span>
+			</button>
+
+			<button
+				type="button"
+				onClick={() => {
+					if (workspaceId) {
+						openKanbanDashboard(workspaceId);
+					}
+				}}
+				className={cn(
+					"group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg transition-all duration-200",
+					"text-muted-foreground hover:text-foreground hover:bg-accent/40",
+				)}
+			>
+				<div className={cn(
+					"flex items-center justify-center size-6 rounded-md transition-colors",
+					"bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary",
+				)}>
+					<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
+				</div>
+				<span className="text-sm font-medium flex-1 text-left">Tree View</span>
 			</button>
 
 			<NewNodeButton />
