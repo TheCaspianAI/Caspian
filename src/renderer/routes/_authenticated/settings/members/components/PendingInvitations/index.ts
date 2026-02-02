@@ -1,1 +1,0 @@
-export { PendingInvitations } from "./PendingInvitations";

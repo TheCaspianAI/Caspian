@@ -2,7 +2,6 @@ import { cn } from "ui/lib/utils";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import {
 	HiOutlineBell,
-	HiOutlineBuildingOffice2,
 	HiOutlineCommandLine,
 	HiOutlineDevicePhoneMobile,
 	HiOutlineKey,
@@ -20,7 +19,6 @@ interface GeneralSettingsProps {
 
 type SettingsRoute =
 	| "/settings/account"
-	| "/settings/organization"
 	| "/settings/appearance"
 	| "/settings/ringtones"
 	| "/settings/keyboard"
@@ -41,12 +39,6 @@ const GENERAL_SECTIONS: {
 		section: "account",
 		label: "Account",
 		icon: <HiOutlineUser className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/organization",
-		section: "organization",
-		label: "Organization",
-		icon: <HiOutlineBuildingOffice2 className="h-4 w-4" />,
 	},
 	{
 		id: "/settings/appearance",
