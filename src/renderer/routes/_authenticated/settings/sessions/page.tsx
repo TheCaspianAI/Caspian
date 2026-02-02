@@ -2,21 +2,21 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useSettingsSearchQuery } from "renderer/stores/settings-state";
 import { getMatchingItemsForSection } from "../utils/settings-search";
-import { PresetsSettings } from "./components/PresetsSettings";
+import { SessionsSettings } from "./components/SessionsSettings";
 
-export const Route = createFileRoute("/_authenticated/settings/presets/")({
-	component: PresetsSettingsPage,
+export const Route = createFileRoute("/_authenticated/settings/sessions/")({
+	component: SessionsSettingsPage,
 });
 
-function PresetsSettingsPage() {
+function SessionsSettingsPage() {
 	const searchQuery = useSettingsSearchQuery();
 
 	const visibleItems = useMemo(() => {
 		if (!searchQuery) return null;
-		return getMatchingItemsForSection(searchQuery, "presets").map(
+		return getMatchingItemsForSection(searchQuery, "sessions").map(
 			(item) => item.id,
 		);
 	}, [searchQuery]);
 
-	return <PresetsSettings visibleItems={visibleItems} />;
+	return <SessionsSettings visibleItems={visibleItems} />;
 }
