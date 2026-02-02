@@ -1,21 +1,21 @@
 import { electronTrpc } from "renderer/lib/electron-trpc";
 
 /**
- * Mutation hook for deleting a closed worktree (one without an active workspace).
+ * Mutation hook for deleting a closed worktree (one without an active node).
  * Handles cache invalidation for worktree-related queries.
  */
 export function useDeleteWorktree(
 	options?: Parameters<
-		typeof electronTrpc.workspaces.deleteWorktree.useMutation
+		typeof electronTrpc.nodes.deleteWorktree.useMutation
 	>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
-	return electronTrpc.workspaces.deleteWorktree.useMutation({
+	return electronTrpc.nodes.deleteWorktree.useMutation({
 		...options,
 		onSettled: async (...args) => {
 			// Invalidate worktree queries to refresh the list
-			await utils.workspaces.getWorktreesByProject.invalidate();
+			await utils.nodes.getWorktreesByRepository.invalidate();
 			await options?.onSettled?.(...args);
 		},
 		onSuccess: async (...args) => {

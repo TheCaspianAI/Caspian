@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-interface UseWorkspaceDeleteHandlerResult {
+interface UseNodeDeleteHandlerResult {
 	/** Whether the delete dialog should be shown */
 	showDeleteDialog: boolean;
 	/** Set whether the delete dialog should be shown */
@@ -10,10 +10,10 @@ interface UseWorkspaceDeleteHandlerResult {
 }
 
 /**
- * Shared hook for workspace delete/close dialog state.
+ * Shared hook for node delete/close dialog state.
  * Always shows the confirmation dialog to let user choose between closing or deleting.
  */
-export function useWorkspaceDeleteHandler(): UseWorkspaceDeleteHandlerResult {
+export function useNodeDeleteHandler(): UseNodeDeleteHandlerResult {
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
 	const handleDeleteClick = (e?: React.MouseEvent) => {

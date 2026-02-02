@@ -1,19 +1,19 @@
 import { toast } from "ui/components/ui/sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { navigateToWorkspace } from "renderer/routes/_authenticated/_dashboard/utils/workspace-navigation";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { useOpenConfigModal } from "renderer/stores/config-modal";
 import { useTabsStore } from "renderer/stores/tabs/store";
 
 /**
- * Mutation hook for opening an existing worktree as a new workspace
- * Automatically invalidates all workspace queries on success
+ * Mutation hook for opening an existing worktree as a new node
+ * Automatically invalidates all node queries on success
  * Creates a terminal tab with setup commands if present
  * Shows config toast if no setup commands are configured
  */
 export function useOpenWorktree(
 	options?: Parameters<
-		typeof electronTrpc.workspaces.openWorktree.useMutation
+		typeof electronTrpc.nodes.openWorktree.useMutation
 	>[0],
 ) {
 	const navigate = useNavigate();
@@ -25,13 +25,13 @@ export function useOpenWorktree(
 	const dismissConfigToast =
 		electronTrpc.config.dismissConfigToast.useMutation();
 
-	return electronTrpc.workspaces.openWorktree.useMutation({
+	return electronTrpc.nodes.openWorktree.useMutation({
 		...options,
 		onSuccess: async (data, ...rest) => {
-			// Auto-invalidate all workspace queries
-			await utils.workspaces.invalidate();
-			// Invalidate project queries since openWorktree updates project metadata
-			await utils.projects.getRecents.invalidate();
+			// Auto-invalidate all node queries
+			await utils.nodes.invalidate();
+			// Invalidate repository queries since openWorktree updates repository metadata
+			await utils.repositories.getRecents.invalidate();
 
 			const initialCommands =
 				Array.isArray(data.initialCommands) && data.initialCommands.length > 0
@@ -39,35 +39,35 @@ export function useOpenWorktree(
 					: undefined;
 
 			// Always create a terminal tab when opening a worktree
-			const { tabId, paneId } = addTab(data.workspace.id);
+			const { tabId, paneId } = addTab(data.node.id);
 			if (initialCommands) {
-				setTabAutoTitle(tabId, "Workspace Setup");
+				setTabAutoTitle(tabId, "Node Setup");
 			}
 			// Pre-create terminal session (with initial commands if present)
 			// Terminal component will attach to this session when it mounts
 			createOrAttach.mutate({
 				paneId,
 				tabId,
-				workspaceId: data.workspace.id,
+				nodeId: data.node.id,
 				initialCommands,
 			});
 
 			if (!initialCommands) {
 				// Show config toast if no setup commands
 				toast.info("No setup script configured", {
-					description: "Automate workspace setup with a config.json file",
+					description: "Automate node setup with a config.json file",
 					action: {
 						label: "Configure",
-						onClick: () => openConfigModal(data.projectId),
+						onClick: () => openConfigModal(data.repositoryId),
 					},
 					onDismiss: () => {
-						dismissConfigToast.mutate({ projectId: data.projectId });
+						dismissConfigToast.mutate({ repositoryId: data.repositoryId });
 					},
 				});
 			}
 
-			// Navigate to the opened workspace
-			navigateToWorkspace(data.workspace.id, navigate);
+			// Navigate to the opened node
+			navigateToNode(data.node.id, navigate);
 
 			// Call user's onSuccess if provided
 			await options?.onSuccess?.(data, ...rest);
