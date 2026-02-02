@@ -214,6 +214,21 @@ export const createFileViewerPane = (
 };
 
 /**
+ * Creates a new kanban pane for the agent dashboard
+ */
+export const createKanbanPane = (tabId: string): Pane => {
+	const id = generateId("pane");
+
+	return {
+		id,
+		tabId,
+		type: "kanban",
+		name: "Agent Dashboard",
+		isNew: false,
+	};
+};
+
+/**
  * Generates a static tab name based on existing tabs
  * (e.g., "Terminal 1", "Terminal 2", finding the next available number)
  */
