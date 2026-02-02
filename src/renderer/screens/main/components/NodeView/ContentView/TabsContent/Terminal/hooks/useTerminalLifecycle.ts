@@ -30,7 +30,7 @@ import type {
 } from "../types";
 import { scrollToBottom } from "../utils";
 
-type DebouncedTitleSetter = ((tabId: string, title: string) => void) & {
+type DebouncedPaneNameSetter = ((paneId: string, name: string) => void) & {
 	cancel?: () => void;
 };
 
@@ -121,7 +121,8 @@ export interface UseTerminalLifecycleOptions {
 	resetModes: () => void;
 	isAlternateScreenRef: MutableRefObject<boolean>;
 	isBracketedPasteRef: MutableRefObject<boolean>;
-	debouncedSetTabAutoTitleRef: MutableRefObject<DebouncedTitleSetter>;
+	debouncedSetPaneNameRef: MutableRefObject<DebouncedPaneNameSetter>;
+	setPaneLastCompletedRef: MutableRefObject<(paneId: string) => void>;
 	handleTerminalFocusRef: MutableRefObject<() => void>;
 	registerClearCallbackRef: MutableRefObject<RegisterCallback>;
 	unregisterClearCallbackRef: MutableRefObject<UnregisterCallback>;
@@ -172,7 +173,8 @@ export function useTerminalLifecycle({
 	resetModes,
 	isAlternateScreenRef,
 	isBracketedPasteRef,
-	debouncedSetTabAutoTitleRef,
+	debouncedSetPaneNameRef,
+	setPaneLastCompletedRef,
 	handleTerminalFocusRef,
 	registerClearCallbackRef,
 	unregisterClearCallbackRef,
@@ -318,7 +320,9 @@ export function useTerminalLifecycle({
 				if (!isAlternateScreenRef.current) {
 					const title = sanitizeForTitle(commandBufferRef.current);
 					if (title) {
-						debouncedSetTabAutoTitleRef.current(tabIdRef.current, title);
+						debouncedSetPaneNameRef.current(paneId, title);
+						// Mark command as completed when Enter is pressed
+						setPaneLastCompletedRef.current(paneId);
 					}
 				}
 				commandBufferRef.current = "";
@@ -465,7 +469,7 @@ export function useTerminalLifecycle({
 		const keyDisposable = xterm.onKey(handleKeyPress);
 		const titleDisposable = xterm.onTitleChange((title) => {
 			if (title) {
-				debouncedSetTabAutoTitleRef.current(tabIdRef.current, title);
+				debouncedSetPaneNameRef.current(paneId, title);
 			}
 		});
 
@@ -560,7 +564,7 @@ export function useTerminalLifecycle({
 			cleanupQuerySuppression();
 			unregisterClearCallbackRef.current(paneId);
 			unregisterScrollToBottomCallbackRef.current(paneId);
-			debouncedSetTabAutoTitleRef.current?.cancel?.();
+			debouncedSetPaneNameRef.current?.cancel?.();
 
 			if (isPaneDestroyedInStore()) {
 				// Pane was explicitly destroyed, so kill the session.

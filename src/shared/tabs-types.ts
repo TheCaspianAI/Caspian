@@ -118,6 +118,8 @@ export interface Pane {
 	cwd?: string | null; // Current working directory
 	cwdConfirmed?: boolean; // True if cwd confirmed via OSC-7, false if seeded
 	fileViewer?: FileViewerState; // For file-viewer panes
+	/** Timestamp when a command was last completed in this terminal */
+	lastCompletedAt?: number;
 }
 
 /**

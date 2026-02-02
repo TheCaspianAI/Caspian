@@ -428,6 +428,17 @@ export async function createWorktree(
 	const usesLfs = await repoUsesLfs(mainRepoPath);
 
 	try {
+		// Validate that the start point exists before attempting worktree creation
+		// This provides a clearer error message than the git command failure
+		const startPointExists = await refExistsLocally(mainRepoPath, startPoint);
+		if (!startPointExists) {
+			throw new Error(
+				`Cannot create worktree: The reference "${startPoint}" does not exist. ` +
+					`This may happen if the repository has no commits yet, or if the branch hasn't been fetched. ` +
+					`Try running "git fetch origin" first, or create an initial commit in the repository.`,
+			);
+		}
+
 		const parentDir = join(worktreePath, "..");
 		await mkdir(parentDir, { recursive: true });
 
@@ -497,6 +508,24 @@ export async function createWorktree(
 			throw new Error(
 				`Failed to create worktree: This repository uses Git LFS, but git-lfs was not found or failed. ` +
 					`Please install git-lfs (e.g., 'brew install git-lfs') and run 'git lfs install'.`,
+			);
+		}
+
+		// Handle empty repository / invalid reference errors
+		const isInvalidRefError =
+			lowerError.includes("not a valid object name") ||
+			lowerError.includes("invalid reference") ||
+			lowerError.includes("unknown revision") ||
+			(lowerError.includes("does not have any commits") &&
+				lowerError.includes("branch"));
+
+		if (isInvalidRefError) {
+			console.error(
+				`Invalid start point error during worktree creation: ${errorMessage}`,
+			);
+			throw new Error(
+				`Failed to create worktree: The repository has no commits or the specified branch doesn't exist. ` +
+					`Please ensure the repository has at least one commit, or try fetching from the remote first with "git fetch origin".`,
 			);
 		}
 

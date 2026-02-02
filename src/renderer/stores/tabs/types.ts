@@ -100,6 +100,10 @@ export interface TabsStore extends TabsState {
 	setFocusedPane: (tabId: string, paneId: string) => void;
 	markPaneAsUsed: (paneId: string) => void;
 	setPaneStatus: (paneId: string, status: PaneStatus) => void;
+	/** Update the pane's display name (e.g., from terminal command) */
+	setPaneName: (paneId: string, name: string) => void;
+	/** Mark when a command was last completed in a terminal pane */
+	setPaneLastCompleted: (paneId: string) => void;
 	clearNodeAttentionStatus: (nodeId: string) => void;
 	updatePaneCwd: (
 		paneId: string,

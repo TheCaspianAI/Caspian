@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { cn } from "ui/lib/utils";
-import { LuTerminal } from "react-icons/lu";
+import { LuTerminal, LuGitBranch } from "react-icons/lu";
 import type { AgentCardData, AgentStatus } from "./types";
 
 const MAX_ACTIVITY_ITEMS = 3;
@@ -49,7 +49,7 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
       onDoubleClick={onDoubleClick}
       onKeyDown={handleKeyDown}
     >
-      {/* Collapsed State */}
+      {/* Collapsed State - Agent Name as Primary */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div
@@ -57,9 +57,13 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
             style={{ backgroundColor: agent.repositoryColor }}
           />
           <div className="min-w-0">
-            <div className="font-medium text-sm truncate">{agent.nodeName}</div>
-            <div className="text-xs text-muted-foreground truncate">
-              {agent.branch}
+            {/* Agent/Terminal name as primary */}
+            <div className="font-medium text-sm truncate">{agent.agentName}</div>
+            {/* Workspace context as secondary */}
+            <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+              <span>{agent.nodeName}</span>
+              <span className="text-muted-foreground/50">·</span>
+              <span className="font-mono">{agent.branch}</span>
             </div>
           </div>
         </div>
@@ -98,26 +102,18 @@ export function AgentCard({ agent, onDoubleClick, onViewInTerminal }: AgentCardP
             </div>
           )}
 
-          {/* Git Section */}
-          {agent.gitInfo && (
-            <div>
-              <div className="text-xs font-medium text-muted-foreground mb-1">
-                Git
-              </div>
-              <div className="text-xs text-foreground/80">
-                {agent.gitInfo.baseBranch} ← {agent.branch}
-              </div>
-              {agent.gitInfo.diffStats && (
-                <div className="text-xs text-muted-foreground">
-                  <span className="text-green-500">+{agent.gitInfo.diffStats.additions}</span>
-                  {" "}
-                  <span className="text-red-500">-{agent.gitInfo.diffStats.deletions}</span>
-                  {" · "}
-                  {agent.gitInfo.diffStats.filesChanged} files
-                </div>
-              )}
+          {/* Workspace Context Section */}
+          <div>
+            <div className="text-xs font-medium text-muted-foreground mb-1">
+              Workspace
             </div>
-          )}
+            <div className="text-xs text-foreground/80 flex items-center gap-1.5">
+              <LuGitBranch className="w-3 h-3 text-muted-foreground" />
+              <span className="font-mono">{agent.branch}</span>
+              <span className="text-muted-foreground/50">in</span>
+              <span>{agent.nodeName}</span>
+            </div>
+          </div>
 
           {/* Action Button */}
           <button

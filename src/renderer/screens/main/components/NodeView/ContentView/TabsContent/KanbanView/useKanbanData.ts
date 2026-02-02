@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
+import { getTabDisplayName } from "renderer/stores/tabs/utils";
 import type { PaneStatus } from "shared/tabs-types";
 import type { AgentCardData, AgentStatus } from "./types";
 
@@ -40,76 +41,53 @@ export function useKanbanData() {
 	const agents = useMemo<AgentCardData[]>(() => {
 		if (!groupedData) return [];
 
-		// Pre-compute panes by tab ID for O(1) lookup
-		const panesByTabId = new Map<string, Array<{ id: string; status: PaneStatus | undefined }>>();
-		for (const pane of Object.values(panes)) {
-			if (pane.type === "terminal") {
-				const existing = panesByTabId.get(pane.tabId) || [];
-				existing.push({ id: pane.id, status: pane.status });
-				panesByTabId.set(pane.tabId, existing);
+		// Build lookup maps for O(1) access
+		const nodeById = new Map<string, { node: typeof groupedData[0]["nodes"][0]; repository: typeof groupedData[0]["repository"] }>();
+		for (const group of groupedData) {
+			for (const node of group.nodes) {
+				nodeById.set(node.id, { node, repository: group.repository });
 			}
 		}
 
+		const tabById = new Map(tabs.map((t) => [t.id, t]));
+
 		const result: AgentCardData[] = [];
 
-		for (const group of groupedData) {
-			for (const node of group.nodes) {
-				// Find panes for this node
-				const nodeTabs = tabs.filter((t) => t.nodeId === node.id);
-				const nodePaneIds = nodeTabs.flatMap((t) =>
-					(panesByTabId.get(t.id) || []).map((p) => p.id)
-				);
+		// Iterate over all terminal panes - each becomes an agent card
+		for (const pane of Object.values(panes)) {
+			// Only show terminal panes as agents
+			if (pane.type !== "terminal") continue;
 
-				// Get highest priority status from all panes
-				let highestStatus: PaneStatus = "idle";
-				let activePaneId = "";
-				let activeTabId = "";
+			const tab = tabById.get(pane.tabId);
+			if (!tab) continue;
 
-				for (const paneId of nodePaneIds) {
-					const pane = panes[paneId];
-					if (!pane) continue;
+			const nodeInfo = nodeById.get(tab.nodeId);
+			if (!nodeInfo) continue;
 
-					const paneStatus = pane.status ?? "idle";
-					// Priority: permission > working > review > idle
-					if (
-						paneStatus === "permission" ||
-						(paneStatus === "working" && highestStatus !== "permission") ||
-						(paneStatus === "review" && highestStatus === "idle")
-					) {
-						highestStatus = paneStatus;
-						activePaneId = paneId;
-						activeTabId = pane.tabId;
-					} else if (!activePaneId && paneStatus === "idle") {
-						activePaneId = paneId;
-						activeTabId = pane.tabId;
-					}
-				}
+			const { node, repository } = nodeInfo;
 
-				// Still show nodes without terminal panes
-				if (!activePaneId && nodeTabs.length > 0) {
-					activePaneId = "";
-					activeTabId = nodeTabs[0].id;
-				}
+			// Get agent name from pane name (if it's not the default "Terminal")
+			// Fall back to tab display name
+			const agentName = (pane.name && pane.name !== "Terminal")
+				? pane.name
+				: getTabDisplayName(tab);
 
-				result.push({
-					nodeId: node.id,
-					nodeName: node.name,
-					paneId: activePaneId,
-					tabId: activeTabId,
-					repositoryId: group.repository.id,
-					repositoryName: group.repository.name,
-					repositoryColor: group.repository.color,
-					branch: node.branch,
-					status: mapPaneStatusToAgentStatus(highestStatus),
-					duration:
-						highestStatus === "working"
-							? formatDuration(node.updatedAt)
-							: undefined,
-					gitInfo: {
-						baseBranch: group.repository.defaultBranch,
-					},
-				});
-			}
+			result.push({
+				agentName,
+				paneId: pane.id,
+				tabId: pane.tabId,
+				nodeId: node.id,
+				nodeName: node.name || node.branch,
+				branch: node.branch,
+				repositoryId: repository.id,
+				repositoryName: repository.name,
+				repositoryColor: repository.color,
+				status: mapPaneStatusToAgentStatus(pane.status),
+				duration:
+					pane.status === "working"
+						? formatDuration(tab.createdAt)
+						: undefined,
+			});
 		}
 
 		return result;

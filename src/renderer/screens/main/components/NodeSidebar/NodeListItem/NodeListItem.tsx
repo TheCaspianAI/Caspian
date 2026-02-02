@@ -168,6 +168,40 @@ export function NodeListItem({
 		return getHighestPriorityStatus(paneStatuses());
 	}, [panes, nodePaneIds]);
 
+	// Get dynamic header name from the most recently completed terminal
+	const dynamicHeaderName = useMemo(() => {
+		// Find all terminal panes for this node
+		const nodeTerminalPanes = Array.from(nodePaneIds)
+			.map((paneId) => panes[paneId])
+			.filter((pane) => pane?.type === "terminal");
+
+		// Find the pane with the most recent lastCompletedAt
+		let mostRecentPane = null;
+		let mostRecentTime = 0;
+
+		for (const pane of nodeTerminalPanes) {
+			if (pane.lastCompletedAt && pane.lastCompletedAt > mostRecentTime) {
+				mostRecentTime = pane.lastCompletedAt;
+				mostRecentPane = pane;
+			}
+		}
+
+		// Use the most recently completed terminal's name
+		if (mostRecentPane && mostRecentPane.name && mostRecentPane.name !== "Terminal") {
+			return mostRecentPane.name;
+		}
+
+		// Fallback: use any terminal pane with a non-default name
+		for (const pane of nodeTerminalPanes) {
+			if (pane.name && pane.name !== "Terminal") {
+				return pane.name;
+			}
+		}
+
+		// Final fallback: node name or branch
+		return name || branch;
+	}, [nodePaneIds, panes, name, branch]);
+
 	const handleClick = () => {
 		if (!rename.isRenaming) {
 			clearNodeAttentionStatus(id);
@@ -299,7 +333,7 @@ export function NodeListItem({
 				<Tooltip delayDuration={300}>
 					<TooltipTrigger asChild>{collapsedButton}</TooltipTrigger>
 					<TooltipContent side="right" className="flex flex-col gap-0.5">
-						<span className="font-medium">{name || branch}</span>
+						<span className="font-medium">{dynamicHeaderName}</span>
 						<span className="text-xs text-muted-foreground">
 							Local node
 						</span>
@@ -461,7 +495,7 @@ export function NodeListItem({
 										: "text-foreground/80",
 								)}
 							>
-								{name || branch}
+								{dynamicHeaderName}
 							</span>
 
 							{/* Keyboard shortcut */}

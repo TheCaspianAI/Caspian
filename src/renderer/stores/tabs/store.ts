@@ -779,6 +779,32 @@ export const useTabsStore = create<TabsStore>()(
 					});
 				},
 
+				setPaneName: (paneId, name) => {
+					const state = get();
+					const pane = state.panes[paneId];
+					if (!pane || pane.name === name) return;
+
+					set({
+						panes: {
+							...state.panes,
+							[paneId]: { ...pane, name },
+						},
+					});
+				},
+
+				setPaneLastCompleted: (paneId) => {
+					const state = get();
+					const pane = state.panes[paneId];
+					if (!pane) return;
+
+					set({
+						panes: {
+							...state.panes,
+							[paneId]: { ...pane, lastCompletedAt: Date.now() },
+						},
+					});
+				},
+
 				clearNodeAttentionStatus: (nodeId) => {
 					const state = get();
 					const nodeTabs = state.tabs.filter(

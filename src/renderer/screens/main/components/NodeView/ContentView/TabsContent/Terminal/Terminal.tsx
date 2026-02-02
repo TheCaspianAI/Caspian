@@ -49,7 +49,8 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 	const tabIdRef = useRef(tabId);
 	tabIdRef.current = tabId;
 	const setFocusedPane = useTabsStore((s) => s.setFocusedPane);
-	const setTabAutoTitle = useTabsStore((s) => s.setTabAutoTitle);
+	const setPaneName = useTabsStore((s) => s.setPaneName);
+	const setPaneLastCompleted = useTabsStore((s) => s.setPaneLastCompleted);
 	const focusedPaneId = useTabsStore((s) => s.focusedPaneIds[tabId]);
 	const terminalTheme = useTerminalTheme();
 
@@ -110,7 +111,8 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 		clearPaneInitialDataRef,
 		nodeCwdRef,
 		handleFileLinkClickRef,
-		debouncedSetTabAutoTitleRef,
+		debouncedSetPaneNameRef,
+		setPaneLastCompletedRef,
 		handleTerminalFocusRef,
 		registerClearCallbackRef,
 		unregisterClearCallbackRef,
@@ -126,7 +128,8 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 		clearPaneInitialData,
 		nodeCwd,
 		handleFileLinkClick,
-		setTabAutoTitle,
+		setPaneName,
+		setPaneLastCompleted,
 		setFocusedPane,
 	});
 
@@ -259,7 +262,8 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 		resetModes,
 		isAlternateScreenRef,
 		isBracketedPasteRef,
-		debouncedSetTabAutoTitleRef,
+		debouncedSetPaneNameRef,
+		setPaneLastCompletedRef,
 		handleTerminalFocusRef,
 		registerClearCallbackRef,
 		unregisterClearCallbackRef,

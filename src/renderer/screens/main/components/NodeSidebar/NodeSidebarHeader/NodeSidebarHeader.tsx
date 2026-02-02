@@ -59,7 +59,7 @@ export function NodeSidebarHeader({
 
 		// Switch to non-kanban tab first, then close kanban tab
 		if (nonKanbanTab) {
-			setActiveTab(nonKanbanTab.id);
+			setActiveTab(workspaceId, nonKanbanTab.id);
 		}
 
 		// Close the kanban tab

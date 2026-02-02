@@ -4,7 +4,7 @@ import type { MutableRefObject } from "react";
 import { useRef } from "react";
 import { useTerminalCallbacksStore } from "renderer/stores/tabs/terminal-callbacks";
 
-type DebouncedTitleSetter = ((tabId: string, title: string) => void) & {
+type DebouncedPaneNameSetter = ((paneId: string, name: string) => void) & {
 	cancel?: () => void;
 };
 
@@ -21,7 +21,8 @@ export interface UseTerminalRefsOptions {
 	clearPaneInitialData: (paneId: string) => void;
 	nodeCwd: string | null | undefined;
 	handleFileLinkClick: (path: string, line?: number, column?: number) => void;
-	setTabAutoTitle: (tabId: string, title: string) => void;
+	setPaneName: (paneId: string, name: string) => void;
+	setPaneLastCompleted: (paneId: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
 }
 
@@ -36,7 +37,8 @@ export interface UseTerminalRefsReturn {
 	handleFileLinkClickRef: MutableRefObject<
 		(path: string, line?: number, column?: number) => void
 	>;
-	debouncedSetTabAutoTitleRef: MutableRefObject<DebouncedTitleSetter>;
+	debouncedSetPaneNameRef: MutableRefObject<DebouncedPaneNameSetter>;
+	setPaneLastCompletedRef: MutableRefObject<(paneId: string) => void>;
 	handleTerminalFocusRef: MutableRefObject<() => void>;
 	registerClearCallbackRef: MutableRefObject<RegisterCallback>;
 	unregisterClearCallbackRef: MutableRefObject<UnregisterCallback>;
@@ -54,7 +56,8 @@ export function useTerminalRefs({
 	clearPaneInitialData,
 	nodeCwd,
 	handleFileLinkClick,
-	setTabAutoTitle,
+	setPaneName,
+	setPaneLastCompleted,
 	setFocusedPane,
 }: UseTerminalRefsOptions): UseTerminalRefsReturn {
 	const initialThemeRef = useRef(terminalTheme);
@@ -75,12 +78,15 @@ export function useTerminalRefs({
 	const handleFileLinkClickRef = useRef(handleFileLinkClick);
 	handleFileLinkClickRef.current = handleFileLinkClick;
 
-	const setTabAutoTitleRef = useRef(setTabAutoTitle);
-	setTabAutoTitleRef.current = setTabAutoTitle;
+	const setPaneNameRef = useRef(setPaneName);
+	setPaneNameRef.current = setPaneName;
 
-	const debouncedSetTabAutoTitleRef = useRef(
-		debounce((targetTabId: string, title: string) => {
-			setTabAutoTitleRef.current(targetTabId, title);
+	const setPaneLastCompletedRef = useRef(setPaneLastCompleted);
+	setPaneLastCompletedRef.current = setPaneLastCompleted;
+
+	const debouncedSetPaneNameRef = useRef(
+		debounce((targetPaneId: string, name: string) => {
+			setPaneNameRef.current(targetPaneId, name);
 		}, 100),
 	);
 
@@ -111,7 +117,8 @@ export function useTerminalRefs({
 		clearPaneInitialDataRef,
 		nodeCwdRef,
 		handleFileLinkClickRef,
-		debouncedSetTabAutoTitleRef,
+		debouncedSetPaneNameRef,
+		setPaneLastCompletedRef,
 		handleTerminalFocusRef,
 		registerClearCallbackRef,
 		unregisterClearCallbackRef,
