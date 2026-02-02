@@ -8,243 +8,256 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as AuthenticatedLayoutRouteImport } from "./routes/_authenticated/layout"
-import { Route as PageRouteImport } from "./routes/page"
-import { Route as AuthenticatedSettingsLayoutRouteImport } from "./routes/_authenticated/settings/layout"
-import { Route as AuthenticatedDashboardLayoutRouteImport } from "./routes/_authenticated/_dashboard/layout"
-import { Route as AuthenticatedSettingsPageRouteImport } from "./routes/_authenticated/settings/page"
-import { Route as AuthenticatedSettingsTerminalPageRouteImport } from "./routes/_authenticated/settings/terminal/page"
-import { Route as AuthenticatedSettingsRingtonesPageRouteImport } from "./routes/_authenticated/settings/ringtones/page"
-import { Route as AuthenticatedSettingsPresetsPageRouteImport } from "./routes/_authenticated/settings/presets/page"
-import { Route as AuthenticatedSettingsKeyboardPageRouteImport } from "./routes/_authenticated/settings/keyboard/page"
-import { Route as AuthenticatedSettingsPreferencesPageRouteImport } from "./routes/_authenticated/settings/preferences/page"
-import { Route as AuthenticatedSettingsBehaviorPageRouteImport } from "./routes/_authenticated/settings/behavior/page"
-import { Route as AuthenticatedSettingsAppearancePageRouteImport } from "./routes/_authenticated/settings/appearance/page"
-import { Route as AuthenticatedDashboardWorkspacesPageRouteImport } from "./routes/_authenticated/_dashboard/workspaces/page"
-import { Route as AuthenticatedDashboardWorkspacePageRouteImport } from "./routes/_authenticated/_dashboard/workspace/page"
-import { Route as AuthenticatedSettingsWorkspaceWorkspaceIdPageRouteImport } from "./routes/_authenticated/settings/workspace/$workspaceId/page"
-import { Route as AuthenticatedSettingsProjectProjectIdPageRouteImport } from "./routes/_authenticated/settings/project/$projectId/page"
-import { Route as AuthenticatedDashboardWorkspaceWorkspaceIdPageRouteImport } from "./routes/_authenticated/_dashboard/workspace/$workspaceId/page"
-import { Route as AuthenticatedDashboardProjectProjectIdPageRouteImport } from "./routes/_authenticated/_dashboard/project/$projectId/page"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthenticatedLayoutRouteImport } from './routes/_authenticated/layout'
+import { Route as PageRouteImport } from './routes/page'
+import { Route as AuthenticatedSettingsLayoutRouteImport } from './routes/_authenticated/settings/layout'
+import { Route as AuthenticatedDashboardLayoutRouteImport } from './routes/_authenticated/_dashboard/layout'
+import { Route as AuthenticatedSettingsPageRouteImport } from './routes/_authenticated/settings/page'
+import { Route as AuthenticatedSettingsTerminalPageRouteImport } from './routes/_authenticated/settings/terminal/page'
+import { Route as AuthenticatedSettingsSessionsPageRouteImport } from './routes/_authenticated/settings/sessions/page'
+import { Route as AuthenticatedSettingsRingtonesPageRouteImport } from './routes/_authenticated/settings/ringtones/page'
+import { Route as AuthenticatedSettingsPresetsPageRouteImport } from './routes/_authenticated/settings/presets/page'
+import { Route as AuthenticatedSettingsPreferencesPageRouteImport } from './routes/_authenticated/settings/preferences/page'
+import { Route as AuthenticatedSettingsKeyboardPageRouteImport } from './routes/_authenticated/settings/keyboard/page'
+import { Route as AuthenticatedSettingsBehaviorPageRouteImport } from './routes/_authenticated/settings/behavior/page'
+import { Route as AuthenticatedSettingsAppearancePageRouteImport } from './routes/_authenticated/settings/appearance/page'
+import { Route as AuthenticatedDashboardWorkspacesPageRouteImport } from './routes/_authenticated/_dashboard/workspaces/page'
+import { Route as AuthenticatedDashboardWorkspacePageRouteImport } from './routes/_authenticated/_dashboard/workspace/page'
+import { Route as AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport } from './routes/_authenticated/settings/repository/$repositoryId/page'
+import { Route as AuthenticatedSettingsNodeNodeIdPageRouteImport } from './routes/_authenticated/settings/node/$nodeId/page'
+import { Route as AuthenticatedDashboardWorkspaceWorkspaceIdPageRouteImport } from './routes/_authenticated/_dashboard/workspace/$workspaceId/page'
+import { Route as AuthenticatedDashboardProjectProjectIdPageRouteImport } from './routes/_authenticated/_dashboard/project/$projectId/page'
 
 const AuthenticatedLayoutRoute = AuthenticatedLayoutRouteImport.update({
-  id: "/_authenticated",
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PageRoute = PageRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSettingsLayoutRoute =
   AuthenticatedSettingsLayoutRouteImport.update({
-    id: "/settings",
-    path: "/settings",
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => AuthenticatedLayoutRoute,
   } as any)
 const AuthenticatedDashboardLayoutRoute =
   AuthenticatedDashboardLayoutRouteImport.update({
-    id: "/_dashboard",
+    id: '/_dashboard',
     getParentRoute: () => AuthenticatedLayoutRoute,
   } as any)
 const AuthenticatedSettingsPageRoute =
   AuthenticatedSettingsPageRouteImport.update({
-    id: "/",
-    path: "/",
+    id: '/',
+    path: '/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsTerminalPageRoute =
   AuthenticatedSettingsTerminalPageRouteImport.update({
-    id: "/terminal/",
-    path: "/terminal/",
+    id: '/terminal/',
+    path: '/terminal/',
+    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
+  } as any)
+const AuthenticatedSettingsSessionsPageRoute =
+  AuthenticatedSettingsSessionsPageRouteImport.update({
+    id: '/sessions/',
+    path: '/sessions/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsRingtonesPageRoute =
   AuthenticatedSettingsRingtonesPageRouteImport.update({
-    id: "/ringtones/",
-    path: "/ringtones/",
+    id: '/ringtones/',
+    path: '/ringtones/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsPresetsPageRoute =
   AuthenticatedSettingsPresetsPageRouteImport.update({
-    id: "/presets/",
-    path: "/presets/",
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsKeyboardPageRoute =
-  AuthenticatedSettingsKeyboardPageRouteImport.update({
-    id: "/keyboard/",
-    path: "/keyboard/",
+    id: '/presets/',
+    path: '/presets/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsPreferencesPageRoute =
   AuthenticatedSettingsPreferencesPageRouteImport.update({
-    id: "/preferences/",
-    path: "/preferences/",
+    id: '/preferences/',
+    path: '/preferences/',
+    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
+  } as any)
+const AuthenticatedSettingsKeyboardPageRoute =
+  AuthenticatedSettingsKeyboardPageRouteImport.update({
+    id: '/keyboard/',
+    path: '/keyboard/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsBehaviorPageRoute =
   AuthenticatedSettingsBehaviorPageRouteImport.update({
-    id: "/behavior/",
-    path: "/behavior/",
+    id: '/behavior/',
+    path: '/behavior/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedSettingsAppearancePageRoute =
   AuthenticatedSettingsAppearancePageRouteImport.update({
-    id: "/appearance/",
-    path: "/appearance/",
+    id: '/appearance/',
+    path: '/appearance/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedDashboardWorkspacesPageRoute =
   AuthenticatedDashboardWorkspacesPageRouteImport.update({
-    id: "/workspaces/",
-    path: "/workspaces/",
+    id: '/workspaces/',
+    path: '/workspaces/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
   } as any)
 const AuthenticatedDashboardWorkspacePageRoute =
   AuthenticatedDashboardWorkspacePageRouteImport.update({
-    id: "/workspace/",
-    path: "/workspace/",
+    id: '/workspace/',
+    path: '/workspace/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
   } as any)
-const AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute =
-  AuthenticatedSettingsWorkspaceWorkspaceIdPageRouteImport.update({
-    id: "/workspace/$workspaceId/",
-    path: "/workspace/$workspaceId/",
+const AuthenticatedSettingsRepositoryRepositoryIdPageRoute =
+  AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport.update({
+    id: '/repository/$repositoryId/',
+    path: '/repository/$repositoryId/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
-const AuthenticatedSettingsProjectProjectIdPageRoute =
-  AuthenticatedSettingsProjectProjectIdPageRouteImport.update({
-    id: "/project/$projectId/",
-    path: "/project/$projectId/",
+const AuthenticatedSettingsNodeNodeIdPageRoute =
+  AuthenticatedSettingsNodeNodeIdPageRouteImport.update({
+    id: '/node/$nodeId/',
+    path: '/node/$nodeId/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute =
   AuthenticatedDashboardWorkspaceWorkspaceIdPageRouteImport.update({
-    id: "/workspace/$workspaceId/",
-    path: "/workspace/$workspaceId/",
+    id: '/workspace/$workspaceId/',
+    path: '/workspace/$workspaceId/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
   } as any)
 const AuthenticatedDashboardProjectProjectIdPageRoute =
   AuthenticatedDashboardProjectProjectIdPageRouteImport.update({
-    id: "/project/$projectId/",
-    path: "/project/$projectId/",
+    id: '/project/$projectId/',
+    path: '/project/$projectId/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof PageRoute
-  "/settings": typeof AuthenticatedSettingsLayoutRouteWithChildren
-  "/settings/": typeof AuthenticatedSettingsPageRoute
-  "/workspace/": typeof AuthenticatedDashboardWorkspacePageRoute
-  "/workspaces/": typeof AuthenticatedDashboardWorkspacesPageRoute
-  "/settings/appearance/": typeof AuthenticatedSettingsAppearancePageRoute
-  "/settings/behavior/": typeof AuthenticatedSettingsBehaviorPageRoute
-  "/settings/keyboard/": typeof AuthenticatedSettingsKeyboardPageRoute
-  "/settings/preferences/": typeof AuthenticatedSettingsPreferencesPageRoute
-  "/settings/presets/": typeof AuthenticatedSettingsPresetsPageRoute
-  "/settings/ringtones/": typeof AuthenticatedSettingsRingtonesPageRoute
-  "/settings/terminal/": typeof AuthenticatedSettingsTerminalPageRoute
-  "/project/$projectId/": typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  "/workspace/$workspaceId/": typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
-  "/settings/project/$projectId/": typeof AuthenticatedSettingsProjectProjectIdPageRoute
-  "/settings/workspace/$workspaceId/": typeof AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute
+  '/': typeof PageRoute
+  '/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
+  '/settings/': typeof AuthenticatedSettingsPageRoute
+  '/workspace/': typeof AuthenticatedDashboardWorkspacePageRoute
+  '/workspaces/': typeof AuthenticatedDashboardWorkspacesPageRoute
+  '/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
+  '/settings/behavior/': typeof AuthenticatedSettingsBehaviorPageRoute
+  '/settings/keyboard/': typeof AuthenticatedSettingsKeyboardPageRoute
+  '/settings/preferences/': typeof AuthenticatedSettingsPreferencesPageRoute
+  '/settings/presets/': typeof AuthenticatedSettingsPresetsPageRoute
+  '/settings/ringtones/': typeof AuthenticatedSettingsRingtonesPageRoute
+  '/settings/sessions/': typeof AuthenticatedSettingsSessionsPageRoute
+  '/settings/terminal/': typeof AuthenticatedSettingsTerminalPageRoute
+  '/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
+  '/workspace/$workspaceId/': typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
+  '/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
+  '/settings/repository/$repositoryId/': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof PageRoute
-  "/settings": typeof AuthenticatedSettingsPageRoute
-  "/workspace": typeof AuthenticatedDashboardWorkspacePageRoute
-  "/workspaces": typeof AuthenticatedDashboardWorkspacesPageRoute
-  "/settings/appearance": typeof AuthenticatedSettingsAppearancePageRoute
-  "/settings/behavior": typeof AuthenticatedSettingsBehaviorPageRoute
-  "/settings/keyboard": typeof AuthenticatedSettingsKeyboardPageRoute
-  "/settings/preferences": typeof AuthenticatedSettingsPreferencesPageRoute
-  "/settings/presets": typeof AuthenticatedSettingsPresetsPageRoute
-  "/settings/ringtones": typeof AuthenticatedSettingsRingtonesPageRoute
-  "/settings/terminal": typeof AuthenticatedSettingsTerminalPageRoute
-  "/project/$projectId": typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  "/workspace/$workspaceId": typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
-  "/settings/project/$projectId": typeof AuthenticatedSettingsProjectProjectIdPageRoute
-  "/settings/workspace/$workspaceId": typeof AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute
+  '/': typeof PageRoute
+  '/settings': typeof AuthenticatedSettingsPageRoute
+  '/workspace': typeof AuthenticatedDashboardWorkspacePageRoute
+  '/workspaces': typeof AuthenticatedDashboardWorkspacesPageRoute
+  '/settings/appearance': typeof AuthenticatedSettingsAppearancePageRoute
+  '/settings/behavior': typeof AuthenticatedSettingsBehaviorPageRoute
+  '/settings/keyboard': typeof AuthenticatedSettingsKeyboardPageRoute
+  '/settings/preferences': typeof AuthenticatedSettingsPreferencesPageRoute
+  '/settings/presets': typeof AuthenticatedSettingsPresetsPageRoute
+  '/settings/ringtones': typeof AuthenticatedSettingsRingtonesPageRoute
+  '/settings/sessions': typeof AuthenticatedSettingsSessionsPageRoute
+  '/settings/terminal': typeof AuthenticatedSettingsTerminalPageRoute
+  '/project/$projectId': typeof AuthenticatedDashboardProjectProjectIdPageRoute
+  '/workspace/$workspaceId': typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
+  '/settings/node/$nodeId': typeof AuthenticatedSettingsNodeNodeIdPageRoute
+  '/settings/repository/$repositoryId': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/": typeof PageRoute
-  "/_authenticated": typeof AuthenticatedLayoutRouteWithChildren
-  "/_authenticated/_dashboard": typeof AuthenticatedDashboardLayoutRouteWithChildren
-  "/_authenticated/settings": typeof AuthenticatedSettingsLayoutRouteWithChildren
-  "/_authenticated/settings/": typeof AuthenticatedSettingsPageRoute
-  "/_authenticated/_dashboard/workspace/": typeof AuthenticatedDashboardWorkspacePageRoute
-  "/_authenticated/_dashboard/workspaces/": typeof AuthenticatedDashboardWorkspacesPageRoute
-  "/_authenticated/settings/appearance/": typeof AuthenticatedSettingsAppearancePageRoute
-  "/_authenticated/settings/behavior/": typeof AuthenticatedSettingsBehaviorPageRoute
-  "/_authenticated/settings/keyboard/": typeof AuthenticatedSettingsKeyboardPageRoute
-  "/_authenticated/settings/preferences/": typeof AuthenticatedSettingsPreferencesPageRoute
-  "/_authenticated/settings/presets/": typeof AuthenticatedSettingsPresetsPageRoute
-  "/_authenticated/settings/ringtones/": typeof AuthenticatedSettingsRingtonesPageRoute
-  "/_authenticated/settings/terminal/": typeof AuthenticatedSettingsTerminalPageRoute
-  "/_authenticated/_dashboard/project/$projectId/": typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  "/_authenticated/_dashboard/workspace/$workspaceId/": typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
-  "/_authenticated/settings/project/$projectId/": typeof AuthenticatedSettingsProjectProjectIdPageRoute
-  "/_authenticated/settings/workspace/$workspaceId/": typeof AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute
+  '/': typeof PageRoute
+  '/_authenticated': typeof AuthenticatedLayoutRouteWithChildren
+  '/_authenticated/_dashboard': typeof AuthenticatedDashboardLayoutRouteWithChildren
+  '/_authenticated/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
+  '/_authenticated/settings/': typeof AuthenticatedSettingsPageRoute
+  '/_authenticated/_dashboard/workspace/': typeof AuthenticatedDashboardWorkspacePageRoute
+  '/_authenticated/_dashboard/workspaces/': typeof AuthenticatedDashboardWorkspacesPageRoute
+  '/_authenticated/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
+  '/_authenticated/settings/behavior/': typeof AuthenticatedSettingsBehaviorPageRoute
+  '/_authenticated/settings/keyboard/': typeof AuthenticatedSettingsKeyboardPageRoute
+  '/_authenticated/settings/preferences/': typeof AuthenticatedSettingsPreferencesPageRoute
+  '/_authenticated/settings/presets/': typeof AuthenticatedSettingsPresetsPageRoute
+  '/_authenticated/settings/ringtones/': typeof AuthenticatedSettingsRingtonesPageRoute
+  '/_authenticated/settings/sessions/': typeof AuthenticatedSettingsSessionsPageRoute
+  '/_authenticated/settings/terminal/': typeof AuthenticatedSettingsTerminalPageRoute
+  '/_authenticated/_dashboard/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
+  '/_authenticated/_dashboard/workspace/$workspaceId/': typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRoute
+  '/_authenticated/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
+  '/_authenticated/settings/repository/$repositoryId/': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/settings"
-    | "/settings/"
-    | "/workspace/"
-    | "/workspaces/"
-    | "/settings/appearance/"
-    | "/settings/behavior/"
-    | "/settings/keyboard/"
-    | "/settings/preferences/"
-    | "/settings/presets/"
-    | "/settings/ringtones/"
-    | "/settings/terminal/"
-    | "/project/$projectId/"
-    | "/workspace/$workspaceId/"
-    | "/settings/project/$projectId/"
-    | "/settings/workspace/$workspaceId/"
+    | '/'
+    | '/settings'
+    | '/settings/'
+    | '/workspace/'
+    | '/workspaces/'
+    | '/settings/appearance/'
+    | '/settings/behavior/'
+    | '/settings/keyboard/'
+    | '/settings/preferences/'
+    | '/settings/presets/'
+    | '/settings/ringtones/'
+    | '/settings/sessions/'
+    | '/settings/terminal/'
+    | '/project/$projectId/'
+    | '/workspace/$workspaceId/'
+    | '/settings/node/$nodeId/'
+    | '/settings/repository/$repositoryId/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/settings"
-    | "/workspace"
-    | "/workspaces"
-    | "/settings/appearance"
-    | "/settings/behavior"
-    | "/settings/keyboard"
-    | "/settings/preferences"
-    | "/settings/presets"
-    | "/settings/ringtones"
-    | "/settings/terminal"
-    | "/project/$projectId"
-    | "/workspace/$workspaceId"
-    | "/settings/project/$projectId"
-    | "/settings/workspace/$workspaceId"
+    | '/'
+    | '/settings'
+    | '/workspace'
+    | '/workspaces'
+    | '/settings/appearance'
+    | '/settings/behavior'
+    | '/settings/keyboard'
+    | '/settings/preferences'
+    | '/settings/presets'
+    | '/settings/ringtones'
+    | '/settings/sessions'
+    | '/settings/terminal'
+    | '/project/$projectId'
+    | '/workspace/$workspaceId'
+    | '/settings/node/$nodeId'
+    | '/settings/repository/$repositoryId'
   id:
-    | "__root__"
-    | "/"
-    | "/_authenticated"
-    | "/_authenticated/_dashboard"
-    | "/_authenticated/settings"
-    | "/_authenticated/settings/"
-    | "/_authenticated/_dashboard/workspace/"
-    | "/_authenticated/_dashboard/workspaces/"
-    | "/_authenticated/settings/appearance/"
-    | "/_authenticated/settings/behavior/"
-    | "/_authenticated/settings/keyboard/"
-    | "/_authenticated/settings/preferences/"
-    | "/_authenticated/settings/presets/"
-    | "/_authenticated/settings/ringtones/"
-    | "/_authenticated/settings/terminal/"
-    | "/_authenticated/_dashboard/project/$projectId/"
-    | "/_authenticated/_dashboard/workspace/$workspaceId/"
-    | "/_authenticated/settings/project/$projectId/"
-    | "/_authenticated/settings/workspace/$workspaceId/"
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/_authenticated/_dashboard'
+    | '/_authenticated/settings'
+    | '/_authenticated/settings/'
+    | '/_authenticated/_dashboard/workspace/'
+    | '/_authenticated/_dashboard/workspaces/'
+    | '/_authenticated/settings/appearance/'
+    | '/_authenticated/settings/behavior/'
+    | '/_authenticated/settings/keyboard/'
+    | '/_authenticated/settings/preferences/'
+    | '/_authenticated/settings/presets/'
+    | '/_authenticated/settings/ringtones/'
+    | '/_authenticated/settings/sessions/'
+    | '/_authenticated/settings/terminal/'
+    | '/_authenticated/_dashboard/project/$projectId/'
+    | '/_authenticated/_dashboard/workspace/$workspaceId/'
+    | '/_authenticated/settings/node/$nodeId/'
+    | '/_authenticated/settings/repository/$repositoryId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,131 +265,138 @@ export interface RootRouteChildren {
   AuthenticatedLayoutRoute: typeof AuthenticatedLayoutRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_authenticated": {
-      id: "/_authenticated"
-      path: ""
-      fullPath: "/"
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthenticatedLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/": {
-      id: "/"
-      path: "/"
-      fullPath: "/"
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof PageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_authenticated/settings": {
-      id: "/_authenticated/settings"
-      path: "/settings"
-      fullPath: "/settings"
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsLayoutRouteImport
       parentRoute: typeof AuthenticatedLayoutRoute
     }
-    "/_authenticated/_dashboard": {
-      id: "/_authenticated/_dashboard"
-      path: ""
-      fullPath: "/"
+    '/_authenticated/_dashboard': {
+      id: '/_authenticated/_dashboard'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthenticatedDashboardLayoutRouteImport
       parentRoute: typeof AuthenticatedLayoutRoute
     }
-    "/_authenticated/settings/": {
-      id: "/_authenticated/settings/"
-      path: "/"
-      fullPath: "/settings/"
+    '/_authenticated/settings/': {
+      id: '/_authenticated/settings/'
+      path: '/'
+      fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/terminal/": {
-      id: "/_authenticated/settings/terminal/"
-      path: "/terminal"
-      fullPath: "/settings/terminal/"
+    '/_authenticated/settings/terminal/': {
+      id: '/_authenticated/settings/terminal/'
+      path: '/terminal'
+      fullPath: '/settings/terminal/'
       preLoaderRoute: typeof AuthenticatedSettingsTerminalPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/ringtones/": {
-      id: "/_authenticated/settings/ringtones/"
-      path: "/ringtones"
-      fullPath: "/settings/ringtones/"
+    '/_authenticated/settings/sessions/': {
+      id: '/_authenticated/settings/sessions/'
+      path: '/sessions'
+      fullPath: '/settings/sessions/'
+      preLoaderRoute: typeof AuthenticatedSettingsSessionsPageRouteImport
+      parentRoute: typeof AuthenticatedSettingsLayoutRoute
+    }
+    '/_authenticated/settings/ringtones/': {
+      id: '/_authenticated/settings/ringtones/'
+      path: '/ringtones'
+      fullPath: '/settings/ringtones/'
       preLoaderRoute: typeof AuthenticatedSettingsRingtonesPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/presets/": {
-      id: "/_authenticated/settings/presets/"
-      path: "/presets"
-      fullPath: "/settings/presets/"
+    '/_authenticated/settings/presets/': {
+      id: '/_authenticated/settings/presets/'
+      path: '/presets'
+      fullPath: '/settings/presets/'
       preLoaderRoute: typeof AuthenticatedSettingsPresetsPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/keyboard/": {
-      id: "/_authenticated/settings/keyboard/"
-      path: "/keyboard"
-      fullPath: "/settings/keyboard/"
-      preLoaderRoute: typeof AuthenticatedSettingsKeyboardPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    "/_authenticated/settings/preferences/": {
-      id: "/_authenticated/settings/preferences/"
-      path: "/preferences"
-      fullPath: "/settings/preferences/"
+    '/_authenticated/settings/preferences/': {
+      id: '/_authenticated/settings/preferences/'
+      path: '/preferences'
+      fullPath: '/settings/preferences/'
       preLoaderRoute: typeof AuthenticatedSettingsPreferencesPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/behavior/": {
-      id: "/_authenticated/settings/behavior/"
-      path: "/behavior"
-      fullPath: "/settings/behavior/"
+    '/_authenticated/settings/keyboard/': {
+      id: '/_authenticated/settings/keyboard/'
+      path: '/keyboard'
+      fullPath: '/settings/keyboard/'
+      preLoaderRoute: typeof AuthenticatedSettingsKeyboardPageRouteImport
+      parentRoute: typeof AuthenticatedSettingsLayoutRoute
+    }
+    '/_authenticated/settings/behavior/': {
+      id: '/_authenticated/settings/behavior/'
+      path: '/behavior'
+      fullPath: '/settings/behavior/'
       preLoaderRoute: typeof AuthenticatedSettingsBehaviorPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/appearance/": {
-      id: "/_authenticated/settings/appearance/"
-      path: "/appearance"
-      fullPath: "/settings/appearance/"
+    '/_authenticated/settings/appearance/': {
+      id: '/_authenticated/settings/appearance/'
+      path: '/appearance'
+      fullPath: '/settings/appearance/'
       preLoaderRoute: typeof AuthenticatedSettingsAppearancePageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/_dashboard/workspaces/": {
-      id: "/_authenticated/_dashboard/workspaces/"
-      path: "/workspaces"
-      fullPath: "/workspaces/"
+    '/_authenticated/_dashboard/workspaces/': {
+      id: '/_authenticated/_dashboard/workspaces/'
+      path: '/workspaces'
+      fullPath: '/workspaces/'
       preLoaderRoute: typeof AuthenticatedDashboardWorkspacesPageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
     }
-    "/_authenticated/_dashboard/workspace/": {
-      id: "/_authenticated/_dashboard/workspace/"
-      path: "/workspace"
-      fullPath: "/workspace/"
+    '/_authenticated/_dashboard/workspace/': {
+      id: '/_authenticated/_dashboard/workspace/'
+      path: '/workspace'
+      fullPath: '/workspace/'
       preLoaderRoute: typeof AuthenticatedDashboardWorkspacePageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
     }
-    "/_authenticated/settings/workspace/$workspaceId/": {
-      id: "/_authenticated/settings/workspace/$workspaceId/"
-      path: "/workspace/$workspaceId"
-      fullPath: "/settings/workspace/$workspaceId/"
-      preLoaderRoute: typeof AuthenticatedSettingsWorkspaceWorkspaceIdPageRouteImport
+    '/_authenticated/settings/repository/$repositoryId/': {
+      id: '/_authenticated/settings/repository/$repositoryId/'
+      path: '/repository/$repositoryId'
+      fullPath: '/settings/repository/$repositoryId/'
+      preLoaderRoute: typeof AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/settings/project/$projectId/": {
-      id: "/_authenticated/settings/project/$projectId/"
-      path: "/project/$projectId"
-      fullPath: "/settings/project/$projectId/"
-      preLoaderRoute: typeof AuthenticatedSettingsProjectProjectIdPageRouteImport
+    '/_authenticated/settings/node/$nodeId/': {
+      id: '/_authenticated/settings/node/$nodeId/'
+      path: '/node/$nodeId'
+      fullPath: '/settings/node/$nodeId/'
+      preLoaderRoute: typeof AuthenticatedSettingsNodeNodeIdPageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
-    "/_authenticated/_dashboard/workspace/$workspaceId/": {
-      id: "/_authenticated/_dashboard/workspace/$workspaceId/"
-      path: "/workspace/$workspaceId"
-      fullPath: "/workspace/$workspaceId/"
+    '/_authenticated/_dashboard/workspace/$workspaceId/': {
+      id: '/_authenticated/_dashboard/workspace/$workspaceId/'
+      path: '/workspace/$workspaceId'
+      fullPath: '/workspace/$workspaceId/'
       preLoaderRoute: typeof AuthenticatedDashboardWorkspaceWorkspaceIdPageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
     }
-    "/_authenticated/_dashboard/project/$projectId/": {
-      id: "/_authenticated/_dashboard/project/$projectId/"
-      path: "/project/$projectId"
-      fullPath: "/project/$projectId/"
+    '/_authenticated/_dashboard/project/$projectId/': {
+      id: '/_authenticated/_dashboard/project/$projectId/'
+      path: '/project/$projectId'
+      fullPath: '/project/$projectId/'
       preLoaderRoute: typeof AuthenticatedDashboardProjectProjectIdPageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
     }
@@ -415,9 +435,10 @@ interface AuthenticatedSettingsLayoutRouteChildren {
   AuthenticatedSettingsPreferencesPageRoute: typeof AuthenticatedSettingsPreferencesPageRoute
   AuthenticatedSettingsPresetsPageRoute: typeof AuthenticatedSettingsPresetsPageRoute
   AuthenticatedSettingsRingtonesPageRoute: typeof AuthenticatedSettingsRingtonesPageRoute
+  AuthenticatedSettingsSessionsPageRoute: typeof AuthenticatedSettingsSessionsPageRoute
   AuthenticatedSettingsTerminalPageRoute: typeof AuthenticatedSettingsTerminalPageRoute
-  AuthenticatedSettingsProjectProjectIdPageRoute: typeof AuthenticatedSettingsProjectProjectIdPageRoute
-  AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute: typeof AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute
+  AuthenticatedSettingsNodeNodeIdPageRoute: typeof AuthenticatedSettingsNodeNodeIdPageRoute
+  AuthenticatedSettingsRepositoryRepositoryIdPageRoute: typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 
 const AuthenticatedSettingsLayoutRouteChildren: AuthenticatedSettingsLayoutRouteChildren =
@@ -435,12 +456,14 @@ const AuthenticatedSettingsLayoutRouteChildren: AuthenticatedSettingsLayoutRoute
       AuthenticatedSettingsPresetsPageRoute,
     AuthenticatedSettingsRingtonesPageRoute:
       AuthenticatedSettingsRingtonesPageRoute,
+    AuthenticatedSettingsSessionsPageRoute:
+      AuthenticatedSettingsSessionsPageRoute,
     AuthenticatedSettingsTerminalPageRoute:
       AuthenticatedSettingsTerminalPageRoute,
-    AuthenticatedSettingsProjectProjectIdPageRoute:
-      AuthenticatedSettingsProjectProjectIdPageRoute,
-    AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute:
-      AuthenticatedSettingsWorkspaceWorkspaceIdPageRoute,
+    AuthenticatedSettingsNodeNodeIdPageRoute:
+      AuthenticatedSettingsNodeNodeIdPageRoute,
+    AuthenticatedSettingsRepositoryRepositoryIdPageRoute:
+      AuthenticatedSettingsRepositoryRepositoryIdPageRoute,
   }
 
 const AuthenticatedSettingsLayoutRouteWithChildren =

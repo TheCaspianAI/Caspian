@@ -33,8 +33,8 @@ function getSectionFromPath(pathname: string): SettingsSection | null {
 	if (pathname.includes("/settings/keyboard")) return "keyboard";
 	if (pathname.includes("/settings/behavior")) return "behavior";
 	if (pathname.includes("/settings/terminal")) return "terminal";
-	if (pathname.includes("/settings/project")) return "project";
-	if (pathname.includes("/settings/workspace")) return "workspace";
+	if (pathname.includes("/settings/repository")) return "repository";
+	if (pathname.includes("/settings/node")) return "node";
 	return null;
 }
 
@@ -70,8 +70,8 @@ function SettingsLayout() {
 		const currentSection = getSectionFromPath(location.pathname);
 		if (!currentSection) return;
 
-		// Don't auto-navigate from project/workspace pages
-		if (currentSection === "project" || currentSection === "workspace") return;
+		// Don't auto-navigate from repository/node pages
+		if (currentSection === "repository" || currentSection === "node") return;
 
 		const matchCounts = getMatchCountBySection(searchQuery);
 		const currentHasMatches = (matchCounts[currentSection] ?? 0) > 0;
