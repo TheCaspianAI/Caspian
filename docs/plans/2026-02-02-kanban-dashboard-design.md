@@ -18,11 +18,11 @@ A Kanban-style status view in the right pane that shows all agents/nodes organiz
 
 ### Toggle Placement
 
-A "Tree View" button placed directly above the "Nodes" header in the right pane:
+A "Tree View" button placed directly above the "Nodes" header in the right sidebar:
 
 ```
 ┌─────────────────────────────────┐
-│     [Tree View]                 │  ← new toggle button
+│     [Tree View]                 │  ← button to open Kanban
 ├─────────────────────────────────┤
 │  ⚡ Nodes                       │  ← existing header
 │  + New Node                     │
@@ -31,35 +31,36 @@ A "Tree View" button placed directly above the "Nodes" header in the right pane:
 ```
 
 **Behavior:**
-- Click "Tree View" → switches to Kanban status board
-- Button label changes to "Nodes" to return to list view
-- Default view on app launch: Nodes (current behavior)
-- Remember last selected view within session
+- Click "Tree View" → opens Kanban dashboard in **main content area** (like a file/terminal tab)
+- Right sidebar (Nodes list) remains visible alongside
+- Kanban tab can be closed like any other tab
+- Can have terminal tabs + Kanban tab open simultaneously
+
+### Full Layout
+
+```
+┌───────────────────────────────────────────────────────────┐
+│  Main Content Area                      │  Right Sidebar  │
+│  ┌───────────────────────────────────┐  │  ┌───────────┐  │
+│  │ RUNNING (2) │ WAITING (1) │ IDLE  │  │  │[Tree View]│  │
+│  │ ─────────── │ ─────────── │ ───── │  │  ├───────────┤  │
+│  │ ┌─────────┐ │ ┌─────────┐ │┌────┐ │  │  │ Nodes     │  │
+│  │ │ Agent1  │ │ │ Agent3  │ ││ ✓  │ │  │  │ + New     │  │
+│  │ │ repo-a  │ │ │ repo-b  │ │└────┘ │  │  │ repo-a    │  │
+│  │ │ 12m 🔵  │ │ │ 3m  🟡  │ │┌────┐ │  │  │  └─node1  │  │
+│  │ └─────────┘ │ └─────────┘ ││ ⚫  │ │  │  │  └─node2  │  │
+│  │ ┌─────────┐ │             │└────┘ │  │  │ repo-b    │  │
+│  │ │ Agent2  │ │             │┌────┐ │  │  │  └─node3  │  │
+│  │ │ repo-a  │ │             ││ 🔴  │ │  │  └───────────┘  │
+│  │ │ 5m  🔵  │ │             │└────┘ │  │                  │
+│  │ └─────────┘ │             │      │  │                  │
+│  └───────────────────────────────────┘  │                  │
+└───────────────────────────────────────────────────────────┘
+```
 
 ### Kanban Board Layout
 
-Three columns organized by agent status:
-
-```
-┌─────────────────────────────────────┐
-│     [Nodes]                         │  ← toggle back button
-├─────────────────────────────────────┤
-│ RUNNING (2) │ WAITING (1) │ IDLE (3)│
-│ ─────────── │ ─────────── │ ─────── │
-│ ┌─────────┐ │ ┌─────────┐ │ ┌─────┐ │
-│ │ Agent1  │ │ │ Agent3  │ │ │ ✓   │ │
-│ │ repo-a  │ │ │ repo-b  │ │ │Done │ │
-│ │ 12m 🔵  │ │ │ 3m  🟡  │ │ └─────┘ │
-│ └─────────┘ │ └─────────┘ │ ┌─────┐ │
-│ ┌─────────┐ │             │ │ ⚫   │ │
-│ │ Agent2  │ │             │ │Idle │ │
-│ │ repo-a  │ │             │ └─────┘ │
-│ │ 5m  🔵  │ │             │ ┌─────┐ │
-│ └─────────┘ │             │ │ 🔴   │ │
-│             │             │ │Error│ │
-│             │             │ └─────┘ │
-└─────────────────────────────────────┘
-```
+Three columns organized by agent status (displayed in main content area):
 
 ### Column Definitions
 
@@ -228,13 +229,14 @@ Determine agent status by monitoring terminal/session state:
 ### Files to Create/Modify
 
 **New Components:**
-- `src/renderer/screens/main/components/NodeSidebar/TreeView/` - Kanban dashboard view
-- `src/renderer/screens/main/components/NodeSidebar/TreeView/AgentCard.tsx` - Card component
-- `src/renderer/screens/main/components/NodeSidebar/TreeView/StatusColumn.tsx` - Column component
+- `src/renderer/screens/main/components/NodeView/TreeView/` - Kanban dashboard view (main content)
+- `src/renderer/screens/main/components/NodeView/TreeView/TreeView.tsx` - Main Kanban container
+- `src/renderer/screens/main/components/NodeView/TreeView/AgentCard.tsx` - Card component
+- `src/renderer/screens/main/components/NodeView/TreeView/StatusColumn.tsx` - Column component
 
 **Modify:**
-- `src/renderer/screens/main/components/NodeSidebar/NodeSidebar.tsx` - Add toggle
-- `src/renderer/stores/node-sidebar-state.ts` - Add view mode state
+- `src/renderer/screens/main/components/NodeSidebar/NodeSidebarHeader/` - Add Tree View button
+- `src/renderer/stores/tabs/` - Support opening Kanban as a special tab type
 
 **New Store/State:**
 - Agent status tracking (may need new store or extend existing)
