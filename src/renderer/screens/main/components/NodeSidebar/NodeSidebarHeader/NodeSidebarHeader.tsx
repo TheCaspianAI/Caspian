@@ -1,7 +1,8 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
 import { useMatchRoute, useNavigate, useParams } from "@tanstack/react-router";
-import { LuLayers, LuLayoutGrid, LuList, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
+import { LuChevronRight, LuLayers, LuLayoutGrid, LuList, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
+import { useState } from "react";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
@@ -28,6 +29,9 @@ export function NodeSidebarHeader({
 
 	// Derive active state from route
 	const isNodesListOpen = !!matchRoute({ to: "/workspaces" });
+
+	// State for Views folder expansion
+	const [isViewsExpanded, setIsViewsExpanded] = useState(true);
 
 	// Check if currently viewing kanban
 	const activeTab = workspaceId ? getActiveTab(workspaceId) : null;
@@ -184,47 +188,60 @@ export function NodeSidebarHeader({
 				</Tooltip>
 			</div>
 
-			{/* Views - Top level item with sub-items */}
+			{/* Views - Collapsible folder */}
 			<div className="flex flex-col">
-				<div className="flex items-center gap-2.5 px-2.5 py-2 text-muted-foreground">
-					<div className="flex items-center justify-center size-6 rounded-md bg-muted/30">
+				<button
+					type="button"
+					onClick={() => setIsViewsExpanded(!isViewsExpanded)}
+					className="group flex items-center gap-2.5 px-2.5 py-2 w-full rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/40 transition-all duration-200"
+				>
+					<LuChevronRight
+						className={cn(
+							"size-4 transition-transform duration-200",
+							isViewsExpanded && "rotate-90"
+						)}
+						strokeWidth={STROKE_WIDTH}
+					/>
+					<div className="flex items-center justify-center size-6 rounded-md bg-muted/30 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
 						<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
 					</div>
 					<span className="text-sm font-medium">Views</span>
-				</div>
-				{/* Sub-items - indented */}
-				<div className="flex flex-col gap-0.5 pl-4">
-					<button
-						type="button"
-						onClick={handleListViewClick}
-						className={cn(
-							"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
-							!isKanbanView
-								? "text-foreground bg-accent/60"
-								: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
-						)}
-					>
-						<LuList className="size-3.5" strokeWidth={STROKE_WIDTH} />
-						<span className="flex-1 text-left">List View</span>
-					</button>
-					<button
-						type="button"
-						onClick={() => {
-							if (workspaceId) {
-								openKanbanDashboard(workspaceId);
-							}
-						}}
-						className={cn(
-							"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
-							isKanbanView
-								? "text-foreground bg-accent/60"
-								: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
-						)}
-					>
-						<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
-						<span className="flex-1 text-left">Kanban View</span>
-					</button>
-				</div>
+				</button>
+				{/* Sub-items - indented, shown when expanded */}
+				{isViewsExpanded && (
+					<div className="flex flex-col gap-0.5 pl-8 mt-0.5">
+						<button
+							type="button"
+							onClick={handleListViewClick}
+							className={cn(
+								"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
+								!isKanbanView
+									? "text-foreground bg-accent/60"
+									: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
+							)}
+						>
+							<LuList className="size-3.5" strokeWidth={STROKE_WIDTH} />
+							<span className="flex-1 text-left">List View</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								if (workspaceId) {
+									openKanbanDashboard(workspaceId);
+								}
+							}}
+							className={cn(
+								"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
+								isKanbanView
+									? "text-foreground bg-accent/60"
+									: "text-muted-foreground hover:text-foreground hover:bg-accent/30",
+							)}
+						>
+							<LuLayoutGrid className="size-3.5" strokeWidth={STROKE_WIDTH} />
+							<span className="flex-1 text-left">Kanban View</span>
+						</button>
+					</div>
+				)}
 			</div>
 
 			<button
