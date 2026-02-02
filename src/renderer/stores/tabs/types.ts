@@ -140,4 +140,7 @@ export interface TabsStore extends TabsState {
 	getActiveTab: (nodeId: string) => Tab | null;
 	getPanesForTab: (tabId: string) => Pane[];
 	getFocusedPane: (tabId: string) => Pane | null;
+
+	/** Opens the Kanban dashboard as a tab in the specified node */
+	openKanbanDashboard: (nodeId: string) => { tabId: string; paneId: string };
 }

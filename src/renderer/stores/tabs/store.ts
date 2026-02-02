@@ -14,6 +14,7 @@ import {
 	buildMultiPaneLayout,
 	type CreatePaneOptions,
 	createFileViewerPane,
+	createKanbanPane,
 	createPane,
 	createTabWithPane,
 	extractPaneIdsFromLayout,
@@ -1023,6 +1024,71 @@ export const useTabsStore = create<TabsStore>()(
 					const focusedPaneId = state.focusedPaneIds[tabId];
 					if (!focusedPaneId) return null;
 					return state.panes[focusedPaneId] || null;
+				},
+
+				openKanbanDashboard: (nodeId: string) => {
+					const state = get();
+
+					// Check if kanban tab already exists for this node
+					const existingKanbanPane = Object.values(state.panes).find(
+						(p) => p.type === "kanban",
+					);
+
+					if (existingKanbanPane) {
+						const existingTab = state.tabs.find(
+							(t) => t.id === existingKanbanPane.tabId,
+						);
+						if (existingTab && existingTab.nodeId === nodeId) {
+							// Activate existing tab
+							set({
+								activeTabIds: {
+									...state.activeTabIds,
+									[nodeId]: existingTab.id,
+								},
+							});
+							return { tabId: existingTab.id, paneId: existingKanbanPane.id };
+						}
+					}
+
+					// Create new kanban tab
+					const tabId = generateId("tab");
+					const pane = createKanbanPane(tabId);
+
+					const tab = {
+						id: tabId,
+						name: "Agent Dashboard",
+						nodeId,
+						layout: pane.id,
+						createdAt: Date.now(),
+					};
+
+					const currentActiveId = state.activeTabIds[nodeId];
+					const historyStack = state.tabHistoryStacks[nodeId] || [];
+					const newHistoryStack = currentActiveId
+						? [
+								currentActiveId,
+								...historyStack.filter((id) => id !== currentActiveId),
+							]
+						: historyStack;
+
+					set({
+						tabs: [...state.tabs, tab],
+						panes: { ...state.panes, [pane.id]: pane },
+						activeTabIds: {
+							...state.activeTabIds,
+							[nodeId]: tab.id,
+						},
+						focusedPaneIds: {
+							...state.focusedPaneIds,
+							[tab.id]: pane.id,
+						},
+						tabHistoryStacks: {
+							...state.tabHistoryStacks,
+							[nodeId]: newHistoryStack,
+						},
+					});
+
+					return { tabId: tab.id, paneId: pane.id };
 				},
 			}),
 			{
