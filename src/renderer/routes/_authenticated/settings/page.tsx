@@ -5,5 +5,5 @@ export const Route = createFileRoute("/_authenticated/settings/")({
 });
 
 function SettingsPage() {
-	return <Navigate to="/settings/account" replace />;
+	return <Navigate to="/settings/appearance" replace />;
 }
