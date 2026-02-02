@@ -2,7 +2,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/toolti
 import { cn } from "ui/lib/utils";
 import { useMatchRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { LuChevronRight, LuLayers, LuLayoutGrid, LuList, LuPanelRight, LuPanelRightClose, LuPanelRightOpen } from "react-icons/lu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
@@ -18,13 +18,14 @@ export function NodeSidebarHeader({
 }: NodeSidebarHeaderProps) {
 	const navigate = useNavigate();
 	const matchRoute = useMatchRoute();
-	const { toggleCollapsed } = useNodeSidebarStore();
+	const { toggleCollapsed, isCollapsed: isSidebarCollapsed } = useNodeSidebarStore();
 	const { workspaceId } = useParams({ strict: false });
 	const openKanbanDashboard = useTabsStore((s) => s.openKanbanDashboard);
 	const getActiveTab = useTabsStore((s) => s.getActiveTab);
 	const panes = useTabsStore((s) => s.panes);
 	const focusedPaneIds = useTabsStore((s) => s.focusedPaneIds);
 	const setActiveTab = useTabsStore((s) => s.setActiveTab);
+	const removeTab = useTabsStore((s) => s.removeTab);
 	const tabs = useTabsStore((s) => s.tabs);
 
 	// Derive active state from route
@@ -39,21 +40,50 @@ export function NodeSidebarHeader({
 	const focusedPane = focusedPaneId ? panes[focusedPaneId] : null;
 	const isKanbanView = focusedPane?.type === "kanban";
 
-	// Switch to list view (find a non-kanban tab or the first terminal tab)
+	// Switch to list view - close kanban tab and switch to adjacent tab
 	const handleListViewClick = () => {
 		if (!workspaceId) return;
 
-		// Find a non-kanban tab for this workspace
+		// Find the kanban tab for this workspace
 		const workspaceTabs = tabs.filter((t) => t.nodeId === workspaceId);
+		const kanbanTab = workspaceTabs.find((t) => {
+			const tabPanes = Object.values(panes).filter((p) => p.tabId === t.id);
+			return tabPanes.some((p) => p.type === "kanban");
+		});
+
+		// Find a non-kanban tab to switch to
 		const nonKanbanTab = workspaceTabs.find((t) => {
 			const tabPanes = Object.values(panes).filter((p) => p.tabId === t.id);
 			return !tabPanes.some((p) => p.type === "kanban");
 		});
 
+		// Switch to non-kanban tab first, then close kanban tab
 		if (nonKanbanTab) {
 			setActiveTab(nonKanbanTab.id);
 		}
+
+		// Close the kanban tab
+		if (kanbanTab) {
+			removeTab(kanbanTab.id);
+		}
 	};
+
+	// Open kanban view and collapse sidebar
+	const handleKanbanViewClick = () => {
+		if (!workspaceId) return;
+		openKanbanDashboard(workspaceId);
+		// Collapse sidebar to give more space to kanban
+		if (!isSidebarCollapsed()) {
+			toggleCollapsed();
+		}
+	};
+
+	// Auto-expand Views when in kanban view
+	useEffect(() => {
+		if (isKanbanView) {
+			setIsViewsExpanded(true);
+		}
+	}, [isKanbanView]);
 
 	const handleNodesClick = () => {
 		if (isNodesListOpen) {
@@ -123,11 +153,7 @@ export function NodeSidebarHeader({
 					<TooltipTrigger asChild>
 						<button
 							type="button"
-							onClick={() => {
-								if (workspaceId) {
-									openKanbanDashboard(workspaceId);
-								}
-							}}
+							onClick={handleKanbanViewClick}
 							className={cn(
 								"flex items-center justify-center size-8 rounded-md transition-colors",
 								isKanbanView
@@ -225,11 +251,7 @@ export function NodeSidebarHeader({
 						</button>
 						<button
 							type="button"
-							onClick={() => {
-								if (workspaceId) {
-									openKanbanDashboard(workspaceId);
-								}
-							}}
+							onClick={handleKanbanViewClick}
 							className={cn(
 								"group flex items-center gap-2 px-2.5 py-1.5 w-full rounded-md transition-all duration-200 text-xs",
 								isKanbanView
