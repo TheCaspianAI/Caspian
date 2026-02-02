@@ -1,9 +1,7 @@
-import { Button } from "ui/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { cn } from "ui/lib/utils";
 import { useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
-import { LuDiff } from "react-icons/lu";
+import { LuPanelLeft, LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useSidebarStore } from "renderer/stores";
@@ -117,31 +115,38 @@ export function SidebarControl() {
 		}
 	}, [isSidebarOpen, toggleSidebar, openFirstFile]);
 
+	const getToggleIcon = (isHovering: boolean) => {
+		if (isSidebarOpen) {
+			return isHovering ? (
+				<LuPanelLeftClose className="size-4" strokeWidth={1.5} />
+			) : (
+				<LuPanelLeft className="size-4" strokeWidth={1.5} />
+			);
+		}
+		return isHovering ? (
+			<LuPanelLeftOpen className="size-4" strokeWidth={1.5} />
+		) : (
+			<LuPanelLeft className="size-4" strokeWidth={1.5} />
+		);
+	};
+
 	return (
-		<Tooltip>
+		<Tooltip delayDuration={300}>
 			<TooltipTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
+				<button
+					type="button"
 					onClick={handleClick}
-					aria-label={
-						isSidebarOpen ? "Hide Changes Sidebar" : "Show Changes Sidebar"
-					}
+					aria-label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
 					aria-pressed={isSidebarOpen}
-					className={cn(
-						"no-drag gap-1.5 h-6 px-1.5 rounded",
-						isSidebarOpen
-							? "font-semibold text-foreground bg-accent"
-							: "text-muted-foreground hover:text-foreground",
-					)}
+					className="no-drag group flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
 				>
-					<LuDiff className="size-3" />
-					<span className="text-xs">Changes</span>
-				</Button>
+					<span className="group-hover:hidden">{getToggleIcon(false)}</span>
+					<span className="hidden group-hover:block">{getToggleIcon(true)}</span>
+				</button>
 			</TooltipTrigger>
 			<TooltipContent side="bottom" showArrow={false}>
 				<HotkeyTooltipContent
-					label="Open Changes Sidebar"
+					label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
 					hotkeyId="TOGGLE_SIDEBAR"
 				/>
 			</TooltipContent>
