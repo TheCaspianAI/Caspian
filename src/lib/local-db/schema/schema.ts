@@ -6,16 +6,16 @@ import type {
 	ExternalApp,
 	GitHubStatus,
 	GitStatus,
+	NodeType,
 	TerminalLinkBehavior,
 	TerminalPreset,
-	WorkspaceType,
 } from "./zod";
 
 /**
- * Projects table - represents a git repository that the user has opened
+ * Repositories table - represents a git repository that the user has opened
  */
-export const projects = sqliteTable(
-	"projects",
+export const repositories = sqliteTable(
+	"repositories",
 	{
 		id: text("id")
 			.primaryKey()
@@ -39,16 +39,16 @@ export const projects = sqliteTable(
 		branchPrefixCustom: text("branch_prefix_custom"),
 	},
 	(table) => [
-		index("projects_main_repo_path_idx").on(table.mainRepoPath),
-		index("projects_last_opened_at_idx").on(table.lastOpenedAt),
+		index("repositories_main_repo_path_idx").on(table.mainRepoPath),
+		index("repositories_last_opened_at_idx").on(table.lastOpenedAt),
 	],
 );
 
-export type InsertProject = typeof projects.$inferInsert;
-export type SelectProject = typeof projects.$inferSelect;
+export type InsertRepository = typeof repositories.$inferInsert;
+export type SelectRepository = typeof repositories.$inferSelect;
 
 /**
- * Worktrees table - represents a git worktree within a project
+ * Worktrees table - represents a git worktree within a repository
  */
 export const worktrees = sqliteTable(
 	"worktrees",
@@ -56,9 +56,9 @@ export const worktrees = sqliteTable(
 		id: text("id")
 			.primaryKey()
 			.$defaultFn(() => uuidv4()),
-		projectId: text("project_id")
+		repositoryId: text("repository_id")
 			.notNull()
-			.references(() => projects.id, { onDelete: "cascade" }),
+			.references(() => repositories.id, { onDelete: "cascade" }),
 		path: text("path").notNull(),
 		branch: text("branch").notNull(),
 		baseBranch: text("base_branch"), // The branch this worktree was created from
@@ -69,7 +69,7 @@ export const worktrees = sqliteTable(
 		githubStatus: text("github_status", { mode: "json" }).$type<GitHubStatus>(),
 	},
 	(table) => [
-		index("worktrees_project_id_idx").on(table.projectId),
+		index("worktrees_repository_id_idx").on(table.repositoryId),
 		index("worktrees_branch_idx").on(table.branch),
 	],
 );
@@ -78,21 +78,21 @@ export type InsertWorktree = typeof worktrees.$inferInsert;
 export type SelectWorktree = typeof worktrees.$inferSelect;
 
 /**
- * Workspaces table - represents an active workspace (worktree or branch-based)
+ * Nodes table - represents an active node (worktree or branch-based)
  */
-export const workspaces = sqliteTable(
-	"workspaces",
+export const nodes = sqliteTable(
+	"nodes",
 	{
 		id: text("id")
 			.primaryKey()
 			.$defaultFn(() => uuidv4()),
-		projectId: text("project_id")
+		repositoryId: text("repository_id")
 			.notNull()
-			.references(() => projects.id, { onDelete: "cascade" }),
+			.references(() => repositories.id, { onDelete: "cascade" }),
 		worktreeId: text("worktree_id").references(() => worktrees.id, {
 			onDelete: "cascade",
 		}), // Only set for type="worktree"
-		type: text("type").notNull().$type<WorkspaceType>(),
+		type: text("type").notNull().$type<NodeType>(),
 		branch: text("branch").notNull(), // Branch name for both types
 		name: text("name").notNull(),
 		tabOrder: integer("tab_order").notNull(),
@@ -107,28 +107,30 @@ export const workspaces = sqliteTable(
 			.$defaultFn(() => Date.now()),
 		isUnread: integer("is_unread", { mode: "boolean" }).default(false),
 		// Timestamp when deletion was initiated. Non-null means deletion in progress.
-		// Workspaces with deletingAt set should be filtered out from queries.
+		// Nodes with deletingAt set should be filtered out from queries.
 		deletingAt: integer("deleting_at"),
+		// Custom teardown script for this node (overrides repository-level config)
+		customTeardownScript: text("custom_teardown_script"),
 	},
 	(table) => [
-		index("workspaces_project_id_idx").on(table.projectId),
-		index("workspaces_worktree_id_idx").on(table.worktreeId),
-		index("workspaces_last_opened_at_idx").on(table.lastOpenedAt),
+		index("nodes_repository_id_idx").on(table.repositoryId),
+		index("nodes_worktree_id_idx").on(table.worktreeId),
+		index("nodes_last_opened_at_idx").on(table.lastOpenedAt),
 		// NOTE: Migration 0006 creates an additional partial unique index:
-		// CREATE UNIQUE INDEX workspaces_unique_branch_per_project
-		//   ON workspaces(project_id) WHERE type = 'branch'
-		// This enforces one branch workspace per project. Drizzle's schema DSL
+		// CREATE UNIQUE INDEX nodes_unique_branch_per_repository
+		//   ON nodes(repository_id) WHERE type = 'branch'
+		// This enforces one branch node per repository. Drizzle's schema DSL
 		// doesn't support partial/filtered indexes, so this constraint is only
 		// applied via the migration, not schema push. See migration 0006 for details.
 	],
 );
 
-export type InsertWorkspace = typeof workspaces.$inferInsert;
-export type SelectWorkspace = typeof workspaces.$inferSelect;
+export type InsertNode = typeof nodes.$inferInsert;
+export type SelectNode = typeof nodes.$inferSelect;
 
 export const settings = sqliteTable("settings", {
 	id: integer("id").primaryKey().default(1),
-	lastActiveWorkspaceId: text("last_active_workspace_id"),
+	lastActiveNodeId: text("last_active_node_id"),
 	lastUsedApp: text("last_used_app").$type<ExternalApp>(),
 	terminalPresets: text("terminal_presets", { mode: "json" }).$type<
 		TerminalPreset[]

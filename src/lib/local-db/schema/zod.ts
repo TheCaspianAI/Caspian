@@ -67,11 +67,11 @@ export const terminalPresetSchema = z.object({
 export type TerminalPreset = z.infer<typeof terminalPresetSchema>;
 
 /**
- * Workspace type
+ * Node type
  */
-export const workspaceTypeSchema = z.enum(["worktree", "branch"]);
+export const nodeTypeSchema = z.enum(["worktree", "branch"]);
 
-export type WorkspaceType = z.infer<typeof workspaceTypeSchema>;
+export type NodeType = z.infer<typeof nodeTypeSchema>;
 
 /**
  * External apps that can be opened
