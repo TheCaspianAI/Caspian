@@ -4,7 +4,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { DndProvider } from "react-dnd";
-import { NewWorkspaceModal } from "renderer/components/NewWorkspaceModal";
+import { NewNodeModal } from "renderer/components/NewNodeModal";
 import { useUpdateListener } from "renderer/components/UpdateToast";
 import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
@@ -62,7 +62,7 @@ function AuthenticatedLayout() {
 				<AgentHooks />
 				<Outlet />
 				<WorkspaceInitEffects />
-				<NewWorkspaceModal />
+				<NewNodeModal />
 			</CollectionsProvider>
 		</DndProvider>
 	);

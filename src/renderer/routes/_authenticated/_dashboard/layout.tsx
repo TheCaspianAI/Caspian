@@ -8,7 +8,7 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
 import { WorkspaceSidebar } from "renderer/screens/main/components/WorkspaceSidebar";
 import { useAppHotkey } from "renderer/stores/hotkeys";
-import { useOpenNewWorkspaceModal } from "renderer/stores/new-workspace-modal";
+import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
 import {
 	COLLAPSED_WORKSPACE_SIDEBAR_WIDTH,
 	MAX_WORKSPACE_SIDEBAR_WIDTH,
@@ -22,20 +22,20 @@ export const Route = createFileRoute("/_authenticated/_dashboard")({
 
 function DashboardLayout() {
 	const navigate = useNavigate();
-	const openNewWorkspaceModal = useOpenNewWorkspaceModal();
+	const openNewNodeModal = useOpenNewNodeModal();
 
-	// Get current workspace from route to pre-select project in new workspace modal
+	// Get current node from route to pre-select repository in new node modal
 	const matchRoute = useMatchRoute();
-	const currentWorkspaceMatch = matchRoute({
+	const currentNodeMatch = matchRoute({
 		to: "/workspace/$workspaceId",
 		fuzzy: true,
 	});
-	const currentWorkspaceId =
-		currentWorkspaceMatch !== false ? currentWorkspaceMatch.workspaceId : null;
+	const currentNodeId =
+		currentNodeMatch !== false ? currentNodeMatch.workspaceId : null;
 
-	const { data: currentWorkspace } = electronTrpc.workspaces.get.useQuery(
-		{ id: currentWorkspaceId ?? "" },
-		{ enabled: !!currentWorkspaceId },
+	const { data: currentNode } = electronTrpc.workspaces.get.useQuery(
+		{ id: currentNodeId ?? "" },
+		{ enabled: !!currentNodeId },
 	);
 
 	const {
@@ -83,15 +83,18 @@ function DashboardLayout() {
 
 	useAppHotkey(
 		"NEW_WORKSPACE",
-		() => openNewWorkspaceModal(currentWorkspace?.projectId),
+		() => openNewNodeModal(currentNode?.repositoryId),
 		undefined,
-		[openNewWorkspaceModal, currentWorkspace?.projectId],
+		[openNewNodeModal, currentNode?.repositoryId],
 	);
 
 	return (
 		<div className="flex flex-col h-full w-full ambient-bg">
 			<TopBar />
 			<div className="flex flex-1 overflow-hidden px-3 pb-3 gap-2">
+				<div className="flex-1 rounded-xl overflow-hidden glass">
+					<Outlet />
+				</div>
 				{isWorkspaceSidebarOpen && (
 					<ResizablePanel
 						width={workspaceSidebarWidth}
@@ -100,15 +103,12 @@ function DashboardLayout() {
 						onResizingChange={setWorkspaceSidebarIsResizing}
 						minWidth={COLLAPSED_WORKSPACE_SIDEBAR_WIDTH}
 						maxWidth={MAX_WORKSPACE_SIDEBAR_WIDTH}
-						handleSide="right"
+						handleSide="left"
 						clampWidth={false}
 					>
 						<WorkspaceSidebar isCollapsed={isWorkspaceSidebarCollapsed()} />
 					</ResizablePanel>
 				)}
-				<div className="flex-1 rounded-xl overflow-hidden bg-card/50 border border-border">
-					<Outlet />
-				</div>
 			</div>
 		</div>
 	);
