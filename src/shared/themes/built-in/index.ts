@@ -3,12 +3,14 @@ import { darkTheme } from "./dark";
 import { emberTheme } from "./ember";
 import { lightTheme } from "./light";
 import { monokaiTheme } from "./monokai";
+import { neonTheme } from "./neon";
 import { oneDarkTheme } from "./one-dark";
 
 /**
  * All built-in themes
  */
 export const builtInThemes: Theme[] = [
+	neonTheme,
 	darkTheme,
 	lightTheme,
 	emberTheme,
@@ -19,7 +21,7 @@ export const builtInThemes: Theme[] = [
 /**
  * Default theme ID
  */
-export const DEFAULT_THEME_ID = "dark";
+export const DEFAULT_THEME_ID = "neon";
 
 /**
  * Get a built-in theme by ID
@@ -29,4 +31,11 @@ export function getBuiltInTheme(id: string): Theme | undefined {
 }
 
 // Re-export individual themes
-export { darkTheme, emberTheme, lightTheme, monokaiTheme, oneDarkTheme };
+export {
+	darkTheme,
+	emberTheme,
+	lightTheme,
+	monokaiTheme,
+	neonTheme,
+	oneDarkTheme,
+};

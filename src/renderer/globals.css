@@ -5,88 +5,89 @@
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
 /**
- * Theme CSS Variables
+ * Glassmorphism Theme - Refined
  *
- * Dark theme fallback values are used by default.
- * Light theme fallback values are applied when .light class is present.
- * The theme store will override these via JavaScript when a theme is applied.
- * This ensures the app looks correct during initial load before hydration.
+ * Design principles:
+ * - Subtle atmospheric background
+ * - One consistent glass treatment
+ * - Pink accent (#ff7aed) used sparingly for primary actions only
+ * - Clear elevation hierarchy
+ * - Generous spacing, visual breathing room
  */
+
 :root {
-	/* Default to dark theme colors as fallback */
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.145 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.145 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.985 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--tertiary: oklch(0.18 0.005 40);
-	--tertiary-active: oklch(0.24 0.005 40);
-	--destructive: oklch(0.396 0.141 25.723);
-	--destructive-foreground: oklch(0.637 0.237 25.331);
-	--border: oklch(0.269 0 0);
-	--input: oklch(0.269 0 0);
-	--ring: oklch(0.439 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--radius: 0.625rem;
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(0.269 0 0);
-	--sidebar-ring: oklch(0.439 0 0);
+	/* Base palette - dark with pink undertone */
+	--background: oklch(0.09 0.015 328);
+	--foreground: oklch(0.93 0.01 328);
+
+	/* Surfaces - subtle elevation through opacity */
+	--card: oklch(0.13 0.02 328 / 0.7);
+	--card-foreground: oklch(0.93 0.01 328);
+	--popover: oklch(0.15 0.025 328 / 0.85);
+	--popover-foreground: oklch(0.93 0.01 328);
+
+	/* Primary - the pink accent, used sparingly */
+	--primary: oklch(0.72 0.25 328);
+	--primary-foreground: oklch(0.1 0.02 328);
+
+	/* Secondary - muted, for less important actions */
+	--secondary: oklch(0.18 0.02 328 / 0.8);
+	--secondary-foreground: oklch(0.85 0.02 328);
+
+	/* Muted - for disabled, hints, subtle text */
+	--muted: oklch(0.16 0.015 328 / 0.6);
+	--muted-foreground: oklch(0.55 0.03 328);
+
+	/* Accent - for hover states, highlights */
+	--accent: oklch(0.18 0.025 328 / 0.6);
+	--accent-foreground: oklch(0.90 0.02 328);
+
+	/* Tertiary - toolbar backgrounds */
+	--tertiary: oklch(0.11 0.015 328 / 0.7);
+	--tertiary-active: oklch(0.15 0.02 328 / 0.7);
+
+	/* Destructive */
+	--destructive: oklch(0.55 0.2 15);
+	--destructive-foreground: oklch(0.95 0.02 15);
+
+	/* Borders - subtle, consistent */
+	--border: oklch(0.3 0.03 328 / 0.15);
+	--input: oklch(0.14 0.02 328 / 0.8);
+	--ring: oklch(0.72 0.25 328);
+
+	/* Sidebar */
+	--sidebar: oklch(0.11 0.018 328 / 0.75);
+	--sidebar-foreground: oklch(0.90 0.015 328);
+	--sidebar-primary: oklch(0.72 0.25 328);
+	--sidebar-primary-foreground: oklch(0.1 0.02 328);
+	--sidebar-accent: oklch(0.20 0.03 328 / 0.5);
+	--sidebar-accent-foreground: oklch(0.90 0.015 328);
+	--sidebar-border: oklch(0.3 0.03 328 / 0.12);
+	--sidebar-ring: oklch(0.72 0.25 328);
+
+	/* Charts */
+	--chart-1: oklch(0.72 0.25 328);
+	--chart-2: oklch(0.65 0.20 340);
+	--chart-3: oklch(0.58 0.15 320);
+	--chart-4: oklch(0.75 0.18 310);
+	--chart-5: oklch(0.50 0.12 335);
+
+	/* Consistent radius */
+	--radius: 0.75rem;
+
+	/* Glass effect - ONE consistent treatment */
+	--glass-bg: oklch(0.12 0.02 328 / 0.65);
+	--glass-border: oklch(0.5 0.05 328 / 0.1);
+	--glass-blur: 12px;
 }
 
-/* Light theme fallback values - applied before hydration if user has light theme saved */
+/* Light theme fallback */
 :root.light {
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.145 0 0);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.145 0 0);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.145 0 0);
-	--primary: oklch(0.205 0 0);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.97 0 0);
-	--secondary-foreground: oklch(0.205 0 0);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.556 0 0);
-	--accent: oklch(0.97 0 0);
-	--accent-foreground: oklch(0.205 0 0);
-	--tertiary: oklch(0.95 0.003 40);
-	--tertiary-active: oklch(0.9 0.003 40);
-	--destructive: oklch(0.577 0.245 27.325);
-	--destructive-foreground: oklch(0.985 0 0);
-	--border: oklch(0.922 0 0);
-	--input: oklch(0.922 0 0);
-	--ring: oklch(0.708 0 0);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.145 0 0);
-	--sidebar-primary: oklch(0.205 0 0);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.97 0 0);
-	--sidebar-accent-foreground: oklch(0.205 0 0);
-	--sidebar-border: oklch(0.922 0 0);
-	--sidebar-ring: oklch(0.708 0 0);
+	--background: oklch(0.97 0.005 328);
+	--foreground: oklch(0.15 0.02 328);
+	--card: oklch(1 0 0 / 0.8);
+	--glass-bg: oklch(1 0 0 / 0.7);
+	--glass-border: oklch(0.5 0.05 328 / 0.15);
 }
 
 @theme inline {
@@ -139,21 +140,18 @@
 		@apply bg-background text-foreground;
 	}
 
-	html,
-	body {
+	html, body {
 		width: 100vw;
 		height: 100vh;
 		min-height: 100vh;
 		margin: 0;
-		overflow: hidden; /* prevent scroll-lock adjustments from collapsing layout */
+		overflow: hidden;
 		user-select: none;
-		scroll-behavior: smooth;
 		-webkit-app-region: no-drag;
 		-webkit-font-smoothing: antialiased;
 	}
 
-	/* Ensure the React root fills the viewport and provides a positioning context */
-	/* biome-ignore lint/correctness/noUnknownTypeSelector: app is a custom element in index.html */
+	/* biome-ignore lint/correctness/noUnknownTypeSelector: app is custom element */
 	app {
 		display: block;
 		position: relative;
@@ -162,98 +160,89 @@
 		min-height: 100vh;
 	}
 
-	/* Ensure xterm terminal fills container height */
-	.xterm {
-		height: 100%;
-		width: 100%;
+	/* Ambient background - subtle gradient, not busy */
+	.ambient-bg {
+		background:
+			radial-gradient(ellipse 100% 80% at 70% -20%, oklch(0.72 0.25 328 / 0.07) 0%, transparent 50%),
+			radial-gradient(ellipse 80% 60% at 20% 100%, oklch(0.60 0.20 340 / 0.04) 0%, transparent 40%),
+			var(--background);
 	}
 
-	.xterm-screen {
-		height: 100%;
-		width: 100%;
-	}
+	/* Terminal */
+	.xterm { height: 100%; width: 100%; }
+	.xterm-screen { height: 100%; width: 100%; }
+	.xterm .xterm-rows a { color: inherit; cursor: pointer; }
 
-	/* Style links in terminal (like iTerm) */
-	/* xterm uses underline-5 (dashed) for links on hover */
-	.xterm .xterm-rows a {
-		color: inherit;
-		cursor: pointer;
-	}
-
-	.xterm .xterm-rows a.xterm-underline-5 {
-		text-decoration-color: #3b8eea;
-	}
-
-	.xterm .xterm-rows a:hover.xterm-underline-5 {
-		text-decoration-color: #5ca8ff;
-	}
-
-	/* Hide scrollbar for workspace carousel and tabs */
+	/* Scrollbars - subtle */
 	.hide-scrollbar {
-		scrollbar-width: none; /* Firefox */
-		-ms-overflow-style: none; /* IE/Edge */
+		scrollbar-width: none;
+		-ms-overflow-style: none;
 	}
+	.hide-scrollbar::-webkit-scrollbar { display: none; }
 
-	.hide-scrollbar::-webkit-scrollbar {
-		display: none; /* Chrome/Safari/Electron */
-	}
-
-	/* Dark mode scrollbar styling */
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: rgb(63 63 70 / 0.5) transparent;
+		scrollbar-color: oklch(0.4 0.03 328 / 0.4) transparent;
 	}
-
-	*::-webkit-scrollbar {
-		width: 12px;
-		height: 12px;
-	}
-
-	*::-webkit-scrollbar-track {
-		background: transparent;
-	}
-
+	*::-webkit-scrollbar { width: 6px; height: 6px; }
+	*::-webkit-scrollbar-track { background: transparent; }
 	*::-webkit-scrollbar-thumb {
-		background-color: rgb(63 63 70 / 0.5);
-		border-radius: 6px;
-		border: 3px solid transparent;
-		background-clip: padding-box;
+		background: oklch(0.4 0.03 328 / 0.4);
+		border-radius: 3px;
 	}
-
 	*::-webkit-scrollbar-thumb:hover {
-		background-color: rgb(82 82 91 / 0.7);
+		background: oklch(0.5 0.04 328 / 0.5);
 	}
 
-	*::-webkit-scrollbar-thumb:active {
-		background-color: rgb(113 113 122 / 0.8);
+	/* Drag regions */
+	.drag { -webkit-app-region: drag; }
+	.no-drag { -webkit-app-region: no-drag; }
+
+	/* Toast fix */
+	[data-sonner-toast]:has(.update-toast) { transform: translateY(0); }
+}
+
+@layer utilities {
+	/* The ONE glass treatment - used everywhere consistently */
+	.glass {
+		background: var(--glass-bg);
+		backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+		border: 1px solid var(--glass-border);
 	}
 
-	*::-webkit-scrollbar-corner {
-		background: transparent;
+	/* Elevation through shadow only - no gimmicks */
+	.elevation-1 {
+		box-shadow: 0 1px 3px oklch(0 0 0 / 0.2), 0 1px 2px oklch(0 0 0 / 0.15);
+	}
+	.elevation-2 {
+		box-shadow: 0 4px 12px oklch(0 0 0 / 0.25), 0 2px 4px oklch(0 0 0 / 0.1);
+	}
+	.elevation-3 {
+		box-shadow: 0 8px 24px oklch(0 0 0 / 0.3), 0 4px 8px oklch(0 0 0 / 0.15);
 	}
 
-	/* Thin scrollbar variant for compact areas */
-	.scrollbar-thin::-webkit-scrollbar {
-		width: 8px;
-		height: 8px;
+	/* Primary glow - ONLY for primary interactive elements */
+	.primary-glow {
+		box-shadow: 0 0 20px oklch(0.72 0.25 328 / 0.25);
+	}
+	.primary-glow-subtle {
+		box-shadow: 0 0 12px oklch(0.72 0.25 328 / 0.15);
 	}
 
-	.scrollbar-thin::-webkit-scrollbar-thumb {
-		border-radius: 4px;
-		border: 2px solid transparent;
+	/* Active indicator - simple and clean */
+	.active-indicator {
+		position: relative;
 	}
-
-	/* Electron drag region utilities */
-	.drag {
-		-webkit-app-region: drag;
-	}
-
-	.no-drag {
-		-webkit-app-region: no-drag;
-	}
-
-	/* Disable sonner toast hover animation for update toast only */
-	[data-sonner-toast]:has(.update-toast) {
-		transform: translateY(0);
+	.active-indicator::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 3px;
+		height: 60%;
+		background: var(--primary);
+		border-radius: 0 2px 2px 0;
 	}
 }

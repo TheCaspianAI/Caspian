@@ -17,10 +17,7 @@ export function TopBar() {
 
 	return (
 		<div className="drag w-full px-3 pt-2 pb-1">
-			<div className="glass-panel h-11 w-full flex items-center justify-between rounded-xl relative">
-				{/* Pink accent line at bottom */}
-				<div className="absolute bottom-0 left-4 right-4 h-px neon-line opacity-50" />
-
+			<div className="glass h-11 w-full flex items-center justify-between rounded-xl">
 				<div
 					className="no-drag flex items-center gap-2 h-full"
 					style={{

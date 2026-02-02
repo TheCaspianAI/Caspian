@@ -254,9 +254,9 @@ export function WorkspaceListItem({
 				onClick={handleClick}
 				onMouseEnter={handleMouseEnter}
 				className={cn(
-					"relative flex items-center justify-center size-8 rounded-md",
-					"hover:bg-muted/50 transition-colors",
-					isActive && "bg-muted",
+					"relative flex items-center justify-center size-8 rounded-lg",
+					"hover:bg-accent transition-colors duration-150",
+					isActive && "bg-accent",
 				)}
 			>
 				{workspaceStatus === "working" ? (
@@ -364,18 +364,18 @@ export function WorkspaceListItem({
 			onMouseEnter={handleMouseEnter}
 			onDoubleClick={isBranchWorkspace ? undefined : rename.startRename}
 			className={cn(
-				"flex items-center w-full pl-3 pr-2 text-sm",
-				"hover:bg-muted/50 transition-colors text-left cursor-pointer",
+				"flex items-center w-full pl-3 pr-2 text-sm mx-1.5 rounded-lg",
+				"hover:bg-accent transition-colors duration-150 text-left cursor-pointer",
 				"group relative",
 				showBranchSubtitle ? "py-1.5" : "py-2",
-				isActive && "bg-muted",
+				isActive && "bg-accent",
 				isDragging && "opacity-30",
 			)}
 			style={{ cursor: isDragging ? "grabbing" : "pointer" }}
 		>
-			{/* Active indicator - left border */}
+			{/* Active indicator */}
 			{isActive && (
-				<div className="absolute left-0 top-0 bottom-0 w-0.5 bg-primary rounded-r" />
+				<div className="absolute left-0 top-2 bottom-2 w-0.5 bg-primary rounded-r" />
 			)}
 
 			{/* Icon with status indicator */}

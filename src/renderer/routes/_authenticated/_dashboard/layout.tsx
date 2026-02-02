@@ -89,9 +89,9 @@ function DashboardLayout() {
 	);
 
 	return (
-		<div className="flex flex-col h-full w-full">
+		<div className="flex flex-col h-full w-full ambient-bg">
 			<TopBar />
-			<div className="flex flex-1 overflow-hidden">
+			<div className="flex flex-1 overflow-hidden px-3 pb-3 gap-2">
 				{isWorkspaceSidebarOpen && (
 					<ResizablePanel
 						width={workspaceSidebarWidth}
@@ -106,7 +106,9 @@ function DashboardLayout() {
 						<WorkspaceSidebar isCollapsed={isWorkspaceSidebarCollapsed()} />
 					</ResizablePanel>
 				)}
-				<Outlet />
+				<div className="flex-1 rounded-xl overflow-hidden bg-card/50 border border-border">
+					<Outlet />
+				</div>
 			</div>
 		</div>
 	);

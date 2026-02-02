@@ -17,7 +17,6 @@ import type { Collection } from "@tanstack/react-db";
 import { createCollection } from "@tanstack/react-db";
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
 import { env } from "renderer/env.renderer";
-import { getAuthToken } from "renderer/lib/auth-client";
 import superjson from "superjson";
 import { z } from "zod";
 
@@ -39,15 +38,11 @@ interface OrgCollections {
 // Per-org collections cache
 const collectionsCache = new Map<string, OrgCollections>();
 
-// Singleton API client with dynamic auth headers
+// Singleton API client
 const apiClient = createTRPCProxyClient<AppRouter>({
 	links: [
 		httpBatchLink({
 			url: `${env.NEXT_PUBLIC_API_URL}/api/trpc`,
-			headers: () => {
-				const token = getAuthToken();
-				return token ? { Authorization: `Bearer ${token}` } : {};
-			},
 			transformer: superjson,
 		}),
 	],
@@ -59,12 +54,6 @@ const organizationsCollection = createCollection(
 		shapeOptions: {
 			url: electricUrl,
 			params: { table: "auth.organizations" },
-			headers: {
-				Authorization: () => {
-					const token = getAuthToken();
-					return token ? `Bearer ${token}` : "";
-				},
-			},
 			columnMapper,
 		},
 		getKey: (item) => item.id,
@@ -87,12 +76,6 @@ const apiKeysCollection = createCollection(
 		shapeOptions: {
 			url: electricUrl,
 			params: { table: "auth.apikeys" },
-			headers: {
-				Authorization: () => {
-					const token = getAuthToken();
-					return token ? `Bearer ${token}` : "";
-				},
-			},
 			columnMapper,
 		},
 		getKey: (item) => item.id,
@@ -100,13 +83,6 @@ const apiKeysCollection = createCollection(
 );
 
 function createOrgCollections(organizationId: string): OrgCollections {
-	const headers = {
-		Authorization: () => {
-			const token = getAuthToken();
-			return token ? `Bearer ${token}` : "";
-		},
-	};
-
 	const tasks = createCollection(
 		electricCollectionOptions<SelectTask>({
 			id: `tasks-${organizationId}`,

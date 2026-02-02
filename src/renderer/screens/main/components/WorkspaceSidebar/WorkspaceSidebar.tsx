@@ -29,10 +29,10 @@ export function WorkspaceSidebar({
 	);
 
 	return (
-		<SidebarDropZone className="flex flex-col h-full bg-background">
+		<SidebarDropZone className="flex flex-col h-full glass rounded-xl overflow-hidden">
 			<WorkspaceSidebarHeader isCollapsed={isCollapsed} />
 
-			<div className="flex-1 overflow-y-auto hide-scrollbar">
+			<div className="flex-1 overflow-y-auto hide-scrollbar fade-mask-y">
 				{groups.map((group, index) => (
 					<ProjectSection
 						key={group.project.id}
@@ -51,7 +51,7 @@ export function WorkspaceSidebar({
 				{groups.length === 0 && !isCollapsed && (
 					<div className="flex flex-col items-center justify-center h-32 text-muted-foreground text-sm">
 						<span>No workspaces yet</span>
-						<span className="text-xs mt-1">
+						<span className="text-xs mt-1 text-muted-foreground/60">
 							Add project or drag a Git repo folder here
 						</span>
 					</div>

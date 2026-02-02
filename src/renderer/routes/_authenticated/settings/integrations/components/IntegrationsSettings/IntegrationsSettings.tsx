@@ -14,13 +14,9 @@ import { useCallback, useEffect, useState } from "react";
 import { FaGithub, FaSlack } from "react-icons/fa";
 import { HiCheckCircle, HiOutlineArrowTopRightOnSquare } from "react-icons/hi2";
 import { SiLinear } from "react-icons/si";
-import {
-	GATED_FEATURES,
-	usePaywall,
-} from "renderer/components/Paywall/usePaywall";
 import { env } from "renderer/env.renderer";
 import { apiTrpcClient } from "renderer/lib/api-trpc-client";
-import { authClient } from "renderer/lib/auth-client";
+import { MOCK_ORG_ID } from "shared/constants";
 import { useCollections } from "renderer/routes/_authenticated/providers/CollectionsProvider";
 import {
 	isItemVisible,
@@ -44,10 +40,8 @@ interface GithubInstallation {
 export function IntegrationsSettings({
 	visibleItems,
 }: IntegrationsSettingsProps) {
-	const { data: session } = authClient.useSession();
-	const activeOrganizationId = session?.session?.activeOrganizationId;
+	const activeOrganizationId = MOCK_ORG_ID;
 	const collections = useCollections();
-	const { gateFeature } = usePaywall();
 
 	const { data: integrations, isLoading: isLoadingIntegrations } = useLiveQuery(
 		(q) =>
@@ -147,11 +141,7 @@ export function IntegrationsSettings({
 						isConnected={isLinearConnected}
 						connectedOrgName={linearConnection?.externalOrgName}
 						isLoading={isLoading}
-						onManage={() =>
-							gateFeature(GATED_FEATURES.INTEGRATIONS, () =>
-								handleOpenWeb("/integrations/linear"),
-							)
-						}
+						onManage={() => handleOpenWeb("/integrations/linear")}
 					/>
 				)}
 
@@ -163,11 +153,7 @@ export function IntegrationsSettings({
 						isConnected={isGithubConnected}
 						connectedOrgName={githubInstallation?.accountLogin}
 						isLoading={isLoading}
-						onManage={() =>
-							gateFeature(GATED_FEATURES.INTEGRATIONS, () =>
-								handleOpenWeb("/integrations/github"),
-							)
-						}
+						onManage={() => handleOpenWeb("/integrations/github")}
 					/>
 				)}
 
@@ -179,11 +165,7 @@ export function IntegrationsSettings({
 						isConnected={isSlackConnected}
 						connectedOrgName={slackConnection?.externalOrgName}
 						isLoading={isLoading}
-						onManage={() =>
-							gateFeature(GATED_FEATURES.INTEGRATIONS, () =>
-								handleOpenWeb("/integrations/slack"),
-							)
-						}
+						onManage={() => handleOpenWeb("/integrations/slack")}
 					/>
 				)}
 			</div>
