@@ -1,42 +1,46 @@
 import { useNavigate } from "@tanstack/react-router";
+import { useCallback } from "react";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { StatusColumn } from "./StatusColumn";
 import { useKanbanData } from "./useKanbanData";
 
-interface KanbanViewProps {
-  paneId: string;
-  tabId: string;
-}
-
-export function KanbanView({ paneId, tabId }: KanbanViewProps) {
+export function KanbanView() {
   const navigate = useNavigate();
   const { columns } = useKanbanData();
-  const setActiveTab = useTabsStore((s) => s.setActiveTab);
-  const setFocusedPane = useTabsStore((s) => s.setFocusedPane);
-  const tabs = useTabsStore((s) => s.tabs);
+  const { setActiveTab, setFocusedPane, tabs } = useTabsStore((s) => ({
+    setActiveTab: s.setActiveTab,
+    setFocusedPane: s.setFocusedPane,
+    tabs: s.tabs,
+  }));
 
-  const handleAgentDoubleClick = (nodeId: string) => {
-    // Navigate to the node's workspace
-    navigate({ to: "/workspace/$workspaceId", params: { workspaceId: nodeId } });
-  };
-
-  const handleViewInTerminal = (nodeId: string, targetPaneId: string) => {
-    if (!targetPaneId) {
-      // No pane, just navigate to node
+  const handleAgentDoubleClick = useCallback(
+    (nodeId: string) => {
+      // Navigate to the node's workspace
       navigate({ to: "/workspace/$workspaceId", params: { workspaceId: nodeId } });
-      return;
-    }
+    },
+    [navigate]
+  );
 
-    // Find the tab containing this pane
-    const targetTab = tabs.find((t) => t.nodeId === nodeId);
-    if (targetTab) {
-      // Navigate to node
-      navigate({ to: "/workspace/$workspaceId", params: { workspaceId: nodeId } });
-      // Activate the tab and focus the pane
-      setActiveTab(nodeId, targetTab.id);
-      setFocusedPane(targetTab.id, targetPaneId);
-    }
-  };
+  const handleViewInTerminal = useCallback(
+    (nodeId: string, targetPaneId: string) => {
+      if (!targetPaneId) {
+        // No pane, just navigate to node
+        navigate({ to: "/workspace/$workspaceId", params: { workspaceId: nodeId } });
+        return;
+      }
+
+      // Find the tab containing this pane
+      const targetTab = tabs.find((t) => t.nodeId === nodeId);
+      if (targetTab) {
+        // Navigate to node
+        navigate({ to: "/workspace/$workspaceId", params: { workspaceId: nodeId } });
+        // Activate the tab and focus the pane
+        setActiveTab(nodeId, targetTab.id);
+        setFocusedPane(targetTab.id, targetPaneId);
+      }
+    },
+    [navigate, tabs, setActiveTab, setFocusedPane]
+  );
 
   return (
     <div className="h-full w-full flex flex-col bg-background">
