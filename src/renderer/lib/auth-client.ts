@@ -1,4 +1,3 @@
-import { stripeClient } from "@better-auth/stripe/client";
 import type { auth } from "lib/auth-types";
 import {
 	apiKeyClient,
@@ -29,7 +28,6 @@ export const authClient = createAuthClient({
 	plugins: [
 		organizationClient(),
 		customSessionClient<typeof auth>(),
-		stripeClient({ subscription: true }),
 		apiKeyClient(),
 	],
 	fetchOptions: {

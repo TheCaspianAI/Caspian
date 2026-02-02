@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { DndProvider } from "react-dnd";
 import { NewWorkspaceModal } from "renderer/components/NewWorkspaceModal";
-import { Paywall } from "renderer/components/Paywall";
 import { useUpdateListener } from "renderer/components/UpdateToast";
 import { env } from "renderer/env.renderer";
 import { authClient } from "renderer/lib/auth-client";
@@ -81,7 +80,6 @@ function AuthenticatedLayout() {
 				<Outlet />
 				<WorkspaceInitEffects />
 				<NewWorkspaceModal />
-				<Paywall />
 			</CollectionsProvider>
 		</DndProvider>
 	);

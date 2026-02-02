@@ -4,7 +4,6 @@ import {
 	HiOutlineBell,
 	HiOutlineBuildingOffice2,
 	HiOutlineCommandLine,
-	HiOutlineCreditCard,
 	HiOutlineDevicePhoneMobile,
 	HiOutlineKey,
 	HiOutlinePaintBrush,
@@ -28,7 +27,6 @@ type SettingsRoute =
 	| "/settings/behavior"
 	| "/settings/terminal"
 	| "/settings/integrations"
-	| "/settings/billing"
 	| "/settings/devices"
 	| "/settings/api-keys";
 
@@ -85,12 +83,6 @@ const GENERAL_SECTIONS: {
 		section: "integrations",
 		label: "Integrations",
 		icon: <HiOutlinePuzzlePiece className="h-4 w-4" />,
-	},
-	{
-		id: "/settings/billing",
-		section: "billing",
-		label: "Billing",
-		icon: <HiOutlineCreditCard className="h-4 w-4" />,
 	},
 	{
 		id: "/settings/devices",
