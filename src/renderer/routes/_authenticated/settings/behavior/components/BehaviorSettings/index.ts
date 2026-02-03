@@ -1,1 +1,0 @@
-export { BehaviorSettings } from "./BehaviorSettings";
