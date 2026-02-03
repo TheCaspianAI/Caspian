@@ -36,18 +36,12 @@ export function RepositoryAccordionItem({
 	const [branchPrefixCustom, setBranchPrefixCustom] = useState(
 		repository.branchPrefixCustom ?? ""
 	);
-	const [setupScript, setSetupScript] = useState(repository.setupScript ?? "");
-	const [teardownScript, setTeardownScript] = useState(
-		repository.teardownScript ?? ""
-	);
 
 	// Sync with server data
 	useEffect(() => {
 		setName(repository.name);
 		setBranchPrefixMode(repository.branchPrefixMode ?? "none");
 		setBranchPrefixCustom(repository.branchPrefixCustom ?? "");
-		setSetupScript(repository.setupScript ?? "");
-		setTeardownScript(repository.teardownScript ?? "");
 	}, [repository]);
 
 	const updateRepository = electronTrpc.repositories.update.useMutation({
@@ -78,24 +72,6 @@ export function RepositoryAccordionItem({
 			updateRepository.mutate({
 				id: repository.id,
 				branchPrefixCustom: branchPrefixCustom || null,
-			});
-		}
-	};
-
-	const handleSetupScriptBlur = () => {
-		if (setupScript !== repository.setupScript) {
-			updateRepository.mutate({
-				id: repository.id,
-				setupScript: setupScript || null,
-			});
-		}
-	};
-
-	const handleTeardownScriptBlur = () => {
-		if (teardownScript !== repository.teardownScript) {
-			updateRepository.mutate({
-				id: repository.id,
-				teardownScript: teardownScript || null,
 			});
 		}
 	};
@@ -199,34 +175,6 @@ export function RepositoryAccordionItem({
 								/>
 							)}
 						</div>
-					</div>
-
-					{/* Setup Script */}
-					<div className="grid grid-cols-[140px_1fr] items-start gap-4">
-						<Label className="text-sm text-muted-foreground pt-2">
-							Setup Script
-						</Label>
-						<Input
-							value={setupScript}
-							onChange={(e) => setSetupScript(e.target.value)}
-							onBlur={handleSetupScriptBlur}
-							placeholder="e.g., npm install"
-							className="max-w-md font-mono text-xs"
-						/>
-					</div>
-
-					{/* Teardown Script */}
-					<div className="grid grid-cols-[140px_1fr] items-start gap-4">
-						<Label className="text-sm text-muted-foreground pt-2">
-							Teardown Script
-						</Label>
-						<Input
-							value={teardownScript}
-							onChange={(e) => setTeardownScript(e.target.value)}
-							onBlur={handleTeardownScriptBlur}
-							placeholder="e.g., cleanup.sh"
-							className="max-w-md font-mono text-xs"
-						/>
 					</div>
 				</div>
 			)}
