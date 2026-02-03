@@ -1,8 +1,11 @@
 import { Spinner } from "ui/components/ui/spinner";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { StartView } from "renderer/screens/main/components/StartView";
+import { OnboardingScreen } from "renderer/screens/main/components/OnboardingScreen";
+
+const ONBOARDING_SEEN_KEY = "caspian-onboarding-seen";
 
 export const Route = createFileRoute("/_authenticated/_dashboard/node/")({
 	component: NodeIndexPage,
@@ -24,6 +27,16 @@ function NodeIndexPage() {
 	const allNodes = nodes?.flatMap((group: { nodes: Array<{ id: string }> }) => group.nodes) ?? [];
 	const hasNoNodes = !isLoading && allNodes.length === 0;
 
+	// Onboarding state - show only for first-time users with no nodes
+	const [showOnboarding, setShowOnboarding] = useState(() => {
+		return !localStorage.getItem(ONBOARDING_SEEN_KEY);
+	});
+
+	const handleOnboardingComplete = () => {
+		localStorage.setItem(ONBOARDING_SEEN_KEY, "true");
+		setShowOnboarding(false);
+	};
+
 	useEffect(() => {
 		if (isLoading || !nodes) return;
 		if (allNodes.length === 0) return; // Show StartView instead
@@ -41,6 +54,11 @@ function NodeIndexPage() {
 			});
 		}
 	}, [nodes, isLoading, navigate, allNodes]);
+
+	// Show onboarding first for new users with no nodes
+	if (hasNoNodes && showOnboarding) {
+		return <OnboardingScreen onContinue={handleOnboardingComplete} />;
+	}
 
 	if (hasNoNodes) {
 		return <StartView />;
