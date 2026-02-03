@@ -10,7 +10,7 @@ export function RepositoriesAccordion({
 	searchQuery,
 }: RepositoriesAccordionProps) {
 	const { data: repositories, isLoading } =
-		electronTrpc.repositories.getAll.useQuery();
+		electronTrpc.repositories.getRecents.useQuery();
 
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 
