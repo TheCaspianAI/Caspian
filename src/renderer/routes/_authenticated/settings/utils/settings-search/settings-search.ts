@@ -6,43 +6,26 @@ export const SETTING_ITEM_ID = {
 	APPEARANCE_MARKDOWN: "appearance-markdown",
 	APPEARANCE_CUSTOM_THEMES: "appearance-custom-themes",
 
-	// Preferences (consolidated from ringtones, keyboard, behavior)
+	// Preferences
 	PREFERENCES_NOTIFICATIONS: "preferences-notifications",
 	PREFERENCES_KEYBOARD: "preferences-keyboard",
 	PREFERENCES_CONFIRM_QUIT: "preferences-confirm-quit",
 	PREFERENCES_BRANCH_PREFIX: "preferences-branch-prefix",
 	PREFERENCES_LINK_BEHAVIOR: "preferences-link-behavior",
 
-	// Behavior
-	BEHAVIOR_CONFIRM_QUIT: "behavior-confirm-quit",
-	BEHAVIOR_BRANCH_PREFIX: "behavior-branch-prefix",
-
-	// Terminal
-	TERMINAL_PRESETS: "terminal-presets",
-	TERMINAL_QUICK_ADD: "terminal-quick-add",
-	TERMINAL_AUTO_APPLY_PRESET: "terminal-auto-apply-preset",
-	TERMINAL_SESSIONS: "terminal-sessions",
-	TERMINAL_LINK_BEHAVIOR: "terminal-link-behavior",
-
-	// Presets (from terminal)
+	// Presets
 	PRESETS_LIST: "presets-list",
 	PRESETS_AGENT_TEMPLATES: "presets-agent-templates",
 	PRESETS_AUTO_APPLY: "presets-auto-apply",
 
-	// Sessions (from terminal)
+	// Sessions
 	SESSIONS_ACTIVE: "sessions-active",
 	SESSIONS_CONTROLS: "sessions-controls",
 
-	// Repository (was project)
+	// Repository
 	REPOSITORY_NAME: "repository-name",
 	REPOSITORY_PATH: "repository-path",
-	REPOSITORY_SCRIPTS: "repository-scripts",
 	REPOSITORY_BRANCH_PREFIX: "repository-branch-prefix",
-
-	// Node (was workspace)
-	NODE_NAME: "node-name",
-	NODE_BRANCH: "node-branch",
-	NODE_PATH: "node-path",
 } as const;
 
 export type SettingItemId =
@@ -107,7 +90,7 @@ export const SETTINGS_ITEMS: SettingsItem[] = [
 		section: "preferences",
 		title: "Branch Prefix",
 		description: "Configure branch naming conventions for new nodes",
-		keywords: ["preferences", "branch", "prefix", "naming", "git", "node"],
+		keywords: ["preferences", "branch", "prefix", "naming", "git"],
 	},
 	{
 		id: SETTING_ITEM_ID.PREFERENCES_LINK_BEHAVIOR,
@@ -137,7 +120,7 @@ export const SETTINGS_ITEMS: SettingsItem[] = [
 		section: "presets",
 		title: "Auto-apply Default Preset",
 		description: "Automatically apply default preset when creating nodes",
-		keywords: ["presets", "default", "auto", "apply", "node", "create", "startup"],
+		keywords: ["presets", "default", "auto", "apply", "create", "startup"],
 	},
 
 	// Sessions section
@@ -172,41 +155,11 @@ export const SETTINGS_ITEMS: SettingsItem[] = [
 		keywords: ["repository", "path", "folder", "directory", "location", "git", "root"],
 	},
 	{
-		id: SETTING_ITEM_ID.REPOSITORY_SCRIPTS,
-		section: "repository",
-		title: "Setup & Teardown Scripts",
-		description: "Shell scripts executed when nodes are created or removed",
-		keywords: ["repository", "scripts", "setup", "teardown", "bash", "shell", "hooks", "init"],
-	},
-	{
 		id: SETTING_ITEM_ID.REPOSITORY_BRANCH_PREFIX,
 		section: "repository",
 		title: "Branch Prefix Override",
 		description: "Override the default branch prefix for this repository",
 		keywords: ["repository", "branch", "prefix", "naming", "git", "override"],
-	},
-
-	// Node section
-	{
-		id: SETTING_ITEM_ID.NODE_NAME,
-		section: "node",
-		title: "Node Name",
-		description: "Identifier for this node",
-		keywords: ["node", "name", "rename", "title", "label"],
-	},
-	{
-		id: SETTING_ITEM_ID.NODE_BRANCH,
-		section: "node",
-		title: "Active Branch",
-		description: "Current git branch for this node",
-		keywords: ["node", "branch", "git", "worktree", "checkout"],
-	},
-	{
-		id: SETTING_ITEM_ID.NODE_PATH,
-		section: "node",
-		title: "Working Directory",
-		description: "Filesystem path for this node",
-		keywords: ["node", "path", "folder", "directory", "location"],
 	},
 ];
 
