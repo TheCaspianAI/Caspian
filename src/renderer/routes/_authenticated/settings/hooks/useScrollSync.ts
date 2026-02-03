@@ -19,6 +19,8 @@ export function useScrollSync({ containerRef }: UseScrollSyncOptions) {
 		useState<SettingsSection>("appearance");
 	const sectionRefs = useRef<Map<SettingsSection, HTMLElement>>(new Map());
 	const isScrollingRef = useRef(false);
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+	const [sectionCount, setSectionCount] = useState(0);
 
 	// Register section ref
 	const registerSection = useCallback(
@@ -28,6 +30,8 @@ export function useScrollSync({ containerRef }: UseScrollSyncOptions) {
 			} else {
 				sectionRefs.current.delete(id);
 			}
+			// Trigger re-observe by updating count
+			setSectionCount(sectionRefs.current.size);
 		},
 		[]
 	);
@@ -44,13 +48,27 @@ export function useScrollSync({ containerRef }: UseScrollSyncOptions) {
 
 			element.scrollIntoView({ behavior: "smooth", block: "start" });
 
+			// Clear any pending timeout
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+
 			// Reset scrolling flag after animation
-			setTimeout(() => {
+			timeoutRef.current = setTimeout(() => {
 				isScrollingRef.current = false;
 			}, 500);
 		},
 		[containerRef]
 	);
+
+	// Cleanup timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (timeoutRef.current) {
+				clearTimeout(timeoutRef.current);
+			}
+		};
+	}, []);
 
 	// Observe scroll position and update active section
 	useEffect(() => {
@@ -90,13 +108,13 @@ export function useScrollSync({ containerRef }: UseScrollSyncOptions) {
 			}
 		);
 
-		// Observe all sections
+		// Observe all registered sections
 		for (const element of sectionRefs.current.values()) {
 			observer.observe(element);
 		}
 
 		return () => observer.disconnect();
-	}, [containerRef]);
+	}, [containerRef, sectionCount]);
 
 	return {
 		activeSection,
