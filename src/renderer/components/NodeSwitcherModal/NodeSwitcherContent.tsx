@@ -208,19 +208,36 @@ export function NodeSwitcherContent() {
 		setSelectedIndex(0);
 	}, [filteredItems.length, searchQuery, filterMode]);
 
+	// Find next valid index (skipping current node)
+	const findNextIndex = useCallback(
+		(fromIndex: number, direction: "up" | "down") => {
+			const step = direction === "down" ? 1 : -1;
+			let nextIndex = fromIndex + step;
+
+			while (nextIndex >= 0 && nextIndex < flatItems.length) {
+				const item = flatItems[nextIndex];
+				if (item.nodeId !== currentNodeId) {
+					return nextIndex;
+				}
+				nextIndex += step;
+			}
+
+			return fromIndex; // No valid index found, stay in place
+		},
+		[flatItems, currentNodeId],
+	);
+
 	// Keyboard navigation
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			switch (e.key) {
 				case "ArrowDown":
 					e.preventDefault();
-					setSelectedIndex((prev) =>
-						prev < flatItems.length - 1 ? prev + 1 : prev,
-					);
+					setSelectedIndex((prev) => findNextIndex(prev, "down"));
 					break;
 				case "ArrowUp":
 					e.preventDefault();
-					setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+					setSelectedIndex((prev) => findNextIndex(prev, "up"));
 					break;
 				case "Enter":
 					e.preventDefault();
@@ -231,7 +248,7 @@ export function NodeSwitcherContent() {
 					break;
 			}
 		},
-		[flatItems, selectedIndex, currentNodeId, handleSelect],
+		[flatItems, selectedIndex, currentNodeId, handleSelect, findNextIndex],
 	);
 
 	// Scroll selected item into view
@@ -269,7 +286,6 @@ export function NodeSwitcherContent() {
 						placeholder="Search nodes and repositories..."
 						value={searchQuery}
 						onChange={(e) => setSearchQuery(e.target.value)}
-						onKeyDown={handleKeyDown}
 						className="pl-9 h-9 bg-background/30 border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
 					/>
 				</div>

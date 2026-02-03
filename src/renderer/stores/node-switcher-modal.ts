@@ -5,6 +5,7 @@ interface NodeSwitcherModalState {
 	isOpen: boolean;
 	openModal: () => void;
 	closeModal: () => void;
+	toggleModal: () => void;
 }
 
 export const useNodeSwitcherModalStore =
@@ -20,6 +21,10 @@ export const useNodeSwitcherModalStore =
 				closeModal: () => {
 					set({ isOpen: false });
 				},
+
+				toggleModal: () => {
+					set((state) => ({ isOpen: !state.isOpen }));
+				},
 			}),
 			{ name: "NodeSwitcherModalStore" },
 		),
@@ -32,3 +37,5 @@ export const useOpenNodeSwitcherModal = () =>
 	useNodeSwitcherModalStore((state) => state.openModal);
 export const useCloseNodeSwitcherModal = () =>
 	useNodeSwitcherModalStore((state) => state.closeModal);
+export const useToggleNodeSwitcherModal = () =>
+	useNodeSwitcherModalStore((state) => state.toggleModal);

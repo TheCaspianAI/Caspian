@@ -7,7 +7,7 @@ import {
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import {
 	HiMiniChevronDown,
@@ -22,6 +22,7 @@ import {
 } from "renderer/assets/app-icons/preset-icons";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { usePresets } from "renderer/react-query/presets";
+import { useOpenSettings } from "renderer/stores/settings-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { useTabsWithPresets } from "renderer/stores/tabs/useTabsWithPresets";
 import {
@@ -50,7 +51,7 @@ export function GroupStrip() {
 
 	const { presets } = usePresets();
 	const isDark = useIsDarkTheme();
-	const navigate = useNavigate();
+	const openSettings = useOpenSettings();
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	const tabs = useMemo(
@@ -96,7 +97,7 @@ export function GroupStrip() {
 	};
 
 	const handleOpenPresetsSettings = () => {
-		navigate({ to: "/settings" });
+		openSettings("presets");
 		setDropdownOpen(false);
 	};
 

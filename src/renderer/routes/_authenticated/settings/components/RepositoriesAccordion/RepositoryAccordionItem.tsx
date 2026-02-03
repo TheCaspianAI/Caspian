@@ -14,6 +14,7 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import { cn } from "ui/lib/utils";
 import { BRANCH_PREFIX_MODE_LABELS } from "../../utils/branch-prefix";
 import { ClickablePath } from "../ClickablePath";
+import { ScriptsEditor } from "../../repository/$repositoryId/components/RepositorySettings/components/ScriptsEditor";
 
 interface RepositoryAccordionItemProps {
 	repository: SelectRepository;
@@ -167,6 +168,14 @@ export function RepositoryAccordionItem({
 								/>
 							)}
 						</div>
+					</div>
+
+					{/* Scripts Editor */}
+					<div className="pt-4 border-t border-border">
+						<ScriptsEditor
+							repositoryId={repository.id}
+							repositoryName={repository.name}
+						/>
 					</div>
 				</div>
 			)}

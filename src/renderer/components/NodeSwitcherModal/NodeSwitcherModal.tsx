@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
 	useNodeSwitcherModalOpen,
 	useCloseNodeSwitcherModal,
@@ -7,6 +8,21 @@ import { NodeSwitcherContent } from "./NodeSwitcherContent";
 export function NodeSwitcherModal() {
 	const isOpen = useNodeSwitcherModalOpen();
 	const closeModal = useCloseNodeSwitcherModal();
+
+	// Handle Escape key
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key === "Escape") {
+				e.preventDefault();
+				closeModal();
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen, closeModal]);
 
 	if (!isOpen) return null;
 

@@ -1,4 +1,3 @@
-// src/renderer/routes/_authenticated/settings/hooks/useScrollSync.ts
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { SettingsSection } from "renderer/stores/settings-state";
 

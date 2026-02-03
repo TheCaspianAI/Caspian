@@ -558,7 +558,7 @@ export const HOTKEYS = {
 
 	// Dashboard
 	OPEN_DASHBOARD: defineHotkey({
-		keys: "meta+shift+l",
+		keys: "meta+shift+enter",
 		label: "Toggle Agents Dashboard",
 		category: "Node",
 		description: "Toggle the agents dashboard",

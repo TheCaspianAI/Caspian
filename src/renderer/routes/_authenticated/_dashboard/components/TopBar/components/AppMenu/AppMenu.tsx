@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuShortcut,
 } from "ui/components/ui/dropdown-menu";
-import { useNavigate } from "@tanstack/react-router";
 import { FaGithub, FaXTwitter } from "react-icons/fa6";
 import {
   HiOutlineChatBubbleLeftRight,
@@ -20,9 +19,10 @@ import {
 import { IoBugOutline } from "react-icons/io5";
 import { LuKeyboard, LuSettings2 } from "react-icons/lu";
 import { useHotkeyText } from "renderer/stores/hotkeys";
+import { useOpenSettings } from "renderer/stores/settings-state";
 
 export function AppMenu() {
-  const navigate = useNavigate();
+  const openSettings = useOpenSettings();
   const settingsHotkey = useHotkeyText("OPEN_SETTINGS");
   const shortcutsHotkey = useHotkeyText("SHOW_HOTKEYS");
 
@@ -44,7 +44,7 @@ export function AppMenu() {
       <DropdownMenuContent align="end" className="w-56">
         {/* Settings */}
         <DropdownMenuItem
-          onSelect={() => navigate({ to: "/settings" })}
+          onSelect={() => openSettings()}
         >
           <HiOutlineCog6Tooth className="h-4 w-4" />
           <span>Settings</span>
@@ -57,7 +57,7 @@ export function AppMenu() {
 
         {/* Help & Support */}
         <DropdownMenuItem
-          onClick={() => navigate({ to: "/settings" })}
+          onClick={() => openSettings()}
         >
           <LuKeyboard className="h-4 w-4" />
           Keyboard Shortcuts

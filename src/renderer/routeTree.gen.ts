@@ -11,13 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedLayoutRouteImport } from './routes/_authenticated/layout'
 import { Route as PageRouteImport } from './routes/page'
-import { Route as AuthenticatedSettingsLayoutRouteImport } from './routes/_authenticated/settings/layout'
 import { Route as AuthenticatedDashboardLayoutRouteImport } from './routes/_authenticated/_dashboard/layout'
-import { Route as AuthenticatedSettingsPageRouteImport } from './routes/_authenticated/settings/page'
 import { Route as AuthenticatedDashboardNodesPageRouteImport } from './routes/_authenticated/_dashboard/nodes/page'
 import { Route as AuthenticatedDashboardNodePageRouteImport } from './routes/_authenticated/_dashboard/node/page'
-import { Route as AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport } from './routes/_authenticated/settings/repository/$repositoryId/page'
-import { Route as AuthenticatedSettingsNodeNodeIdPageRouteImport } from './routes/_authenticated/settings/node/$nodeId/page'
 import { Route as AuthenticatedDashboardProjectProjectIdPageRouteImport } from './routes/_authenticated/_dashboard/project/$projectId/page'
 import { Route as AuthenticatedDashboardNodeNodeIdPageRouteImport } from './routes/_authenticated/_dashboard/node/$nodeId/page'
 
@@ -30,22 +26,10 @@ const PageRoute = PageRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedSettingsLayoutRoute =
-  AuthenticatedSettingsLayoutRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => AuthenticatedLayoutRoute,
-  } as any)
 const AuthenticatedDashboardLayoutRoute =
   AuthenticatedDashboardLayoutRouteImport.update({
     id: '/_dashboard',
     getParentRoute: () => AuthenticatedLayoutRoute,
-  } as any)
-const AuthenticatedSettingsPageRoute =
-  AuthenticatedSettingsPageRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedDashboardNodesPageRoute =
   AuthenticatedDashboardNodesPageRouteImport.update({
@@ -58,18 +42,6 @@ const AuthenticatedDashboardNodePageRoute =
     id: '/node/',
     path: '/node/',
     getParentRoute: () => AuthenticatedDashboardLayoutRoute,
-  } as any)
-const AuthenticatedSettingsRepositoryRepositoryIdPageRoute =
-  AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport.update({
-    id: '/repository/$repositoryId/',
-    path: '/repository/$repositoryId/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsNodeNodeIdPageRoute =
-  AuthenticatedSettingsNodeNodeIdPageRouteImport.update({
-    id: '/node/$nodeId/',
-    path: '/node/$nodeId/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedDashboardProjectProjectIdPageRoute =
   AuthenticatedDashboardProjectProjectIdPageRouteImport.update({
@@ -86,74 +58,47 @@ const AuthenticatedDashboardNodeNodeIdPageRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof PageRoute
-  '/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
-  '/settings/': typeof AuthenticatedSettingsPageRoute
   '/node/': typeof AuthenticatedDashboardNodePageRoute
   '/nodes/': typeof AuthenticatedDashboardNodesPageRoute
   '/node/$nodeId/': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  '/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
-  '/settings/repository/$repositoryId/': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof PageRoute
-  '/settings': typeof AuthenticatedSettingsPageRoute
   '/node': typeof AuthenticatedDashboardNodePageRoute
   '/nodes': typeof AuthenticatedDashboardNodesPageRoute
   '/node/$nodeId': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/project/$projectId': typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  '/settings/node/$nodeId': typeof AuthenticatedSettingsNodeNodeIdPageRoute
-  '/settings/repository/$repositoryId': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof PageRoute
   '/_authenticated': typeof AuthenticatedLayoutRouteWithChildren
   '/_authenticated/_dashboard': typeof AuthenticatedDashboardLayoutRouteWithChildren
-  '/_authenticated/settings': typeof AuthenticatedSettingsLayoutRouteWithChildren
-  '/_authenticated/settings/': typeof AuthenticatedSettingsPageRoute
   '/_authenticated/_dashboard/node/': typeof AuthenticatedDashboardNodePageRoute
   '/_authenticated/_dashboard/nodes/': typeof AuthenticatedDashboardNodesPageRoute
   '/_authenticated/_dashboard/node/$nodeId/': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/_authenticated/_dashboard/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
-  '/_authenticated/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
-  '/_authenticated/settings/repository/$repositoryId/': typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/settings'
-    | '/settings/'
     | '/node/'
     | '/nodes/'
     | '/node/$nodeId/'
     | '/project/$projectId/'
-    | '/settings/node/$nodeId/'
-    | '/settings/repository/$repositoryId/'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/settings'
-    | '/node'
-    | '/nodes'
-    | '/node/$nodeId'
-    | '/project/$projectId'
-    | '/settings/node/$nodeId'
-    | '/settings/repository/$repositoryId'
+  to: '/' | '/node' | '/nodes' | '/node/$nodeId' | '/project/$projectId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/_authenticated/_dashboard'
-    | '/_authenticated/settings'
-    | '/_authenticated/settings/'
     | '/_authenticated/_dashboard/node/'
     | '/_authenticated/_dashboard/nodes/'
     | '/_authenticated/_dashboard/node/$nodeId/'
     | '/_authenticated/_dashboard/project/$projectId/'
-    | '/_authenticated/settings/node/$nodeId/'
-    | '/_authenticated/settings/repository/$repositoryId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -177,26 +122,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PageRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsLayoutRouteImport
-      parentRoute: typeof AuthenticatedLayoutRoute
-    }
     '/_authenticated/_dashboard': {
       id: '/_authenticated/_dashboard'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedDashboardLayoutRouteImport
       parentRoute: typeof AuthenticatedLayoutRoute
-    }
-    '/_authenticated/settings/': {
-      id: '/_authenticated/settings/'
-      path: '/'
-      fullPath: '/settings/'
-      preLoaderRoute: typeof AuthenticatedSettingsPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
     '/_authenticated/_dashboard/nodes/': {
       id: '/_authenticated/_dashboard/nodes/'
@@ -211,20 +142,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/node/'
       preLoaderRoute: typeof AuthenticatedDashboardNodePageRouteImport
       parentRoute: typeof AuthenticatedDashboardLayoutRoute
-    }
-    '/_authenticated/settings/repository/$repositoryId/': {
-      id: '/_authenticated/settings/repository/$repositoryId/'
-      path: '/repository/$repositoryId'
-      fullPath: '/settings/repository/$repositoryId/'
-      preLoaderRoute: typeof AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/node/$nodeId/': {
-      id: '/_authenticated/settings/node/$nodeId/'
-      path: '/node/$nodeId'
-      fullPath: '/settings/node/$nodeId/'
-      preLoaderRoute: typeof AuthenticatedSettingsNodeNodeIdPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
     '/_authenticated/_dashboard/project/$projectId/': {
       id: '/_authenticated/_dashboard/project/$projectId/'
@@ -265,36 +182,13 @@ const AuthenticatedDashboardLayoutRouteWithChildren =
     AuthenticatedDashboardLayoutRouteChildren,
   )
 
-interface AuthenticatedSettingsLayoutRouteChildren {
-  AuthenticatedSettingsPageRoute: typeof AuthenticatedSettingsPageRoute
-  AuthenticatedSettingsNodeNodeIdPageRoute: typeof AuthenticatedSettingsNodeNodeIdPageRoute
-  AuthenticatedSettingsRepositoryRepositoryIdPageRoute: typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
-}
-
-const AuthenticatedSettingsLayoutRouteChildren: AuthenticatedSettingsLayoutRouteChildren =
-  {
-    AuthenticatedSettingsPageRoute: AuthenticatedSettingsPageRoute,
-    AuthenticatedSettingsNodeNodeIdPageRoute:
-      AuthenticatedSettingsNodeNodeIdPageRoute,
-    AuthenticatedSettingsRepositoryRepositoryIdPageRoute:
-      AuthenticatedSettingsRepositoryRepositoryIdPageRoute,
-  }
-
-const AuthenticatedSettingsLayoutRouteWithChildren =
-  AuthenticatedSettingsLayoutRoute._addFileChildren(
-    AuthenticatedSettingsLayoutRouteChildren,
-  )
-
 interface AuthenticatedLayoutRouteChildren {
   AuthenticatedDashboardLayoutRoute: typeof AuthenticatedDashboardLayoutRouteWithChildren
-  AuthenticatedSettingsLayoutRoute: typeof AuthenticatedSettingsLayoutRouteWithChildren
 }
 
 const AuthenticatedLayoutRouteChildren: AuthenticatedLayoutRouteChildren = {
   AuthenticatedDashboardLayoutRoute:
     AuthenticatedDashboardLayoutRouteWithChildren,
-  AuthenticatedSettingsLayoutRoute:
-    AuthenticatedSettingsLayoutRouteWithChildren,
 }
 
 const AuthenticatedLayoutRouteWithChildren =

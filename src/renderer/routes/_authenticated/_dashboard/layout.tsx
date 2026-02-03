@@ -10,7 +10,8 @@ import { ContextRail } from "renderer/screens/main/components/ContextRail";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useToggleDashboardModal } from "renderer/stores/dashboard-modal";
 import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
-import { useOpenNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
+import { useToggleNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
+import { useOpenSettings } from "renderer/stores/settings-state";
 import {
 	MIN_SIDEBAR_WIDTH,
 	MAX_SIDEBAR_WIDTH,
@@ -26,7 +27,8 @@ function DashboardLayout() {
 	const navigate = useNavigate();
 	const toggleDashboardModal = useToggleDashboardModal();
 	const openNewNodeModal = useOpenNewNodeModal();
-	const openNodeSwitcher = useOpenNodeSwitcherModal();
+	const toggleNodeSwitcher = useToggleNodeSwitcherModal();
+	const openSettings = useOpenSettings();
 
 	// Get current node from route to pre-select repository in new node modal
 	const matchRoute = useMatchRoute();
@@ -54,16 +56,16 @@ function DashboardLayout() {
 	// Global hotkeys for dashboard
 	useAppHotkey(
 		"OPEN_SETTINGS",
-		() => navigate({ to: "/settings" }),
+		() => openSettings(),
 		undefined,
-		[navigate],
+		[openSettings],
 	);
 
 	useAppHotkey(
 		"SHOW_HOTKEYS",
-		() => navigate({ to: "/settings" }),
+		() => openSettings(),
 		undefined,
-		[navigate],
+		[openSettings],
 	);
 
 	useAppHotkey(
@@ -84,9 +86,9 @@ function DashboardLayout() {
 
 	useAppHotkey(
 		"SWITCH_WORKSPACE",
-		() => openNodeSwitcher(),
+		() => toggleNodeSwitcher(),
 		undefined,
-		[openNodeSwitcher],
+		[toggleNodeSwitcher],
 	);
 
 	useAppHotkey(

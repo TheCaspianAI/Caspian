@@ -1,1 +1,0 @@
-export { SettingsHeader } from "./SettingsHeader";
