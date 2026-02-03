@@ -48,15 +48,7 @@ export function AppearanceSettings({ visibleItems }: AppearanceSettingsProps) {
 	const allThemes = [...builtInThemes, ...customThemes];
 
 	return (
-		<div className="p-6 max-w-4xl w-full">
-			<div className="mb-8">
-				<h2 className="text-xl font-semibold">Appearance</h2>
-				<p className="text-sm text-muted-foreground mt-1">
-					Configure visual preferences for the Caspian interface
-				</p>
-			</div>
-
-			<div className="space-y-8">
+		<div className="space-y-8">
 				{/* Theme Section */}
 				{showTheme && (
 					<div>
@@ -110,7 +102,6 @@ export function AppearanceSettings({ visibleItems }: AppearanceSettingsProps) {
 						</p>
 					</div>
 				)}
-			</div>
 		</div>
 	);
 }

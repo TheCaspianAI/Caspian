@@ -336,15 +336,7 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 	};
 
 	return (
-		<div className="p-6 max-w-7xl w-full">
-			<div className="mb-8">
-				<h2 className="text-xl font-semibold">Presets</h2>
-				<p className="text-sm text-muted-foreground mt-1">
-					Manage execution configurations for AI coding agents
-				</p>
-			</div>
-
-			<div className="space-y-6">
+		<div className="space-y-6">
 				{/* Presets Section */}
 				{(showPresets || showAgentTemplates) && (
 					<div className="space-y-4">
@@ -516,7 +508,6 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 						/>
 					</div>
 				)}
-			</div>
 		</div>
 	);
 }

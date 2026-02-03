@@ -20,17 +20,9 @@ import {
 } from "ui/components/ui/select";
 import { toast } from "ui/components/ui/sonner";
 import { Switch } from "ui/components/ui/switch";
-import { cn } from "ui/lib/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { HiCheck, HiMagnifyingGlass, HiPlay, HiStop } from "react-icons/hi2";
+import { useEffect, useMemo, useState } from "react";
+import { HiMagnifyingGlass } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { electronTrpcClient } from "renderer/lib/trpc-client";
-import {
-	AVAILABLE_RINGTONES,
-	type Ringtone,
-	useSelectedRingtoneId,
-	useSetRingtone,
-} from "renderer/stores";
 import {
 	captureHotkeyFromEvent,
 	getHotkeyConflict,
@@ -57,106 +49,6 @@ const CATEGORY_ORDER: HotkeyCategory[] = [
 	"Window",
 	"Help",
 ];
-
-// ============================================================================
-// Notification Sounds Components
-// ============================================================================
-
-function formatDuration(seconds: number): string {
-	return `${seconds}s`;
-}
-
-interface RingtoneCardProps {
-	ringtone: Ringtone;
-	isSelected: boolean;
-	isPlaying: boolean;
-	onSelect: () => void;
-	onTogglePlay: () => void;
-}
-
-function RingtoneCard({
-	ringtone,
-	isSelected,
-	isPlaying,
-	onSelect,
-	onTogglePlay,
-}: RingtoneCardProps) {
-	return (
-		// biome-ignore lint/a11y/useSemanticElements: Using div with role="button" to allow nested play/stop button
-		<div
-			role="button"
-			tabIndex={0}
-			onClick={onSelect}
-			onKeyDown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					e.preventDefault();
-					onSelect();
-				}
-			}}
-			className={cn(
-				"relative flex flex-col rounded-lg border-2 overflow-hidden transition-all text-left cursor-pointer",
-				isSelected
-					? "border-primary ring-2 ring-primary/20"
-					: "border-border hover:border-muted-foreground/50",
-			)}
-		>
-			{/* Preview area */}
-			<div
-				className={cn(
-					"h-24 flex items-center justify-center relative",
-					isSelected ? "bg-accent/50" : "bg-muted/30",
-				)}
-			>
-				{/* Emoji */}
-				<span className="text-4xl">{ringtone.emoji}</span>
-
-				{/* Duration badge */}
-				{ringtone.duration && (
-					<span className="absolute top-2 right-2 text-xs text-muted-foreground bg-background/80 px-1.5 py-0.5 rounded">
-						{formatDuration(ringtone.duration)}
-					</span>
-				)}
-
-				{/* Play/Stop button */}
-				<button
-					type="button"
-					onClick={(e) => {
-						e.stopPropagation();
-						onTogglePlay();
-					}}
-					className={cn(
-						"absolute bottom-2 right-2 h-8 w-8 rounded-full flex items-center justify-center",
-						"transition-colors border",
-						isPlaying
-							? "bg-destructive text-destructive-foreground border-destructive hover:bg-destructive/90"
-							: "bg-card text-foreground border-border hover:bg-accent",
-					)}
-				>
-					{isPlaying ? (
-						<HiStop className="h-4 w-4" />
-					) : (
-						<HiPlay className="h-4 w-4 ml-0.5" />
-					)}
-				</button>
-			</div>
-
-			{/* Info */}
-			<div className="p-3 bg-card border-t flex items-center justify-between">
-				<div>
-					<div className="text-sm font-medium">{ringtone.name}</div>
-					<div className="text-xs text-muted-foreground">
-						{ringtone.description}
-					</div>
-				</div>
-				{isSelected && (
-					<div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-						<HiCheck className="h-3 w-3 text-primary-foreground" />
-					</div>
-				)}
-			</div>
-		</div>
-	);
-}
 
 // ============================================================================
 // Keyboard Shortcuts Components
@@ -221,11 +113,6 @@ export function PreferencesSettings() {
 	// ========================================================================
 	// Notification Sounds State
 	// ========================================================================
-	const selectedRingtoneId = useSelectedRingtoneId();
-	const setRingtone = useSetRingtone();
-	const [playingId, setPlayingId] = useState<string | null>(null);
-	const previewTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
 	const { data: isMutedData, isLoading: isMutedLoading } =
 		electronTrpc.settings.getNotificationSoundsMuted.useQuery();
 	const isMuted = isMutedData ?? false;
@@ -252,78 +139,6 @@ export function PreferencesSettings() {
 	const handleMutedToggle = (enabled: boolean) => {
 		setMuted.mutate({ muted: !enabled });
 	};
-
-	// Clean up timer and stop any playing sound on unmount
-	useEffect(() => {
-		return () => {
-			if (previewTimerRef.current) {
-				clearTimeout(previewTimerRef.current);
-			}
-			// Stop any in-progress preview when navigating away
-			electronTrpcClient.ringtone.stop.mutate().catch(() => {
-				// Ignore errors during cleanup
-			});
-		};
-	}, []);
-
-	const handleTogglePlay = useCallback(
-		async (ringtone: Ringtone) => {
-			if (!ringtone.filename) {
-				return;
-			}
-
-			// Clear any pending timer
-			if (previewTimerRef.current) {
-				clearTimeout(previewTimerRef.current);
-				previewTimerRef.current = null;
-			}
-
-			// If this ringtone is already playing, stop it
-			if (playingId === ringtone.id) {
-				try {
-					await electronTrpcClient.ringtone.stop.mutate();
-				} catch (error) {
-					console.error("Failed to stop ringtone:", error);
-				}
-				setPlayingId(null);
-				return;
-			}
-
-			// Stop any currently playing sound first
-			try {
-				await electronTrpcClient.ringtone.stop.mutate();
-			} catch (error) {
-				console.error("Failed to stop ringtone:", error);
-			}
-
-			// Play the new sound
-			setPlayingId(ringtone.id);
-
-			try {
-				await electronTrpcClient.ringtone.preview.mutate({
-					filename: ringtone.filename,
-				});
-			} catch (error) {
-				console.error("Failed to play ringtone:", error);
-				setPlayingId(null);
-			}
-
-			// Auto-reset after the ringtone's actual duration (with 500ms buffer)
-			const durationMs = ((ringtone.duration ?? 5) + 0.5) * 1000;
-			previewTimerRef.current = setTimeout(() => {
-				setPlayingId((current) => (current === ringtone.id ? null : current));
-				previewTimerRef.current = null;
-			}, durationMs);
-		},
-		[playingId],
-	);
-
-	const handleSelectRingtone = useCallback(
-		(ringtoneId: string) => {
-			setRingtone(ringtoneId);
-		},
-		[setRingtone],
-	);
 
 	// ========================================================================
 	// Keyboard Shortcuts State
@@ -593,16 +408,8 @@ export function PreferencesSettings() {
 	// Render
 	// ========================================================================
 	return (
-		<div className="p-6 max-w-4xl w-full">
+		<>
 			<div className="space-y-10">
-				{/* Page Header */}
-				<div>
-					<h2 className="text-lg font-semibold mb-1">Preferences</h2>
-					<p className="text-sm text-muted-foreground">
-						Configure application behavior and interaction settings
-					</p>
-				</div>
-
 				{/* Notification Sounds Section */}
 				<section className="space-y-4">
 					<h3 className="text-sm font-medium">Notification Sounds</h3>
@@ -623,28 +430,6 @@ export function PreferencesSettings() {
 							disabled={isMutedLoading || setMuted.isPending}
 						/>
 					</div>
-
-					{!isMuted && (
-						<>
-							<div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-								{AVAILABLE_RINGTONES.map((ringtone) => (
-									<RingtoneCard
-										key={ringtone.id}
-										ringtone={ringtone}
-										isSelected={selectedRingtoneId === ringtone.id}
-										isPlaying={playingId === ringtone.id}
-										onSelect={() => handleSelectRingtone(ringtone.id)}
-										onTogglePlay={() => handleTogglePlay(ringtone)}
-									/>
-								))}
-							</div>
-
-							<p className="text-xs text-muted-foreground pt-2">
-								Click the play button to preview a sound. Click stop or play
-								another to stop the current sound.
-							</p>
-						</>
-					)}
 				</section>
 
 				{/* Keyboard Shortcuts Section */}
@@ -918,6 +703,6 @@ export function PreferencesSettings() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</div>
+		</>
 	);
 }

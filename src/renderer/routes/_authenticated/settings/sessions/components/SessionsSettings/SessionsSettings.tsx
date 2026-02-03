@@ -147,14 +147,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 	};
 
 	return (
-		<div className="p-6 max-w-7xl w-full">
-			<div className="mb-8">
-				<h2 className="text-xl font-semibold">Sessions</h2>
-				<p className="text-sm text-muted-foreground mt-1">
-					Monitor and control active agent sessions
-				</p>
-			</div>
-
+		<>
 			<div className="space-y-6">
 				{/* Active Sessions */}
 				{showSessions && (
@@ -497,6 +490,6 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
-		</div>
+		</>
 	);
 }
