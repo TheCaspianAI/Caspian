@@ -1,6 +1,6 @@
 import path from "node:path";
 import { settings } from "lib/local-db";
-import { app, BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow, dialog, nativeImage } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
 import { DEFAULT_CONFIRM_ON_QUIT, PROTOCOL_SCHEME } from "shared/constants";
 import { setupAgentHooks } from "./lib/agent-setup";
@@ -15,9 +15,28 @@ import { MainWindow } from "./windows/main";
 // Initialize local SQLite database (runs migrations + legacy data migration on import)
 console.log("[main] Local database ready:", !!localDb);
 
-// Set different app name for dev to avoid singleton lock conflicts with production
-if (process.env.NODE_ENV === "development") {
-	app.setName("Caspian Dev");
+// Set app name
+app.setName("Caspian");
+
+// Set dock icon on macOS (after app is ready)
+if (process.platform === "darwin") {
+	app.whenReady().then(() => {
+		if (app.dock) {
+			// Use PNG for dock icon
+			const iconPath = path.join(process.cwd(), "src/resources/build/icons/icon.png");
+			console.log("[main] Setting dock icon from:", iconPath);
+			try {
+				const icon = nativeImage.createFromPath(iconPath);
+				console.log("[main] Icon loaded, isEmpty:", icon.isEmpty());
+				if (!icon.isEmpty()) {
+					app.dock.setIcon(icon);
+					console.log("[main] Dock icon set successfully");
+				}
+			} catch (e) {
+				console.error("[main] Failed to set dock icon:", e);
+			}
+		}
+	});
 }
 
 // Register protocol handler for deep linking
