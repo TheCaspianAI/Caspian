@@ -37,9 +37,9 @@ export function SettingsModal({ children }: SettingsModalProps) {
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center">
-			{/* Backdrop */}
+			{/* Backdrop with blur */}
 			<div
-				className="absolute inset-0 bg-black/50 animate-in fade-in duration-150"
+				className="absolute inset-0 bg-black/40 modal-backdrop-blur animate-in fade-in duration-150"
 				onClick={closeSettings}
 				aria-hidden="true"
 			/>
