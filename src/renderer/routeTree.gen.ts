@@ -14,13 +14,6 @@ import { Route as PageRouteImport } from './routes/page'
 import { Route as AuthenticatedSettingsLayoutRouteImport } from './routes/_authenticated/settings/layout'
 import { Route as AuthenticatedDashboardLayoutRouteImport } from './routes/_authenticated/_dashboard/layout'
 import { Route as AuthenticatedSettingsPageRouteImport } from './routes/_authenticated/settings/page'
-import { Route as AuthenticatedSettingsTerminalPageRouteImport } from './routes/_authenticated/settings/terminal/page'
-import { Route as AuthenticatedSettingsSessionsPageRouteImport } from './routes/_authenticated/settings/sessions/page'
-import { Route as AuthenticatedSettingsPresetsPageRouteImport } from './routes/_authenticated/settings/presets/page'
-import { Route as AuthenticatedSettingsPreferencesPageRouteImport } from './routes/_authenticated/settings/preferences/page'
-import { Route as AuthenticatedSettingsKeyboardPageRouteImport } from './routes/_authenticated/settings/keyboard/page'
-import { Route as AuthenticatedSettingsBehaviorPageRouteImport } from './routes/_authenticated/settings/behavior/page'
-import { Route as AuthenticatedSettingsAppearancePageRouteImport } from './routes/_authenticated/settings/appearance/page'
 import { Route as AuthenticatedDashboardNodesPageRouteImport } from './routes/_authenticated/_dashboard/nodes/page'
 import { Route as AuthenticatedDashboardNodePageRouteImport } from './routes/_authenticated/_dashboard/node/page'
 import { Route as AuthenticatedSettingsRepositoryRepositoryIdPageRouteImport } from './routes/_authenticated/settings/repository/$repositoryId/page'
@@ -52,48 +45,6 @@ const AuthenticatedSettingsPageRoute =
   AuthenticatedSettingsPageRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsTerminalPageRoute =
-  AuthenticatedSettingsTerminalPageRouteImport.update({
-    id: '/terminal/',
-    path: '/terminal/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsSessionsPageRoute =
-  AuthenticatedSettingsSessionsPageRouteImport.update({
-    id: '/sessions/',
-    path: '/sessions/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsPresetsPageRoute =
-  AuthenticatedSettingsPresetsPageRouteImport.update({
-    id: '/presets/',
-    path: '/presets/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsPreferencesPageRoute =
-  AuthenticatedSettingsPreferencesPageRouteImport.update({
-    id: '/preferences/',
-    path: '/preferences/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsKeyboardPageRoute =
-  AuthenticatedSettingsKeyboardPageRouteImport.update({
-    id: '/keyboard/',
-    path: '/keyboard/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsBehaviorPageRoute =
-  AuthenticatedSettingsBehaviorPageRouteImport.update({
-    id: '/behavior/',
-    path: '/behavior/',
-    getParentRoute: () => AuthenticatedSettingsLayoutRoute,
-  } as any)
-const AuthenticatedSettingsAppearancePageRoute =
-  AuthenticatedSettingsAppearancePageRouteImport.update({
-    id: '/appearance/',
-    path: '/appearance/',
     getParentRoute: () => AuthenticatedSettingsLayoutRoute,
   } as any)
 const AuthenticatedDashboardNodesPageRoute =
@@ -139,13 +90,6 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsPageRoute
   '/node/': typeof AuthenticatedDashboardNodePageRoute
   '/nodes/': typeof AuthenticatedDashboardNodesPageRoute
-  '/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
-  '/settings/behavior/': typeof AuthenticatedSettingsBehaviorPageRoute
-  '/settings/keyboard/': typeof AuthenticatedSettingsKeyboardPageRoute
-  '/settings/preferences/': typeof AuthenticatedSettingsPreferencesPageRoute
-  '/settings/presets/': typeof AuthenticatedSettingsPresetsPageRoute
-  '/settings/sessions/': typeof AuthenticatedSettingsSessionsPageRoute
-  '/settings/terminal/': typeof AuthenticatedSettingsTerminalPageRoute
   '/node/$nodeId/': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
   '/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
@@ -156,13 +100,6 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsPageRoute
   '/node': typeof AuthenticatedDashboardNodePageRoute
   '/nodes': typeof AuthenticatedDashboardNodesPageRoute
-  '/settings/appearance': typeof AuthenticatedSettingsAppearancePageRoute
-  '/settings/behavior': typeof AuthenticatedSettingsBehaviorPageRoute
-  '/settings/keyboard': typeof AuthenticatedSettingsKeyboardPageRoute
-  '/settings/preferences': typeof AuthenticatedSettingsPreferencesPageRoute
-  '/settings/presets': typeof AuthenticatedSettingsPresetsPageRoute
-  '/settings/sessions': typeof AuthenticatedSettingsSessionsPageRoute
-  '/settings/terminal': typeof AuthenticatedSettingsTerminalPageRoute
   '/node/$nodeId': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/project/$projectId': typeof AuthenticatedDashboardProjectProjectIdPageRoute
   '/settings/node/$nodeId': typeof AuthenticatedSettingsNodeNodeIdPageRoute
@@ -177,13 +114,6 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsPageRoute
   '/_authenticated/_dashboard/node/': typeof AuthenticatedDashboardNodePageRoute
   '/_authenticated/_dashboard/nodes/': typeof AuthenticatedDashboardNodesPageRoute
-  '/_authenticated/settings/appearance/': typeof AuthenticatedSettingsAppearancePageRoute
-  '/_authenticated/settings/behavior/': typeof AuthenticatedSettingsBehaviorPageRoute
-  '/_authenticated/settings/keyboard/': typeof AuthenticatedSettingsKeyboardPageRoute
-  '/_authenticated/settings/preferences/': typeof AuthenticatedSettingsPreferencesPageRoute
-  '/_authenticated/settings/presets/': typeof AuthenticatedSettingsPresetsPageRoute
-  '/_authenticated/settings/sessions/': typeof AuthenticatedSettingsSessionsPageRoute
-  '/_authenticated/settings/terminal/': typeof AuthenticatedSettingsTerminalPageRoute
   '/_authenticated/_dashboard/node/$nodeId/': typeof AuthenticatedDashboardNodeNodeIdPageRoute
   '/_authenticated/_dashboard/project/$projectId/': typeof AuthenticatedDashboardProjectProjectIdPageRoute
   '/_authenticated/settings/node/$nodeId/': typeof AuthenticatedSettingsNodeNodeIdPageRoute
@@ -197,13 +127,6 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/node/'
     | '/nodes/'
-    | '/settings/appearance/'
-    | '/settings/behavior/'
-    | '/settings/keyboard/'
-    | '/settings/preferences/'
-    | '/settings/presets/'
-    | '/settings/sessions/'
-    | '/settings/terminal/'
     | '/node/$nodeId/'
     | '/project/$projectId/'
     | '/settings/node/$nodeId/'
@@ -214,13 +137,6 @@ export interface FileRouteTypes {
     | '/settings'
     | '/node'
     | '/nodes'
-    | '/settings/appearance'
-    | '/settings/behavior'
-    | '/settings/keyboard'
-    | '/settings/preferences'
-    | '/settings/presets'
-    | '/settings/sessions'
-    | '/settings/terminal'
     | '/node/$nodeId'
     | '/project/$projectId'
     | '/settings/node/$nodeId'
@@ -234,13 +150,6 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/_dashboard/node/'
     | '/_authenticated/_dashboard/nodes/'
-    | '/_authenticated/settings/appearance/'
-    | '/_authenticated/settings/behavior/'
-    | '/_authenticated/settings/keyboard/'
-    | '/_authenticated/settings/preferences/'
-    | '/_authenticated/settings/presets/'
-    | '/_authenticated/settings/sessions/'
-    | '/_authenticated/settings/terminal/'
     | '/_authenticated/_dashboard/node/$nodeId/'
     | '/_authenticated/_dashboard/project/$projectId/'
     | '/_authenticated/settings/node/$nodeId/'
@@ -287,55 +196,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/settings/'
       preLoaderRoute: typeof AuthenticatedSettingsPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/terminal/': {
-      id: '/_authenticated/settings/terminal/'
-      path: '/terminal'
-      fullPath: '/settings/terminal/'
-      preLoaderRoute: typeof AuthenticatedSettingsTerminalPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/sessions/': {
-      id: '/_authenticated/settings/sessions/'
-      path: '/sessions'
-      fullPath: '/settings/sessions/'
-      preLoaderRoute: typeof AuthenticatedSettingsSessionsPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/presets/': {
-      id: '/_authenticated/settings/presets/'
-      path: '/presets'
-      fullPath: '/settings/presets/'
-      preLoaderRoute: typeof AuthenticatedSettingsPresetsPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/preferences/': {
-      id: '/_authenticated/settings/preferences/'
-      path: '/preferences'
-      fullPath: '/settings/preferences/'
-      preLoaderRoute: typeof AuthenticatedSettingsPreferencesPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/keyboard/': {
-      id: '/_authenticated/settings/keyboard/'
-      path: '/keyboard'
-      fullPath: '/settings/keyboard/'
-      preLoaderRoute: typeof AuthenticatedSettingsKeyboardPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/behavior/': {
-      id: '/_authenticated/settings/behavior/'
-      path: '/behavior'
-      fullPath: '/settings/behavior/'
-      preLoaderRoute: typeof AuthenticatedSettingsBehaviorPageRouteImport
-      parentRoute: typeof AuthenticatedSettingsLayoutRoute
-    }
-    '/_authenticated/settings/appearance/': {
-      id: '/_authenticated/settings/appearance/'
-      path: '/appearance'
-      fullPath: '/settings/appearance/'
-      preLoaderRoute: typeof AuthenticatedSettingsAppearancePageRouteImport
       parentRoute: typeof AuthenticatedSettingsLayoutRoute
     }
     '/_authenticated/_dashboard/nodes/': {
@@ -407,13 +267,6 @@ const AuthenticatedDashboardLayoutRouteWithChildren =
 
 interface AuthenticatedSettingsLayoutRouteChildren {
   AuthenticatedSettingsPageRoute: typeof AuthenticatedSettingsPageRoute
-  AuthenticatedSettingsAppearancePageRoute: typeof AuthenticatedSettingsAppearancePageRoute
-  AuthenticatedSettingsBehaviorPageRoute: typeof AuthenticatedSettingsBehaviorPageRoute
-  AuthenticatedSettingsKeyboardPageRoute: typeof AuthenticatedSettingsKeyboardPageRoute
-  AuthenticatedSettingsPreferencesPageRoute: typeof AuthenticatedSettingsPreferencesPageRoute
-  AuthenticatedSettingsPresetsPageRoute: typeof AuthenticatedSettingsPresetsPageRoute
-  AuthenticatedSettingsSessionsPageRoute: typeof AuthenticatedSettingsSessionsPageRoute
-  AuthenticatedSettingsTerminalPageRoute: typeof AuthenticatedSettingsTerminalPageRoute
   AuthenticatedSettingsNodeNodeIdPageRoute: typeof AuthenticatedSettingsNodeNodeIdPageRoute
   AuthenticatedSettingsRepositoryRepositoryIdPageRoute: typeof AuthenticatedSettingsRepositoryRepositoryIdPageRoute
 }
@@ -421,20 +274,6 @@ interface AuthenticatedSettingsLayoutRouteChildren {
 const AuthenticatedSettingsLayoutRouteChildren: AuthenticatedSettingsLayoutRouteChildren =
   {
     AuthenticatedSettingsPageRoute: AuthenticatedSettingsPageRoute,
-    AuthenticatedSettingsAppearancePageRoute:
-      AuthenticatedSettingsAppearancePageRoute,
-    AuthenticatedSettingsBehaviorPageRoute:
-      AuthenticatedSettingsBehaviorPageRoute,
-    AuthenticatedSettingsKeyboardPageRoute:
-      AuthenticatedSettingsKeyboardPageRoute,
-    AuthenticatedSettingsPreferencesPageRoute:
-      AuthenticatedSettingsPreferencesPageRoute,
-    AuthenticatedSettingsPresetsPageRoute:
-      AuthenticatedSettingsPresetsPageRoute,
-    AuthenticatedSettingsSessionsPageRoute:
-      AuthenticatedSettingsSessionsPageRoute,
-    AuthenticatedSettingsTerminalPageRoute:
-      AuthenticatedSettingsTerminalPageRoute,
     AuthenticatedSettingsNodeNodeIdPageRoute:
       AuthenticatedSettingsNodeNodeIdPageRoute,
     AuthenticatedSettingsRepositoryRepositoryIdPageRoute:

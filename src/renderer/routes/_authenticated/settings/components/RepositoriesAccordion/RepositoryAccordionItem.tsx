@@ -1,4 +1,4 @@
-import type { Repository, BranchPrefixMode } from "lib/local-db";
+import type { SelectRepository, BranchPrefixMode } from "lib/local-db";
 import { Button } from "ui/components/ui/button";
 import { Input } from "ui/components/ui/input";
 import { Label } from "ui/components/ui/label";
@@ -9,14 +9,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "ui/components/ui/select";
-import { ChevronRight, FolderOpen } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { cn } from "ui/lib/utils";
 import { BRANCH_PREFIX_MODE_LABELS } from "../../utils/branch-prefix";
 
 interface RepositoryAccordionItemProps {
-	repository: Repository;
+	repository: SelectRepository;
 	isExpanded: boolean;
 	onToggle: () => void;
 }
@@ -46,15 +46,13 @@ export function RepositoryAccordionItem({
 
 	const updateRepository = electronTrpc.repositories.update.useMutation({
 		onSettled: () => {
-			utils.repositories.getAll.invalidate();
+			utils.repositories.getRecents.invalidate();
 		},
 	});
 
-	const openInFinder = electronTrpc.repositories.openInFinder.useMutation();
-
 	const handleNameBlur = () => {
 		if (name !== repository.name) {
-			updateRepository.mutate({ id: repository.id, name });
+			updateRepository.mutate({ id: repository.id, patch: { name } });
 		}
 	};
 
@@ -62,8 +60,10 @@ export function RepositoryAccordionItem({
 		setBranchPrefixMode(mode);
 		updateRepository.mutate({
 			id: repository.id,
-			branchPrefixMode: mode,
-			branchPrefixCustom: mode === "custom" ? branchPrefixCustom : null,
+			patch: {
+				branchPrefixMode: mode,
+				branchPrefixCustom: mode === "custom" ? branchPrefixCustom : null,
+			},
 		});
 	};
 
@@ -71,9 +71,13 @@ export function RepositoryAccordionItem({
 		if (branchPrefixCustom !== repository.branchPrefixCustom) {
 			updateRepository.mutate({
 				id: repository.id,
-				branchPrefixCustom: branchPrefixCustom || null,
+				patch: { branchPrefixCustom: branchPrefixCustom || null },
 			});
 		}
+	};
+
+	const openInFinder = () => {
+		window.electronAPI?.shell.showItemInFolder(repository.mainRepoPath);
 	};
 
 	return (
@@ -98,7 +102,7 @@ export function RepositoryAccordionItem({
 					{repository.name}
 				</span>
 				<span className="text-xs text-muted-foreground truncate max-w-[300px]">
-					{repository.path}
+					{repository.mainRepoPath}
 				</span>
 			</button>
 
@@ -125,14 +129,14 @@ export function RepositoryAccordionItem({
 						</Label>
 						<div className="flex items-center gap-2">
 							<code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-md">
-								{repository.path}
+								{repository.mainRepoPath}
 							</code>
 							<Button
 								variant="ghost"
 								size="sm"
-								onClick={() => openInFinder.mutate({ id: repository.id })}
+								onClick={openInFinder}
 							>
-								<FolderOpen className="h-4 w-4" />
+								<ExternalLink className="h-4 w-4" />
 							</Button>
 						</div>
 					</div>

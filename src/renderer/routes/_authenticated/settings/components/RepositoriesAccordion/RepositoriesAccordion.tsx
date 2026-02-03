@@ -23,7 +23,7 @@ export function RepositoriesAccordion({
 		return repositories.filter(
 			(repo) =>
 				repo.name.toLowerCase().includes(q) ||
-				repo.path.toLowerCase().includes(q)
+				repo.mainRepoPath.toLowerCase().includes(q)
 		);
 	}, [repositories, searchQuery]);
 
