@@ -96,7 +96,7 @@ export function GroupStrip() {
 	};
 
 	const handleOpenPresetsSettings = () => {
-		navigate({ to: "/settings/presets" });
+		navigate({ to: "/settings" });
 		setDropdownOpen(false);
 	};
 

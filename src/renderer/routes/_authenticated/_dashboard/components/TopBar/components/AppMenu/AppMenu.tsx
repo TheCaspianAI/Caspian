@@ -44,7 +44,7 @@ export function AppMenu() {
       <DropdownMenuContent align="end" className="w-56">
         {/* Settings */}
         <DropdownMenuItem
-          onSelect={() => navigate({ to: "/settings/appearance" })}
+          onSelect={() => navigate({ to: "/settings" })}
         >
           <HiOutlineCog6Tooth className="h-4 w-4" />
           <span>Settings</span>
@@ -57,7 +57,7 @@ export function AppMenu() {
 
         {/* Help & Support */}
         <DropdownMenuItem
-          onClick={() => navigate({ to: "/settings/keyboard" })}
+          onClick={() => navigate({ to: "/settings" })}
         >
           <LuKeyboard className="h-4 w-4" />
           Keyboard Shortcuts

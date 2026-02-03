@@ -13,7 +13,7 @@ export function SettingsButton() {
 				<Button
 					variant="ghost"
 					size="icon"
-					onClick={() => navigate({ to: "/settings/appearance" })}
+					onClick={() => navigate({ to: "/settings" })}
 					aria-label="Open settings"
 					className="no-drag"
 				>

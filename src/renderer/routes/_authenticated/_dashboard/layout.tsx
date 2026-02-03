@@ -54,14 +54,14 @@ function DashboardLayout() {
 	// Global hotkeys for dashboard
 	useAppHotkey(
 		"OPEN_SETTINGS",
-		() => navigate({ to: "/settings/appearance" }),
+		() => navigate({ to: "/settings" }),
 		undefined,
 		[navigate],
 	);
 
 	useAppHotkey(
 		"SHOW_HOTKEYS",
-		() => navigate({ to: "/settings/keyboard" }),
+		() => navigate({ to: "/settings" }),
 		undefined,
 		[navigate],
 	);

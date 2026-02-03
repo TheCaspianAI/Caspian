@@ -50,8 +50,7 @@ function AuthenticatedLayout() {
 	electronTrpc.menu.subscribe.useSubscription(undefined, {
 		onData: (event) => {
 			if (event.type === "open-settings") {
-				const section = event.data.section || "appearance";
-				navigate({ to: `/settings/${section}` as "/settings/appearance" });
+				navigate({ to: "/settings" });
 			} else if (event.type === "open-node") {
 				navigate({ to: `/node/${event.data.nodeId}` });
 			}
