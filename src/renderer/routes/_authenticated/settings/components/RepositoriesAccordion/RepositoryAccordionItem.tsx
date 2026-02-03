@@ -1,5 +1,4 @@
 import type { SelectRepository, BranchPrefixMode } from "lib/local-db";
-import { Button } from "ui/components/ui/button";
 import { Input } from "ui/components/ui/input";
 import { Label } from "ui/components/ui/label";
 import {
@@ -9,11 +8,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "ui/components/ui/select";
-import { ChevronRight, ExternalLink } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { cn } from "ui/lib/utils";
 import { BRANCH_PREFIX_MODE_LABELS } from "../../utils/branch-prefix";
+import { ClickablePath } from "../ClickablePath";
 
 interface RepositoryAccordionItemProps {
 	repository: SelectRepository;
@@ -76,10 +76,6 @@ export function RepositoryAccordionItem({
 		}
 	};
 
-	const openInFinder = () => {
-		window.electronAPI?.shell.showItemInFolder(repository.mainRepoPath);
-	};
-
 	return (
 		<div className="border-b border-border last:border-b-0">
 			{/* Collapsed row */}
@@ -127,18 +123,10 @@ export function RepositoryAccordionItem({
 						<Label className="text-sm text-muted-foreground">
 							Repository Path
 						</Label>
-						<div className="flex items-center gap-2">
-							<code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-md">
-								{repository.mainRepoPath}
-							</code>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={openInFinder}
-							>
-								<ExternalLink className="h-4 w-4" />
-							</Button>
-						</div>
+						<ClickablePath
+							path={repository.mainRepoPath}
+							className="text-xs"
+						/>
 					</div>
 
 					{/* Branch Prefix */}
