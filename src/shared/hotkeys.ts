@@ -421,20 +421,11 @@ export const HOTKEYS = {
 	}),
 
 	// Layout
-	TOGGLE_SIDEBAR: defineHotkey({
-		keys: "meta+l",
-		label: "Toggle Changes Tab",
-		category: "Layout",
-	}),
-	TOGGLE_EXPAND_SIDEBAR: defineHotkey({
-		keys: "meta+shift+l",
-		label: "Toggle Expand Sidebar",
-		category: "Layout",
-	}),
 	TOGGLE_NODE_SIDEBAR: defineHotkey({
 		keys: "meta+b",
-		label: "Toggle Nodes Sidebar",
+		label: "Toggle Context Pane",
 		category: "Layout",
+		description: "Show or hide the context pane (Files/Changes)",
 	}),
 	SPLIT_RIGHT: defineHotkey({
 		keys: "meta+d",
@@ -555,6 +546,22 @@ export const HOTKEYS = {
 		keys: "ctrl+9",
 		label: "Open Preset 9",
 		category: "Terminal",
+	}),
+
+	// Workspace
+	SWITCH_WORKSPACE: defineHotkey({
+		keys: "meta+p",
+		label: "Switch Workspace",
+		category: "Node",
+		description: "Open the workspace switcher",
+	}),
+
+	// Dashboard
+	OPEN_DASHBOARD: defineHotkey({
+		keys: "meta+shift+l",
+		label: "Toggle Agents Dashboard",
+		category: "Node",
+		description: "Toggle the agents dashboard",
 	}),
 
 	// Node creation

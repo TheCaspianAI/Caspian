@@ -6,14 +6,16 @@ import {
 } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
-import { NodeSidebar } from "renderer/screens/main/components/NodeSidebar";
+import { ContextRail } from "renderer/screens/main/components/ContextRail";
 import { useAppHotkey } from "renderer/stores/hotkeys";
+import { useToggleDashboardModal } from "renderer/stores/dashboard-modal";
 import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
+import { useOpenNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
 import {
-	COLLAPSED_NODE_SIDEBAR_WIDTH,
-	MAX_NODE_SIDEBAR_WIDTH,
-	useNodeSidebarStore,
-} from "renderer/stores/node-sidebar-state";
+	MIN_SIDEBAR_WIDTH,
+	MAX_SIDEBAR_WIDTH,
+	useSidebarStore,
+} from "renderer/stores/sidebar-state";
 import { TopBar } from "./components/TopBar";
 
 export const Route = createFileRoute("/_authenticated/_dashboard")({
@@ -22,16 +24,18 @@ export const Route = createFileRoute("/_authenticated/_dashboard")({
 
 function DashboardLayout() {
 	const navigate = useNavigate();
+	const toggleDashboardModal = useToggleDashboardModal();
 	const openNewNodeModal = useOpenNewNodeModal();
+	const openNodeSwitcher = useOpenNodeSwitcherModal();
 
 	// Get current node from route to pre-select repository in new node modal
 	const matchRoute = useMatchRoute();
 	const currentNodeMatch = matchRoute({
-		to: "/workspace/$workspaceId",
+		to: "/node/$nodeId",
 		fuzzy: true,
 	});
 	const currentNodeId =
-		currentNodeMatch !== false ? currentNodeMatch.workspaceId : null;
+		currentNodeMatch !== false ? currentNodeMatch.nodeId : null;
 
 	const { data: currentNode } = electronTrpc.nodes.get.useQuery(
 		{ id: currentNodeId ?? "" },
@@ -39,15 +43,13 @@ function DashboardLayout() {
 	);
 
 	const {
-		isOpen: isNodeSidebarOpen,
-		toggleCollapsed: toggleNodeSidebarCollapsed,
-		setOpen: setNodeSidebarOpen,
-		width: nodeSidebarWidth,
-		setWidth: setNodeSidebarWidth,
-		isResizing: isNodeSidebarResizing,
-		setIsResizing: setNodeSidebarIsResizing,
-		isCollapsed: isNodeSidebarCollapsed,
-	} = useNodeSidebarStore();
+		isSidebarOpen,
+		sidebarWidth,
+		setSidebarWidth,
+		isResizing,
+		setIsResizing,
+		toggleSidebar,
+	} = useSidebarStore();
 
 	// Global hotkeys for dashboard
 	useAppHotkey(
@@ -67,14 +69,10 @@ function DashboardLayout() {
 	useAppHotkey(
 		"TOGGLE_NODE_SIDEBAR",
 		() => {
-			if (!isNodeSidebarOpen) {
-				setNodeSidebarOpen(true);
-			} else {
-				toggleNodeSidebarCollapsed();
-			}
+			toggleSidebar();
 		},
 		undefined,
-		[isNodeSidebarOpen, setNodeSidebarOpen, toggleNodeSidebarCollapsed],
+		[toggleSidebar],
 	);
 
 	useAppHotkey(
@@ -84,27 +82,44 @@ function DashboardLayout() {
 		[openNewNodeModal, currentNode?.repositoryId],
 	);
 
+	useAppHotkey(
+		"SWITCH_WORKSPACE",
+		() => openNodeSwitcher(),
+		undefined,
+		[openNodeSwitcher],
+	);
+
+	useAppHotkey(
+		"OPEN_DASHBOARD",
+		() => toggleDashboardModal(),
+		undefined,
+		[toggleDashboardModal],
+	);
+
+	// Only show ContextRail on node routes (requires node context for Files/Changes)
+	const isNodeRoute = !!currentNodeId;
+	const showContextRail = isSidebarOpen && isNodeRoute;
+
 	return (
-		<div className="flex flex-col h-full w-full ambient-bg">
+		<div className="flex flex-col h-full w-full bg-tertiary">
 			<TopBar />
-			<div className="flex flex-1 overflow-hidden px-3 pb-3 gap-2">
-				<div className="flex-1 rounded-xl overflow-hidden glass">
-					<Outlet />
-				</div>
-				{isNodeSidebarOpen && (
+			<div className="flex flex-1 overflow-hidden">
+				{showContextRail && (
 					<ResizablePanel
-						width={nodeSidebarWidth}
-						onWidthChange={setNodeSidebarWidth}
-						isResizing={isNodeSidebarResizing}
-						onResizingChange={setNodeSidebarIsResizing}
-						minWidth={COLLAPSED_NODE_SIDEBAR_WIDTH}
-						maxWidth={MAX_NODE_SIDEBAR_WIDTH}
-						handleSide="left"
-						clampWidth={false}
+						width={sidebarWidth}
+						onWidthChange={setSidebarWidth}
+						isResizing={isResizing}
+						onResizingChange={setIsResizing}
+						minWidth={MIN_SIDEBAR_WIDTH}
+						maxWidth={MAX_SIDEBAR_WIDTH}
+						handleSide="right"
 					>
-						<NodeSidebar isCollapsed={isNodeSidebarCollapsed()} />
+						<ContextRail />
 					</ResizablePanel>
 				)}
+				<div className="flex-1 m-3 bg-background rounded-[var(--radius-modal)] overflow-hidden elevation-2">
+					<Outlet />
+				</div>
 			</div>
 		</div>
 	);

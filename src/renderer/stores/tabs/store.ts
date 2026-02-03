@@ -1091,7 +1091,7 @@ export const useTabsStore = create<TabsStore>()(
 
 					const tab = {
 						id: tabId,
-						name: "Agent Dashboard",
+						name: "Agents Dashboard",
 						nodeId,
 						layout: pane.id,
 						createdAt: Date.now(),

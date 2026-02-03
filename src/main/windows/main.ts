@@ -18,9 +18,9 @@ import {
 	notificationsEmitter,
 } from "../lib/notifications/server";
 import {
-	extractWorkspaceIdFromUrl,
+	extractNodeIdFromUrl,
+	getNodeName,
 	getNotificationTitle,
-	getWorkspaceName,
 	isPaneVisible,
 } from "../lib/notifications/utils";
 import {
@@ -28,13 +28,13 @@ import {
 	loadWindowState,
 	saveWindowState,
 } from "../lib/window-state";
-import { getWorkspaceRuntimeRegistry } from "../lib/workspace-runtime";
+import { getNodeRuntimeRegistry } from "../lib/node-runtime";
 
 // Singleton IPC handler to prevent duplicate handlers on window reopen (macOS)
 let ipcHandler: ReturnType<typeof createIPCHandler> | null = null;
 
 function getNodeNameFromDb(nodeId: string | undefined): string {
-	if (!nodeId) return "Workspace";
+	if (!nodeId) return "Node";
 	try {
 		const node = localDb
 			.select()
@@ -48,10 +48,10 @@ function getNodeNameFromDb(nodeId: string | undefined): string {
 					.where(eq(worktrees.id, node.worktreeId))
 					.get()
 			: undefined;
-		return getWorkspaceName({ workspace: node, worktree });
+		return getNodeName({ node, worktree });
 	} catch (error) {
 		console.error("[notifications] Failed to get node name:", error);
-		return "Workspace";
+		return "Node";
 	}
 }
 
@@ -82,7 +82,7 @@ export async function MainWindow() {
 		autoHideMenuBar: true,
 		frame: false,
 		titleBarStyle: "hidden",
-		trafficLightPosition: { x: 22, y: 16 },
+		trafficLightPosition: { x: 22, y: 18 },
 		webPreferences: {
 			preload: join(__dirname, "../preload/index.js"),
 			webviewTag: true,
@@ -132,12 +132,12 @@ export async function MainWindow() {
 				event.paneId
 			) {
 				const isVisible = isPaneVisible({
-					currentWorkspaceId: extractWorkspaceIdFromUrl(
+					currentNodeId: extractNodeIdFromUrl(
 						window.webContents.getURL(),
 					),
 					tabsState: appState.data?.tabsState,
 					pane: {
-						workspaceId: event.nodeId,
+						nodeId: event.nodeId,
 						tabId: event.tabId,
 						paneId: event.paneId,
 					},
@@ -185,7 +185,7 @@ export async function MainWindow() {
 	// Forward low-volume terminal lifecycle events to the renderer via the existing
 	// notifications subscription. This is used only for correctness (e.g. clearing
 	// stuck agent lifecycle statuses when terminal panes aren't mounted).
-	getWorkspaceRuntimeRegistry()
+	getNodeRuntimeRegistry()
 		.getDefault()
 		.terminal.on(
 			"terminalExit",
@@ -256,7 +256,7 @@ export async function MainWindow() {
 		server.close();
 		notificationsEmitter.removeAllListeners();
 		// Remove terminal listeners to prevent duplicates when window reopens on macOS
-		getWorkspaceRuntimeRegistry().getDefault().terminal.detachAllListeners();
+		getNodeRuntimeRegistry().getDefault().terminal.detachAllListeners();
 		// Detach window from IPC handler (handler stays alive for window reopen)
 		ipcHandler?.detachWindow(window);
 		// Clear current window reference

@@ -1,10 +1,7 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { settings } from "lib/local-db";
-import {
-	DEFAULT_RINGTONE_ID,
-	getRingtoneFilename,
-} from "../../shared/ringtones";
+import { NOTIFICATION_SOUND_FILENAME } from "../../shared/ringtones";
 import { localDb } from "./local-db";
 import { getSoundPath } from "./sound-paths";
 
@@ -17,30 +14,6 @@ function areNotificationSoundsMuted(): boolean {
 		return settingsRow?.notificationSoundsMuted ?? false;
 	} catch {
 		return false;
-	}
-}
-
-/**
- * Gets the selected ringtone filename from the database.
- * Falls back to default ringtone if the stored ID is invalid/stale.
- */
-function getSelectedRingtoneFilename(): string {
-	const defaultFilename = getRingtoneFilename(DEFAULT_RINGTONE_ID);
-
-	try {
-		const settingsRow = localDb.select().from(settings).get();
-		const selectedId = settingsRow?.selectedRingtoneId ?? DEFAULT_RINGTONE_ID;
-
-		// Legacy: "none" was previously used before the muted toggle existed
-		if (selectedId === "none") {
-			return "";
-		}
-
-		const filename = getRingtoneFilename(selectedId);
-		// Fall back to default if stored ID is stale/unknown
-		return filename || defaultFilename;
-	} catch {
-		return defaultFilename;
 	}
 }
 
@@ -71,7 +44,7 @@ function playSoundFile(soundPath: string): void {
 }
 
 /**
- * Plays the notification sound based on user's selected ringtone.
+ * Plays the notification sound.
  * Uses platform-specific commands to play the audio file.
  */
 export function playNotificationSound(): void {
@@ -80,13 +53,6 @@ export function playNotificationSound(): void {
 		return;
 	}
 
-	const filename = getSelectedRingtoneFilename();
-
-	// No sound if "none" is selected
-	if (!filename) {
-		return;
-	}
-
-	const soundPath = getSoundPath(filename);
+	const soundPath = getSoundPath(NOTIFICATION_SOUND_FILENAME);
 	playSoundFile(soundPath);
 }

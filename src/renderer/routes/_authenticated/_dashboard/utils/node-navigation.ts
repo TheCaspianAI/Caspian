@@ -18,8 +18,8 @@ export function navigateToNode(
 ): Promise<void> {
 	localStorage.setItem("lastViewedNodeId", nodeId);
 	return navigate({
-		to: "/workspace/$workspaceId",
-		params: { workspaceId: nodeId },
+		to: "/node/$nodeId",
+		params: { nodeId },
 		...options,
 	});
 }

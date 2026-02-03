@@ -157,7 +157,7 @@ export function InitGitDialog({
 				aria-modal="true"
 				aria-labelledby={titleId}
 				onKeyDown={handleKeyDown}
-				className="bg-card border border-border rounded-lg p-8 w-full max-w-md shadow-2xl"
+				className="bg-card border border-border rounded-lg p-8 w-full max-w-md elevation-3"
 			>
 				<h2 id={titleId} className="text-xl font-normal text-foreground mb-4">
 					Initialize Git Repository

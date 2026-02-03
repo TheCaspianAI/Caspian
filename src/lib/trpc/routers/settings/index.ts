@@ -14,12 +14,9 @@ import {
 	DEFAULT_CONFIRM_ON_QUIT,
 	DEFAULT_TERMINAL_LINK_BEHAVIOR,
 } from "shared/constants";
-import { DEFAULT_RINGTONE_ID, RINGTONES } from "shared/ringtones";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import { getGitAuthorName, getGitHubUsername } from "../nodes/utils/git";
-
-const VALID_RINGTONE_IDS = RINGTONES.map((r) => r.id);
 
 function getSettings() {
 	let row = localDb.select().from(settings).get();
@@ -205,54 +202,6 @@ export const createSettingsRouter = () => {
 			const presets = row.terminalPresets ?? [];
 			return presets.find((p) => p.isDefault) ?? null;
 		}),
-
-		getSelectedRingtoneId: publicProcedure.query(() => {
-			const row = getSettings();
-			const storedId = row.selectedRingtoneId;
-
-			if (!storedId) {
-				return DEFAULT_RINGTONE_ID;
-			}
-
-			if (VALID_RINGTONE_IDS.includes(storedId)) {
-				return storedId;
-			}
-
-			console.warn(
-				`[settings] Invalid ringtone ID "${storedId}" found, resetting to default`,
-			);
-			localDb
-				.insert(settings)
-				.values({ id: 1, selectedRingtoneId: DEFAULT_RINGTONE_ID })
-				.onConflictDoUpdate({
-					target: settings.id,
-					set: { selectedRingtoneId: DEFAULT_RINGTONE_ID },
-				})
-				.run();
-			return DEFAULT_RINGTONE_ID;
-		}),
-
-		setSelectedRingtoneId: publicProcedure
-			.input(z.object({ ringtoneId: z.string() }))
-			.mutation(({ input }) => {
-				if (!VALID_RINGTONE_IDS.includes(input.ringtoneId)) {
-					throw new TRPCError({
-						code: "BAD_REQUEST",
-						message: `Invalid ringtone ID: ${input.ringtoneId}`,
-					});
-				}
-
-				localDb
-					.insert(settings)
-					.values({ id: 1, selectedRingtoneId: input.ringtoneId })
-					.onConflictDoUpdate({
-						target: settings.id,
-						set: { selectedRingtoneId: input.ringtoneId },
-					})
-					.run();
-
-				return { success: true };
-			}),
 
 		getConfirmOnQuit: publicProcedure.query(() => {
 			const row = getSettings();

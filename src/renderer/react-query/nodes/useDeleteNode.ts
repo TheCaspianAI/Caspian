@@ -50,8 +50,8 @@ export function useDeleteNode(
 					navigatedTo = targetNodeId;
 					navigateToNode(targetNodeId, navigate);
 				} else {
-					navigatedTo = "/workspace";
-					navigate({ to: "/workspace" });
+					navigatedTo = "/node";
+					navigate({ to: "/node" });
 				}
 			}
 

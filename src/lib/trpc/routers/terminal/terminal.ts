@@ -11,7 +11,7 @@ import {
 	TerminalKilledError,
 } from "main/lib/terminal/errors";
 import { getTerminalHostClient } from "main/lib/terminal-host/client";
-import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
+import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import { assertNodeUsable } from "../nodes/utils/usability";
@@ -46,7 +46,7 @@ const SAFE_ID = z
  * - CASPIAN_PORT: The hooks server port for agent completion notifications
  */
 export const createTerminalRouter = () => {
-	const registry = getWorkspaceRuntimeRegistry();
+	const registry = getNodeRuntimeRegistry();
 	const terminal = registry.getDefault().terminal;
 	if (DEBUG_TERMINAL) {
 		console.log(

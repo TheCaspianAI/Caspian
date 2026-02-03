@@ -1,14 +1,14 @@
 import { createNode } from "./create-worktree";
-import { deleteNode } from "./delete-workspace";
+import { deleteNode } from "./delete-node";
 import { getAppContext } from "./get-app-context";
 import { listRepositories } from "./list-projects";
-import { listNodes } from "./list-workspaces";
-import { navigateToNode } from "./navigate-to-workspace";
+import { listNodes } from "./list-nodes";
+import { navigateToNode } from "./navigate-to-node";
 import { startClaudeSession } from "./start-claude-session";
 import { startClaudeSubagent } from "./start-claude-subagent";
-import { switchNode } from "./switch-workspace";
+import { switchNode } from "./switch-node";
 import type { CommandResult, ToolContext, ToolDefinition } from "./types";
-import { updateNode } from "./update-workspace";
+import { updateNode } from "./update-node";
 
 // Registry of all available tools
 // biome-ignore lint/suspicious/noExplicitAny: Tool schemas vary

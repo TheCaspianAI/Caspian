@@ -1,16 +1,16 @@
 /**
- * Extracts the workspace ID from a hash-routed URL.
+ * Extracts the node ID from a hash-routed URL.
  *
  * The app uses hash routing, so URLs look like:
- * - file:///path/to/app/index.html#/workspace/abc123
- * - file:///Users/foo/workspace/caspian/dist/index.html#/workspace/abc123?foo=bar
+ * - file:///path/to/app/index.html#/node/abc123
+ * - file:///Users/foo/workspace/caspian/dist/index.html#/node/abc123?foo=bar
  *
- * This function parses the hash portion to avoid matching /workspace/ in the file path.
+ * This function parses the hash portion to avoid matching /node/ in the file path.
  */
-export function extractWorkspaceIdFromUrl(url: string): string | null {
+export function extractNodeIdFromUrl(url: string): string | null {
 	try {
 		const hash = new URL(url).hash;
-		const match = hash.match(/\/workspace\/([^/?#]+)/);
+		const match = hash.match(/\/node\/([^/?#]+)/);
 		return match?.[1] ?? null;
 	} catch {
 		return null;
@@ -23,7 +23,7 @@ interface TabsState {
 }
 
 interface PaneLocation {
-	workspaceId: string;
+	nodeId: string;
 	tabId: string;
 	paneId: string;
 }
@@ -32,28 +32,28 @@ interface PaneLocation {
  * Determines if a pane is currently visible to the user.
  *
  * A pane is visible when:
- * 1. User is viewing the workspace containing the pane
- * 2. The tab is the active tab in that workspace
+ * 1. User is viewing the node containing the pane
+ * 2. The tab is the active tab in that node
  * 3. The pane is the focused pane in that tab
  */
 export function isPaneVisible({
-	currentWorkspaceId,
+	currentNodeId,
 	tabsState,
 	pane,
 }: {
-	currentWorkspaceId: string | null;
+	currentNodeId: string | null;
 	tabsState: TabsState | undefined;
 	pane: PaneLocation;
 }): boolean {
-	if (!currentWorkspaceId || !tabsState) {
+	if (!currentNodeId || !tabsState) {
 		return false;
 	}
 
-	const isViewingWorkspace = currentWorkspaceId === pane.workspaceId;
-	const isActiveTab = tabsState.activeTabIds?.[pane.workspaceId] === pane.tabId;
+	const isViewingNode = currentNodeId === pane.nodeId;
+	const isActiveTab = tabsState.activeTabIds?.[pane.nodeId] === pane.tabId;
 	const isFocusedPane = tabsState.focusedPaneIds?.[pane.tabId] === pane.paneId;
 
-	return isViewingWorkspace && isActiveTab && isFocusedPane;
+	return isViewingNode && isActiveTab && isFocusedPane;
 }
 
 interface BaseTab {
@@ -86,7 +86,7 @@ export function getNotificationTitle({
 	return tab?.userTitle?.trim() || tab?.name || pane?.name || "Terminal";
 }
 
-interface Workspace {
+interface Node {
 	name: string | null;
 	worktreeId: string | null;
 }
@@ -96,14 +96,14 @@ interface Worktree {
 }
 
 /**
- * Derives a display name for a workspace, falling back through available names.
+ * Derives a display name for a node, falling back through available names.
  */
-export function getWorkspaceName({
-	workspace,
+export function getNodeName({
+	node,
 	worktree,
 }: {
-	workspace?: Workspace | null;
+	node?: Node | null;
 	worktree?: Worktree | null;
 }): string {
-	return workspace?.name || worktree?.branch || "Workspace";
+	return node?.name || worktree?.branch || "Node";
 }

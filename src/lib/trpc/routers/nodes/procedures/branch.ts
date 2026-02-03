@@ -1,7 +1,7 @@
 import { repositories, nodes } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
-import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
+import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
@@ -87,8 +87,8 @@ export const createBranchProcedures = () => {
 				await safeCheckoutBranch(repository.mainRepoPath, input.branch);
 
 				// Send newline to terminals so their prompts refresh with new branch
-				getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(node.id)
+				getNodeRuntimeRegistry()
+					.getForNodeId(node.id)
 					.terminal.refreshPromptsForWorkspace(node.id);
 
 				// Update the node - name is always the branch for branch nodes

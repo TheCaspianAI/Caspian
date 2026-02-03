@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useChangesStore } from "renderer/stores/changes";
 import type { ChangedFile, GitChangesStatus } from "shared/changes-types";
-import { useScrollContext } from "../../context";
+import { useScrollContextRequired } from "../../context";
 import { sortFiles } from "../../utils";
 import { VirtualizedFileList } from "../VirtualizedFileList";
 import { CategoryHeader } from "./components/CategoryHeader";
@@ -21,7 +21,7 @@ export function InfiniteScrollView({
 	worktreePath,
 	baseBranch,
 }: InfiniteScrollViewProps) {
-	const { containerRef, viewedCount } = useScrollContext();
+	const { containerRef, viewedCount } = useScrollContextRequired();
 	const {
 		viewMode: diffViewMode,
 		setViewMode: setDiffViewMode,

@@ -64,7 +64,7 @@ export function FileViewerToolbar({
 				{!isPinned && (
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span className="text-[10px] text-muted-foreground/50 cursor-default">
+							<span className="text-caption text-muted-foreground/50 cursor-default">
 								preview
 							</span>
 						</TooltipTrigger>
@@ -80,26 +80,26 @@ export function FileViewerToolbar({
 					value={viewMode}
 					onValueChange={onViewModeChange}
 					size="sm"
-					className="h-5 bg-muted/50 rounded-md"
+					className="h-6 bg-muted/50 rounded-md"
 				>
 					{isMarkdown && (
 						<ToggleGroupItem
 							value="rendered"
-							className="h-5 px-1.5 text-[10px] text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+							className="h-6 px-2 text-caption text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
 						>
 							Rendered
 						</ToggleGroupItem>
 					)}
 					<ToggleGroupItem
 						value="raw"
-						className="h-5 px-1.5 text-[10px] text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+						className="h-6 px-2 text-caption text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
 					>
 						Raw
 					</ToggleGroupItem>
 					{hasDiff && (
 						<ToggleGroupItem
 							value="diff"
-							className="h-5 px-1.5 text-[10px] text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
+							className="h-6 px-2 text-caption text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm"
 						>
 							Diff
 						</ToggleGroupItem>

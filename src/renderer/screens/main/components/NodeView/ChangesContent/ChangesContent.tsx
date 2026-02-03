@@ -4,7 +4,7 @@ import { useChangesStore } from "renderer/stores/changes";
 import { InfiniteScrollView } from "./components/InfiniteScrollView";
 
 export function ChangesContent() {
-	const { workspaceId } = useParams({ strict: false });
+	const { nodeId: workspaceId } = useParams({ strict: false });
 	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },

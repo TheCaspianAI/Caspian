@@ -62,7 +62,7 @@ export function CloneRepoDialog({
 
 	return (
 		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-			<div className="bg-card border border-border rounded-lg p-8 w-full max-w-md shadow-2xl">
+			<div className="bg-card border border-border rounded-lg p-8 w-full max-w-md elevation-3">
 				<h2 className="text-xl font-normal text-foreground mb-6">
 					Clone Repository
 				</h2>

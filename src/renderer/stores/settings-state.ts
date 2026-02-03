@@ -8,7 +8,6 @@ import { devtools } from "zustand/middleware";
 export type SettingsSection =
 	| "appearance"
 	| "preferences"   // main preferences page
-	| "ringtones"     // notification sounds
 	| "keyboard"      // keyboard shortcuts
 	| "behavior"      // general behavior settings
 	| "presets"       // terminal presets

@@ -12,7 +12,6 @@ import { createMenuRouter } from "./menu";
 import { createNotificationsRouter } from "./notifications";
 import { createPortsRouter } from "./ports";
 import { createRepositoriesRouter } from "./repositories";
-import { createRingtoneRouter } from "./ringtone";
 import { createSettingsRouter } from "./settings";
 import { createTerminalRouter } from "./terminal";
 import { createUiStateRouter } from "./ui-state";
@@ -38,7 +37,6 @@ export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 		settings: createSettingsRouter(),
 		config: createConfigRouter(),
 		uiState: createUiStateRouter(),
-		ringtone: createRingtoneRouter(),
 	});
 };
 

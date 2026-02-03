@@ -182,9 +182,9 @@ export function NodesListView() {
 	return (
 		<div className="flex-1 flex flex-col bg-card overflow-hidden">
 			{/* Header */}
-			<div className="flex items-center gap-3 px-4 py-2 border-b border-border/50">
+			<div className="flex items-center gap-3 px-3 py-2 border-b border-border/50">
 				{/* Filter toggle */}
-				<div className="flex items-center gap-1 bg-background/50 rounded-md p-0.5">
+				<div className="flex items-center gap-0.5 bg-background/50 rounded-sm p-0.5">
 					{FILTER_OPTIONS.map((option) => {
 						const count =
 							option.value === "all"
@@ -198,7 +198,7 @@ export function NodesListView() {
 								type="button"
 								onClick={() => setFilterMode(option.value)}
 								className={cn(
-									"px-2 py-1 text-xs rounded-md transition-colors",
+									"px-2.5 py-1 text-caption rounded-sm transition-colors",
 									filterMode === option.value
 										? "bg-accent text-foreground"
 										: "text-foreground/60 hover:text-foreground",
@@ -227,7 +227,7 @@ export function NodesListView() {
 				<Button
 					variant="ghost"
 					size="icon"
-					onClick={() => navigate({ to: "/workspace" })}
+					onClick={() => navigate({ to: "/node" })}
 					className="size-7 text-foreground/60 hover:text-foreground shrink-0"
 				>
 					<LuX className="size-4" />
@@ -239,11 +239,11 @@ export function NodesListView() {
 				{repositoryGroups.map((group) => (
 					<div key={group.repositoryId}>
 						{/* Repository header */}
-						<div className="sticky top-0 bg-card/95 backdrop-blur-sm px-4 py-2 border-b border-border/50">
-							<span className="text-xs font-medium text-foreground/70">
+						<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border/50">
+							<span className="text-label font-medium text-foreground/70">
 								{group.repositoryName}
 							</span>
-							<span className="text-xs text-foreground/40 ml-2">
+							<span className="text-caption text-foreground/40 ml-2">
 								{group.nodes.length}
 							</span>
 						</div>
@@ -265,7 +265,7 @@ export function NodesListView() {
 				))}
 
 				{filteredItems.length === 0 && (
-					<div className="flex items-center justify-center h-32 text-foreground/50 text-sm">
+					<div className="flex items-center justify-center h-32 text-foreground/50 text-label">
 						{searchQuery
 							? "No nodes match your search"
 							: filterMode === "active"

@@ -1,7 +1,7 @@
 import type { SelectWorktree } from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { nodeInitManager } from "main/lib/node-init-manager";
-import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
+import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
@@ -58,8 +58,8 @@ export const createDeleteProcedures = () => {
 					};
 				}
 
-				const activeTerminalCount = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
+				const activeTerminalCount = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
 					.terminal.getSessionCountByWorkspaceId(input.id);
 
 				// Branch nodes are non-destructive to close - no git checks needed
@@ -186,8 +186,8 @@ export const createDeleteProcedures = () => {
 				}
 
 				// Kill all terminal processes in this node first
-				const terminalResult = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
+				const terminalResult = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
 					.terminal.killByWorkspaceId(input.id);
 
 				const repository = getRepository(node.repositoryId);
@@ -278,8 +278,8 @@ export const createDeleteProcedures = () => {
 					throw new Error("Node not found");
 				}
 
-				const terminalResult = await getWorkspaceRuntimeRegistry()
-					.getForWorkspaceId(input.id)
+				const terminalResult = await getNodeRuntimeRegistry()
+					.getForNodeId(input.id)
 					.terminal.killByWorkspaceId(input.id);
 
 				deleteNode(input.id); // keeps worktree on disk

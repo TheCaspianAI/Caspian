@@ -17,7 +17,6 @@ import {
 	extractPaneIdsFromLayout,
 } from "renderer/stores/tabs/utils";
 import { FileViewerPane } from "./FileViewerPane";
-import { KanbanView } from "../KanbanView";
 import { TabPane } from "./TabPane";
 
 interface TabViewProps {
@@ -156,11 +155,6 @@ export function TabView({ tab }: TabViewProps) {
 						onMoveToNewTab={() => movePaneToNewTab(paneId)}
 					/>
 				);
-			}
-
-			// Route kanban panes to KanbanView component
-			if (paneInfo.type === "kanban") {
-				return <KanbanView />;
 			}
 
 			// Default: terminal panes

@@ -4,7 +4,9 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { DndProvider } from "react-dnd";
+import { DashboardModal } from "renderer/components/DashboardModal";
 import { NewNodeModal } from "renderer/components/NewNodeModal";
+import { NodeSwitcherModal } from "renderer/components/NodeSwitcherModal";
 import { useUpdateListener } from "renderer/components/UpdateToast";
 import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
@@ -51,7 +53,7 @@ function AuthenticatedLayout() {
 				const section = event.data.section || "appearance";
 				navigate({ to: `/settings/${section}` as "/settings/appearance" });
 			} else if (event.type === "open-node") {
-				navigate({ to: `/workspace/${event.data.nodeId}` });
+				navigate({ to: `/node/${event.data.nodeId}` });
 			}
 		},
 	});
@@ -62,7 +64,9 @@ function AuthenticatedLayout() {
 				<AgentHooks />
 				<Outlet />
 				<NodeInitEffects />
+				<DashboardModal />
 				<NewNodeModal />
+				<NodeSwitcherModal />
 			</CollectionsProvider>
 		</DndProvider>
 	);

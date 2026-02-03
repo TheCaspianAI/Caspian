@@ -1,1 +1,0 @@
-export { RepositoryThumbnail } from "./RepositoryThumbnail";

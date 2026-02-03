@@ -14,7 +14,7 @@ import type { BrowserWindow } from "electron";
 import { dialog } from "electron";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
-import { getWorkspaceRuntimeRegistry } from "main/lib/workspace-runtime";
+import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { REPOSITORY_COLOR_VALUES } from "shared/constants/repository-colors";
 import simpleGit from "simple-git";
 import { z } from "zod";
@@ -909,9 +909,9 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					.all();
 
 				let totalFailed = 0;
-				const registry = getWorkspaceRuntimeRegistry();
+				const registry = getNodeRuntimeRegistry();
 				for (const node of repositoryNodes) {
-					const terminal = registry.getForWorkspaceId(node.id).terminal;
+					const terminal = registry.getForNodeId(node.id).terminal;
 					const terminalResult = await terminal.killByWorkspaceId(node.id);
 					totalFailed += terminalResult.failed;
 				}

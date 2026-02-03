@@ -8,8 +8,8 @@ import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import {
 	getStatusColor,
 	getStatusIndicator,
-} from "../../../RightSidebar/ChangesView/utils";
-import { createFileKey, useScrollContext } from "../../context";
+} from "../../../../ContextRail/ChangesView/utils";
+import { createFileKey, useScrollContextRequired } from "../../context";
 import { DiffViewer } from "../DiffViewer";
 import { FileDiffHeader } from "./components/FileDiffHeader";
 
@@ -77,7 +77,7 @@ export function FileDiffSection({
 		setFileViewed,
 		setActiveFileKey,
 		containerRef,
-	} = useScrollContext();
+	} = useScrollContextRequired();
 	const { viewMode: diffViewMode, hideUnchangedRegions } = useChangesStore();
 	const [isCopied, setIsCopied] = useState(false);
 	const [hasBeenVisible, setHasBeenVisible] = useState(false);

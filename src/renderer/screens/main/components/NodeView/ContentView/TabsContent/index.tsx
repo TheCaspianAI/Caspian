@@ -6,7 +6,7 @@ import { EmptyTabView } from "./EmptyTabView";
 import { TabView } from "./TabView";
 
 export function TabsContent() {
-	const { workspaceId: activeWorkspaceId } = useParams({ strict: false });
+	const { nodeId: activeWorkspaceId } = useParams({ strict: false });
 	const allTabs = useTabsStore((s) => s.tabs);
 	const activeTabIds = useTabsStore((s) => s.activeTabIds);
 	const tabHistoryStacks = useTabsStore((s) => s.tabHistoryStacks);

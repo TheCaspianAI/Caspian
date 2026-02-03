@@ -92,22 +92,3 @@ export const trpcHotkeysStorage = createJSONStorage(() =>
 	}),
 );
 
-/**
- * Zustand storage adapter for ringtone state using tRPC.
- * Only the selectedRingtoneId is persisted.
- */
-export const trpcRingtoneStorage = createJSONStorage(() =>
-	createTrpcStorageAdapter({
-		get: async () => {
-			const ringtoneId =
-				await electronTrpcClient.settings.getSelectedRingtoneId.query();
-			return { selectedRingtoneId: ringtoneId };
-		},
-		set: async (input) => {
-			const state = input as { selectedRingtoneId: string };
-			await electronTrpcClient.settings.setSelectedRingtoneId.mutate({
-				ringtoneId: state.selectedRingtoneId,
-			});
-		},
-	}),
-);

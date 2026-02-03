@@ -38,7 +38,7 @@ export function SidebarToggle() {
 			</TooltipTrigger>
 			<TooltipContent side="right">
 				<HotkeyTooltipContent
-					label="Toggle sidebar"
+					label="Toggle context pane"
 					hotkeyId="TOGGLE_NODE_SIDEBAR"
 				/>
 			</TooltipContent>

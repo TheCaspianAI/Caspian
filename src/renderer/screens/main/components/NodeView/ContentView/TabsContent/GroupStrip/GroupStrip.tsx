@@ -34,7 +34,7 @@ import { GroupItem } from "./GroupItem";
 import { NewTabDropZone } from "./NewTabDropZone";
 
 export function GroupStrip() {
-	const { workspaceId: activeWorkspaceId } = useParams({ strict: false });
+	const { nodeId: activeWorkspaceId } = useParams({ strict: false });
 
 	const allTabs = useTabsStore((s) => s.tabs);
 	const panes = useTabsStore((s) => s.panes);

@@ -43,7 +43,7 @@ export function UpdateToast({
 	};
 
 	return (
-		<div className="update-toast relative flex flex-col gap-3 bg-popover text-popover-foreground rounded-lg border border-border p-4 shadow-lg min-w-[340px]">
+		<div className="update-toast relative flex flex-col gap-3 bg-popover text-popover-foreground rounded-lg border border-border p-4 elevation-2 min-w-[340px]">
 			<button
 				type="button"
 				onClick={handleLater}

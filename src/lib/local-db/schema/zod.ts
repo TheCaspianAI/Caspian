@@ -116,7 +116,7 @@ export const TERMINAL_LINK_BEHAVIORS = [
 export type TerminalLinkBehavior = (typeof TERMINAL_LINK_BEHAVIORS)[number];
 
 /**
- * Branch prefix modes for workspace branch naming
+ * Branch prefix modes for node branch naming
  */
 export const BRANCH_PREFIX_MODES = [
 	"github",

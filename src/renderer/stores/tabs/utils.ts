@@ -223,7 +223,7 @@ export const createKanbanPane = (tabId: string): Pane => {
 		id,
 		tabId,
 		type: "kanban",
-		name: "Agent Dashboard",
+		name: "Agents Dashboard",
 		isNew: false,
 	};
 };

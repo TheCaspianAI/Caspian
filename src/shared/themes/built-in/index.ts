@@ -19,9 +19,9 @@ export const builtInThemes: Theme[] = [
 ];
 
 /**
- * Default theme ID
+ * Default theme ID - Caspian is the gold-standard reference theme
  */
-export const DEFAULT_THEME_ID = "nord";
+export const DEFAULT_THEME_ID = "caspian";
 
 /**
  * Get a built-in theme by ID

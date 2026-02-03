@@ -119,14 +119,14 @@ app.get("/hook/complete", (req, res) => {
 	const {
 		paneId,
 		tabId,
-		workspaceId, // Legacy alias for nodeId - keep for backwards compatibility
+		workspaceId, // Legacy alias for nodeId - keep for backwards compatibility with older hooks
 		nodeId: nodeIdParam,
 		eventType,
 		env: clientEnv,
 		version,
 	} = req.query;
 
-	// Support both nodeId and legacy workspaceId parameter
+	// Support both nodeId and legacy workspaceId parameter for backwards compatibility
 	const nodeId = (nodeIdParam ?? workspaceId) as string | undefined;
 
 	// Environment validation: detect dev/prod cross-talk

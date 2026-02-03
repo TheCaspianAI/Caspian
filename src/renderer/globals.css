@@ -5,14 +5,15 @@
 @source "../../../../packages/ui/src/**/*.{ts,tsx}";
 
 /**
- * Glassmorphism Theme - Refined
+ * Design System - Linear-quality polish
  *
  * Design principles:
- * - Subtle atmospheric background
- * - One consistent glass treatment
- * - Pink accent (#ff7aed) used sparingly for primary actions only
- * - Clear elevation hierarchy
- * - Generous spacing, visual breathing room
+ * - Structural surfaces use solid backgrounds, not glass
+ * - Glass reserved for temporary overlays only
+ * - Pink accent (#ff7aed) used sparingly for primary actions
+ * - Three-tier elevation system (max 3 levels)
+ * - Tight density in navigation, relaxed in input areas
+ * - Typography scale locked: caption (12px), label (14px), body (16px), heading (20px)
  */
 
 /* Satoshi Font Family */
@@ -105,10 +106,20 @@
 	--chart-4: oklch(0.75 0.18 310);
 	--chart-5: oklch(0.50 0.12 335);
 
-	/* Consistent radius */
+	/* Radius system - three tiers */
 	--radius: 0.75rem;
+	--radius-structural: 0.25rem;    /* 4px - sidebars, panels, structural chrome */
+	--radius-interactive: 0.5rem;   /* 8px - buttons, inputs, tabs */
+	--radius-modal: 0.75rem;        /* 12px - modals, major overlays */
+	--radius-scrollbar: 3px;
 
-	/* Glass effect - ONE consistent treatment */
+	/* Typography scale - locked (matches Tailwind: xs, sm, base, xl) */
+	--text-caption: 0.75rem;        /* 12px - badges, counts, hints */
+	--text-label: 0.875rem;         /* 14px - labels, section titles, meta text */
+	--text-body: 1rem;              /* 16px - primary content, descriptions */
+	--text-heading: 1.25rem;        /* 20px - page titles */
+
+	/* Glass effect - for OVERLAYS ONLY, not structural surfaces */
 	--glass-bg: oklch(0.12 0.02 328 / 0.65);
 	--glass-border: oklch(0.5 0.05 328 / 0.1);
 	--glass-blur: 12px;
@@ -154,6 +165,15 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+	/* Semantic radius tiers */
+	--radius-structural: var(--radius-structural);
+	--radius-interactive: var(--radius-interactive);
+	--radius-modal: var(--radius-modal);
+	/* Typography scale */
+	--font-size-caption: var(--text-caption);
+	--font-size-label: var(--text-label);
+	--font-size-body: var(--text-body);
+	--font-size-heading: var(--text-heading);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -175,9 +195,8 @@
 	}
 
 	html {
-		/* Larger base font size - makes all rem values scale up */
-		/* Default is 16px, 17px = ~6% larger across the board */
-		font-size: 17px;
+		/* Standard base font size for predictable rem calculations */
+		font-size: 16px;
 	}
 
 	html, body {
@@ -211,6 +230,7 @@
 	/* Terminal */
 	.xterm { height: 100%; width: 100%; }
 	.xterm-screen { height: 100%; width: 100%; }
+	.xterm-viewport { background-color: transparent !important; }
 	.xterm .xterm-rows a { color: inherit; cursor: pointer; }
 
 	/* Scrollbars - subtle */
@@ -228,7 +248,7 @@
 	*::-webkit-scrollbar-track { background: transparent; }
 	*::-webkit-scrollbar-thumb {
 		background: oklch(0.4 0.03 328 / 0.4);
-		border-radius: 3px;
+		border-radius: var(--radius-scrollbar);
 	}
 	*::-webkit-scrollbar-thumb:hover {
 		background: oklch(0.5 0.04 328 / 0.5);
@@ -243,7 +263,9 @@
 }
 
 @layer utilities {
-	/* The ONE glass treatment - used everywhere consistently */
+	/* Glass - for TEMPORARY OVERLAYS ONLY
+	 * Do NOT use for: TopBar, sidebars, structural containers
+	 * Use solid bg-tertiary or bg-card instead */
 	.glass {
 		background: var(--glass-bg);
 		backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
@@ -251,16 +273,31 @@
 		border: 1px solid var(--glass-border);
 	}
 
-	/* Elevation through shadow only - no gimmicks */
+	/* Modal overlay blur - requires webkit prefix for Electron */
+	.modal-backdrop-blur {
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+	}
+
+	/* Elevation system - THREE LEVELS ONLY, no more
+	 * elevation-1: hover states, transient emphasis
+	 * elevation-2: dropdowns, dialogs, popovers
+	 * elevation-3: major overlays (dashboard modal) - MAXIMUM */
 	.elevation-1 {
-		box-shadow: 0 1px 3px oklch(0 0 0 / 0.2), 0 1px 2px oklch(0 0 0 / 0.15);
+		box-shadow: 0 1px 3px oklch(0 0 0 / 0.12), 0 1px 2px oklch(0 0 0 / 0.08);
 	}
 	.elevation-2 {
-		box-shadow: 0 4px 12px oklch(0 0 0 / 0.25), 0 2px 4px oklch(0 0 0 / 0.1);
+		box-shadow: 0 4px 12px oklch(0 0 0 / 0.15), 0 2px 4px oklch(0 0 0 / 0.08);
 	}
 	.elevation-3 {
-		box-shadow: 0 8px 24px oklch(0 0 0 / 0.3), 0 4px 8px oklch(0 0 0 / 0.15);
+		box-shadow: 0 8px 24px oklch(0 0 0 / 0.20), 0 4px 8px oklch(0 0 0 / 0.10);
 	}
+
+	/* Semantic typography utilities */
+	.text-caption { font-size: var(--text-caption); }  /* 12px */
+	.text-label { font-size: var(--text-label); }      /* 14px */
+	.text-body { font-size: var(--text-body); }        /* 16px */
+	.text-heading { font-size: var(--text-heading); }  /* 20px */
 
 	/* Primary glow - ONLY for primary interactive elements */
 	.primary-glow {

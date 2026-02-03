@@ -15,8 +15,8 @@ import {
 } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
-import { STROKE_WIDTH } from "../../NodeSidebar/constants";
-import { DeleteNodeDialog } from "../../NodeSidebar/NodeListItem/components/DeleteNodeDialog/DeleteNodeDialog";
+import { STROKE_WIDTH } from "../constants";
+import { DeleteNodeDialog } from "../components/DeleteNodeDialog/DeleteNodeDialog";
 import type { NodeItem } from "../types";
 import { getRelativeTime } from "../utils";
 import { DeleteWorktreeDialog } from "./DeleteWorktreeDialog";
@@ -76,7 +76,7 @@ export function NodeRow({
 			disabled={isOpening}
 			onMouseEnter={() => !hasHovered && setHasHovered(true)}
 			className={cn(
-				"flex items-center gap-3 w-full px-4 py-2 group text-left",
+				"flex items-center gap-3 w-full px-4 py-2.5 group text-left",
 				"hover:bg-background/50 transition-colors",
 				isOpening && "opacity-50 cursor-wait",
 			)}
@@ -142,7 +142,7 @@ export function NodeRow({
 
 			{/* Diff stats */}
 			{showDiffStats && (
-				<div className="flex items-center gap-1 text-[10px] font-mono shrink-0">
+				<div className="flex items-center gap-1 text-caption font-mono shrink-0">
 					<span className="text-emerald-500">+{pr.additions}</span>
 					<span className="text-destructive-foreground">-{pr.deletions}</span>
 				</div>
@@ -152,7 +152,7 @@ export function NodeRow({
 			<div className="flex-1" />
 
 			{/* Time context */}
-			<span className="text-xs text-foreground/40 shrink-0 group-hover:hidden">
+			<span className="text-caption text-foreground/40 shrink-0 group-hover:hidden">
 				{timeText}
 			</span>
 

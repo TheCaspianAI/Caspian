@@ -81,11 +81,10 @@ export type SelectWorktree = typeof worktrees.$inferSelect;
 
 /**
  * Nodes table - represents an active node (worktree or branch-based)
- * Note: SQL table is still named "workspaces" for migration compatibility
  * Column "repositoryId" maps to SQL "project_id"
  */
 export const nodes = sqliteTable(
-	"workspaces",
+	"nodes",
 	{
 		id: text("id")
 			.primaryKey()
@@ -117,15 +116,9 @@ export const nodes = sqliteTable(
 		customTeardownScript: text("custom_teardown_script"),
 	},
 	(table) => [
-		index("workspaces_project_id_idx").on(table.repositoryId),
-		index("workspaces_worktree_id_idx").on(table.worktreeId),
-		index("workspaces_last_opened_at_idx").on(table.lastOpenedAt),
-		// NOTE: Migration 0006 creates an additional partial unique index:
-		// CREATE UNIQUE INDEX workspaces_unique_branch_per_project
-		//   ON workspaces(project_id) WHERE type = 'branch'
-		// This enforces one branch node per repository. Drizzle's schema DSL
-		// doesn't support partial/filtered indexes, so this constraint is only
-		// applied via the migration, not schema push. See migration 0006 for details.
+		index("nodes_project_id_idx").on(table.repositoryId),
+		index("nodes_worktree_id_idx").on(table.worktreeId),
+		index("nodes_last_opened_at_idx").on(table.lastOpenedAt),
 	],
 );
 
@@ -134,7 +127,7 @@ export type SelectNode = typeof nodes.$inferSelect;
 
 export const settings = sqliteTable("settings", {
 	id: integer("id").primaryKey().default(1),
-	lastActiveNodeId: text("last_active_workspace_id"),
+	lastActiveNodeId: text("last_active_node_id"),
 	lastUsedApp: text("last_used_app").$type<ExternalApp>(),
 	terminalPresets: text("terminal_presets", { mode: "json" }).$type<
 		TerminalPreset[]

@@ -13,9 +13,6 @@ export const SETTING_ITEM_ID = {
 	PREFERENCES_BRANCH_PREFIX: "preferences-branch-prefix",
 	PREFERENCES_LINK_BEHAVIOR: "preferences-link-behavior",
 
-	// Ringtones
-	RINGTONES_NOTIFICATION: "ringtones-notification",
-
 	// Behavior
 	BEHAVIOR_CONFIRM_QUIT: "behavior-confirm-quit",
 	BEHAVIOR_BRANCH_PREFIX: "behavior-branch-prefix",

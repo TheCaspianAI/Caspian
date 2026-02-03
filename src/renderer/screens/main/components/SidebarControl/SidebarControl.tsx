@@ -2,7 +2,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/toolti
 import { useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { LuPanelLeft, LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
-import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useSidebarStore } from "renderer/stores";
 import { useChangesStore } from "renderer/stores/changes";
@@ -24,7 +23,7 @@ export function SidebarControl() {
 	const { isSidebarOpen, toggleSidebar } = useSidebarStore();
 
 	// Get active workspace for file opening
-	const { workspaceId } = useParams({ strict: false });
+	const { nodeId: workspaceId } = useParams({ strict: false });
 	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
@@ -145,10 +144,7 @@ export function SidebarControl() {
 				</button>
 			</TooltipTrigger>
 			<TooltipContent side="bottom" showArrow={false}>
-				<HotkeyTooltipContent
-					label={isSidebarOpen ? "Hide sidebar" : "Show sidebar"}
-					hotkeyId="TOGGLE_SIDEBAR"
-				/>
+				{isSidebarOpen ? "Hide" : "Show"}
 			</TooltipContent>
 		</Tooltip>
 	);
