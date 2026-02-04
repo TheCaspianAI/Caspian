@@ -1,15 +1,15 @@
-// import posthogFull from "posthog-js/dist/module.full.no-external";
-// import type { PostHog } from "posthog-js/react";
+import type { PostHog } from "posthog-js";
 
 // PostHog analytics - currently disabled
 // To enable, uncomment the code below and set POSTHOG_KEY
 
+// import posthogFull from "posthog-js/dist/module.full.no-external";
 // const POSTHOG_KEY = "";
 // const POSTHOG_HOST = "https://us.i.posthog.com";
 
 // Cast to standard PostHog type for compatibility with posthog-js/react
 // export const posthog = posthogFull as unknown as PostHog;
-export const posthog = null;
+export const posthog: PostHog | null = null;
 
 export function initPostHog() {
 	// if (!POSTHOG_KEY) {
