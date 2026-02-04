@@ -26,6 +26,7 @@ const config: Configuration = {
 		provider: "github",
 		owner: "TheCaspianAI",
 		repo: "Caspian",
+		releaseType: "release", // Upload to existing release (not draft)
 	},
 
 	// Directories
