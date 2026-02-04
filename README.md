@@ -27,7 +27,7 @@ Run multiple AI agents in parallel. Each in its own isolated workspace. All from
 <br/>
 <br/>
 
-<img src="https://github.com/Alchemishty/SuperCaspian/actions/workflows/build.yml/badge.svg" alt="Build"/>
+<img src="https://github.com/Alchemishty/SuperCaspian/actions/workflows/ci.yml/badge.svg" alt="CI"/>
 &nbsp;
 <img src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" alt="macOS"/>
 &nbsp;
