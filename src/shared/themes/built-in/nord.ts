@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * Nord theme - An arctic, north-bluish color palette
+ * https://nordtheme.com
+ */
+export const nordTheme: Theme = {
+	id: "nord",
+	name: "Nord",
+	author: "Arctic Ice Studio",
+	type: "dark",
+	isBuiltIn: true,
+	description: "An arctic, north-bluish color palette",
+
+	ui: {
+		background: "#2e3440",
+		foreground: "#eceff4",
+		card: "#3b4252",
+		cardForeground: "#eceff4",
+		popover: "#3b4252",
+		popoverForeground: "#eceff4",
+		primary: "#88c0d0",
+		primaryForeground: "#2e3440",
+		secondary: "#3b4252",
+		secondaryForeground: "#eceff4",
+		muted: "#3b4252",
+		mutedForeground: "#d8dee9",
+		accent: "#434c5e",
+		accentForeground: "#eceff4",
+		tertiary: "#242933",
+		tertiaryActive: "#3b4252",
+		destructive: "#bf616a",
+		destructiveForeground: "#eceff4",
+		border: "#4c566a",
+		input: "#4c566a",
+		ring: "#88c0d0",
+		sidebar: "#242933",
+		sidebarForeground: "#eceff4",
+		sidebarPrimary: "#88c0d0",
+		sidebarPrimaryForeground: "#2e3440",
+		sidebarAccent: "#3b4252",
+		sidebarAccentForeground: "#eceff4",
+		sidebarBorder: "#4c566a",
+		sidebarRing: "#88c0d0",
+		chart1: "#bf616a",
+		chart2: "#a3be8c",
+		chart3: "#81a1c1",
+		chart4: "#ebcb8b",
+		chart5: "#b48ead",
+	},
+
+	terminal: {
+		background: "#2e3440",
+		foreground: "#eceff4",
+		cursor: "#eceff4",
+		cursorAccent: "#2e3440",
+		selectionBackground: "rgba(67, 76, 94, 0.6)",
+
+		black: "#3b4252",
+		red: "#bf616a",
+		green: "#a3be8c",
+		yellow: "#ebcb8b",
+		blue: "#81a1c1",
+		magenta: "#b48ead",
+		cyan: "#88c0d0",
+		white: "#e5e9f0",
+
+		brightBlack: "#4c566a",
+		brightRed: "#bf616a",
+		brightGreen: "#a3be8c",
+		brightYellow: "#ebcb8b",
+		brightBlue: "#81a1c1",
+		brightMagenta: "#b48ead",
+		brightCyan: "#8fbcbb",
+		brightWhite: "#eceff4",
+	},
+};

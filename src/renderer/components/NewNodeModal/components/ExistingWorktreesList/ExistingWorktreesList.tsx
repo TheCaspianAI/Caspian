@@ -1,0 +1,178 @@
+import { useMemo, useState } from "react";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useCreateFromPr, useCreateNode, useOpenWorktree } from "renderer/react-query/nodes";
+import { toast } from "ui/components/ui/sonner";
+import { BranchesSection, PrUrlSection, WorktreesSection } from "./components";
+
+interface ExistingWorktreesListProps {
+	repositoryId: string;
+	onOpenSuccess: () => void;
+}
+
+export function ExistingWorktreesList({ repositoryId, onOpenSuccess }: ExistingWorktreesListProps) {
+	const { data: worktrees = [], isLoading: isWorktreesLoading } =
+		electronTrpc.nodes.getWorktreesByRepository.useQuery({ repositoryId });
+	const { data: branchData, isLoading: isBranchesLoading } =
+		electronTrpc.repositories.getBranches.useQuery({ repositoryId });
+	const openWorktree = useOpenWorktree();
+	const createNode = useCreateNode();
+	const createFromPr = useCreateFromPr();
+
+	const [branchOpen, setBranchOpen] = useState(false);
+	const [branchSearch, setBranchSearch] = useState("");
+	const [prUrl, setPrUrl] = useState("");
+
+	const closedWorktrees = worktrees
+		.filter((wt) => !wt.hasActiveNode)
+		.sort((a, b) => b.createdAt - a.createdAt);
+	const openWorktrees = worktrees
+		.filter((wt) => wt.hasActiveNode)
+		.sort((a, b) => b.createdAt - a.createdAt);
+
+	const branchesWithoutWorktrees = useMemo(() => {
+		if (!branchData?.branches) return [];
+		const worktreeBranches = new Set(worktrees.map((wt) => wt.branch));
+		return branchData.branches.filter((branch) => !worktreeBranches.has(branch.name));
+	}, [branchData?.branches, worktrees]);
+
+	const filteredBranches = useMemo(() => {
+		if (!branchSearch) return branchesWithoutWorktrees;
+		const searchLower = branchSearch.toLowerCase();
+		return branchesWithoutWorktrees.filter((b) => b.name.toLowerCase().includes(searchLower));
+	}, [branchesWithoutWorktrees, branchSearch]);
+
+	const handleOpenWorktree = async (worktreeId: string, branch: string) => {
+		toast.promise(openWorktree.mutateAsync({ worktreeId }), {
+			loading: "Opening node...",
+			success: () => {
+				onOpenSuccess();
+				return `Opened ${branch}`;
+			},
+			error: (err) => (err instanceof Error ? err.message : "Failed to open node"),
+		});
+	};
+
+	const handleOpenAll = async () => {
+		if (closedWorktrees.length === 0) return;
+
+		const count = closedWorktrees.length;
+		toast.promise(
+			(async () => {
+				for (const wt of closedWorktrees) {
+					await openWorktree.mutateAsync({ worktreeId: wt.id });
+				}
+			})(),
+			{
+				loading: `Opening ${count} nodes...`,
+				success: () => {
+					onOpenSuccess();
+					return `Opened ${count} nodes`;
+				},
+				error: (err) => (err instanceof Error ? err.message : "Failed to open nodes"),
+			},
+		);
+	};
+
+	const handleCreateFromBranch = async (branchName: string) => {
+		setBranchOpen(false);
+		setBranchSearch("");
+
+		try {
+			const result = await createNode.mutateAsync({
+				repositoryId,
+				branchName,
+				useExistingBranch: true,
+			});
+
+			onOpenSuccess();
+
+			if (result.isInitializing) {
+				toast.success("Node created", {
+					description: "Setting up in the background...",
+				});
+			} else {
+				toast.success("Node created");
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Failed to create node");
+		}
+	};
+
+	const handleCreateFromPr = async () => {
+		if (!prUrl.trim()) return;
+
+		try {
+			const result = await createFromPr.mutateAsync({
+				repositoryId,
+				prUrl: prUrl.trim(),
+			});
+
+			onOpenSuccess();
+			setPrUrl("");
+
+			if (result.wasExisting) {
+				toast.success(`Reopened PR #${result.prNumber}`, {
+					description: result.prTitle,
+				});
+			} else {
+				toast.success(`Opened PR #${result.prNumber}`, {
+					description: result.prTitle,
+				});
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Failed to open PR");
+		}
+	};
+
+	const isLoading = isWorktreesLoading || isBranchesLoading;
+	const isPending = openWorktree.isPending || createNode.isPending || createFromPr.isPending;
+
+	if (isLoading) {
+		return <div className="py-6 text-center text-xs text-muted-foreground">Loading...</div>;
+	}
+
+	const hasWorktrees = closedWorktrees.length > 0 || openWorktrees.length > 0;
+	const hasBranches = branchesWithoutWorktrees.length > 0;
+
+	return (
+		<div className="space-y-3 max-h-[350px] overflow-y-auto">
+			<PrUrlSection
+				prUrl={prUrl}
+				onPrUrlChange={setPrUrl}
+				onSubmit={handleCreateFromPr}
+				isPending={createFromPr.isPending}
+			/>
+
+			{hasBranches && (
+				<BranchesSection
+					branches={filteredBranches}
+					defaultBranch={branchData?.defaultBranch}
+					searchValue={branchSearch}
+					onSearchChange={setBranchSearch}
+					isOpen={branchOpen}
+					onOpenChange={setBranchOpen}
+					onSelectBranch={handleCreateFromBranch}
+					disabled={isPending}
+				/>
+			)}
+
+			{hasWorktrees && (
+				<WorktreesSection
+					closedWorktrees={closedWorktrees}
+					openWorktrees={openWorktrees}
+					onOpenWorktree={handleOpenWorktree}
+					onOpenAll={handleOpenAll}
+					disabled={isPending}
+				/>
+			)}
+
+			{!hasWorktrees && !hasBranches && (
+				<div className="py-4 text-center text-xs text-muted-foreground">
+					No existing worktrees or branches.
+					<br />
+					Paste a PR URL above or create a new branch.
+				</div>
+			)}
+		</div>
+	);
+}

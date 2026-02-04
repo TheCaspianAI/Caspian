@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * Rosé Pine theme - All natural pine, faux fur and a bit of soho vibes
+ * https://rosepinetheme.com
+ */
+export const rosePineTheme: Theme = {
+	id: "rose-pine",
+	name: "Rosé Pine",
+	author: "Rosé Pine",
+	type: "dark",
+	isBuiltIn: true,
+	description: "All natural pine, faux fur and a bit of soho vibes",
+
+	ui: {
+		background: "#191724",
+		foreground: "#e0def4",
+		card: "#26233a",
+		cardForeground: "#e0def4",
+		popover: "#26233a",
+		popoverForeground: "#e0def4",
+		primary: "#c4a7e7",
+		primaryForeground: "#191724",
+		secondary: "#26233a",
+		secondaryForeground: "#e0def4",
+		muted: "#26233a",
+		mutedForeground: "#908caa",
+		accent: "#403d52",
+		accentForeground: "#e0def4",
+		tertiary: "#1f1d2e",
+		tertiaryActive: "#26233a",
+		destructive: "#eb6f92",
+		destructiveForeground: "#191724",
+		border: "#403d52",
+		input: "#403d52",
+		ring: "#c4a7e7",
+		sidebar: "#1f1d2e",
+		sidebarForeground: "#e0def4",
+		sidebarPrimary: "#c4a7e7",
+		sidebarPrimaryForeground: "#191724",
+		sidebarAccent: "#26233a",
+		sidebarAccentForeground: "#e0def4",
+		sidebarBorder: "#403d52",
+		sidebarRing: "#c4a7e7",
+		chart1: "#eb6f92",
+		chart2: "#31748f",
+		chart3: "#9ccfd8",
+		chart4: "#f6c177",
+		chart5: "#ebbcba",
+	},
+
+	terminal: {
+		background: "#191724",
+		foreground: "#e0def4",
+		cursor: "#524f67",
+		cursorAccent: "#e0def4",
+		selectionBackground: "rgba(64, 61, 82, 0.5)",
+
+		black: "#26233a",
+		red: "#eb6f92",
+		green: "#31748f",
+		yellow: "#f6c177",
+		blue: "#9ccfd8",
+		magenta: "#c4a7e7",
+		cyan: "#ebbcba",
+		white: "#e0def4",
+
+		brightBlack: "#6e6a86",
+		brightRed: "#eb6f92",
+		brightGreen: "#31748f",
+		brightYellow: "#f6c177",
+		brightBlue: "#9ccfd8",
+		brightMagenta: "#c4a7e7",
+		brightCyan: "#ebbcba",
+		brightWhite: "#e0def4",
+	},
+};

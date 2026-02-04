@@ -1,0 +1,77 @@
+import type { Theme } from "../types";
+
+/**
+ * GitHub Light theme - GitHub's clean light theme
+ * https://github.com/primer/github-vscode-theme
+ */
+export const githubLightTheme: Theme = {
+	id: "github-light",
+	name: "GitHub Light",
+	author: "GitHub",
+	type: "light",
+	isBuiltIn: true,
+	description: "GitHub's official light theme",
+
+	ui: {
+		background: "#ffffff",
+		foreground: "#1f2328",
+		card: "#f6f8fa",
+		cardForeground: "#1f2328",
+		popover: "#ffffff",
+		popoverForeground: "#1f2328",
+		primary: "#0969da",
+		primaryForeground: "#ffffff",
+		secondary: "#f6f8fa",
+		secondaryForeground: "#1f2328",
+		muted: "#f6f8fa",
+		mutedForeground: "#656d76",
+		accent: "#eaeef2",
+		accentForeground: "#1f2328",
+		tertiary: "#f6f8fa",
+		tertiaryActive: "#eaeef2",
+		destructive: "#cf222e",
+		destructiveForeground: "#ffffff",
+		border: "#d0d7de",
+		input: "#d0d7de",
+		ring: "#0969da",
+		sidebar: "#f6f8fa",
+		sidebarForeground: "#1f2328",
+		sidebarPrimary: "#0969da",
+		sidebarPrimaryForeground: "#ffffff",
+		sidebarAccent: "#eaeef2",
+		sidebarAccentForeground: "#1f2328",
+		sidebarBorder: "#d0d7de",
+		sidebarRing: "#0969da",
+		chart1: "#cf222e",
+		chart2: "#1a7f37",
+		chart3: "#0969da",
+		chart4: "#bf8700",
+		chart5: "#8250df",
+	},
+
+	terminal: {
+		background: "#ffffff",
+		foreground: "#1f2328",
+		cursor: "#1f2328",
+		cursorAccent: "#ffffff",
+		selectionBackground: "#add6ff",
+
+		black: "#1f2328",
+		red: "#cf222e",
+		green: "#1a7f37",
+		yellow: "#9a6700",
+		blue: "#0969da",
+		magenta: "#8250df",
+		cyan: "#1b7c83",
+		white: "#6e7781",
+
+		brightBlack: "#57606a",
+		brightRed: "#a40e26",
+		brightGreen: "#2da44e",
+		brightYellow: "#bf8700",
+		brightBlue: "#218bff",
+		brightMagenta: "#a475f9",
+		brightCyan: "#3192aa",
+		brightWhite: "#8c959f",
+	},
+};

@@ -1,164 +1,186 @@
+<div align="center">
+
 # Caspian
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)]()
-[![Built with Tauri](https://img.shields.io/badge/Built%20with-Tauri-orange.svg)]()
+**The command center for AI coding agents**
 
-**The control plane for AI coding agents.**
+Run multiple AI agents in parallel. Each in its own isolated workspace. All from one screen.
 
-Run multiple agents in parallel. Each in its own workspace. All from one screen.
+<br/>
 
-https://github.com/user-attachments/assets/3b154018-6e2e-462b-9621-1b92354ffef7
+<a href="#-quick-start">Quick Start</a>
+&nbsp;&nbsp;·&nbsp;&nbsp;
+<a href="https://github.com/TheCaspianAI/Caspian/discussions">Discussions</a>
+&nbsp;&nbsp;·&nbsp;&nbsp;
+<a href="#-contributing">Contributing</a>
 
----
+<br/>
+<br/>
+
+<img src="https://github.com/TheCaspianAI/Caspian/actions/workflows/ci.yml/badge.svg" alt="CI"/>
+&nbsp;
+<img src="https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white" alt="macOS"/>
+&nbsp;
+<img src="https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black" alt="Linux"/>
+&nbsp;
+<img src="https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white" alt="Windows"/>
+&nbsp;
+<img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"/>
+
+</div>
+
+<br/>
 
 ## The Problem
 
-Running multiple Claude Code agents? It gets messy fast.
+Running multiple AI coding agents gets messy fast:
 
-**Here's what happens:**
-- 5 terminals, 5 agents, and you've already forgotten what the third one was doing
-- No bird's-eye view — just endless cmd+tab until your brain gives up
-- All agents stomping around the same directory, overwriting each other's work
-- Close a terminal, poof — context gone forever
+- **5 terminals, 5 agents** — endless `Cmd+Tab`
+- **No visibility** — what's agent #3 doing?
+- **No isolation** — agents overwriting each other
+- **No persistence** — close terminal, lose everything
 
-**The real problem?** You can't scale. Your brain becomes the bottleneck. More agents = more chaos.
+**Your brain becomes the bottleneck.** More agents = more chaos.
 
-**The tradeoff nobody asked for:** Run a few agents with focused tasks, or run many with vague ones. Pick one.
+<br/>
 
-There's no control plane. No dashboard. No structure. Until now.
+## The Solution
 
----
+<div align="center">
 
-## Caspian
+|                          |                                                      |
+| :----------------------: | :--------------------------------------------------: |
+| **Isolated Workspaces**  | Every agent gets its own git worktree. No conflicts. |
+|  **Parallel Execution**  |         Run multiple agents simultaneously.          |
+|  **Unified Dashboard**   |    All agents, one screen. No context switching.     |
+| **Real-time Monitoring** |               Watch agents work live.                |
+| **Persistent Sessions**  |      Close app. Come back. Everything's there.       |
+| **Multi-Agent Support**  |   Claude Code, Codex, OpenCode or bring your own.    |
 
-One screen. All your agents. Each in its own isolated workspace.
+</div>
 
-Run 10 agents on 10 focused tasks. See everything. Control everything.
-
-**Granularity *and* scale.**
-
----
-
-## Features
-
-| What | Why it matters |
-|------|----------------|
-| **Isolated Workspaces** | Each agent gets its own worktree. No more stepping on each other's toes. |
-| **Parallel Execution** | Run as many agents as you want, simultaneously. |
-| **Single Dashboard** | All agents, one screen. Your brain can relax. |
-| **Live Monitoring** | Watch every agent in real-time. See what they see. |
-| **Persistent Context** | Close the app, grab coffee, come back. Everything's still there. |
-| **PR Integration** | Done? Ship it as a pull request. |
-
----
+<br/>
 
 ## Quick Start
 
-> **Note:** Caspian currently supports macOS only.
-
 ### Prerequisites
-- Node.js 18+
-- Rust 1.77+
-- Claude Code CLI
 
-### Get running
+| Dependency                  | Version | Install                                     |
+| :-------------------------- | :------ | :------------------------------------------ |
+| [Bun](https://bun.sh/)      | 1.0+    | `curl -fsSL https://bun.sh/install \| bash` |
+| [Git](https://git-scm.com/) | 2.20+   | [Download](https://git-scm.com/downloads)   |
+
+> **Note:** You can use any terminal-based AI agent (Claude Code, Codex, Cursor CLI, etc.)
+
+### Install & Run
 
 ```bash
 git clone https://github.com/TheCaspianAI/Caspian.git
 cd Caspian
-npm install
-npm run tauri:dev
+bun install
+bun run dev
 ```
 
-### Build for production
+## Build
 
 ```bash
-npm run tauri:build
+bun run build:mac     # macOS
+bun run build:linux   # Linux
+bun run build:win     # Windows
 ```
 
-Output: `src-tauri/target/release/bundle/`
-
----
+<br/>
 
 ## How It Works
 
+<div align="center">
+
 ```
-1. Add repo     →  Point Caspian at your project
-2. Create node  →  Spin up an isolated workspace
-3. Run agent    →  Launch Claude Code in that workspace
-4. Watch        →  See everything in real-time
-5. Review       →  Check the changes
-6. Ship         →  Create a PR
+Add Repo  →  Create Workspace  →  Launch Agent  →  Monitor  →  Review  →  Ship PR
 ```
 
----
+</div>
 
-## Roadmap
+Each workspace is an isolated git worktree. Agents can't step on each other. When you're happy with the changes, create a PR directly from Caspian.
 
-**Coming soon: Custom Workflows**
-
-Finding the best way to work with AI agents is hard. Beads? Gastown? GSD? Something else entirely?
-
-We're building workflow templates that capture best practices — so you can plug in what works for your team instead of figuring it out from scratch.
-
----
+<br/>
 
 ## Architecture
 
-```
-┌────────────────────────────────────────────────┐
-│              Caspian Desktop App               │
-├────────────────────────────────────────────────┤
-│  Frontend (React + TypeScript)                 │
-│  • Real-time agent streaming                   │
-│  • Multi-agent grid view                       │
-│  • Diff viewer & review mode                   │
-├────────────────────────────────────────────────┤
-│  Backend (Rust + Tauri)                        │
-│  • Git worktree orchestration                  │
-│  • Agent process management                    │
-│  • File system watching                        │
-│  • SQLite persistence                          │
-└────────────────────────────────────────────────┘
-```
+<div align="center">
 
----
+| Layer        | Tech                              | Responsibilities                           |
+| :----------- | :-------------------------------- | :----------------------------------------- |
+| **Renderer** | React 19, TypeScript, Tailwind v4 | Dashboard, terminal streaming, diff viewer |
+| **IPC**      | tRPC                              | Type-safe communication                    |
+| **Main**     | Electron, Node.js                 | Git orchestration, terminal daemon, SQLite |
 
-## Tech
+</div>
 
-**Frontend:** React 19, TypeScript, Tailwind, Zustand, Vite
+<br/>
 
-**Backend:** Rust, Tauri 2, libgit2, SQLite, Tokio
+## Tech Stack
 
----
+<div align="center">
+
+![Electron](https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white)
+![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind_v4-06B6D4?logo=tailwindcss&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)
+![tRPC](https://img.shields.io/badge/tRPC-2596BE?logo=trpc&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=black)
+
+</div>
+
+<br/>
 
 ## Contributing
 
-PRs welcome.
+PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-```bash
-npm install        # install deps
-npm run tauri:dev  # dev server
-npm run lint       # check your work
-```
+<br/>
 
----
+## FAQ
+
+<details>
+<summary><b>What AI agents does Caspian support?</b></summary>
+<br/>
+Any terminal-based agent: Claude Code, Codex CLI, OpenCode, Gemini CLI, etc. If it runs in a terminal, it works.
+</details>
+
+<details>
+<summary><b>How is this different from just using tmux?</b></summary>
+<br/>
+Caspian provides git worktree isolation (agents can't conflict), a visual dashboard, persistent sessions across restarts, and one-click PR creation. Tmux gives you panes; Caspian gives you a control plane.
+</details>
+
+<details>
+<summary><b>Does it work offline?</b></summary>
+<br/>
+Yes. Caspian runs entirely locally. Your code never leaves your machine.
+</details>
+
+<br/>
 
 ## License
 
-MIT
+[MIT](LICENSE)
 
----
+<br/>
 
-## Links
+<div align="center">
 
-[Website](https://trycaspianai.com)
+<a href="https://github.com/TheCaspianAI/Caspian">GitHub</a>
+&nbsp;&nbsp;·&nbsp;&nbsp;
+<a href="https://github.com/TheCaspianAI/Caspian/issues">Issues</a>
+&nbsp;&nbsp;·&nbsp;&nbsp;
+<a href="https://github.com/TheCaspianAI/Caspian/discussions">Discussions</a>
 
----
+<br/>
+<br/>
 
-If you find Caspian useful, give it a ⭐
+**If Caspian helps you ship faster, give it a ⭐**
 
----
-
-Built by [Caspian](https://trycaspianai.com) and Claude Code
+</div>
