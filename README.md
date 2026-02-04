@@ -1,6 +1,6 @@
 <div align="center">
 
-# SuperCaspian
+# Caspian
 
 **The command center for AI coding agents**
 
@@ -73,6 +73,18 @@ Running multiple AI coding agents gets messy fast:
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+| Dependency | Version | Install |
+|:-----------|:--------|:--------|
+| [Bun](https://bun.sh/) | 1.0+ | `curl -fsSL https://bun.sh/install \| bash` |
+| [Git](https://git-scm.com/) | 2.20+ | [Download](https://git-scm.com/downloads) |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code) | Latest | `npm install -g @anthropic-ai/claude-code` |
+
+> **Note:** You can use any terminal-based AI agent (Codex, Aider, etc.), but Claude Code is recommended.
+
+### Install & Run
+
 ```bash
 git clone https://github.com/Alchemishty/SuperCaspian.git
 cd SuperCaspian
@@ -80,7 +92,27 @@ bun install
 bun run dev
 ```
 
-**Prerequisites:** [Bun](https://bun.sh/) 1.0+ &nbsp;·&nbsp; Git 2.20+ &nbsp;·&nbsp; Your favorite AI agent
+### Troubleshooting
+
+<details>
+<summary><b>Native module errors on first run?</b></summary>
+<br/>
+
+Run this to rebuild native modules for Electron:
+```bash
+bun run install:deps
+```
+</details>
+
+<details>
+<summary><b>Port already in use?</b></summary>
+<br/>
+
+Kill existing processes:
+```bash
+lsof -ti:5927 | xargs kill -9
+```
+</details>
 
 <br/>
 
@@ -104,7 +136,7 @@ Add Repo  →  Create Workspace  →  Launch Agent  →  Monitor  →  Review  �
 
 </div>
 
-Each workspace is an isolated git worktree. Agents can't step on each other. When you're happy with the changes, create a PR directly from SuperCaspian.
+Each workspace is an isolated git worktree. Agents can't step on each other. When you're happy with the changes, create a PR directly from Caspian.
 
 <br/>
 
@@ -157,7 +189,7 @@ PRs welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 ## 💬 FAQ
 
 <details>
-<summary><b>What AI agents does SuperCaspian support?</b></summary>
+<summary><b>What AI agents does Caspian support?</b></summary>
 <br/>
 Any terminal-based agent: Claude Code, Codex CLI, OpenCode, Aider, etc. If it runs in a terminal, it works.
 </details>
@@ -165,13 +197,13 @@ Any terminal-based agent: Claude Code, Codex CLI, OpenCode, Aider, etc. If it ru
 <details>
 <summary><b>How is this different from just using tmux?</b></summary>
 <br/>
-SuperCaspian provides git worktree isolation (agents can't conflict), a visual dashboard, persistent sessions across restarts, and one-click PR creation. Tmux gives you panes; SuperCaspian gives you a control plane.
+Caspian provides git worktree isolation (agents can't conflict), a visual dashboard, persistent sessions across restarts, and one-click PR creation. Tmux gives you panes; Caspian gives you a control plane.
 </details>
 
 <details>
 <summary><b>Does it work offline?</b></summary>
 <br/>
-Yes. SuperCaspian runs entirely locally. Your code never leaves your machine.
+Yes. Caspian runs entirely locally. Your code never leaves your machine.
 </details>
 
 <br/>
@@ -193,6 +225,6 @@ Yes. SuperCaspian runs entirely locally. Your code never leaves your machine.
 <br/>
 <br/>
 
-**If SuperCaspian helps you ship faster, give it a ⭐**
+**If Caspian helps you ship faster, give it a ⭐**
 
 </div>
