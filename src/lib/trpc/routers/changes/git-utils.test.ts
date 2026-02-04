@@ -49,8 +49,7 @@ describe("git-operations error handling", () => {
 		});
 
 		test("merge conflict during pull", () => {
-			const message =
-				"CONFLICT (content): Merge conflict in src/file.ts\nAutomatic merge failed";
+			const message = "CONFLICT (content): Merge conflict in src/file.ts\nAutomatic merge failed";
 			expect(message.includes("CONFLICT")).toBe(true);
 			expect(message.includes("Merge conflict")).toBe(true);
 		});
@@ -62,9 +61,7 @@ describe("git-operations error handling", () => {
 
 		test("no remote configured", () => {
 			const message = "fatal: 'origin' does not appear to be a git repository";
-			expect(message.includes("does not appear to be a git repository")).toBe(
-				true,
-			);
+			expect(message.includes("does not appear to be a git repository")).toBe(true);
 		});
 	});
 });
@@ -83,9 +80,7 @@ describe("sync operation logic", () => {
 	});
 
 	test("should re-throw other pull errors", () => {
-		const pullError = new Error(
-			"CONFLICT (content): Merge conflict in file.ts",
-		);
+		const pullError = new Error("CONFLICT (content): Merge conflict in file.ts");
 
 		expect(isUpstreamMissingError(pullError.message)).toBe(false);
 	});

@@ -73,9 +73,7 @@ def456|def|another|person|2024-01-16T14:20:00Z`;
 
 		expect(commits).toHaveLength(1);
 		// Date should be close to now (within 1 second)
-		expect(Math.abs(commits[0].date.getTime() - now.getTime())).toBeLessThan(
-			1000,
-		);
+		expect(Math.abs(commits[0].date.getTime() - now.getTime())).toBeLessThan(1000);
 	});
 
 	test("trims whitespace from all fields", () => {

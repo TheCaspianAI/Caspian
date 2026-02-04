@@ -205,17 +205,12 @@ describe("resolvePath", () => {
 		});
 
 		test("handles file:// URL with special characters", () => {
-			const result = resolvePath(
-				"file:///Users/test/path%20with%20spaces/file%2B1.ts",
-			);
+			const result = resolvePath("file:///Users/test/path%20with%20spaces/file%2B1.ts");
 			expect(result).toBe("/Users/test/path with spaces/file+1.ts");
 		});
 
 		test("handles file:// URL unchanged when already absolute", () => {
-			const result = resolvePath(
-				"file:///absolute/path/file.ts",
-				"/ignored/cwd",
-			);
+			const result = resolvePath("file:///absolute/path/file.ts", "/ignored/cwd");
 			expect(result).toBe("/absolute/path/file.ts");
 		});
 	});
@@ -310,9 +305,7 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("strips deeply nested mixed wrappers", () => {
-			expect(stripPathWrappers("\"('[/path/to/file]')\"")).toBe(
-				"/path/to/file",
-			);
+			expect(stripPathWrappers("\"('[/path/to/file]')\"")).toBe("/path/to/file");
 		});
 	});
 
@@ -400,9 +393,7 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("preserves multi-dot extensions like .test.ts", () => {
-			expect(stripPathWrappers("./path/file.test.ts")).toBe(
-				"./path/file.test.ts",
-			);
+			expect(stripPathWrappers("./path/file.test.ts")).toBe("./path/file.test.ts");
 		});
 
 		test("preserves line number suffix :42", () => {
@@ -410,9 +401,7 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("preserves line:col suffix :42:10", () => {
-			expect(stripPathWrappers("./path/file.ts:42:10")).toBe(
-				"./path/file.ts:42:10",
-			);
+			expect(stripPathWrappers("./path/file.ts:42:10")).toBe("./path/file.ts:42:10");
 		});
 	});
 
@@ -422,9 +411,7 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("extracts path from text(./path)more pattern", () => {
-			expect(stripPathWrappers("text(./src/file.ts)more")).toBe(
-				"./src/file.ts",
-			);
+			expect(stripPathWrappers("text(./src/file.ts)more")).toBe("./src/file.ts");
 		});
 
 		test("extracts path from prefix (path) suffix with spaces", () => {
@@ -440,27 +427,19 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("extracts path with line:col from parentheses", () => {
-			expect(stripPathWrappers("in (src/file.ts:42:10)")).toBe(
-				"src/file.ts:42:10",
-			);
+			expect(stripPathWrappers("in (src/file.ts:42:10)")).toBe("src/file.ts:42:10");
 		});
 
 		test("handles absolute path inside parentheses with prefix", () => {
-			expect(stripPathWrappers("see (/absolute/path/file.ts)")).toBe(
-				"/absolute/path/file.ts",
-			);
+			expect(stripPathWrappers("see (/absolute/path/file.ts)")).toBe("/absolute/path/file.ts");
 		});
 
 		test("handles ~ path inside parentheses with prefix", () => {
-			expect(stripPathWrappers("in (~/Documents/file.ts)")).toBe(
-				"~/Documents/file.ts",
-			);
+			expect(stripPathWrappers("in (~/Documents/file.ts)")).toBe("~/Documents/file.ts");
 		});
 
 		test("preserves valid paths with parentheses in directory names", () => {
-			expect(stripPathWrappers("/path/dir (copy)/file.ts")).toBe(
-				"/path/dir (copy)/file.ts",
-			);
+			expect(stripPathWrappers("/path/dir (copy)/file.ts")).toBe("/path/dir (copy)/file.ts");
 		});
 
 		test("handles brackets similar to parentheses", () => {
@@ -468,21 +447,15 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("handles angle brackets similar to parentheses", () => {
-			expect(stripPathWrappers("import <src/file.ts> done")).toBe(
-				"src/file.ts",
-			);
+			expect(stripPathWrappers("import <src/file.ts> done")).toBe("src/file.ts");
 		});
 
 		test("does not extract non-path content from parentheses", () => {
-			expect(stripPathWrappers("text(not a path)more")).toBe(
-				"text(not a path)more",
-			);
+			expect(stripPathWrappers("text(not a path)more")).toBe("text(not a path)more");
 		});
 
 		test("handles nested brackets with path", () => {
-			expect(stripPathWrappers("prefix((src/file.ts))suffix")).toBe(
-				"src/file.ts",
-			);
+			expect(stripPathWrappers("prefix((src/file.ts))suffix")).toBe("src/file.ts");
 		});
 	});
 
@@ -518,15 +491,11 @@ describe("stripPathWrappers", () => {
 		});
 
 		test("strips trailing period after line:col", () => {
-			expect(stripPathWrappers("./path/file.ts:42:10.")).toBe(
-				"./path/file.ts:42:10",
-			);
+			expect(stripPathWrappers("./path/file.ts:42:10.")).toBe("./path/file.ts:42:10");
 		});
 
 		test("strips trailing comma after line:col", () => {
-			expect(stripPathWrappers("./path/file.ts:42:10,")).toBe(
-				"./path/file.ts:42:10",
-			);
+			expect(stripPathWrappers("./path/file.ts:42:10,")).toBe("./path/file.ts:42:10");
 		});
 	});
 

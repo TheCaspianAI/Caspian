@@ -57,9 +57,7 @@ describe("removeLinkQueryString", () => {
 	});
 
 	it("handles UNC paths with ? prefix", () => {
-		expect(removeLinkQueryString("\\\\?\\C:\\path\\file.ts")).toBe(
-			"\\\\?\\C:\\path\\file.ts",
-		);
+		expect(removeLinkQueryString("\\\\?\\C:\\path\\file.ts")).toBe("\\\\?\\C:\\path\\file.ts");
 		expect(removeLinkQueryString("\\\\?\\C:\\path\\file.ts?query")).toBe(
 			"\\\\?\\C:\\path\\file.ts",
 		);

@@ -43,44 +43,29 @@ describe("resolveNotificationTarget", () => {
 	});
 
 	it("uses explicit tabId when pane not found", () => {
-		const result = resolveNotificationTarget(
-			{ tabId: "tab-2" },
-			createState() as never,
-		);
+		const result = resolveNotificationTarget({ tabId: "tab-2" }, createState() as never);
 		expect(result?.tabId).toBe("tab-2");
 		expect(result?.nodeId).toBe("node-2");
 	});
 
 	it("uses explicit tabId when paneId is undefined", () => {
-		const result = resolveNotificationTarget(
-			{ tabId: "tab-1" },
-			createState() as never,
-		);
+		const result = resolveNotificationTarget({ tabId: "tab-1" }, createState() as never);
 		expect(result?.tabId).toBe("tab-1");
 		expect(result?.nodeId).toBe("node-1");
 	});
 
 	it("returns null if nodeId cannot be resolved", () => {
-		const result = resolveNotificationTarget(
-			{ paneId: "unknown-pane" },
-			createState() as never,
-		);
+		const result = resolveNotificationTarget({ paneId: "unknown-pane" }, createState() as never);
 		expect(result).toBeNull();
 	});
 
 	it("returns null if tabId not found and no nodeId", () => {
-		const result = resolveNotificationTarget(
-			{ tabId: "unknown-tab" },
-			createState() as never,
-		);
+		const result = resolveNotificationTarget({ tabId: "unknown-tab" }, createState() as never);
 		expect(result).toBeNull();
 	});
 
 	it("handles explicit nodeId without pane or tab", () => {
-		const result = resolveNotificationTarget(
-			{ nodeId: "direct-node" },
-			createState() as never,
-		);
+		const result = resolveNotificationTarget({ nodeId: "direct-node" }, createState() as never);
 		expect(result).toEqual({
 			paneId: undefined,
 			tabId: undefined,

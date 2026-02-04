@@ -14,18 +14,16 @@ import {
 	isOsReservedHotkey,
 	isTerminalReservedEvent,
 	isTerminalReservedHotkey,
+	type KeyboardEventLike,
 	matchesHotkeyEvent,
 	toElectronAccelerator,
-	type KeyboardEventLike,
 } from "./hotkeys";
 
 describe("canonicalizeHotkey", () => {
 	it("normalizes modifier order to meta+ctrl+alt+shift", () => {
 		expect(canonicalizeHotkey("shift+meta+k")).toBe("meta+shift+k");
 		expect(canonicalizeHotkey("alt+ctrl+k")).toBe("ctrl+alt+k");
-		expect(canonicalizeHotkey("shift+alt+ctrl+meta+k")).toBe(
-			"meta+ctrl+alt+shift+k",
-		);
+		expect(canonicalizeHotkey("shift+alt+ctrl+meta+k")).toBe("meta+ctrl+alt+shift+k");
 	});
 
 	it("normalizes key aliases", () => {
@@ -164,26 +162,23 @@ describe("matchesHotkeyEvent", () => {
 	});
 
 	it("handles arrow key aliases", () => {
-		expect(
-			matchesHotkeyEvent(createEvent({ key: "ArrowLeft", metaKey: true }), "meta+left"),
-		).toBe(true);
+		expect(matchesHotkeyEvent(createEvent({ key: "ArrowLeft", metaKey: true }), "meta+left")).toBe(
+			true,
+		);
 		expect(
 			matchesHotkeyEvent(createEvent({ key: "ArrowRight", metaKey: true }), "meta+right"),
 		).toBe(true);
-		expect(
-			matchesHotkeyEvent(createEvent({ key: "ArrowUp", metaKey: true }), "meta+up"),
-		).toBe(true);
-		expect(
-			matchesHotkeyEvent(createEvent({ key: "ArrowDown", metaKey: true }), "meta+down"),
-		).toBe(true);
+		expect(matchesHotkeyEvent(createEvent({ key: "ArrowUp", metaKey: true }), "meta+up")).toBe(
+			true,
+		);
+		expect(matchesHotkeyEvent(createEvent({ key: "ArrowDown", metaKey: true }), "meta+down")).toBe(
+			true,
+		);
 	});
 
 	it("handles slash key via code", () => {
 		expect(
-			matchesHotkeyEvent(
-				createEvent({ key: "/", code: "Slash", metaKey: true }),
-				"meta+slash",
-			),
+			matchesHotkeyEvent(createEvent({ key: "/", code: "Slash", metaKey: true }), "meta+slash"),
 		).toBe(true);
 	});
 
@@ -206,31 +201,25 @@ describe("hotkeyFromKeyboardEvent", () => {
 	}
 
 	it("captures a simple meta hotkey on mac", () => {
-		const keys = hotkeyFromKeyboardEvent(
-			createEvent({ key: "k", metaKey: true }),
-			"darwin",
-		);
+		const keys = hotkeyFromKeyboardEvent(createEvent({ key: "k", metaKey: true }), "darwin");
 		expect(keys).toBe("meta+k");
 	});
 
 	it("captures a simple ctrl hotkey on all platforms", () => {
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "darwin"),
-		).toBe("ctrl+k");
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "win32"),
-		).toBe("ctrl+k");
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "linux"),
-		).toBe("ctrl+k");
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "darwin")).toBe(
+			"ctrl+k",
+		);
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "win32")).toBe(
+			"ctrl+k",
+		);
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", ctrlKey: true }), "linux")).toBe(
+			"ctrl+k",
+		);
 	});
 
 	it("captures hotkey with multiple modifiers", () => {
 		expect(
-			hotkeyFromKeyboardEvent(
-				createEvent({ key: "w", metaKey: true, shiftKey: true }),
-				"darwin",
-			),
+			hotkeyFromKeyboardEvent(createEvent({ key: "w", metaKey: true, shiftKey: true }), "darwin"),
 		).toBe("meta+shift+w");
 	});
 
@@ -241,9 +230,7 @@ describe("hotkeyFromKeyboardEvent", () => {
 		expect(
 			hotkeyFromKeyboardEvent(createEvent({ key: "Control", ctrlKey: true }), "darwin"),
 		).toBeNull();
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "Alt", altKey: true }), "darwin"),
-		).toBeNull();
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "Alt", altKey: true }), "darwin")).toBeNull();
 		expect(
 			hotkeyFromKeyboardEvent(createEvent({ key: "Meta", metaKey: true }), "darwin"),
 		).toBeNull();
@@ -260,21 +247,13 @@ describe("hotkeyFromKeyboardEvent", () => {
 
 	it("returns null if no primary modifier is pressed", () => {
 		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k" }), "darwin")).toBeNull();
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", altKey: true }), "darwin"),
-		).toBeNull();
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", shiftKey: true }), "darwin"),
-		).toBeNull();
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", altKey: true }), "darwin")).toBeNull();
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", shiftKey: true }), "darwin")).toBeNull();
 	});
 
 	it("returns null for meta on non-mac platforms", () => {
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", metaKey: true }), "win32"),
-		).toBeNull();
-		expect(
-			hotkeyFromKeyboardEvent(createEvent({ key: "k", metaKey: true }), "linux"),
-		).toBeNull();
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", metaKey: true }), "win32")).toBeNull();
+		expect(hotkeyFromKeyboardEvent(createEvent({ key: "k", metaKey: true }), "linux")).toBeNull();
 	});
 });
 
@@ -493,11 +472,9 @@ describe("HOTKEYS registry", () => {
 
 	it("getEffectiveHotkey respects overrides", () => {
 		expect(getEffectiveHotkey("JUMP_TO_NODE_1", {}, "darwin")).toBe("meta+1");
-		expect(
-			getEffectiveHotkey("JUMP_TO_NODE_1", { JUMP_TO_NODE_1: "meta+0" }, "darwin"),
-		).toBe("meta+0");
-		expect(
-			getEffectiveHotkey("JUMP_TO_NODE_1", { JUMP_TO_NODE_1: null }, "darwin"),
-		).toBeNull();
+		expect(getEffectiveHotkey("JUMP_TO_NODE_1", { JUMP_TO_NODE_1: "meta+0" }, "darwin")).toBe(
+			"meta+0",
+		);
+		expect(getEffectiveHotkey("JUMP_TO_NODE_1", { JUMP_TO_NODE_1: null }, "darwin")).toBeNull();
 	});
 });

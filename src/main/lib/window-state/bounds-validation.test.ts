@@ -1,11 +1,4 @@
-import {
-	beforeEach,
-	describe,
-	expect,
-	it,
-	type mock as MockType,
-	mock,
-} from "bun:test";
+import { beforeEach, describe, expect, it, type mock as MockType, mock } from "bun:test";
 
 // Mock electron with screen API before importing anything that uses it
 const mockScreen = {
@@ -26,9 +19,7 @@ mock.module("electron", () => ({
 }));
 
 // Import module after mocks are set up
-const { getInitialWindowBounds, isVisibleOnAnyDisplay } = await import(
-	"./bounds-validation"
-);
+const { getInitialWindowBounds, isVisibleOnAnyDisplay } = await import("./bounds-validation");
 const screen = mockScreen;
 
 const MIN_VISIBLE_OVERLAP = 50;
@@ -43,15 +34,11 @@ describe("isVisibleOnAnyDisplay", () => {
 		});
 
 		it("should return true for window fully within display", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 100, y: 100, width: 800, height: 600 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 100, y: 100, width: 800, height: 600 })).toBe(true);
 		});
 
 		it("should return true for window covering entire display", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 0, y: 0, width: 1920, height: 1080 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 0, y: 0, width: 1920, height: 1080 })).toBe(true);
 		});
 
 		it("should return true for window with more than MIN_VISIBLE_OVERLAP on right edge", () => {
@@ -88,27 +75,19 @@ describe("isVisibleOnAnyDisplay", () => {
 		});
 
 		it("should return false for window completely off-screen (right)", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 2000, y: 100, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: 2000, y: 100, width: 800, height: 600 })).toBe(false);
 		});
 
 		it("should return false for window completely off-screen (left)", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: -900, y: 100, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: -900, y: 100, width: 800, height: 600 })).toBe(false);
 		});
 
 		it("should return false for window completely off-screen (bottom)", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 100, y: 1200, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: 100, y: 1200, width: 800, height: 600 })).toBe(false);
 		});
 
 		it("should return false for window completely off-screen (top)", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 100, y: -700, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: 100, y: -700, width: 800, height: 600 })).toBe(false);
 		});
 
 		it("should return false for window with insufficient overlap (49px < 50px threshold)", () => {
@@ -132,21 +111,15 @@ describe("isVisibleOnAnyDisplay", () => {
 		});
 
 		it("should return true for window on secondary display", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 2000, y: 100, width: 800, height: 600 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 2000, y: 100, width: 800, height: 600 })).toBe(true);
 		});
 
 		it("should return true for window spanning both displays", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 1500, y: 100, width: 1000, height: 600 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 1500, y: 100, width: 1000, height: 600 })).toBe(true);
 		});
 
 		it("should return false for window off-screen to the right of secondary", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 4000, y: 100, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: 4000, y: 100, width: 800, height: 600 })).toBe(false);
 		});
 	});
 
@@ -159,15 +132,11 @@ describe("isVisibleOnAnyDisplay", () => {
 		});
 
 		it("should return true for window on offset secondary display", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 1000, y: 1200, width: 800, height: 600 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 1000, y: 1200, width: 800, height: 600 })).toBe(true);
 		});
 
 		it("should return false for window in gap between displays", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: 0, y: 1100, width: 800, height: 600 }),
-			).toBe(false);
+			expect(isVisibleOnAnyDisplay({ x: 0, y: 1100, width: 800, height: 600 })).toBe(false);
 		});
 	});
 
@@ -180,29 +149,21 @@ describe("isVisibleOnAnyDisplay", () => {
 		});
 
 		it("should return true for window on display with negative coordinates", () => {
-			expect(
-				isVisibleOnAnyDisplay({ x: -1000, y: 100, width: 800, height: 600 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: -1000, y: 100, width: 800, height: 600 })).toBe(true);
 		});
 	});
 
 	describe("edge cases", () => {
 		it("should return false when no displays connected", () => {
-			(screen.getAllDisplays as ReturnType<typeof MockType>).mockReturnValue(
-				[],
-			);
-			expect(
-				isVisibleOnAnyDisplay({ x: 100, y: 100, width: 800, height: 600 }),
-			).toBe(false);
+			(screen.getAllDisplays as ReturnType<typeof MockType>).mockReturnValue([]);
+			expect(isVisibleOnAnyDisplay({ x: 100, y: 100, width: 800, height: 600 })).toBe(false);
 		});
 
 		it("should return true for zero-size window if position is valid (size validation is separate)", () => {
 			(screen.getAllDisplays as ReturnType<typeof MockType>).mockReturnValue([
 				{ bounds: { x: 0, y: 0, width: 1920, height: 1080 } },
 			]);
-			expect(
-				isVisibleOnAnyDisplay({ x: 100, y: 100, width: 0, height: 0 }),
-			).toBe(true);
+			expect(isVisibleOnAnyDisplay({ x: 100, y: 100, width: 0, height: 0 })).toBe(true);
 		});
 	});
 });
@@ -347,11 +308,9 @@ describe("getInitialWindowBounds", () => {
 
 	describe("DPI/resolution changes", () => {
 		it("should handle resolution decrease gracefully", () => {
-			(screen.getPrimaryDisplay as ReturnType<typeof MockType>).mockReturnValue(
-				{
-					workAreaSize: { width: 1280, height: 720 },
-				},
-			);
+			(screen.getPrimaryDisplay as ReturnType<typeof MockType>).mockReturnValue({
+				workAreaSize: { width: 1280, height: 720 },
+			});
 
 			const result = getInitialWindowBounds({
 				x: 0,
@@ -366,11 +325,9 @@ describe("getInitialWindowBounds", () => {
 		});
 
 		it("should clamp to work area even if smaller than MIN_WINDOW_SIZE", () => {
-			(screen.getPrimaryDisplay as ReturnType<typeof MockType>).mockReturnValue(
-				{
-					workAreaSize: { width: 300, height: 200 },
-				},
-			);
+			(screen.getPrimaryDisplay as ReturnType<typeof MockType>).mockReturnValue({
+				workAreaSize: { width: 300, height: 200 },
+			});
 
 			const result = getInitialWindowBounds({
 				x: 0,

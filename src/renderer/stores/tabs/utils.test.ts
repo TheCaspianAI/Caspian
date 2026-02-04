@@ -28,12 +28,8 @@ describe("resolveFileViewerMode", () => {
 	});
 
 	it("returns diff mode if diffCategory is provided", () => {
-		expect(
-			resolveFileViewerMode({ filePath: "file.ts", diffCategory: "staged" }),
-		).toBe("diff");
-		expect(
-			resolveFileViewerMode({ filePath: "file.ts", diffCategory: "unstaged" }),
-		).toBe("diff");
+		expect(resolveFileViewerMode({ filePath: "file.ts", diffCategory: "staged" })).toBe("diff");
+		expect(resolveFileViewerMode({ filePath: "file.ts", diffCategory: "unstaged" })).toBe("diff");
 	});
 
 	it("returns rendered for markdown files", () => {
@@ -168,12 +164,7 @@ describe("extractPaneIdsFromLayout", () => {
 				second: "pane-br",
 			},
 		};
-		expect(extractPaneIdsFromLayout(layout)).toEqual([
-			"pane-tl",
-			"pane-tr",
-			"pane-bl",
-			"pane-br",
-		]);
+		expect(extractPaneIdsFromLayout(layout)).toEqual(["pane-tl", "pane-tr", "pane-bl", "pane-br"]);
 	});
 });
 
