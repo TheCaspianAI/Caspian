@@ -7,10 +7,7 @@ const schema = z.object({
 	name: z.string(),
 });
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	// 1. Derive repositoryId from current node or most recent
 	const nodes = ctx.getNodes();
 	if (!nodes || nodes.length === 0) {
@@ -20,18 +17,14 @@ async function execute(
 	let repositoryId: string | null = null;
 	const activeNodeId = ctx.getActiveNodeId();
 	if (activeNodeId) {
-		const activeNode = nodes.find(
-			(n) => n.id === activeNodeId,
-		);
+		const activeNode = nodes.find((n) => n.id === activeNodeId);
 		if (activeNode) {
 			repositoryId = activeNode.repositoryId;
 		}
 	}
 
 	if (!repositoryId) {
-		const sorted = [...nodes].sort(
-			(a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0),
-		);
+		const sorted = [...nodes].sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0));
 		repositoryId = sorted[0].repositoryId;
 	}
 
@@ -63,10 +56,7 @@ async function execute(
 	} catch (error) {
 		return {
 			success: false,
-			error:
-				error instanceof Error
-					? error.message
-					: "Failed to start Claude session",
+			error: error instanceof Error ? error.message : "Failed to start Claude session",
 		};
 	}
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "ui/components/ui/button";
 import {
 	Dialog,
@@ -9,7 +10,6 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "ui/components/ui/dialog";
-import { useState } from "react";
 
 type AlertOptions = {
 	title: string;
@@ -27,9 +27,7 @@ type InternalAlertOptions = AlertOptions & {
 let showAlertFn: ((options: InternalAlertOptions) => void) | null = null;
 
 const Alerter = () => {
-	const [alertOptions, setAlertOptions] = useState<InternalAlertOptions | null>(
-		null,
-	);
+	const [alertOptions, setAlertOptions] = useState<InternalAlertOptions | null>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -59,11 +57,7 @@ const Alerter = () => {
 	};
 
 	return (
-		<Dialog
-			modal={true}
-			open={isOpen}
-			onOpenChange={(open) => !open && handleCancel()}
-		>
+		<Dialog modal={true} open={isOpen} onOpenChange={(open) => !open && handleCancel()}>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{alertOptions?.title}</DialogTitle>
@@ -78,9 +72,7 @@ const Alerter = () => {
 						onClick={handleConfirm}
 						disabled={isLoading}
 					>
-						{isLoading
-							? "Loading..."
-							: (alertOptions?.confirmText ?? "Confirm")}
+						{isLoading ? "Loading..." : (alertOptions?.confirmText ?? "Confirm")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
@@ -91,9 +83,7 @@ const Alerter = () => {
 const createAlert = (variant: "default" | "destructive") => {
 	return (options: AlertOptions) => {
 		if (!showAlertFn) {
-			console.error(
-				"[alert] Alerter not mounted. Make sure to render <Alerter /> in your app",
-			);
+			console.error("[alert] Alerter not mounted. Make sure to render <Alerter /> in your app");
 			return;
 		}
 		const internalOptions: InternalAlertOptions = { ...options, variant };

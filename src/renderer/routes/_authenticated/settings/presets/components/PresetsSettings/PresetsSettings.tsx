@@ -1,21 +1,7 @@
-import type {
-	ExecutionMode,
-	TerminalPreset,
-} from "lib/local-db";
-import { Button } from "ui/components/ui/button";
-import { Label } from "ui/components/ui/label";
-import { Switch } from "ui/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import type { ExecutionMode, TerminalPreset } from "lib/local-db";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-	HiOutlineCheck,
-	HiOutlinePlus,
-	HiOutlineQuestionMarkCircle,
-} from "react-icons/hi2";
-import {
-	getPresetIcon,
-	useIsDarkTheme,
-} from "renderer/assets/app-icons/preset-icons";
+import { HiOutlineCheck, HiOutlinePlus, HiOutlineQuestionMarkCircle } from "react-icons/hi2";
+import { getPresetIcon, useIsDarkTheme } from "renderer/assets/app-icons/preset-icons";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { usePresets } from "renderer/react-query/presets";
 import {
@@ -23,11 +9,11 @@ import {
 	type PresetColumnKey,
 } from "renderer/routes/_authenticated/settings/presets/types";
 import { DEFAULT_AUTO_APPLY_DEFAULT_PRESET } from "shared/constants";
-import {
-	isItemVisible,
-	SETTING_ITEM_ID,
-	type SettingItemId,
-} from "../../../utils/settings-search";
+import { Button } from "ui/components/ui/button";
+import { Label } from "ui/components/ui/label";
+import { Switch } from "ui/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { isItemVisible, SETTING_ITEM_ID, type SettingItemId } from "../../../utils/settings-search";
 import { PresetRow } from "./components/PresetRow";
 
 interface PresetTemplate {
@@ -95,18 +81,9 @@ interface PresetsSettingsProps {
 }
 
 export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
-	const showPresets = isItemVisible(
-		SETTING_ITEM_ID.PRESETS_LIST,
-		visibleItems,
-	);
-	const showAgentTemplates = isItemVisible(
-		SETTING_ITEM_ID.PRESETS_AGENT_TEMPLATES,
-		visibleItems,
-	);
-	const showAutoApplyPreset = isItemVisible(
-		SETTING_ITEM_ID.PRESETS_AUTO_APPLY,
-		visibleItems,
-	);
+	const showPresets = isItemVisible(SETTING_ITEM_ID.PRESETS_LIST, visibleItems);
+	const showAgentTemplates = isItemVisible(SETTING_ITEM_ID.PRESETS_AGENT_TEMPLATES, visibleItems);
+	const showAutoApplyPreset = isItemVisible(SETTING_ITEM_ID.PRESETS_AUTO_APPLY, visibleItems);
 
 	const utils = electronTrpc.useUtils();
 	const isDark = useIsDarkTheme();
@@ -121,8 +98,7 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 		setDefaultPreset,
 		reorderPresets,
 	} = usePresets();
-	const [localPresets, setLocalPresets] =
-		useState<TerminalPreset[]>(serverPresets);
+	const [localPresets, setLocalPresets] = useState<TerminalPreset[]>(serverPresets);
 	const presetsContainerRef = useRef<HTMLDivElement>(null);
 	const prevPresetsCountRef = useRef(serverPresets.length);
 	const serverPresetsRef = useRef(serverPresets);
@@ -167,9 +143,7 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 			setLocalPresets((currentLocal) => {
 				const preset = currentLocal[rowIndex];
 				if (!preset) return currentLocal;
-				const serverPreset = serverPresetsRef.current.find(
-					(p) => p.id === preset.id,
-				);
+				const serverPreset = serverPresetsRef.current.find((p) => p.id === preset.id);
 				if (!serverPreset) return currentLocal;
 				if (preset[column] === serverPreset[column]) return currentLocal;
 
@@ -188,9 +162,7 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 			setLocalPresets((prev) => {
 				const preset = prev[rowIndex];
 				const isDelete = preset && commands.length < preset.commands.length;
-				const newPresets = prev.map((p, i) =>
-					i === rowIndex ? { ...p, commands } : p,
-				);
+				const newPresets = prev.map((p, i) => (i === rowIndex ? { ...p, commands } : p));
 
 				// Save immediately on delete since onBlur won't have the updated state yet
 				if (isDelete && preset) {
@@ -210,14 +182,9 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 			setLocalPresets((currentLocal) => {
 				const preset = currentLocal[rowIndex];
 				if (!preset) return currentLocal;
-				const serverPreset = serverPresetsRef.current.find(
-					(p) => p.id === preset.id,
-				);
+				const serverPreset = serverPresetsRef.current.find((p) => p.id === preset.id);
 				if (!serverPreset) return currentLocal;
-				if (
-					JSON.stringify(preset.commands) ===
-					JSON.stringify(serverPreset.commands)
-				)
+				if (JSON.stringify(preset.commands) === JSON.stringify(serverPreset.commands))
 					return currentLocal;
 
 				updatePreset.mutate({
@@ -287,17 +254,14 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 		[setDefaultPreset],
 	);
 
-	const handleLocalReorder = useCallback(
-		(fromIndex: number, toIndex: number) => {
-			setLocalPresets((prev) => {
-				const newPresets = [...prev];
-				const [removed] = newPresets.splice(fromIndex, 1);
-				newPresets.splice(toIndex, 0, removed);
-				return newPresets;
-			});
-		},
-		[],
-	);
+	const handleLocalReorder = useCallback((fromIndex: number, toIndex: number) => {
+		setLocalPresets((prev) => {
+			const newPresets = [...prev];
+			const [removed] = newPresets.splice(fromIndex, 1);
+			newPresets.splice(toIndex, 0, removed);
+			return newPresets;
+		});
+	}, []);
 
 	const handlePersistReorder = useCallback(
 		(presetId: string, targetIndex: number) => {
@@ -310,26 +274,22 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 	const { data: autoApplyDefaultPreset, isLoading: isLoadingAutoApply } =
 		electronTrpc.settings.getAutoApplyDefaultPreset.useQuery();
 
-	const setAutoApplyDefaultPreset =
-		electronTrpc.settings.setAutoApplyDefaultPreset.useMutation({
-			onMutate: async ({ enabled }) => {
-				await utils.settings.getAutoApplyDefaultPreset.cancel();
-				const previous = utils.settings.getAutoApplyDefaultPreset.getData();
-				utils.settings.getAutoApplyDefaultPreset.setData(undefined, enabled);
-				return { previous };
-			},
-			onError: (_err, _vars, context) => {
-				if (context?.previous !== undefined) {
-					utils.settings.getAutoApplyDefaultPreset.setData(
-						undefined,
-						context.previous,
-					);
-				}
-			},
-			onSettled: () => {
-				utils.settings.getAutoApplyDefaultPreset.invalidate();
-			},
-		});
+	const setAutoApplyDefaultPreset = electronTrpc.settings.setAutoApplyDefaultPreset.useMutation({
+		onMutate: async ({ enabled }) => {
+			await utils.settings.getAutoApplyDefaultPreset.cancel();
+			const previous = utils.settings.getAutoApplyDefaultPreset.getData();
+			utils.settings.getAutoApplyDefaultPreset.setData(undefined, enabled);
+			return { previous };
+		},
+		onError: (_err, _vars, context) => {
+			if (context?.previous !== undefined) {
+				utils.settings.getAutoApplyDefaultPreset.setData(undefined, context.previous);
+			}
+		},
+		onSettled: () => {
+			utils.settings.getAutoApplyDefaultPreset.invalidate();
+		},
+	});
 
 	const handleAutoApplyToggle = (enabled: boolean) => {
 		setAutoApplyDefaultPreset.mutate({ enabled });
@@ -337,177 +297,153 @@ export function PresetsSettings({ visibleItems }: PresetsSettingsProps) {
 
 	return (
 		<div className="space-y-6">
-				{/* Presets Section */}
-				{(showPresets || showAgentTemplates) && (
-					<div className="space-y-4">
-						<div className="flex items-center justify-between">
-							<div className="space-y-0.5">
-								<Label className="text-sm font-medium">Execution Presets</Label>
-								<p className="text-xs text-muted-foreground">
-									Presets let you quickly launch terminals with pre-configured
-									commands.
-								</p>
-							</div>
-							{showPresets && (
-								<Button
-									variant="default"
-									size="sm"
-									className="gap-2"
-									onClick={handleAddRow}
-								>
-									<HiOutlinePlus className="h-4 w-4" />
-									Add Preset
-								</Button>
-							)}
-						</div>
-
-						{showAgentTemplates && (
-							<div className="flex flex-wrap gap-2">
-								<span className="text-xs text-muted-foreground mr-1 self-center">
-									Agent templates:
-								</span>
-								{PRESET_TEMPLATES.map((template) => {
-									const alreadyAdded = isTemplateAdded(template);
-									const presetIcon = getPresetIcon(template.name, isDark);
-									return (
-										<Tooltip key={template.name}>
-											<TooltipTrigger asChild>
-												<Button
-													variant="outline"
-													size="sm"
-													className="gap-1.5 text-xs h-7"
-													onClick={() => handleAddTemplate(template)}
-													disabled={alreadyAdded || createPreset.isPending}
-												>
-													{alreadyAdded ? (
-														<HiOutlineCheck className="h-3 w-3" />
-													) : presetIcon ? (
-														<img
-															src={presetIcon}
-															alt=""
-															className="h-3 w-3 object-contain"
-														/>
-													) : null}
-													{template.name}
-												</Button>
-											</TooltipTrigger>
-											<TooltipContent side="bottom" showArrow={false}>
-												{alreadyAdded
-													? "Already added"
-													: template.preset.description}
-											</TooltipContent>
-										</Tooltip>
-									);
-								})}
-							</div>
-						)}
-
-						{showPresets && (
-							<div className="rounded-lg border border-border overflow-hidden">
-								<div className="flex items-center gap-4 py-2 px-4 bg-accent/10 border-b border-border">
-									<div className="w-6 shrink-0" />
-									{PRESET_COLUMNS.map((column) => (
-										<div
-											key={column.key}
-											className="flex-1 text-xs font-medium text-muted-foreground uppercase tracking-wider"
-										>
-											{column.label}
-										</div>
-									))}
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<div className="w-28 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0 cursor-help flex items-center gap-1">
-												Mode
-												<HiOutlineQuestionMarkCircle className="h-3.5 w-3.5" />
-											</div>
-										</TooltipTrigger>
-										<TooltipContent side="top" className="max-w-xs">
-											<p className="font-medium mb-1">Execution Mode</p>
-											<p className="text-xs">
-												<strong>Sequential:</strong> Commands run one after
-												another in a single terminal (joined with &&)
-											</p>
-											<p className="text-xs mt-1">
-												<strong>Parallel:</strong> Each command runs in its own
-												split pane within a single tab
-											</p>
-										</TooltipContent>
-									</Tooltip>
-									<div className="w-20 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center shrink-0">
-										Actions
-									</div>
-								</div>
-
-								<div
-									ref={presetsContainerRef}
-									className="max-h-[320px] overflow-y-auto"
-								>
-									{isLoadingPresets ? (
-										<div className="py-8 text-center text-sm text-muted-foreground">
-											Loading presets...
-										</div>
-									) : localPresets.length > 0 ? (
-										localPresets.map((preset, index) => (
-											<PresetRow
-												key={preset.id}
-												preset={preset}
-												rowIndex={index}
-												isEven={index % 2 === 0}
-												onChange={handleCellChange}
-												onBlur={handleCellBlur}
-												onCommandsChange={handleCommandsChange}
-												onCommandsBlur={handleCommandsBlur}
-												onExecutionModeChange={handleExecutionModeChange}
-												onDelete={handleDeleteRow}
-												onSetDefault={handleSetDefault}
-												onLocalReorder={handleLocalReorder}
-												onPersistReorder={handlePersistReorder}
-											/>
-										))
-									) : (
-										<div className="py-8 text-center text-sm text-muted-foreground">
-											No presets yet. Click "Add Preset" to create your first
-											preset.
-										</div>
-									)}
-								</div>
-							</div>
-						)}
-					</div>
-				)}
-
-				{showAutoApplyPreset && (
-					<div
-						className={
-							showPresets || showAgentTemplates
-								? "flex items-center justify-between pt-6 border-t"
-								: "flex items-center justify-between"
-						}
-					>
+			{/* Presets Section */}
+			{(showPresets || showAgentTemplates) && (
+				<div className="space-y-4">
+					<div className="flex items-center justify-between">
 						<div className="space-y-0.5">
-							<Label
-								htmlFor="auto-apply-preset"
-								className="text-sm font-medium"
-							>
-								Auto-apply default preset
-							</Label>
+							<Label className="text-sm font-medium">Execution Presets</Label>
 							<p className="text-xs text-muted-foreground">
-								Automatically apply your default preset when creating new
-								nodes
+								Presets let you quickly launch terminals with pre-configured commands.
 							</p>
 						</div>
-						<Switch
-							id="auto-apply-preset"
-							checked={
-								autoApplyDefaultPreset ?? DEFAULT_AUTO_APPLY_DEFAULT_PRESET
-							}
-							onCheckedChange={handleAutoApplyToggle}
-							disabled={
-								isLoadingAutoApply || setAutoApplyDefaultPreset.isPending
-							}
-						/>
+						{showPresets && (
+							<Button variant="default" size="sm" className="gap-2" onClick={handleAddRow}>
+								<HiOutlinePlus className="h-4 w-4" />
+								Add Preset
+							</Button>
+						)}
 					</div>
-				)}
+
+					{showAgentTemplates && (
+						<div className="flex flex-wrap gap-2">
+							<span className="text-xs text-muted-foreground mr-1 self-center">
+								Agent templates:
+							</span>
+							{PRESET_TEMPLATES.map((template) => {
+								const alreadyAdded = isTemplateAdded(template);
+								const presetIcon = getPresetIcon(template.name, isDark);
+								return (
+									<Tooltip key={template.name}>
+										<TooltipTrigger asChild>
+											<Button
+												variant="outline"
+												size="sm"
+												className="gap-1.5 text-xs h-7"
+												onClick={() => handleAddTemplate(template)}
+												disabled={alreadyAdded || createPreset.isPending}
+											>
+												{alreadyAdded ? (
+													<HiOutlineCheck className="h-3 w-3" />
+												) : presetIcon ? (
+													<img src={presetIcon} alt="" className="h-3 w-3 object-contain" />
+												) : null}
+												{template.name}
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent side="bottom" showArrow={false}>
+											{alreadyAdded ? "Already added" : template.preset.description}
+										</TooltipContent>
+									</Tooltip>
+								);
+							})}
+						</div>
+					)}
+
+					{showPresets && (
+						<div className="rounded-lg border border-border overflow-hidden">
+							<div className="flex items-center gap-4 py-2 px-4 bg-accent/10 border-b border-border">
+								<div className="w-6 shrink-0" />
+								{PRESET_COLUMNS.map((column) => (
+									<div
+										key={column.key}
+										className="flex-1 text-xs font-medium text-muted-foreground uppercase tracking-wider"
+									>
+										{column.label}
+									</div>
+								))}
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<div className="w-28 text-xs font-medium text-muted-foreground uppercase tracking-wider shrink-0 cursor-help flex items-center gap-1">
+											Mode
+											<HiOutlineQuestionMarkCircle className="h-3.5 w-3.5" />
+										</div>
+									</TooltipTrigger>
+									<TooltipContent side="top" className="max-w-xs">
+										<p className="font-medium mb-1">Execution Mode</p>
+										<p className="text-xs">
+											<strong>Sequential:</strong> Commands run one after another in a single
+											terminal (joined with &&)
+										</p>
+										<p className="text-xs mt-1">
+											<strong>Parallel:</strong> Each command runs in its own split pane within a
+											single tab
+										</p>
+									</TooltipContent>
+								</Tooltip>
+								<div className="w-20 text-xs font-medium text-muted-foreground uppercase tracking-wider text-center shrink-0">
+									Actions
+								</div>
+							</div>
+
+							<div ref={presetsContainerRef} className="max-h-[320px] overflow-y-auto">
+								{isLoadingPresets ? (
+									<div className="py-8 text-center text-sm text-muted-foreground">
+										Loading presets...
+									</div>
+								) : localPresets.length > 0 ? (
+									localPresets.map((preset, index) => (
+										<PresetRow
+											key={preset.id}
+											preset={preset}
+											rowIndex={index}
+											isEven={index % 2 === 0}
+											onChange={handleCellChange}
+											onBlur={handleCellBlur}
+											onCommandsChange={handleCommandsChange}
+											onCommandsBlur={handleCommandsBlur}
+											onExecutionModeChange={handleExecutionModeChange}
+											onDelete={handleDeleteRow}
+											onSetDefault={handleSetDefault}
+											onLocalReorder={handleLocalReorder}
+											onPersistReorder={handlePersistReorder}
+										/>
+									))
+								) : (
+									<div className="py-8 text-center text-sm text-muted-foreground">
+										No presets yet. Click "Add Preset" to create your first preset.
+									</div>
+								)}
+							</div>
+						</div>
+					)}
+				</div>
+			)}
+
+			{showAutoApplyPreset && (
+				<div
+					className={
+						showPresets || showAgentTemplates
+							? "flex items-center justify-between pt-6 border-t"
+							: "flex items-center justify-between"
+					}
+				>
+					<div className="space-y-0.5">
+						<Label htmlFor="auto-apply-preset" className="text-sm font-medium">
+							Auto-apply default preset
+						</Label>
+						<p className="text-xs text-muted-foreground">
+							Automatically apply your default preset when creating new nodes
+						</p>
+					</div>
+					<Switch
+						id="auto-apply-preset"
+						checked={autoApplyDefaultPreset ?? DEFAULT_AUTO_APPLY_DEFAULT_PRESET}
+						onCheckedChange={handleAutoApplyToggle}
+						disabled={isLoadingAutoApply || setAutoApplyDefaultPreset.isPending}
+					/>
+				</div>
+			)}
 		</div>
 	);
 }

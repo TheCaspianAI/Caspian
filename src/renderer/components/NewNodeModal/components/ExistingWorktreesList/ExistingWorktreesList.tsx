@@ -1,11 +1,7 @@
-import { toast } from "ui/components/ui/sonner";
 import { useMemo, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import {
-	useCreateFromPr,
-	useCreateNode,
-	useOpenWorktree,
-} from "renderer/react-query/nodes";
+import { useCreateFromPr, useCreateNode, useOpenWorktree } from "renderer/react-query/nodes";
+import { toast } from "ui/components/ui/sonner";
 import { BranchesSection, PrUrlSection, WorktreesSection } from "./components";
 
 interface ExistingWorktreesListProps {
@@ -13,10 +9,7 @@ interface ExistingWorktreesListProps {
 	onOpenSuccess: () => void;
 }
 
-export function ExistingWorktreesList({
-	repositoryId,
-	onOpenSuccess,
-}: ExistingWorktreesListProps) {
+export function ExistingWorktreesList({ repositoryId, onOpenSuccess }: ExistingWorktreesListProps) {
 	const { data: worktrees = [], isLoading: isWorktreesLoading } =
 		electronTrpc.nodes.getWorktreesByRepository.useQuery({ repositoryId });
 	const { data: branchData, isLoading: isBranchesLoading } =
@@ -39,17 +32,13 @@ export function ExistingWorktreesList({
 	const branchesWithoutWorktrees = useMemo(() => {
 		if (!branchData?.branches) return [];
 		const worktreeBranches = new Set(worktrees.map((wt) => wt.branch));
-		return branchData.branches.filter(
-			(branch) => !worktreeBranches.has(branch.name),
-		);
+		return branchData.branches.filter((branch) => !worktreeBranches.has(branch.name));
 	}, [branchData?.branches, worktrees]);
 
 	const filteredBranches = useMemo(() => {
 		if (!branchSearch) return branchesWithoutWorktrees;
 		const searchLower = branchSearch.toLowerCase();
-		return branchesWithoutWorktrees.filter((b) =>
-			b.name.toLowerCase().includes(searchLower),
-		);
+		return branchesWithoutWorktrees.filter((b) => b.name.toLowerCase().includes(searchLower));
 	}, [branchesWithoutWorktrees, branchSearch]);
 
 	const handleOpenWorktree = async (worktreeId: string, branch: string) => {
@@ -59,8 +48,7 @@ export function ExistingWorktreesList({
 				onOpenSuccess();
 				return `Opened ${branch}`;
 			},
-			error: (err) =>
-				err instanceof Error ? err.message : "Failed to open node",
+			error: (err) => (err instanceof Error ? err.message : "Failed to open node"),
 		});
 	};
 
@@ -80,8 +68,7 @@ export function ExistingWorktreesList({
 					onOpenSuccess();
 					return `Opened ${count} nodes`;
 				},
-				error: (err) =>
-					err instanceof Error ? err.message : "Failed to open nodes",
+				error: (err) => (err instanceof Error ? err.message : "Failed to open nodes"),
 			},
 		);
 	};
@@ -107,9 +94,7 @@ export function ExistingWorktreesList({
 				toast.success("Node created");
 			}
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Failed to create node",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to create node");
 		}
 	};
 
@@ -140,17 +125,10 @@ export function ExistingWorktreesList({
 	};
 
 	const isLoading = isWorktreesLoading || isBranchesLoading;
-	const isPending =
-		openWorktree.isPending ||
-		createNode.isPending ||
-		createFromPr.isPending;
+	const isPending = openWorktree.isPending || createNode.isPending || createFromPr.isPending;
 
 	if (isLoading) {
-		return (
-			<div className="py-6 text-center text-xs text-muted-foreground">
-				Loading...
-			</div>
-		);
+		return <div className="py-6 text-center text-xs text-muted-foreground">Loading...</div>;
 	}
 
 	const hasWorktrees = closedWorktrees.length > 0 || openWorktrees.length > 0;

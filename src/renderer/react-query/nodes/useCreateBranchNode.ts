@@ -5,15 +5,11 @@ import { useNodeInitStore } from "renderer/stores/node-init";
 import type { NodeInitProgress } from "shared/types/node-init";
 
 export function useCreateBranchNode(
-	options?: Parameters<
-		typeof electronTrpc.nodes.createBranchNode.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.nodes.createBranchNode.useMutation>[0],
 ) {
 	const navigate = useNavigate();
 	const utils = electronTrpc.useUtils();
-	const addPendingTerminalSetup = useNodeInitStore(
-		(s) => s.addPendingTerminalSetup,
-	);
+	const addPendingTerminalSetup = useNodeInitStore((s) => s.addPendingTerminalSetup);
 	const updateProgress = useNodeInitStore((s) => s.updateProgress);
 
 	return electronTrpc.nodes.createBranchNode.useMutation({
@@ -28,10 +24,7 @@ export function useCreateBranchNode(
 						nodeId: data.node.id,
 					});
 				} catch (error) {
-					console.error(
-						"[useCreateBranchNode] Failed to fetch setup commands:",
-						error,
-					);
+					console.error("[useCreateBranchNode] Failed to fetch setup commands:", error);
 				}
 
 				addPendingTerminalSetup({

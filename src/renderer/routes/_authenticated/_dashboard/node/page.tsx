@@ -1,9 +1,9 @@
-import { Spinner } from "ui/components/ui/spinner";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { StartView } from "renderer/screens/main/components/StartView";
 import { OnboardingScreen } from "renderer/screens/main/components/OnboardingScreen";
+import { StartView } from "renderer/screens/main/components/StartView";
+import { Spinner } from "ui/components/ui/spinner";
 
 const ONBOARDING_SEEN_KEY = "caspian-onboarding-seen";
 
@@ -21,8 +21,7 @@ function LoadingSpinner() {
 
 function NodeIndexPage() {
 	const navigate = useNavigate();
-	const { data: nodes, isLoading } =
-		electronTrpc.nodes.getAllGrouped.useQuery();
+	const { data: nodes, isLoading } = electronTrpc.nodes.getAllGrouped.useQuery();
 
 	const allNodes = nodes?.flatMap((group: { nodes: Array<{ id: string }> }) => group.nodes) ?? [];
 	const hasNoNodes = !isLoading && allNodes.length === 0;
@@ -43,8 +42,7 @@ function NodeIndexPage() {
 
 		// Try to restore last viewed node
 		const lastViewedId = localStorage.getItem("lastViewedNodeId");
-		const targetNode =
-			allNodes.find((n: { id: string }) => n.id === lastViewedId) ?? allNodes[0];
+		const targetNode = allNodes.find((n: { id: string }) => n.id === lastViewedId) ?? allNodes[0];
 
 		if (targetNode) {
 			navigate({

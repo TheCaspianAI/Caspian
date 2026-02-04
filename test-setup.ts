@@ -90,12 +90,8 @@ mock.module("electron", () => ({
 		isPackaged: false,
 	},
 	dialog: {
-		showOpenDialog: mock(() =>
-			Promise.resolve({ canceled: false, filePaths: [] }),
-		),
-		showSaveDialog: mock(() =>
-			Promise.resolve({ canceled: false, filePath: "" }),
-		),
+		showOpenDialog: mock(() => Promise.resolve({ canceled: false, filePaths: [] })),
+		showSaveDialog: mock(() => Promise.resolve({ canceled: false, filePath: "" })),
 		showMessageBox: mock(() => Promise.resolve({ response: 0 })),
 	},
 	BrowserWindow: mock(() => ({

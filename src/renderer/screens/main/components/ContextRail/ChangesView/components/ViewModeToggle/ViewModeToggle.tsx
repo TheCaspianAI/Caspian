@@ -1,6 +1,6 @@
+import { LuFolderTree, LuList } from "react-icons/lu";
 import { Button } from "ui/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { LuFolderTree, LuList } from "react-icons/lu";
 import type { ChangesViewMode } from "../../types";
 
 interface ViewModeToggleProps {
@@ -8,10 +8,7 @@ interface ViewModeToggleProps {
 	onViewModeChange: (mode: ChangesViewMode) => void;
 }
 
-export function ViewModeToggle({
-	viewMode,
-	onViewModeChange,
-}: ViewModeToggleProps) {
+export function ViewModeToggle({ viewMode, onViewModeChange }: ViewModeToggleProps) {
 	const handleToggle = () => {
 		onViewModeChange(viewMode === "grouped" ? "tree" : "grouped");
 	};
@@ -34,9 +31,7 @@ export function ViewModeToggle({
 				</Button>
 			</TooltipTrigger>
 			<TooltipContent side="bottom" showArrow={false}>
-				{viewMode === "grouped"
-					? "Switch to tree view"
-					: "Switch to grouped view"}
+				{viewMode === "grouped" ? "Switch to tree view" : "Switch to grouped view"}
 			</TooltipContent>
 		</Tooltip>
 	);

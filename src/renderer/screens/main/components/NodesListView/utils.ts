@@ -33,10 +33,8 @@ export function getRelativeTime(timestamp: number): string {
 	if (days === 1) return "yesterday";
 	if (days < DAYS_PER_WEEK) return `${days} days ago`;
 	if (days < TWO_WEEKS_DAYS) return "1 week ago";
-	if (days < DAYS_PER_MONTH)
-		return `${Math.floor(days / DAYS_PER_WEEK)} weeks ago`;
+	if (days < DAYS_PER_MONTH) return `${Math.floor(days / DAYS_PER_WEEK)} weeks ago`;
 	if (days < TWO_MONTHS_DAYS) return "1 month ago";
-	if (days < DAYS_PER_YEAR)
-		return `${Math.floor(days / DAYS_PER_MONTH)} months ago`;
+	if (days < DAYS_PER_YEAR) return `${Math.floor(days / DAYS_PER_MONTH)} months ago`;
 	return "over a year ago";
 }

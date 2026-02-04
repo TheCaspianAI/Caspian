@@ -1,24 +1,20 @@
+import { Search, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { X, Search } from "lucide-react";
-import { Button } from "ui/components/ui/button";
-import { Input } from "ui/components/ui/input";
-import { cn } from "ui/lib/utils";
-import {
-	useSettingsStore,
-	type SettingsSection,
-} from "renderer/stores/settings-state";
+// Import section content components
+import { AppearanceSettings } from "renderer/routes/_authenticated/settings/appearance/components/AppearanceSettings";
+import { RepositoriesAccordion } from "renderer/routes/_authenticated/settings/components/RepositoriesAccordion";
+import { PreferencesSettings } from "renderer/routes/_authenticated/settings/preferences/components/PreferencesSettings";
+import { PresetsSettings } from "renderer/routes/_authenticated/settings/presets/components/PresetsSettings";
+import { SessionsSettings } from "renderer/routes/_authenticated/settings/sessions/components/SessionsSettings";
 import {
 	getMatchingItemsForSection,
 	searchSettings,
 } from "renderer/routes/_authenticated/settings/utils/settings-search";
+import { type SettingsSection, useSettingsStore } from "renderer/stores/settings-state";
+import { Button } from "ui/components/ui/button";
+import { Input } from "ui/components/ui/input";
+import { cn } from "ui/lib/utils";
 import { useScrollSync } from "./useScrollSync";
-
-// Import section content components
-import { AppearanceSettings } from "renderer/routes/_authenticated/settings/appearance/components/AppearanceSettings";
-import { PreferencesSettings } from "renderer/routes/_authenticated/settings/preferences/components/PreferencesSettings";
-import { PresetsSettings } from "renderer/routes/_authenticated/settings/presets/components/PresetsSettings";
-import { SessionsSettings } from "renderer/routes/_authenticated/settings/sessions/components/SessionsSettings";
-import { RepositoriesAccordion } from "renderer/routes/_authenticated/settings/components/RepositoriesAccordion";
 
 const TABS: { id: SettingsSection; label: string }[] = [
 	{ id: "appearance", label: "Appearance" },
@@ -43,6 +39,7 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 	});
 
 	// Scroll to the requested section from store on mount
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Intentionally run only on mount
 	useEffect(() => {
 		if (storeActiveSection !== "appearance") {
 			// Delay to ensure sections are registered after render
@@ -51,12 +48,12 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 			}, 0);
 			return () => clearTimeout(timer);
 		}
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}, []);
 
 	// Compute which sections have matches
 	const matchingItems = useMemo(
 		() => (searchQuery ? searchSettings(searchQuery) : null),
-		[searchQuery]
+		[searchQuery],
 	);
 
 	const sectionHasMatches = useCallback(
@@ -64,30 +61,22 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 			if (!matchingItems) return true;
 			return matchingItems.some((item) => item.section === section);
 		},
-		[matchingItems]
+		[matchingItems],
 	);
 
 	// Get visible item IDs for each section
 	const getVisibleItems = useCallback(
 		(section: string) => {
 			if (!searchQuery) return null;
-			return getMatchingItemsForSection(searchQuery, section as any).map(
-				(item) => item.id
-			);
+			return getMatchingItemsForSection(searchQuery, section as any).map((item) => item.id);
 		},
-		[searchQuery]
+		[searchQuery],
 	);
 
 	// Disabled tabs (sections with no search matches)
 	const disabledTabs = useMemo(() => {
 		if (!searchQuery) return [];
-		const sections = [
-			"appearance",
-			"preferences",
-			"presets",
-			"sessions",
-			"repository",
-		] as const;
+		const sections = ["appearance", "preferences", "presets", "sessions", "repository"] as const;
 		return sections.filter((s) => !sectionHasMatches(s));
 	}, [searchQuery, sectionHasMatches]);
 
@@ -124,7 +113,7 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 									isActive
 										? "bg-accent text-accent-foreground font-medium"
 										: "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-									isDisabled && "opacity-40 cursor-not-allowed"
+									isDisabled && "opacity-40 cursor-not-allowed",
 								)}
 							>
 								{tab.label}
@@ -134,12 +123,7 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 				</nav>
 
 				{/* Close button */}
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-8 w-8 shrink-0"
-					onClick={onClose}
-				>
+				<Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={onClose}>
 					<X className="h-4 w-4" />
 					<span className="sr-only">Close settings</span>
 				</Button>
@@ -226,24 +210,18 @@ interface SectionProps {
 
 const Section = forwardRef<HTMLElement, SectionProps>(function Section(
 	{ id, title, description, children, className, isFirst },
-	ref
+	ref,
 ) {
 	return (
 		<section
 			ref={ref}
 			id={`settings-section-${id}`}
 			data-settings-section={id}
-			className={cn(
-				"scroll-mt-4",
-				!isFirst && "border-t border-border pt-6 mt-6",
-				className
-			)}
+			className={cn("scroll-mt-4", !isFirst && "border-t border-border pt-6 mt-6", className)}
 		>
 			<div className="mb-4">
 				<h2 className="text-base font-medium">{title}</h2>
-				{description && (
-					<p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-				)}
+				{description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
 			</div>
 			<div>{children}</div>
 		</section>

@@ -2,12 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { getNotifyScriptPath } from "./notify-hook";
-import {
-	BIN_DIR,
-	HOOKS_DIR,
-	OPENCODE_CONFIG_DIR,
-	OPENCODE_PLUGIN_DIR,
-} from "./paths";
+import { BIN_DIR, HOOKS_DIR, OPENCODE_CONFIG_DIR, OPENCODE_PLUGIN_DIR } from "./paths";
 
 export const WRAPPER_MARKER = "# Caspian agent-wrapper v1";
 export const CLAUDE_SETTINGS_FILE = "claude-settings.json";
@@ -68,9 +63,7 @@ export function getOpenCodePluginPath(): string {
 /** @see https://opencode.ai/docs/plugins */
 export function getOpenCodeGlobalPluginPath(): string {
 	const xdgConfigHome = process.env.XDG_CONFIG_HOME?.trim();
-	const configHome = xdgConfigHome?.length
-		? xdgConfigHome
-		: path.join(os.homedir(), ".config");
+	const configHome = xdgConfigHome?.length ? xdgConfigHome : path.join(os.homedir(), ".config");
 	return path.join(configHome, "opencode", "plugin", OPENCODE_PLUGIN_FILE);
 }
 
@@ -79,9 +72,7 @@ export function getClaudeSettingsContent(notifyPath: string): string {
 		hooks: {
 			UserPromptSubmit: [{ hooks: [{ type: "command", command: notifyPath }] }],
 			Stop: [{ hooks: [{ type: "command", command: notifyPath }] }],
-			PermissionRequest: [
-				{ matcher: "*", hooks: [{ type: "command", command: notifyPath }] },
-			],
+			PermissionRequest: [{ matcher: "*", hooks: [{ type: "command", command: notifyPath }] }],
 		},
 	};
 
@@ -201,10 +192,7 @@ export function cleanupGlobalOpenCodePlugin(): void {
 			);
 		}
 	} catch (error) {
-		console.warn(
-			"[agent-setup] Failed to cleanup global OpenCode plugin:",
-			error,
-		);
+		console.warn("[agent-setup] Failed to cleanup global OpenCode plugin:", error);
 	}
 }
 

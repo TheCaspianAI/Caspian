@@ -1,12 +1,12 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useParams } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { LuPanelLeft, LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useSidebarStore } from "renderer/stores";
+import { useSidebarStore } from "renderer/stores/sidebar-state";
 import { useChangesStore } from "renderer/stores/changes";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import type { ChangeCategory, ChangedFile } from "shared/changes-types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 /** Priority order for selecting the first file to open */
 const FILE_CATEGORIES: Array<{
@@ -61,10 +61,11 @@ export function SidebarControl() {
 					filePath,
 				}),
 			]).catch((error) => {
-				console.error(
-					"[SidebarControl/invalidateFileContent] Failed to invalidate:",
-					{ worktreePath, filePath, error },
-				);
+				console.error("[SidebarControl/invalidateFileContent] Failed to invalidate:", {
+					worktreePath,
+					filePath,
+					error,
+				});
 			});
 		},
 		[worktreePath, trpcUtils],
@@ -96,14 +97,7 @@ export function SidebarControl() {
 			});
 			invalidateFileContent(firstFile.path);
 		}
-	}, [
-		workspaceId,
-		worktreePath,
-		status,
-		selectFile,
-		addFileViewerPane,
-		invalidateFileContent,
-	]);
+	}, [workspaceId, worktreePath, status, selectFile, addFileViewerPane, invalidateFileContent]);
 
 	const handleClick = useCallback(() => {
 		if (isSidebarOpen) {

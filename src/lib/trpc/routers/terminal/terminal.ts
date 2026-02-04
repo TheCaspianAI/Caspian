@@ -1,17 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { repositories, nodes, worktrees } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { eq } from "drizzle-orm";
+import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
-import { getDaemonTerminalManager } from "main/lib/terminal";
-import {
-	TERMINAL_SESSION_KILLED_MESSAGE,
-	TerminalKilledError,
-} from "main/lib/terminal/errors";
-import { getTerminalHostClient } from "main/lib/terminal-host/client";
 import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
+import { getDaemonTerminalManager } from "main/lib/terminal";
+import { TERMINAL_SESSION_KILLED_MESSAGE, TerminalKilledError } from "main/lib/terminal/errors";
+import { getTerminalHostClient } from "main/lib/terminal-host/client";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import { assertNodeUsable } from "../nodes/utils/usability";
@@ -25,11 +22,9 @@ let createOrAttachCallCounter = 0;
 const SAFE_ID = z
 	.string()
 	.min(1)
-	.refine(
-		(value) =>
-			!value.includes("/") && !value.includes("\\") && !value.includes(".."),
-		{ message: "Invalid id" },
-	);
+	.refine((value) => !value.includes("/") && !value.includes("\\") && !value.includes(".."), {
+		message: "Invalid id",
+	});
 
 /**
  * Terminal router using daemon-backed terminal runtime
@@ -49,10 +44,7 @@ export const createTerminalRouter = () => {
 	const registry = getNodeRuntimeRegistry();
 	const terminal = registry.getDefault().terminal;
 	if (DEBUG_TERMINAL) {
-		console.log(
-			"[Terminal Router] Using terminal runtime, capabilities:",
-			terminal.capabilities,
-		);
+		console.log("[Terminal Router] Using terminal runtime, capabilities:", terminal.capabilities);
 	}
 
 	return router({
@@ -85,14 +77,8 @@ export const createTerminalRouter = () => {
 					allowKilled,
 				} = input;
 
-				const node = localDb
-					.select()
-					.from(nodes)
-					.where(eq(nodes.id, nodeId))
-					.get();
-				const nodePath = node
-					? (getNodePath(node) ?? undefined)
-					: undefined;
+				const node = localDb.select().from(nodes).where(eq(nodes.id, nodeId)).get();
+				const nodePath = node ? (getNodePath(node) ?? undefined) : undefined;
 				if (node?.type === "worktree") {
 					assertNodeUsable(nodeId, nodePath);
 				}
@@ -111,11 +97,7 @@ export const createTerminalRouter = () => {
 				}
 
 				const repository = node
-					? localDb
-							.select()
-							.from(repositories)
-							.where(eq(repositories.id, node.repositoryId))
-							.get()
+					? localDb.select().from(repositories).where(eq(repositories.id, node.repositoryId)).get()
 					: undefined;
 
 				try {
@@ -158,17 +140,13 @@ export const createTerminalRouter = () => {
 				} catch (error) {
 					const isKilledError =
 						error instanceof TerminalKilledError ||
-						(error instanceof Error &&
-							error.message === TERMINAL_SESSION_KILLED_MESSAGE);
+						(error instanceof Error && error.message === TERMINAL_SESSION_KILLED_MESSAGE);
 					if (isKilledError) {
 						if (DEBUG_TERMINAL) {
-							console.warn(
-								"[Terminal Router] createOrAttach blocked (killed):",
-								{
-									paneId,
-									nodeId,
-								},
-							);
+							console.warn("[Terminal Router] createOrAttach blocked (killed):", {
+								paneId,
+								nodeId,
+							});
 						}
 						throw new TRPCError({
 							code: "BAD_REQUEST",
@@ -199,8 +177,7 @@ export const createTerminalRouter = () => {
 				try {
 					terminal.write(input);
 				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : "Write failed";
+					const message = error instanceof Error ? error.message : "Write failed";
 
 					// Emit exit instead of error for deleted sessions to prevent toast floods
 					if (message.includes("not found or not alive")) {
@@ -284,12 +261,7 @@ export const createTerminalRouter = () => {
 			const client = getTerminalHostClient();
 			const before = await terminal.management.listSessions();
 			const beforeIds = before.sessions.map((s) => s.sessionId);
-			console.log(
-				"[killAllDaemonSessions] Before kill:",
-				beforeIds.length,
-				"sessions",
-				beforeIds,
-			);
+			console.log("[killAllDaemonSessions] Before kill:", beforeIds.length, "sessions", beforeIds);
 
 			if (beforeIds.length > 0) {
 				const results = await Promise.allSettled(
@@ -298,13 +270,10 @@ export const createTerminalRouter = () => {
 				for (const [index, result] of results.entries()) {
 					if (result.status === "rejected") {
 						const paneId = beforeIds[index];
-						logger.error(
-							`[killAllDaemonSessions] terminal.kill failed for paneId=${paneId}`,
-							{
-								paneId,
-								reason: result.reason,
-							},
-						);
+						logger.error(`[killAllDaemonSessions] terminal.kill failed for paneId=${paneId}`, {
+							paneId,
+							reason: result.reason,
+						});
 					}
 				}
 			}
@@ -318,9 +287,7 @@ export const createTerminalRouter = () => {
 			for (let i = 0; i < MAX_RETRIES && remainingCount > 0; i++) {
 				await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
 				const after = await client.listSessions();
-				afterIds = after.sessions
-					.filter((s) => s.isAlive)
-					.map((s) => s.sessionId);
+				afterIds = after.sessions.filter((s) => s.isAlive).map((s) => s.sessionId);
 				remainingCount = afterIds.length;
 
 				if (remainingCount > 0) {
@@ -348,9 +315,7 @@ export const createTerminalRouter = () => {
 			.input(z.object({ nodeId: z.string() }))
 			.mutation(async ({ input }) => {
 				const { sessions } = await terminal.management.listSessions();
-				const toKill = sessions.filter(
-					(session) => session.workspaceId === input.nodeId,
-				);
+				const toKill = sessions.filter((session) => session.workspaceId === input.nodeId);
 
 				if (toKill.length > 0) {
 					const paneIds = toKill.map((session) => session.sessionId);
@@ -391,16 +356,11 @@ export const createTerminalRouter = () => {
 				if (connected) {
 					const { sessions } = await client.listSessions();
 					const aliveCount = sessions.filter((s) => s.isAlive).length;
-					console.log(
-						`[restartDaemon] Shutting down daemon with ${aliveCount} alive sessions`,
-					);
+					console.log(`[restartDaemon] Shutting down daemon with ${aliveCount} alive sessions`);
 
 					for (const session of sessions) {
 						void terminal.kill({ paneId: session.sessionId }).catch((error) => {
-							console.warn(
-								"[restartDaemon] Failed to mark session killed:",
-								error,
-							);
+							console.warn("[restartDaemon] Failed to mark session killed:", error);
 						});
 					}
 
@@ -409,10 +369,7 @@ export const createTerminalRouter = () => {
 					console.log("[restartDaemon] Daemon was not running");
 				}
 			} catch (error) {
-				console.warn(
-					"[restartDaemon] Error during shutdown (continuing):",
-					error,
-				);
+				console.warn("[restartDaemon] Error during shutdown (continuing):", error);
 			}
 
 			const manager = getDaemonTerminalManager();
@@ -423,35 +380,27 @@ export const createTerminalRouter = () => {
 			return { success: true };
 		}),
 
-		getSession: publicProcedure
-			.input(z.string())
-			.query(async ({ input: paneId }) => {
-				return terminal.getSession(paneId);
-			}),
+		getSession: publicProcedure.input(z.string()).query(async ({ input: paneId }) => {
+			return terminal.getSession(paneId);
+		}),
 
-		getNodeCwd: publicProcedure
-			.input(z.string())
-			.query(({ input: nodeId }) => {
-				const node = localDb
-					.select()
-					.from(nodes)
-					.where(eq(nodes.id, nodeId))
-					.get();
-				if (!node) {
-					return null;
-				}
+		getNodeCwd: publicProcedure.input(z.string()).query(({ input: nodeId }) => {
+			const node = localDb.select().from(nodes).where(eq(nodes.id, nodeId)).get();
+			if (!node) {
+				return null;
+			}
 
-				if (!node.worktreeId) {
-					return null;
-				}
+			if (!node.worktreeId) {
+				return null;
+			}
 
-				const worktree = localDb
-					.select()
-					.from(worktrees)
-					.where(eq(worktrees.id, node.worktreeId))
-					.get();
-				return worktree?.path ?? null;
-			}),
+			const worktree = localDb
+				.select()
+				.from(worktrees)
+				.where(eq(worktrees.id, node.worktreeId))
+				.get();
+			return worktree?.path ?? null;
+		}),
 
 		listDirectory: publicProcedure
 			.input(
@@ -498,72 +447,68 @@ export const createTerminalRouter = () => {
 				}
 			}),
 
-		stream: publicProcedure
-			.input(z.string())
-			.subscription(({ input: paneId }) => {
-				return observable<
-					| { type: "data"; data: string }
-					| {
-							type: "exit";
-							exitCode: number;
-							signal?: number;
-							reason?: "killed" | "exited" | "error";
-					  }
-					| { type: "disconnect"; reason: string }
-					| { type: "error"; error: string; code?: string }
-				>((emit) => {
-					if (DEBUG_TERMINAL) {
-						console.log(`[Terminal Stream] Subscribe: ${paneId}`);
+		stream: publicProcedure.input(z.string()).subscription(({ input: paneId }) => {
+			return observable<
+				| { type: "data"; data: string }
+				| {
+						type: "exit";
+						exitCode: number;
+						signal?: number;
+						reason?: "killed" | "exited" | "error";
+				  }
+				| { type: "disconnect"; reason: string }
+				| { type: "error"; error: string; code?: string }
+			>((emit) => {
+				if (DEBUG_TERMINAL) {
+					console.log(`[Terminal Stream] Subscribe: ${paneId}`);
+				}
+
+				let firstDataReceived = false;
+
+				const onData = (data: string) => {
+					if (DEBUG_TERMINAL && !firstDataReceived) {
+						firstDataReceived = true;
+						console.log(`[Terminal Stream] First data for ${paneId}: ${data.length} bytes`);
 					}
+					emit.next({ type: "data", data });
+				};
 
-					let firstDataReceived = false;
+				const onExit = (
+					exitCode: number,
+					signal?: number,
+					reason?: "killed" | "exited" | "error",
+				) => {
+					// Don't emit.complete() - paneId is reused across restarts, completion would strand listeners
+					emit.next({ type: "exit", exitCode, signal, reason });
+				};
 
-					const onData = (data: string) => {
-						if (DEBUG_TERMINAL && !firstDataReceived) {
-							firstDataReceived = true;
-							console.log(
-								`[Terminal Stream] First data for ${paneId}: ${data.length} bytes`,
-							);
-						}
-						emit.next({ type: "data", data });
-					};
+				const onDisconnect = (reason: string) => {
+					emit.next({ type: "disconnect", reason });
+				};
 
-					const onExit = (
-						exitCode: number,
-						signal?: number,
-						reason?: "killed" | "exited" | "error",
-					) => {
-						// Don't emit.complete() - paneId is reused across restarts, completion would strand listeners
-						emit.next({ type: "exit", exitCode, signal, reason });
-					};
+				const onError = (payload: { error: string; code?: string }) => {
+					emit.next({
+						type: "error",
+						error: payload.error,
+						code: payload.code,
+					});
+				};
 
-					const onDisconnect = (reason: string) => {
-						emit.next({ type: "disconnect", reason });
-					};
+				terminal.on(`data:${paneId}`, onData);
+				terminal.on(`exit:${paneId}`, onExit);
+				terminal.on(`disconnect:${paneId}`, onDisconnect);
+				terminal.on(`error:${paneId}`, onError);
 
-					const onError = (payload: { error: string; code?: string }) => {
-						emit.next({
-							type: "error",
-							error: payload.error,
-							code: payload.code,
-						});
-					};
-
-					terminal.on(`data:${paneId}`, onData);
-					terminal.on(`exit:${paneId}`, onExit);
-					terminal.on(`disconnect:${paneId}`, onDisconnect);
-					terminal.on(`error:${paneId}`, onError);
-
-					return () => {
-						if (DEBUG_TERMINAL) {
-							console.log(`[Terminal Stream] Unsubscribe: ${paneId}`);
-						}
-						terminal.off(`data:${paneId}`, onData);
-						terminal.off(`exit:${paneId}`, onExit);
-						terminal.off(`disconnect:${paneId}`, onDisconnect);
-						terminal.off(`error:${paneId}`, onError);
-					};
-				});
-			}),
+				return () => {
+					if (DEBUG_TERMINAL) {
+						console.log(`[Terminal Stream] Unsubscribe: ${paneId}`);
+					}
+					terminal.off(`data:${paneId}`, onData);
+					terminal.off(`exit:${paneId}`, onExit);
+					terminal.off(`disconnect:${paneId}`, onDisconnect);
+					terminal.off(`error:${paneId}`, onError);
+				};
+			});
+		}),
 	});
 };

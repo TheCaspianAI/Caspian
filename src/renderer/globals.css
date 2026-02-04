@@ -18,32 +18,32 @@
 
 /* Satoshi Font Family */
 @font-face {
-	font-family: 'Satoshi';
-	src: url('./assets/fonts/Satoshi-Variable.woff2') format('woff2');
+	font-family: "Satoshi";
+	src: url("./assets/fonts/Satoshi-Variable.woff2") format("woff2");
 	font-weight: 300 900;
 	font-display: swap;
 	font-style: normal;
 }
 
 @font-face {
-	font-family: 'Satoshi';
-	src: url('./assets/fonts/Satoshi-Regular.woff2') format('woff2');
+	font-family: "Satoshi";
+	src: url("./assets/fonts/Satoshi-Regular.woff2") format("woff2");
 	font-weight: 400;
 	font-display: swap;
 	font-style: normal;
 }
 
 @font-face {
-	font-family: 'Satoshi';
-	src: url('./assets/fonts/Satoshi-Medium.woff2') format('woff2');
+	font-family: "Satoshi";
+	src: url("./assets/fonts/Satoshi-Medium.woff2") format("woff2");
 	font-weight: 500;
 	font-display: swap;
 	font-style: normal;
 }
 
 @font-face {
-	font-family: 'Satoshi';
-	src: url('./assets/fonts/Satoshi-Bold.woff2') format('woff2');
+	font-family: "Satoshi";
+	src: url("./assets/fonts/Satoshi-Bold.woff2") format("woff2");
 	font-weight: 700;
 	font-display: swap;
 	font-style: normal;
@@ -88,16 +88,16 @@
 
 	/* Radius system - three tiers */
 	--radius: 0.625rem;
-	--radius-structural: 0.25rem;    /* 4px - sidebars, panels, structural chrome */
-	--radius-interactive: 0.5rem;   /* 8px - buttons, inputs, tabs */
-	--radius-modal: 0.75rem;        /* 12px - modals, major overlays */
+	--radius-structural: 0.25rem; /* 4px - sidebars, panels, structural chrome */
+	--radius-interactive: 0.5rem; /* 8px - buttons, inputs, tabs */
+	--radius-modal: 0.75rem; /* 12px - modals, major overlays */
 	--radius-scrollbar: 3px;
 
 	/* Typography scale - locked (matches Tailwind: xs, sm, base, xl) */
-	--text-caption: 0.75rem;        /* 12px - badges, counts, hints */
-	--text-label: 0.875rem;         /* 14px - labels, section titles, meta text */
-	--text-body: 1rem;              /* 16px - primary content, descriptions */
-	--text-heading: 1.25rem;        /* 20px - page titles */
+	--text-caption: 0.75rem; /* 12px - badges, counts, hints */
+	--text-label: 0.875rem; /* 14px - labels, section titles, meta text */
+	--text-body: 1rem; /* 16px - primary content, descriptions */
+	--text-heading: 1.25rem; /* 20px - page titles */
 
 	/* Glass effect - for OVERLAYS ONLY, not structural surfaces */
 	--glass-bg: oklch(0.12 0.02 328 / 0.65);
@@ -171,7 +171,7 @@
 
 	body {
 		@apply bg-background text-foreground;
-		font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+		font-family: "Satoshi", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 	}
 
 	html {
@@ -179,7 +179,8 @@
 		font-size: 16px;
 	}
 
-	html, body {
+	html,
+	body {
 		width: 100vw;
 		height: 100vh;
 		min-height: 100vh;
@@ -203,29 +204,48 @@
 	.ambient-bg {
 		background:
 			radial-gradient(ellipse 100% 80% at 70% -20%, oklch(0.72 0.25 328 / 0.07) 0%, transparent 50%),
-			radial-gradient(ellipse 80% 60% at 20% 100%, oklch(0.60 0.20 340 / 0.04) 0%, transparent 40%),
+			radial-gradient(ellipse 80% 60% at 20% 100%, oklch(0.6 0.2 340 / 0.04) 0%, transparent 40%),
 			var(--background);
 	}
 
 	/* Terminal */
-	.xterm { height: 100%; width: 100%; }
-	.xterm-screen { height: 100%; width: 100%; }
-	.xterm-viewport { background-color: transparent !important; }
-	.xterm .xterm-rows a { color: inherit; cursor: pointer; }
+	.xterm {
+		height: 100%;
+		width: 100%;
+	}
+	.xterm-screen {
+		height: 100%;
+		width: 100%;
+	}
+	.xterm-viewport {
+		/* biome-ignore lint/complexity/noImportantStyles: Override xterm's inline style */
+		background-color: transparent !important;
+	}
+	.xterm .xterm-rows a {
+		color: inherit;
+		cursor: pointer;
+	}
 
 	/* Scrollbars - subtle */
 	.hide-scrollbar {
 		scrollbar-width: none;
 		-ms-overflow-style: none;
 	}
-	.hide-scrollbar::-webkit-scrollbar { display: none; }
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
 
 	* {
 		scrollbar-width: thin;
 		scrollbar-color: oklch(0.4 0.03 328 / 0.4) transparent;
 	}
-	*::-webkit-scrollbar { width: 6px; height: 6px; }
-	*::-webkit-scrollbar-track { background: transparent; }
+	*::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
 	*::-webkit-scrollbar-thumb {
 		background: oklch(0.4 0.03 328 / 0.4);
 		border-radius: var(--radius-scrollbar);
@@ -235,11 +255,17 @@
 	}
 
 	/* Drag regions */
-	.drag { -webkit-app-region: drag; }
-	.no-drag { -webkit-app-region: no-drag; }
+	.drag {
+		-webkit-app-region: drag;
+	}
+	.no-drag {
+		-webkit-app-region: no-drag;
+	}
 
 	/* Toast fix */
-	[data-sonner-toast]:has(.update-toast) { transform: translateY(0); }
+	[data-sonner-toast]:has(.update-toast) {
+		transform: translateY(0);
+	}
 
 	/* Remove cmdk input focus ring */
 	[cmdk-input]:focus {
@@ -270,20 +296,34 @@
 	 * elevation-2: dropdowns, dialogs, popovers
 	 * elevation-3: major overlays (dashboard modal) - MAXIMUM */
 	.elevation-1 {
-		box-shadow: 0 1px 3px oklch(0 0 0 / 0.12), 0 1px 2px oklch(0 0 0 / 0.08);
+		box-shadow:
+			0 1px 3px oklch(0 0 0 / 0.12),
+			0 1px 2px oklch(0 0 0 / 0.08);
 	}
 	.elevation-2 {
-		box-shadow: 0 4px 12px oklch(0 0 0 / 0.15), 0 2px 4px oklch(0 0 0 / 0.08);
+		box-shadow:
+			0 4px 12px oklch(0 0 0 / 0.15),
+			0 2px 4px oklch(0 0 0 / 0.08);
 	}
 	.elevation-3 {
-		box-shadow: 0 8px 24px oklch(0 0 0 / 0.20), 0 4px 8px oklch(0 0 0 / 0.10);
+		box-shadow:
+			0 8px 24px oklch(0 0 0 / 0.2),
+			0 4px 8px oklch(0 0 0 / 0.1);
 	}
 
 	/* Semantic typography utilities */
-	.text-caption { font-size: var(--text-caption); }  /* 12px */
-	.text-label { font-size: var(--text-label); }      /* 14px */
-	.text-body { font-size: var(--text-body); }        /* 16px */
-	.text-heading { font-size: var(--text-heading); }  /* 20px */
+	.text-caption {
+		font-size: var(--text-caption);
+	} /* 12px */
+	.text-label {
+		font-size: var(--text-label);
+	} /* 14px */
+	.text-body {
+		font-size: var(--text-body);
+	} /* 16px */
+	.text-heading {
+		font-size: var(--text-heading);
+	} /* 20px */
 
 	/* Primary glow - ONLY for primary interactive elements */
 	.primary-glow {

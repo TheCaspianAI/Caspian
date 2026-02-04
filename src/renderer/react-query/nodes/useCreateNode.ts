@@ -4,9 +4,7 @@ import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/
 import { useNodeInitStore } from "renderer/stores/node-init";
 import type { NodeInitProgress } from "shared/types/node-init";
 
-type MutationOptions = Parameters<
-	typeof electronTrpc.nodes.create.useMutation
->[0];
+type MutationOptions = Parameters<typeof electronTrpc.nodes.create.useMutation>[0];
 
 interface UseCreateNodeOptions extends NonNullable<MutationOptions> {
 	skipNavigation?: boolean;
@@ -15,9 +13,7 @@ interface UseCreateNodeOptions extends NonNullable<MutationOptions> {
 export function useCreateNode(options?: UseCreateNodeOptions) {
 	const navigate = useNavigate();
 	const utils = electronTrpc.useUtils();
-	const addPendingTerminalSetup = useNodeInitStore(
-		(s) => s.addPendingTerminalSetup,
-	);
+	const addPendingTerminalSetup = useNodeInitStore((s) => s.addPendingTerminalSetup);
 	const updateProgress = useNodeInitStore((s) => s.updateProgress);
 
 	return electronTrpc.nodes.create.useMutation({

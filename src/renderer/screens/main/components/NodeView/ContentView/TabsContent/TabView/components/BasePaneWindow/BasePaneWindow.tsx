@@ -82,11 +82,7 @@ export function BasePaneWindow({
 			onDragEnd={() => clearDragging()}
 		>
 			{/* biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/noStaticElementInteractions: Focus handler for pane */}
-			<div
-				ref={containerRef}
-				className={contentClassName}
-				onClick={handleFocus}
-			>
+			<div ref={containerRef} className={contentClassName} onClick={handleFocus}>
 				{children}
 			</div>
 		</MosaicWindow>

@@ -37,10 +37,7 @@ export const STATUS_PRIORITY = {
  * Compare two statuses and return the higher priority one.
  * Useful for reducing/folding over pane statuses.
  */
-export function pickHigherStatus(
-	a: PaneStatus | undefined,
-	b: PaneStatus | undefined,
-): PaneStatus {
+export function pickHigherStatus(a: PaneStatus | undefined, b: PaneStatus | undefined): PaneStatus {
 	const aPriority = a ? STATUS_PRIORITY[a] : 0;
 	const bPriority = b ? STATUS_PRIORITY[b] : 0;
 	if (aPriority >= bPriority) return a ?? "idle";

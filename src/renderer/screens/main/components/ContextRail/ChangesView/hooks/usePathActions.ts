@@ -8,17 +8,11 @@ interface UsePathActionsProps {
 	cwd?: string;
 }
 
-export function usePathActions({
-	absolutePath,
-	relativePath,
-	cwd,
-}: UsePathActionsProps) {
+export function usePathActions({ absolutePath, relativePath, cwd }: UsePathActionsProps) {
 	const openInFinderMutation = electronTrpc.external.openInFinder.useMutation();
 	const openInAppMutation = electronTrpc.external.openInApp.useMutation();
-	const openFileInEditorMutation =
-		electronTrpc.external.openFileInEditor.useMutation();
-	const { data: lastUsedApp = "cursor" } =
-		electronTrpc.settings.getLastUsedApp.useQuery();
+	const openFileInEditorMutation = electronTrpc.external.openFileInEditor.useMutation();
+	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery();
 
 	const copyPath = useCallback(async () => {
 		if (absolutePath) {
@@ -46,13 +40,7 @@ export function usePathActions({
 		} else {
 			openInAppMutation.mutate({ path: absolutePath, app: lastUsedApp });
 		}
-	}, [
-		absolutePath,
-		cwd,
-		lastUsedApp,
-		openInAppMutation,
-		openFileInEditorMutation,
-	]);
+	}, [absolutePath, cwd, lastUsedApp, openInAppMutation, openFileInEditorMutation]);
 
 	return {
 		copyPath,

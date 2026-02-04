@@ -3,9 +3,9 @@ import type * as Monaco from "monaco-editor";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LuLoader } from "react-icons/lu";
 import {
+	CASPIAN_THEME,
 	MONACO_EDITOR_OPTIONS,
 	registerSaveAction,
-	CASPIAN_THEME,
 	useMonacoReady,
 } from "renderer/providers/MonacoProvider";
 import type { Tab } from "renderer/stores/tabs/types";
@@ -72,12 +72,8 @@ export function DiffViewer({
 	fitContent = false,
 }: DiffViewerProps) {
 	const isMonacoReady = useMonacoReady();
-	const diffEditorRef = useRef<Monaco.editor.IStandaloneDiffEditor | null>(
-		null,
-	);
-	const modifiedEditorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(
-		null,
-	);
+	const diffEditorRef = useRef<Monaco.editor.IStandaloneDiffEditor | null>(null);
+	const modifiedEditorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
 	const [isEditorMounted, setIsEditorMounted] = useState(false);
 	const [isFocused, setIsFocused] = useState(false);
 	const [contentHeight, setContentHeight] = useState<number | null>(null);
@@ -212,12 +208,11 @@ export function DiffViewer({
 
 		changeListenerRef.current?.dispose();
 
-		changeListenerRef.current =
-			modifiedEditorRef.current.onDidChangeModelContent(() => {
-				if (modifiedEditorRef.current) {
-					onChange(modifiedEditorRef.current.getValue());
-				}
-			});
+		changeListenerRef.current = modifiedEditorRef.current.onDidChangeModelContent(() => {
+			if (modifiedEditorRef.current) {
+				onChange(modifiedEditorRef.current.getValue());
+			}
+		});
 
 		return () => {
 			changeListenerRef.current?.dispose();
@@ -226,9 +221,7 @@ export function DiffViewer({
 	}, [isEditorMounted, onChange]);
 
 	const getEditor = useCallback(() => {
-		return (
-			modifiedEditorRef.current || diffEditorRef.current?.getOriginalEditor()
-		);
+		return modifiedEditorRef.current || diffEditorRef.current?.getOriginalEditor();
 	}, []);
 
 	const editorActions = useEditorActions({
@@ -273,10 +266,7 @@ export function DiffViewer({
 			}
 			options={{
 				...MONACO_EDITOR_OPTIONS,
-				lineNumbersMinChars: getLineNumbersMinChars(
-					contents.original,
-					contents.modified,
-				),
+				lineNumbersMinChars: getLineNumbersMinChars(contents.original, contents.modified),
 				renderSideBySide: viewMode === "side-by-side",
 				useInlineViewWhenSpaceIsLimited: false,
 				readOnly: !editable,
@@ -301,12 +291,7 @@ export function DiffViewer({
 	if (!contextMenuProps) {
 		return (
 			// biome-ignore lint/a11y/noStaticElementInteractions: focus/blur tracking for scroll behavior
-			<div
-				ref={containerRef}
-				className="h-full w-full"
-				onFocus={handleFocus}
-				onBlur={handleBlur}
-			>
+			<div ref={containerRef} className="h-full w-full" onFocus={handleFocus} onBlur={handleBlur}>
 				{diffEditor}
 			</div>
 		);
@@ -325,12 +310,7 @@ export function DiffViewer({
 	return (
 		<EditorContextMenu editorActions={editorActions} paneActions={paneActions}>
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: focus/blur tracking for scroll behavior */}
-			<div
-				ref={containerRef}
-				className="h-full w-full"
-				onFocus={handleFocus}
-				onBlur={handleBlur}
-			>
+			<div ref={containerRef} className="h-full w-full" onFocus={handleFocus} onBlur={handleBlur}>
 				{diffEditor}
 			</div>
 		</EditorContextMenu>

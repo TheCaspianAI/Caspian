@@ -6,11 +6,8 @@ interface RepositoriesAccordionProps {
 	searchQuery?: string;
 }
 
-export function RepositoriesAccordion({
-	searchQuery,
-}: RepositoriesAccordionProps) {
-	const { data: repositories, isLoading } =
-		electronTrpc.repositories.getRecents.useQuery();
+export function RepositoriesAccordion({ searchQuery }: RepositoriesAccordionProps) {
+	const { data: repositories, isLoading } = electronTrpc.repositories.getRecents.useQuery();
 
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -21,9 +18,7 @@ export function RepositoriesAccordion({
 
 		const q = searchQuery.toLowerCase();
 		return repositories.filter(
-			(repo) =>
-				repo.name.toLowerCase().includes(q) ||
-				repo.mainRepoPath.toLowerCase().includes(q)
+			(repo) => repo.name.toLowerCase().includes(q) || repo.mainRepoPath.toLowerCase().includes(q),
 		);
 	}, [repositories, searchQuery]);
 
@@ -33,9 +28,7 @@ export function RepositoriesAccordion({
 
 	if (isLoading) {
 		return (
-			<div className="py-8 text-center text-sm text-muted-foreground">
-				Loading repositories...
-			</div>
+			<div className="py-8 text-center text-sm text-muted-foreground">Loading repositories...</div>
 		);
 	}
 

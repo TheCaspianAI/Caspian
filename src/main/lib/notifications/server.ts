@@ -15,8 +15,7 @@ export type {
  * The environment this server is running in.
  * Used to validate incoming hook requests and detect cross-environment issues.
  */
-const SERVER_ENV =
-	process.env.NODE_ENV === "development" ? "development" : "production";
+const SERVER_ENV = process.env.NODE_ENV === "development" ? "development" : "production";
 
 export const notificationsEmitter = new EventEmitter();
 

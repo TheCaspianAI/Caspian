@@ -1,10 +1,4 @@
-import {
-	existsSync,
-	readFileSync,
-	renameSync,
-	unlinkSync,
-	writeFileSync,
-} from "node:fs";
+import { existsSync, readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { WINDOW_STATE_PATH } from "../app-environment";
 
@@ -42,10 +36,7 @@ export function loadWindowState(): WindowState | null {
  * Corruption-safe: partial writes won't corrupt existing state.
  */
 export function saveWindowState(state: WindowState): void {
-	const tempPath = join(
-		dirname(WINDOW_STATE_PATH),
-		`.window-state.${Date.now()}.tmp`,
-	);
+	const tempPath = join(dirname(WINDOW_STATE_PATH), `.window-state.${Date.now()}.tmp`);
 
 	try {
 		writeFileSync(tempPath, JSON.stringify(state, null, 2), "utf-8");

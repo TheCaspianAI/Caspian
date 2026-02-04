@@ -1,7 +1,7 @@
 import path from "node:path";
-import { settings } from "lib/local-db";
 import { app, BrowserWindow, dialog, nativeImage } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
+import { settings } from "lib/local-db";
 import { DEFAULT_CONFIRM_ON_QUIT, PROTOCOL_SCHEME } from "shared/constants";
 import { setupAgentHooks } from "./lib/agent-setup";
 import { initAppState } from "./lib/app-state";
@@ -131,8 +131,7 @@ app.on("before-quit", async (event) => {
 	if (isQuitting) return;
 
 	const isDev = process.env.NODE_ENV === "development";
-	const shouldConfirm =
-		!skipConfirmation && !isDev && getConfirmOnQuitSetting();
+	const shouldConfirm = !skipConfirmation && !isDev && getConfirmOnQuitSetting();
 
 	if (shouldConfirm) {
 		event.preventDefault();

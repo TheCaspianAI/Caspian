@@ -29,10 +29,7 @@ function playSoundFile(soundPath: string): void {
 	if (process.platform === "darwin") {
 		execFile("afplay", [soundPath]);
 	} else if (process.platform === "win32") {
-		execFile("powershell", [
-			"-c",
-			`(New-Object Media.SoundPlayer '${soundPath}').PlaySync()`,
-		]);
+		execFile("powershell", ["-c", `(New-Object Media.SoundPlayer '${soundPath}').PlaySync()`]);
 	} else {
 		// Linux - try common audio players
 		execFile("paplay", [soundPath], (error) => {

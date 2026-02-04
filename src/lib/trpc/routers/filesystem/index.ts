@@ -243,10 +243,7 @@ export const createFilesystemRouter = () => {
 					await fs.access(filePath);
 					throw new Error(`File already exists: ${input.fileName}`);
 				} catch (error) {
-					if (
-						error instanceof Error &&
-						error.message.includes("already exists")
-					) {
+					if (error instanceof Error && error.message.includes("already exists")) {
 						throw error;
 					}
 				}
@@ -269,10 +266,7 @@ export const createFilesystemRouter = () => {
 					await fs.access(dirPath);
 					throw new Error(`Directory already exists: ${input.dirName}`);
 				} catch (error) {
-					if (
-						error instanceof Error &&
-						error.message.includes("already exists")
-					) {
+					if (error instanceof Error && error.message.includes("already exists")) {
 						throw error;
 					}
 				}
@@ -295,10 +289,7 @@ export const createFilesystemRouter = () => {
 					await fs.access(newPath);
 					throw new Error(`Target already exists: ${input.newName}`);
 				} catch (error) {
-					if (
-						error instanceof Error &&
-						error.message.includes("already exists")
-					) {
+					if (error instanceof Error && error.message.includes("already exists")) {
 						throw error;
 					}
 				}
@@ -357,10 +348,7 @@ export const createFilesystemRouter = () => {
 							await fs.access(destPath);
 							throw new Error(`Target already exists: ${fileName}`);
 						} catch (accessError) {
-							if (
-								accessError instanceof Error &&
-								accessError.message.includes("already exists")
-							) {
+							if (accessError instanceof Error && accessError.message.includes("already exists")) {
 								throw accessError;
 							}
 						}
@@ -400,10 +388,7 @@ export const createFilesystemRouter = () => {
 								await fs.access(destPath);
 								const ext = path.extname(fileName);
 								const base = path.basename(fileName, ext);
-								destPath = path.join(
-									input.destinationDir,
-									`${base} (${counter})${ext}`,
-								);
+								destPath = path.join(input.destinationDir, `${base} (${counter})${ext}`);
 								counter++;
 							} catch {
 								break;
@@ -423,43 +408,39 @@ export const createFilesystemRouter = () => {
 				return { copied, errors };
 			}),
 
-		exists: publicProcedure
-			.input(z.object({ path: z.string() }))
-			.query(async ({ input }) => {
-				try {
-					await fs.access(input.path);
-					const stats = await fs.stat(input.path);
-					return {
-						exists: true,
-						isDirectory: stats.isDirectory(),
-						isFile: stats.isFile(),
-					};
-				} catch {
-					return { exists: false, isDirectory: false, isFile: false };
-				}
-			}),
+		exists: publicProcedure.input(z.object({ path: z.string() })).query(async ({ input }) => {
+			try {
+				await fs.access(input.path);
+				const stats = await fs.stat(input.path);
+				return {
+					exists: true,
+					isDirectory: stats.isDirectory(),
+					isFile: stats.isFile(),
+				};
+			} catch {
+				return { exists: false, isDirectory: false, isFile: false };
+			}
+		}),
 
-		stat: publicProcedure
-			.input(z.object({ path: z.string() }))
-			.query(async ({ input }) => {
-				try {
-					const stats = await fs.stat(input.path);
-					return {
-						size: stats.size,
-						isDirectory: stats.isDirectory(),
-						isFile: stats.isFile(),
-						isSymbolicLink: stats.isSymbolicLink(),
-						createdAt: stats.birthtime.toISOString(),
-						modifiedAt: stats.mtime.toISOString(),
-						accessedAt: stats.atime.toISOString(),
-					};
-				} catch (error) {
-					console.error("[filesystem/stat] Failed:", {
-						path: input.path,
-						error,
-					});
-					return null;
-				}
-			}),
+		stat: publicProcedure.input(z.object({ path: z.string() })).query(async ({ input }) => {
+			try {
+				const stats = await fs.stat(input.path);
+				return {
+					size: stats.size,
+					isDirectory: stats.isDirectory(),
+					isFile: stats.isFile(),
+					isSymbolicLink: stats.isSymbolicLink(),
+					createdAt: stats.birthtime.toISOString(),
+					modifiedAt: stats.mtime.toISOString(),
+					accessedAt: stats.atime.toISOString(),
+				};
+			} catch (error) {
+				console.error("[filesystem/stat] Failed:", {
+					path: input.path,
+					error,
+				});
+				return null;
+			}
+		}),
 	});
 };

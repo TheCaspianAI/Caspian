@@ -1,14 +1,3 @@
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuShortcut,
-	ContextMenuSub,
-	ContextMenuSubContent,
-	ContextMenuSubTrigger,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
 import type { ReactNode } from "react";
 import {
 	LuArrowDownToLine,
@@ -21,6 +10,17 @@ import {
 } from "react-icons/lu";
 import { useHotkeyText } from "renderer/stores/hotkeys";
 import type { Tab } from "renderer/stores/tabs/types";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuSub,
+	ContextMenuSubContent,
+	ContextMenuSubTrigger,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
 
 interface TabContentContextMenuProps {
 	children: ReactNode;
@@ -69,9 +69,7 @@ export function TabContentContextMenu({
 				<ContextMenuItem onSelect={onClearTerminal}>
 					<LuEraser className="size-4" />
 					Clear Terminal
-					{showClearShortcut && (
-						<ContextMenuShortcut>{clearShortcut}</ContextMenuShortcut>
-					)}
+					{showClearShortcut && <ContextMenuShortcut>{clearShortcut}</ContextMenuShortcut>}
 				</ContextMenuItem>
 				<ContextMenuItem onSelect={onScrollToBottom}>
 					<LuArrowDownToLine className="size-4" />
@@ -88,10 +86,7 @@ export function TabContentContextMenu({
 					</ContextMenuSubTrigger>
 					<ContextMenuSubContent>
 						{targetTabs.map((tab) => (
-							<ContextMenuItem
-								key={tab.id}
-								onSelect={() => onMoveToTab(tab.id)}
-							>
+							<ContextMenuItem key={tab.id} onSelect={() => onMoveToTab(tab.id)}>
 								{tab.name}
 							</ContextMenuItem>
 						))}

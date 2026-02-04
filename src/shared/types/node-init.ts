@@ -61,10 +61,7 @@ export function getStepIndex(step: NodeInitStep): number {
 /**
  * Check if a step is complete based on the current step.
  */
-export function isStepComplete(
-	step: NodeInitStep,
-	currentStep: NodeInitStep,
-): boolean {
+export function isStepComplete(step: NodeInitStep, currentStep: NodeInitStep): boolean {
 	if (currentStep === "failed") return false;
 	const stepIndex = getStepIndex(step);
 	const currentIndex = getStepIndex(currentStep);

@@ -1,8 +1,8 @@
-import { toast } from "ui/components/ui/sonner";
 import { useCallback, useMemo, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useChangesStore } from "renderer/stores/changes";
 import type { ChangedFile, GitChangesStatus } from "shared/changes-types";
+import { toast } from "ui/components/ui/sonner";
 import { useScrollContextRequired } from "../../context";
 import { sortFiles } from "../../utils";
 import { VirtualizedFileList } from "../VirtualizedFileList";
@@ -16,11 +16,7 @@ interface InfiniteScrollViewProps {
 	baseBranch: string;
 }
 
-export function InfiniteScrollView({
-	status,
-	worktreePath,
-	baseBranch,
-}: InfiniteScrollViewProps) {
+export function InfiniteScrollView({ status, worktreePath, baseBranch }: InfiniteScrollViewProps) {
 	const { containerRef, viewedCount } = useScrollContextRequired();
 	const {
 		viewMode: diffViewMode,
@@ -40,10 +36,7 @@ export function InfiniteScrollView({
 			...status.unstaged,
 			...status.untracked,
 		];
-		const commitFileCount = status.commits.reduce(
-			(acc, commit) => acc + commit.files.length,
-			0,
-		);
+		const commitFileCount = status.commits.reduce((acc, commit) => acc + commit.files.length, 0);
 
 		let totalAdditions = 0;
 		let totalDeletions = 0;
@@ -89,10 +82,7 @@ export function InfiniteScrollView({
 	const stageFileMutation = electronTrpc.changes.stageFile.useMutation({
 		onSuccess: () => refetch(),
 		onError: (error, variables) => {
-			console.error(
-				`[InfiniteScrollView] Failed to stage file ${variables.filePath}:`,
-				error,
-			);
+			console.error(`[InfiniteScrollView] Failed to stage file ${variables.filePath}:`, error);
 			toast.error(`Failed to stage ${variables.filePath}: ${error.message}`);
 		},
 	});
@@ -100,37 +90,29 @@ export function InfiniteScrollView({
 	const unstageFileMutation = electronTrpc.changes.unstageFile.useMutation({
 		onSuccess: () => refetch(),
 		onError: (error, variables) => {
-			console.error(
-				`[InfiniteScrollView] Failed to unstage file ${variables.filePath}:`,
-				error,
-			);
+			console.error(`[InfiniteScrollView] Failed to unstage file ${variables.filePath}:`, error);
 			toast.error(`Failed to unstage ${variables.filePath}: ${error.message}`);
 		},
 	});
 
-	const discardChangesMutation =
-		electronTrpc.changes.discardChanges.useMutation({
-			onSuccess: () => refetch(),
-			onError: (error, variables) => {
-				console.error(
-					`[InfiniteScrollView] Failed to discard changes for ${variables.filePath}:`,
-					error,
-				);
-				toast.error(`Failed to discard changes: ${error.message}`);
-			},
-		});
+	const discardChangesMutation = electronTrpc.changes.discardChanges.useMutation({
+		onSuccess: () => refetch(),
+		onError: (error, variables) => {
+			console.error(
+				`[InfiniteScrollView] Failed to discard changes for ${variables.filePath}:`,
+				error,
+			);
+			toast.error(`Failed to discard changes: ${error.message}`);
+		},
+	});
 
-	const deleteUntrackedMutation =
-		electronTrpc.changes.deleteUntracked.useMutation({
-			onSuccess: () => refetch(),
-			onError: (error, variables) => {
-				console.error(
-					`[InfiniteScrollView] Failed to delete ${variables.filePath}:`,
-					error,
-				);
-				toast.error(`Failed to delete file: ${error.message}`);
-			},
-		});
+	const deleteUntrackedMutation = electronTrpc.changes.deleteUntracked.useMutation({
+		onSuccess: () => refetch(),
+		onError: (error, variables) => {
+			console.error(`[InfiniteScrollView] Failed to delete ${variables.filePath}:`, error);
+			toast.error(`Failed to delete file: ${error.message}`);
+		},
+	});
 
 	const handleDiscard = useCallback(
 		(file: ChangedFile) => {
@@ -158,8 +140,7 @@ export function InfiniteScrollView({
 		[status.staged, fileListViewMode],
 	);
 	const sortedUnstaged = useMemo(
-		() =>
-			sortFiles([...status.unstaged, ...status.untracked], fileListViewMode),
+		() => sortFiles([...status.unstaged, ...status.untracked], fileListViewMode),
 		[status.unstaged, status.untracked, fileListViewMode],
 	);
 

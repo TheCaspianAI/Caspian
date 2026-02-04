@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { nodes } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import {
 	app,
@@ -11,12 +10,10 @@ import {
 	nativeImage,
 	Tray,
 } from "electron";
+import { nodes } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { menuEmitter } from "main/lib/menu-events";
-import {
-	getDaemonTerminalManager,
-	tryListExistingDaemonSessions,
-} from "main/lib/terminal";
+import { getDaemonTerminalManager, tryListExistingDaemonSessions } from "main/lib/terminal";
 import { getTerminalHostClient } from "main/lib/terminal-host/client";
 import type { ListSessionsResponse } from "main/lib/terminal-host/types";
 
@@ -41,11 +38,7 @@ function getTrayIconPath(): string | null {
 		return previewPath;
 	}
 
-	const devPath = join(
-		app.getAppPath(),
-		"src/resources/tray",
-		TRAY_ICON_FILENAME,
-	);
+	const devPath = join(app.getAppPath(), "src/resources/tray", TRAY_ICON_FILENAME);
 	if (existsSync(devPath)) {
 		return devPath;
 	}
@@ -148,20 +141,14 @@ async function killSession(paneId: string): Promise<void> {
 
 function getNodeName(nodeId: string): string {
 	try {
-		const node = localDb
-			.select({ name: nodes.name })
-			.from(nodes)
-			.where(eq(nodes.id, nodeId))
-			.get();
+		const node = localDb.select({ name: nodes.name }).from(nodes).where(eq(nodes.id, nodeId)).get();
 		return node?.name || nodeId.slice(0, 8);
 	} catch {
 		return nodeId.slice(0, 8);
 	}
 }
 
-function formatSessionLabel(
-	session: ListSessionsResponse["sessions"][0],
-): string {
+function formatSessionLabel(session: ListSessionsResponse["sessions"][0]): string {
 	const attached = session.attachedClients > 0 ? " (attached)" : "";
 	const shellName = session.shell?.split("/").pop() || "shell";
 	return `${shellName}${attached}`;
@@ -285,9 +272,7 @@ async function updateTrayMenu(): Promise<void> {
 
 	const sessionsSubmenu = buildSessionsSubmenu(sessions);
 	const sessionsLabel =
-		sessionCount > 0
-			? `Background Sessions (${sessionCount})`
-			: "Background Sessions";
+		sessionCount > 0 ? `Background Sessions (${sessionCount})` : "Background Sessions";
 
 	const menu = Menu.buildFromTemplate([
 		{

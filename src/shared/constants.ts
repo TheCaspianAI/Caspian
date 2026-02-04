@@ -20,9 +20,7 @@ export const CASPIAN_DIR_NAMES = {
 	DEV: ".caspian-dev",
 	PROD: ".caspian",
 } as const;
-export const CASPIAN_DIR_NAME = isDev
-	? CASPIAN_DIR_NAMES.DEV
-	: CASPIAN_DIR_NAMES.PROD;
+export const CASPIAN_DIR_NAME = isDev ? CASPIAN_DIR_NAMES.DEV : CASPIAN_DIR_NAMES.PROD;
 
 // Deep link protocol scheme (environment-aware)
 export const PROTOCOL_SCHEME = isDev ? "caspian-dev" : "caspian";

@@ -23,10 +23,7 @@ export async function reconcileDaemonSessions(): Promise<void> {
 		const manager = getDaemonTerminalManager();
 		await manager.reconcileOnStartup();
 	} catch (error) {
-		console.warn(
-			"[TerminalManager] Failed to reconcile daemon sessions:",
-			error,
-		);
+		console.warn("[TerminalManager] Failed to reconcile daemon sessions:", error);
 	}
 }
 
@@ -43,10 +40,7 @@ export async function tryListExistingDaemonSessions(): Promise<{
 			error,
 		);
 		if (DEBUG_TERMINAL) {
-			console.log(
-				"[TerminalManager] Failed to list existing daemon sessions:",
-				error,
-			);
+			console.log("[TerminalManager] Failed to list existing daemon sessions:", error);
 		}
 		return { sessions: [] };
 	}

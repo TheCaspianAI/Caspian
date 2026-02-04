@@ -1,6 +1,6 @@
-import { toast } from "ui/components/ui/sonner";
 import type * as Monaco from "monaco-editor";
 import { useCallback } from "react";
+import { toast } from "ui/components/ui/sonner";
 import type { EditorActions } from "./EditorContextMenu";
 
 interface UseEditorActionsProps {
@@ -72,16 +72,14 @@ export function useEditorActions({
 	const handleCopyPathWithLine = useCallback(async () => {
 		const editor = getEditor();
 		if (!editor) {
-			console.error(
-				"[handleCopyPathWithLine] Editor is missing, falling back to filePath only",
-			);
+			console.error("[handleCopyPathWithLine] Editor is missing, falling back to filePath only");
 			try {
 				await navigator.clipboard.writeText(filePath);
 			} catch (error) {
-				console.error(
-					"[handleCopyPathWithLine] Failed to copy path to clipboard:",
-					{ error, filePath },
-				);
+				console.error("[handleCopyPathWithLine] Failed to copy path to clipboard:", {
+					error,
+					filePath,
+				});
 				toast.error("Failed to copy path to clipboard", {
 					description: String(error),
 				});
@@ -91,16 +89,14 @@ export function useEditorActions({
 
 		const selection = editor.getSelection();
 		if (!selection) {
-			console.error(
-				"[handleCopyPathWithLine] Selection is missing, falling back to filePath only",
-			);
+			console.error("[handleCopyPathWithLine] Selection is missing, falling back to filePath only");
 			try {
 				await navigator.clipboard.writeText(filePath);
 			} catch (error) {
-				console.error(
-					"[handleCopyPathWithLine] Failed to copy path to clipboard:",
-					{ error, filePath },
-				);
+				console.error("[handleCopyPathWithLine] Failed to copy path to clipboard:", {
+					error,
+					filePath,
+				});
 				toast.error("Failed to copy path to clipboard", {
 					description: String(error),
 				});
@@ -117,10 +113,10 @@ export function useEditorActions({
 		try {
 			await navigator.clipboard.writeText(pathWithLine);
 		} catch (error) {
-			console.error(
-				"[handleCopyPathWithLine] Failed to copy path with line to clipboard:",
-				{ error, pathWithLine },
-			);
+			console.error("[handleCopyPathWithLine] Failed to copy path with line to clipboard:", {
+				error,
+				pathWithLine,
+			});
 			toast.error("Failed to copy path to clipboard", {
 				description: String(error),
 			});

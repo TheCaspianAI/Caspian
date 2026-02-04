@@ -1,15 +1,15 @@
+import { useState } from "react";
+import { LuFolderGit, LuFolderOpen } from "react-icons/lu";
+import { useCreateBranchNode } from "renderer/react-query/nodes";
+import { useOpenNew } from "renderer/react-query/repositories";
+import { Button } from "ui/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
-import { Button } from "ui/components/ui/button";
 import { toast } from "ui/components/ui/sonner";
-import { useState } from "react";
-import { LuFolderGit, LuFolderOpen } from "react-icons/lu";
-import { useOpenNew } from "renderer/react-query/repositories";
-import { useCreateBranchNode } from "renderer/react-query/nodes";
 import { CloneRepoDialog } from "../StartView/CloneRepoDialog";
 
 export function SystemNav() {
@@ -33,24 +33,18 @@ export function SystemNav() {
 			}
 			if ("needsGitInit" in result) {
 				toast.error("Selected folder is not a git repository", {
-					description:
-						"Please use 'Open repository' from the start view to initialize git.",
+					description: "Please use 'Open repository' from the start view to initialize git.",
 				});
 				return;
 			}
-			toast.promise(
-				createBranchNode.mutateAsync({ repositoryId: result.repository.id }),
-				{
-					loading: "Opening repository...",
-					success: "Repository opened",
-					error: (err) =>
-						err instanceof Error ? err.message : "Failed to open repository",
-				},
-			);
+			toast.promise(createBranchNode.mutateAsync({ repositoryId: result.repository.id }), {
+				loading: "Opening repository...",
+				success: "Repository opened",
+				error: (err) => (err instanceof Error ? err.message : "Failed to open repository"),
+			});
 		} catch (error) {
 			toast.error("Failed to open repository", {
-				description:
-					error instanceof Error ? error.message : "An unknown error occurred",
+				description: error instanceof Error ? error.message : "An unknown error occurred",
 			});
 		}
 	};

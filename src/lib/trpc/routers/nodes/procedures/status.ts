@@ -1,13 +1,9 @@
-import { nodes } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
+import { nodes } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import {
-	getNodeNotDeleting,
-	setLastActiveNode,
-	touchNode,
-} from "../utils/db-helpers";
+import { getNodeNotDeleting, setLastActiveNode, touchNode } from "../utils/db-helpers";
 
 export const createStatusProcedures = () => {
 	return router({
@@ -25,12 +21,7 @@ export const createStatusProcedures = () => {
 				const repositoryNodes = localDb
 					.select()
 					.from(nodes)
-					.where(
-						and(
-							eq(nodes.repositoryId, repositoryId),
-							isNull(nodes.deletingAt),
-						),
-					)
+					.where(and(eq(nodes.repositoryId, repositoryId), isNull(nodes.deletingAt)))
 					.all()
 					.sort((a, b) => a.tabOrder - b.tabOrder);
 
@@ -69,9 +60,7 @@ export const createStatusProcedures = () => {
 			.mutation(({ input }) => {
 				const node = getNodeNotDeleting(input.id);
 				if (!node) {
-					throw new Error(
-						`Node ${input.id} not found or is being deleted`,
-					);
+					throw new Error(`Node ${input.id} not found or is being deleted`);
 				}
 
 				touchNode(input.id, {
@@ -86,33 +75,23 @@ export const createStatusProcedures = () => {
 			.mutation(({ input }) => {
 				const node = getNodeNotDeleting(input.id);
 				if (!node) {
-					throw new Error(
-						`Node ${input.id} not found or is being deleted`,
-					);
+					throw new Error(`Node ${input.id} not found or is being deleted`);
 				}
 
-				localDb
-					.update(nodes)
-					.set({ isUnread: input.isUnread })
-					.where(eq(nodes.id, input.id))
-					.run();
+				localDb.update(nodes).set({ isUnread: input.isUnread }).where(eq(nodes.id, input.id)).run();
 
 				return { success: true, isUnread: input.isUnread };
 			}),
 
-		setActive: publicProcedure
-			.input(z.object({ nodeId: z.string() }))
-			.mutation(({ input }) => {
-				const node = getNodeNotDeleting(input.nodeId);
-				if (!node) {
-					throw new Error(
-						`Node ${input.nodeId} not found or is being deleted`,
-					);
-				}
+		setActive: publicProcedure.input(z.object({ nodeId: z.string() })).mutation(({ input }) => {
+			const node = getNodeNotDeleting(input.nodeId);
+			if (!node) {
+				throw new Error(`Node ${input.nodeId} not found or is being deleted`);
+			}
 
-				setLastActiveNode(input.nodeId);
+			setLastActiveNode(input.nodeId);
 
-				return { success: true, nodeId: input.nodeId };
-			}),
+			return { success: true, nodeId: input.nodeId };
+		}),
 	});
 };

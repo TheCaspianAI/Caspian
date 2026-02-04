@@ -1,4 +1,4 @@
-import { app, Menu } from "electron";
+import { Menu } from "electron";
 import { appState } from "main/lib/app-state";
 import { hotkeysEmitter } from "main/lib/hotkeys-events";
 import {

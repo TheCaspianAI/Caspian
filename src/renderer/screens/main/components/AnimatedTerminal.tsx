@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export interface TerminalLine {
 	type: "command" | "output" | "success" | "error" | "diff-add" | "diff-remove";
@@ -40,7 +40,7 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 
 	// Cursor blink
 	useEffect(() => {
-		const interval = setInterval(() => setShowCursor(prev => !prev), 530);
+		const interval = setInterval(() => setShowCursor((prev) => !prev), 530);
 		return () => clearInterval(interval);
 	}, []);
 
@@ -60,7 +60,9 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 				setVisibleLines(0);
 				setCurrentText("");
 			}, 3000); // Longer pause before loop
-			return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+			return () => {
+				if (timeoutRef.current) clearTimeout(timeoutRef.current);
+			};
 		}
 
 		const line = script[visibleLines];
@@ -73,13 +75,18 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 			}, typeSpeed);
 		} else {
 			// Longer pause between lines
-			timeoutRef.current = setTimeout(() => {
-				setVisibleLines(prev => prev + 1);
-				setCurrentText("");
-			}, isCommand ? 800 : 400);
+			timeoutRef.current = setTimeout(
+				() => {
+					setVisibleLines((prev) => prev + 1);
+					setCurrentText("");
+				},
+				isCommand ? 800 : 400,
+			);
 		}
 
-		return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+		return () => {
+			if (timeoutRef.current) clearTimeout(timeoutRef.current);
+		};
 	}, [isStarted, visibleLines, currentText, script]);
 
 	const getPrefix = (type: TerminalLine["type"]) => {
@@ -109,7 +116,8 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 				{/* Completed lines */}
 				{script.slice(0, visibleLines).map((line, i) => (
 					<div key={i} className={`${getLineColor(line.type)} whitespace-pre`}>
-						{getPrefix(line.type)}{line.text}
+						{getPrefix(line.type)}
+						{line.text}
 					</div>
 				))}
 

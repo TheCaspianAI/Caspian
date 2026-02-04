@@ -7,12 +7,7 @@ import { PLATFORM } from "./constants";
 
 export type HotkeyPlatform = "darwin" | "win32" | "linux";
 
-export type HotkeyCategory =
-	| "Node"
-	| "Layout"
-	| "Terminal"
-	| "Window"
-	| "Help";
+export type HotkeyCategory = "Node" | "Layout" | "Terminal" | "Window" | "Help";
 
 export interface HotkeyDefinition {
 	/** Human-readable label for display */
@@ -45,12 +40,7 @@ export interface HotkeysExportFile {
 
 export const HOTKEYS_STATE_VERSION = 1;
 
-const MODIFIER_ORDER: Array<"meta" | "ctrl" | "alt" | "shift"> = [
-	"meta",
-	"ctrl",
-	"alt",
-	"shift",
-];
+const MODIFIER_ORDER: Array<"meta" | "ctrl" | "alt" | "shift"> = ["meta", "ctrl", "alt", "shift"];
 
 const KEY_ALIAS_MAP: Record<string, string> = {
 	cmd: "meta",
@@ -188,10 +178,7 @@ export function canonicalizeHotkeyForPlatform(
 	return canonical;
 }
 
-export function formatHotkeyDisplay(
-	keys: string | null,
-	platform: HotkeyPlatform,
-): string[] {
+export function formatHotkeyDisplay(keys: string | null, platform: HotkeyPlatform): string[] {
 	if (!keys) return ["Unassigned"];
 	const canonical = canonicalizeHotkey(keys);
 	if (!canonical) return ["Unassigned"];
@@ -199,18 +186,15 @@ export function formatHotkeyDisplay(
 	const { modifiers, key } = parseHotkeyString(canonical);
 	if (!key) return ["Unassigned"];
 
-	const modifierSymbols = MODIFIER_ORDER.filter((modifier) =>
-		modifiers.has(modifier),
-	).map((modifier) => MODIFIER_DISPLAY_MAP[platform][modifier]);
+	const modifierSymbols = MODIFIER_ORDER.filter((modifier) => modifiers.has(modifier)).map(
+		(modifier) => MODIFIER_DISPLAY_MAP[platform][modifier],
+	);
 
 	const keyDisplay = KEY_DISPLAY_MAP[key] ?? key.toUpperCase();
 	return [...modifierSymbols, keyDisplay];
 }
 
-export function formatHotkeyText(
-	keys: string | null,
-	platform: HotkeyPlatform,
-): string {
+export function formatHotkeyText(keys: string | null, platform: HotkeyPlatform): string {
 	const display = formatHotkeyDisplay(keys, platform);
 	if (display.length === 1 && display[0] === "Unassigned") {
 		return "Unassigned";
@@ -218,10 +202,7 @@ export function formatHotkeyText(
 	return platform === "darwin" ? display.join("") : display.join("+");
 }
 
-export function matchesHotkeyEvent(
-	event: KeyboardEventLike,
-	keys: string,
-): boolean {
+export function matchesHotkeyEvent(event: KeyboardEventLike, keys: string): boolean {
 	const canonical = canonicalizeHotkey(keys);
 	if (!canonical) return false;
 
@@ -300,10 +281,7 @@ export function isTerminalReservedEvent(event: KeyboardEventLike): boolean {
 	return false;
 }
 
-export function isOsReservedHotkey(
-	keys: string,
-	platform: HotkeyPlatform,
-): boolean {
+export function isOsReservedHotkey(keys: string, platform: HotkeyPlatform): boolean {
 	const canonical = canonicalizeHotkey(keys);
 	if (!canonical) return false;
 	return OS_RESERVED_CHORDS[platform].includes(canonical);
@@ -634,9 +612,7 @@ export const HOTKEYS = {
 } as const satisfies Record<string, HotkeyDefinition>;
 
 export function getVisibleHotkeys(): HotkeyId[] {
-	return (Object.keys(HOTKEYS) as HotkeyId[]).filter(
-		(id) => !HOTKEYS[id].isHidden,
-	);
+	return (Object.keys(HOTKEYS) as HotkeyId[]).filter((id) => !HOTKEYS[id].isHidden);
 }
 
 export function getHotkeysByCategory(options?: {
@@ -658,10 +634,7 @@ export function getHotkeysByCategory(options?: {
 	return grouped;
 }
 
-export function getDefaultHotkey(
-	id: HotkeyId,
-	platform: HotkeyPlatform,
-): string | null {
+export function getDefaultHotkey(id: HotkeyId, platform: HotkeyPlatform): string | null {
 	return HOTKEYS[id].defaults[platform];
 }
 
@@ -703,8 +676,7 @@ export function buildOverridesFromBindings(
 		if (!(id in bindings)) continue;
 		const value = bindings[id];
 		if (value === undefined) continue;
-		const canonical =
-			value === null ? null : canonicalizeHotkeyForPlatform(value, platform);
+		const canonical = value === null ? null : canonicalizeHotkeyForPlatform(value, platform);
 		if (canonical === null && value !== null) {
 			continue;
 		}
@@ -751,9 +723,7 @@ export function createDefaultHotkeysState(): HotkeysState {
 	};
 }
 
-export function createHotkeysExport(
-	hotkeysState: HotkeysState,
-): HotkeysExportFile {
+export function createHotkeysExport(hotkeysState: HotkeysState): HotkeysExportFile {
 	return {
 		schemaVersion: HOTKEYS_STATE_VERSION,
 		exportedAt: new Date().toISOString(),
@@ -766,24 +736,13 @@ export function createHotkeysExport(
 	};
 }
 
-export function buildHotkeysStateFromExport(
-	exportFile: HotkeysExportFile,
-): HotkeysState {
+export function buildHotkeysStateFromExport(exportFile: HotkeysExportFile): HotkeysState {
 	return {
 		version: HOTKEYS_STATE_VERSION,
 		byPlatform: {
-			darwin: buildOverridesFromBindings(
-				exportFile.hotkeys.darwin ?? {},
-				"darwin",
-			),
-			win32: buildOverridesFromBindings(
-				exportFile.hotkeys.win32 ?? {},
-				"win32",
-			),
-			linux: buildOverridesFromBindings(
-				exportFile.hotkeys.linux ?? {},
-				"linux",
-			),
+			darwin: buildOverridesFromBindings(exportFile.hotkeys.darwin ?? {}, "darwin"),
+			win32: buildOverridesFromBindings(exportFile.hotkeys.win32 ?? {}, "win32"),
+			linux: buildOverridesFromBindings(exportFile.hotkeys.linux ?? {}, "linux"),
 		},
 	};
 }
@@ -817,20 +776,18 @@ export function toElectronAccelerator(
 	const { modifiers, key } = parseHotkeyString(canonical);
 	if (!key) return null;
 
-	const modifierTokens = MODIFIER_ORDER.filter((modifier) =>
-		modifiers.has(modifier),
-	).map((modifier) => {
-		if (modifier === "meta") return "Command";
-		if (modifier === "ctrl") return "Ctrl";
-		if (modifier === "alt") return "Alt";
-		return "Shift";
-	});
+	const modifierTokens = MODIFIER_ORDER.filter((modifier) => modifiers.has(modifier)).map(
+		(modifier) => {
+			if (modifier === "meta") return "Command";
+			if (modifier === "ctrl") return "Ctrl";
+			if (modifier === "alt") return "Alt";
+			return "Shift";
+		},
+	);
 
 	const mappedKey =
 		ELECTRON_KEY_MAP[key] ??
-		(key.length === 1
-			? key.toUpperCase()
-			: `${key.charAt(0).toUpperCase()}${key.slice(1)}`);
+		(key.length === 1 ? key.toUpperCase() : `${key.charAt(0).toUpperCase()}${key.slice(1)}`);
 
 	return [...modifierTokens, mappedKey].join("+");
 }

@@ -10,13 +10,9 @@ interface DragPaneActions {
 	clearDragging: () => void;
 }
 
-export const useDragPaneStore = create<DragPaneState & DragPaneActions>(
-	(set) => ({
-		draggingPaneId: null,
-		draggingSourceTabId: null,
-		setDragging: (paneId, tabId) =>
-			set({ draggingPaneId: paneId, draggingSourceTabId: tabId }),
-		clearDragging: () =>
-			set({ draggingPaneId: null, draggingSourceTabId: null }),
-	}),
-);
+export const useDragPaneStore = create<DragPaneState & DragPaneActions>((set) => ({
+	draggingPaneId: null,
+	draggingSourceTabId: null,
+	setDragging: (paneId, tabId) => set({ draggingPaneId: paneId, draggingSourceTabId: tabId }),
+	clearDragging: () => set({ draggingPaneId: null, draggingSourceTabId: null }),
+}));

@@ -48,9 +48,7 @@ try {
 	).trim();
 
 	if (result === PROTOCOL_SCHEME) {
-		console.log(
-			`[patch-dev-protocol] ${PROTOCOL_SCHEME}:// already registered`,
-		);
+		console.log(`[patch-dev-protocol] ${PROTOCOL_SCHEME}:// already registered`);
 		process.exit(0);
 	}
 } catch {
@@ -61,9 +59,7 @@ console.log(`[patch-dev-protocol] Registering ${PROTOCOL_SCHEME}:// scheme...`);
 
 // Set unique bundle ID to avoid conflicts with other Electron apps
 try {
-	execSync(
-		`/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${BUNDLE_ID}" "${PLIST_PATH}"`,
-	);
+	execSync(`/usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier ${BUNDLE_ID}" "${PLIST_PATH}"`);
 } catch {
 	// Ignore errors
 }
@@ -91,12 +87,7 @@ try {
 	execSync(
 		`/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "${ELECTRON_APP_PATH}"`,
 	);
-	console.log(
-		`[patch-dev-protocol] Registered ${PROTOCOL_SCHEME}:// with Launch Services`,
-	);
+	console.log(`[patch-dev-protocol] Registered ${PROTOCOL_SCHEME}:// with Launch Services`);
 } catch (err) {
-	console.warn(
-		"[patch-dev-protocol] Failed to register with Launch Services:",
-		err,
-	);
+	console.warn("[patch-dev-protocol] Failed to register with Launch Services:", err);
 }

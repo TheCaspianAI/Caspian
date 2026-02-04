@@ -1,6 +1,6 @@
-import { cn } from "ui/lib/utils";
 import { useState } from "react";
 import { LuCheck, LuFile, LuFolder, LuX } from "react-icons/lu";
+import { cn } from "ui/lib/utils";
 import { TREE_INDENT } from "../../constants";
 import type { NewItemMode } from "../../types";
 
@@ -63,11 +63,7 @@ export function NewItemInput({
 					"bg-background border border-ring rounded outline-none",
 				)}
 			/>
-			<button
-				type="button"
-				onClick={handleSubmit}
-				className="p-0.5 hover:bg-background/50 rounded"
-			>
+			<button type="button" onClick={handleSubmit} className="p-0.5 hover:bg-background/50 rounded">
 				<LuCheck className="size-3 text-muted-foreground" />
 			</button>
 			<button

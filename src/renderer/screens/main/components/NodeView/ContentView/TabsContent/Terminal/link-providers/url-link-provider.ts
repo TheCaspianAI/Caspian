@@ -1,8 +1,5 @@
 import type { Terminal } from "@xterm/xterm";
-import {
-	type LinkMatch,
-	MultiLineLinkProvider,
-} from "./multi-line-link-provider";
+import { type LinkMatch, MultiLineLinkProvider } from "./multi-line-link-provider";
 
 const TRAILING_PUNCTUATION = /[.,;:!?]+$/;
 

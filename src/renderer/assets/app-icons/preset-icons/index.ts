@@ -1,5 +1,5 @@
-import { getPresetIcon, PRESET_ICONS } from "ui/assets/icons/preset-icons";
 import { useThemeStore } from "renderer/stores/theme/store";
+import { getPresetIcon, PRESET_ICONS } from "ui/assets/icons/preset-icons";
 
 export { PRESET_ICONS, getPresetIcon };
 export type { PresetIconSet } from "ui/assets/icons/preset-icons";

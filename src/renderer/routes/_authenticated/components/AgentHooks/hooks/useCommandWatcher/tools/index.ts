@@ -1,8 +1,8 @@
 import { createNode } from "./create-worktree";
 import { deleteNode } from "./delete-node";
 import { getAppContext } from "./get-app-context";
-import { listRepositories } from "./list-projects";
 import { listNodes } from "./list-nodes";
+import { listRepositories } from "./list-projects";
 import { navigateToNode } from "./navigate-to-node";
 import { startClaudeSession } from "./start-claude-session";
 import { startClaudeSubagent } from "./start-claude-subagent";

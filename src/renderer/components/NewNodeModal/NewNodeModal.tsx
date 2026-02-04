@@ -1,9 +1,19 @@
-import { Button } from "ui/components/ui/button";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GoGitBranch } from "react-icons/go";
+import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
+import { LuFolderOpen } from "react-icons/lu";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
+import { useCreateNode } from "renderer/react-query/nodes";
+import { useOpenNew } from "renderer/react-query/repositories";
 import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "ui/components/ui/collapsible";
+	useCloseNewNodeModal,
+	useNewNodeModalOpen,
+	usePreSelectedRepositoryId,
+} from "renderer/stores/new-node-modal";
+import { resolveBranchPrefix, sanitizeBranchName, sanitizeSegment } from "shared/utils/branch";
+import { Button } from "ui/components/ui/button";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
 import {
 	Command,
 	CommandEmpty,
@@ -11,12 +21,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "ui/components/ui/command";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "ui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "ui/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -26,26 +31,8 @@ import {
 } from "ui/components/ui/dropdown-menu";
 import { Input } from "ui/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
-import { Textarea } from "ui/components/ui/textarea";
 import { toast } from "ui/components/ui/sonner";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { GoGitBranch } from "react-icons/go";
-import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
-import { LuFolderOpen } from "react-icons/lu";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
-import { useOpenNew } from "renderer/react-query/repositories";
-import { useCreateNode } from "renderer/react-query/nodes";
-import {
-	useCloseNewNodeModal,
-	useNewNodeModalOpen,
-	usePreSelectedRepositoryId,
-} from "renderer/stores/new-node-modal";
-import {
-	resolveBranchPrefix,
-	sanitizeBranchName,
-	sanitizeSegment,
-} from "shared/utils/branch";
+import { Textarea } from "ui/components/ui/textarea";
 import { ExistingWorktreesList } from "./components/ExistingWorktreesList";
 
 function generateSlugFromTitle(title: string): string {
@@ -61,9 +48,7 @@ export function NewNodeModal() {
 	const isOpen = useNewNodeModalOpen();
 	const closeModal = useCloseNewNodeModal();
 	const preSelectedRepositoryId = usePreSelectedRepositoryId();
-	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | null>(
-		null,
-	);
+	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | null>(null);
 	const [title, setTitle] = useState("");
 	const [branchName, setBranchName] = useState("");
 	const [branchNameEdited, setBranchNameEdited] = useState(false);
@@ -76,8 +61,7 @@ export function NewNodeModal() {
 	const [teardownScript, setTeardownScript] = useState("");
 	const titleInputRef = useRef<HTMLInputElement>(null);
 
-	const { data: recentRepositories = [] } =
-		electronTrpc.repositories.getRecents.useQuery();
+	const { data: recentRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
 	const { data: repository } = electronTrpc.repositories.get.useQuery(
 		{ id: selectedRepositoryId ?? "" },
 		{ enabled: !!selectedRepositoryId },
@@ -94,8 +78,7 @@ export function NewNodeModal() {
 		{ id: selectedRepositoryId ?? "" },
 		{ enabled: !!selectedRepositoryId },
 	);
-	const { data: globalBranchPrefix } =
-		electronTrpc.settings.getBranchPrefix.useQuery();
+	const { data: globalBranchPrefix } = electronTrpc.settings.getBranchPrefix.useQuery();
 	const { data: gitInfo } = electronTrpc.settings.getGitInfo.useQuery();
 	const createNode = useCreateNode();
 	const openNew = useOpenNew();
@@ -118,9 +101,7 @@ export function NewNodeModal() {
 		if (!branchData?.branches) return [];
 		if (!branchSearch) return branchData.branches;
 		const searchLower = branchSearch.toLowerCase();
-		return branchData.branches.filter((b) =>
-			b.name.toLowerCase().includes(searchLower),
-		);
+		return branchData.branches.filter((b) => b.name.toLowerCase().includes(searchLower));
 	}, [branchData?.branches, branchSearch]);
 
 	useEffect(() => {
@@ -143,9 +124,7 @@ export function NewNodeModal() {
 	const applyPrefix = !branchNameEdited;
 
 	const branchPreview =
-		branchSlug && applyPrefix && resolvedPrefix
-			? `${resolvedPrefix}/${branchSlug}`
-			: branchSlug;
+		branchSlug && applyPrefix && resolvedPrefix ? `${resolvedPrefix}/${branchSlug}` : branchSlug;
 
 	const resetForm = () => {
 		setSelectedRepositoryId(null);
@@ -212,15 +191,12 @@ export function NewNodeModal() {
 			setSelectedRepositoryId(result.repository.id);
 		} catch (error) {
 			toast.error("Failed to open repository", {
-				description:
-					error instanceof Error ? error.message : "An unknown error occurred",
+				description: error instanceof Error ? error.message : "An unknown error occurred",
 			});
 		}
 	};
 
-	const selectedRepository = recentRepositories.find(
-		(r) => r.id === selectedRepositoryId,
-	);
+	const selectedRepository = recentRepositories.find((r) => r.id === selectedRepositoryId);
 
 	const handleCreateNode = async () => {
 		if (!selectedRepositoryId) return;
@@ -248,9 +224,7 @@ export function NewNodeModal() {
 				toast.success("Node created");
 			}
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Failed to create node",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to create node");
 		}
 	};
 
@@ -267,22 +241,14 @@ export function NewNodeModal() {
 				<div className="px-4 pb-3">
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button
-								variant="outline"
-								className="w-full h-8 text-sm justify-between font-normal"
-							>
-								<span
-									className={selectedRepository ? "" : "text-muted-foreground"}
-								>
+							<Button variant="outline" className="w-full h-8 text-sm justify-between font-normal">
+								<span className={selectedRepository ? "" : "text-muted-foreground"}>
 									{selectedRepository?.name ?? "Select repository"}
 								</span>
 								<HiChevronDown className="size-4 text-muted-foreground" />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							align="start"
-							className="w-[--radix-dropdown-menu-trigger-width]"
-						>
+						<DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
 							{recentRepositories
 								.filter((repository) => repository.id)
 								.map((repository) => (
@@ -360,19 +326,12 @@ export function NewNodeModal() {
 									{(title || branchNameEdited) && (
 										<p className="text-xs text-muted-foreground flex items-center gap-1.5">
 											<GoGitBranch className="size-3" />
-											<span className="font-mono">
-												{branchPreview || "branch-name"}
-											</span>
-											<span className="text-muted-foreground/60">
-												from {effectiveBaseBranch}
-											</span>
+											<span className="font-mono">{branchPreview || "branch-name"}</span>
+											<span className="text-muted-foreground/60">from {effectiveBaseBranch}</span>
 										</p>
 									)}
 
-									<Collapsible
-										open={showAdvanced}
-										onOpenChange={setShowAdvanced}
-									>
+									<Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
 										<CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
 											<HiChevronDown
 												className={`size-3 transition-transform ${showAdvanced ? "" : "-rotate-90"}`}
@@ -381,10 +340,7 @@ export function NewNodeModal() {
 										</CollapsibleTrigger>
 										<CollapsibleContent className="pt-3 space-y-3">
 											<div className="space-y-1.5">
-												<label
-													htmlFor="branch"
-													className="text-xs text-muted-foreground"
-												>
+												<label htmlFor="branch" className="text-xs text-muted-foreground">
 													Branch name
 												</label>
 												<Input
@@ -392,17 +348,13 @@ export function NewNodeModal() {
 													className="h-8 text-sm font-mono"
 													placeholder="auto-generated"
 													value={branchNameEdited ? branchName : branchPreview}
-													onChange={(e) =>
-														handleBranchNameChange(e.target.value)
-													}
+													onChange={(e) => handleBranchNameChange(e.target.value)}
 													onBlur={handleBranchNameBlur}
 												/>
 											</div>
 
 											<div className="space-y-1.5">
-												<span className="text-xs text-muted-foreground">
-													Base branch
-												</span>
+												<span className="text-xs text-muted-foreground">Base branch</span>
 												{isBranchesError ? (
 													<div className="flex items-center gap-2 h-8 px-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-xs">
 														Failed to load branches
@@ -425,8 +377,7 @@ export function NewNodeModal() {
 																	<span className="truncate font-mono text-sm">
 																		{effectiveBaseBranch || "Select branch..."}
 																	</span>
-																	{effectiveBaseBranch ===
-																		branchData?.defaultBranch && (
+																	{effectiveBaseBranch === branchData?.defaultBranch && (
 																		<span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
 																			default
 																		</span>
@@ -461,11 +412,8 @@ export function NewNodeModal() {
 																		>
 																			<span className="flex items-center gap-2 truncate">
 																				<GoGitBranch className="size-3.5 shrink-0 text-muted-foreground" />
-																				<span className="truncate">
-																					{branch.name}
-																				</span>
-																				{branch.name ===
-																					branchData?.defaultBranch && (
+																				<span className="truncate">{branch.name}</span>
+																				{branch.name === branchData?.defaultBranch && (
 																					<span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
 																						default
 																					</span>
@@ -474,13 +422,10 @@ export function NewNodeModal() {
 																			<span className="flex items-center gap-2 shrink-0">
 																				{branch.lastCommitDate > 0 && (
 																					<span className="text-xs text-muted-foreground">
-																						{formatRelativeTime(
-																							branch.lastCommitDate,
-																						)}
+																						{formatRelativeTime(branch.lastCommitDate)}
 																					</span>
 																				)}
-																				{effectiveBaseBranch ===
-																					branch.name && (
+																				{effectiveBaseBranch === branch.name && (
 																					<HiCheck className="size-4 text-primary" />
 																				)}
 																			</span>
@@ -494,10 +439,7 @@ export function NewNodeModal() {
 											</div>
 
 											<div className="space-y-1.5">
-												<label
-													htmlFor="setup-script"
-													className="text-xs text-muted-foreground"
-												>
+												<label htmlFor="setup-script" className="text-xs text-muted-foreground">
 													Setup script
 												</label>
 												<Textarea
@@ -510,10 +452,7 @@ export function NewNodeModal() {
 											</div>
 
 											<div className="space-y-1.5">
-												<label
-													htmlFor="teardown-script"
-													className="text-xs text-muted-foreground"
-												>
+												<label htmlFor="teardown-script" className="text-xs text-muted-foreground">
 													Teardown script
 												</label>
 												<Textarea
@@ -544,9 +483,7 @@ export function NewNodeModal() {
 							)}
 							{mode === "cloud" && (
 								<div className="flex flex-col items-center justify-center py-8 text-center">
-									<div className="text-sm font-medium text-foreground mb-1">
-										Cloud Nodes
-									</div>
+									<div className="text-sm font-medium text-foreground mb-1">Cloud Nodes</div>
 									<p className="text-xs text-muted-foreground">Coming soon</p>
 								</div>
 							)}

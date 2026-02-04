@@ -1,7 +1,3 @@
-import { Button } from "ui/components/ui/button";
-import { Checkbox } from "ui/components/ui/checkbox";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { cn } from "ui/lib/utils";
 import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
 import {
 	LuCheck,
@@ -12,6 +8,10 @@ import {
 	LuUndo2,
 } from "react-icons/lu";
 import type { ChangedFile } from "shared/changes-types";
+import { Button } from "ui/components/ui/button";
+import { Checkbox } from "ui/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { cn } from "ui/lib/utils";
 
 interface FileDiffHeaderProps {
 	file: ChangedFile;
@@ -71,9 +71,7 @@ export function FileDiffHeader({
 				)}
 			</button>
 
-			<span className={cn("shrink-0 flex items-center", statusBadgeColor)}>
-				{statusIndicator}
-			</span>
+			<span className={cn("shrink-0 flex items-center", statusBadgeColor)}>{statusIndicator}</span>
 
 			<Tooltip>
 				<TooltipTrigger asChild>
@@ -116,14 +114,10 @@ export function FileDiffHeader({
 			{showStats && (
 				<span className="flex items-center gap-1 text-xs font-mono shrink-0">
 					{file.additions > 0 && (
-						<span className="text-green-600 dark:text-green-500">
-							+{file.additions}
-						</span>
+						<span className="text-green-600 dark:text-green-500">+{file.additions}</span>
 					)}
 					{file.deletions > 0 && (
-						<span className="text-red-600 dark:text-red-400">
-							-{file.deletions}
-						</span>
+						<span className="text-red-600 dark:text-red-400">-{file.deletions}</span>
 					)}
 				</span>
 			)}
@@ -140,20 +134,14 @@ export function FileDiffHeader({
 					onCheckedChange={(checked) => onViewedChange(checked === true)}
 					className="size-3.5 border-muted-foreground/50"
 				/>
-				<label
-					htmlFor={`viewed-${fileKey}`}
-					className="text-muted-foreground cursor-pointer"
-				>
+				<label htmlFor={`viewed-${fileKey}`} className="text-muted-foreground cursor-pointer">
 					Viewed
 				</label>
 			</div>
 
 			{/* biome-ignore lint/a11y/useKeyWithClickEvents: nested interactive elements handle their own events */}
 			{/* biome-ignore lint/a11y/noStaticElementInteractions: this span just stops click propagation */}
-			<span
-				className="flex items-center gap-1 shrink-0"
-				onClick={(e) => e.stopPropagation()}
-			>
+			<span className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
 				{onDiscard && (
 					<Tooltip>
 						<TooltipTrigger asChild>

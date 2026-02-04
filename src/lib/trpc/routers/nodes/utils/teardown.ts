@@ -76,10 +76,7 @@ export async function runTeardown(
 		return { success: true };
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.error(
-			`Teardown failed for node ${nodeName}:`,
-			errorMessage,
-		);
+		console.error(`Teardown failed for node ${nodeName}:`, errorMessage);
 		return {
 			success: false,
 			error: errorMessage,

@@ -4,12 +4,7 @@ import { devtools } from "zustand/middleware";
 /**
  * Settings sections available in the modal.
  */
-export type SettingsSection =
-	| "appearance"
-	| "preferences"
-	| "presets"
-	| "sessions"
-	| "repository";
+export type SettingsSection = "appearance" | "preferences" | "presets" | "sessions" | "repository";
 
 interface SettingsState {
 	activeSection: SettingsSection;
@@ -50,17 +45,10 @@ export const useSettingsStore = create<SettingsState>()(
 );
 
 // Convenience hooks
-export const useSettingsSection = () =>
-	useSettingsStore((state) => state.activeSection);
-export const useSetSettingsSection = () =>
-	useSettingsStore((state) => state.setActiveSection);
-export const useSettingsSearchQuery = () =>
-	useSettingsStore((state) => state.searchQuery);
-export const useSetSettingsSearchQuery = () =>
-	useSettingsStore((state) => state.setSearchQuery);
-export const useCloseSettings = () =>
-	useSettingsStore((state) => state.closeSettings);
-export const useOpenSettings = () =>
-	useSettingsStore((state) => state.openSettings);
-export const useSettingsIsOpen = () =>
-	useSettingsStore((state) => state.isOpen);
+export const useSettingsSection = () => useSettingsStore((state) => state.activeSection);
+export const useSetSettingsSection = () => useSettingsStore((state) => state.setActiveSection);
+export const useSettingsSearchQuery = () => useSettingsStore((state) => state.searchQuery);
+export const useSetSettingsSearchQuery = () => useSettingsStore((state) => state.setSearchQuery);
+export const useCloseSettings = () => useSettingsStore((state) => state.closeSettings);
+export const useOpenSettings = () => useSettingsStore((state) => state.openSettings);
+export const useSettingsIsOpen = () => useSettingsStore((state) => state.isOpen);

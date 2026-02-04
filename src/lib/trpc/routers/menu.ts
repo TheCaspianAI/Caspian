@@ -1,8 +1,8 @@
 import { observable } from "@trpc/server/observable";
 import {
 	menuEmitter,
-	type OpenSettingsEvent,
 	type OpenNodeEvent,
+	type OpenSettingsEvent,
 	type SettingsSection,
 } from "main/lib/menu-events";
 import { publicProcedure, router } from "..";

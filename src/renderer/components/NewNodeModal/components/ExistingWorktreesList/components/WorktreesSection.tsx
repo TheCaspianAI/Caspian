@@ -1,6 +1,6 @@
-import { Button } from "ui/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { LuGitBranch } from "react-icons/lu";
+import { Button } from "ui/components/ui/button";
 
 interface Worktree {
 	id: string;
@@ -71,9 +71,7 @@ export function WorktreesSection({
 							className="flex items-center gap-2 px-2 py-1.5 text-muted-foreground/60"
 						>
 							<LuGitBranch className="h-3.5 w-3.5 shrink-0" />
-							<span className="flex-1 text-sm truncate font-mono">
-								{wt.branch}
-							</span>
+							<span className="flex-1 text-sm truncate font-mono">{wt.branch}</span>
 							<span className="text-[10px] shrink-0">open</span>
 						</div>
 					))}

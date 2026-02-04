@@ -52,12 +52,9 @@ export function movePaneToTab(
 	const newTabs = isLastPane
 		? state.tabs
 				.filter((t) => t.id !== sourceTab.id)
-				.map((t) =>
-					t.id === targetTabId ? { ...t, layout: newTargetLayout } : t,
-				)
+				.map((t) => (t.id === targetTabId ? { ...t, layout: newTargetLayout } : t))
 		: state.tabs.map((t) => {
-				if (t.id === sourceTab.id && newSourceLayout)
-					return { ...t, layout: newSourceLayout };
+				if (t.id === sourceTab.id && newSourceLayout) return { ...t, layout: newSourceLayout };
 				if (t.id === targetTabId) return { ...t, layout: newTargetLayout };
 				return t;
 			});
@@ -119,9 +116,7 @@ export function movePaneToNewTab(
 	};
 
 	const newTabs = state.tabs.map((t) =>
-		t.id === sourceTab.id && newSourceLayout
-			? { ...t, layout: newSourceLayout }
-			: t,
+		t.id === sourceTab.id && newSourceLayout ? { ...t, layout: newSourceLayout } : t,
 	);
 	newTabs.push(newTab);
 

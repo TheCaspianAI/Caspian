@@ -39,8 +39,7 @@ export function useDeleteNode(
 
 			// If viewing deleted node, get navigation target BEFORE optimistic update
 			if (wasViewingDeleted) {
-				const prevNodeId =
-					await utils.nodes.getPreviousNode.fetch({ id });
+				const prevNodeId = await utils.nodes.getPreviousNode.fetch({ id });
 				const nextNodeId = await utils.nodes.getNextNode.fetch({
 					id,
 				});
@@ -56,10 +55,7 @@ export function useDeleteNode(
 			}
 
 			// Cancel outgoing queries and get snapshots
-			await Promise.all([
-				utils.nodes.getAll.cancel(),
-				utils.nodes.getAllGrouped.cancel(),
-			]);
+			await Promise.all([utils.nodes.getAll.cancel(), utils.nodes.getAllGrouped.cancel()]);
 
 			const previousGrouped = utils.nodes.getAllGrouped.getData();
 			const previousAll = utils.nodes.getAll.getData();
@@ -102,10 +98,7 @@ export function useDeleteNode(
 		onError: async (_err, variables, context, ...rest) => {
 			// Rollback optimistic cache updates
 			if (context?.previousGrouped !== undefined) {
-				utils.nodes.getAllGrouped.setData(
-					undefined,
-					context.previousGrouped,
-				);
+				utils.nodes.getAllGrouped.setData(undefined, context.previousGrouped);
 			}
 			if (context?.previousAll !== undefined) {
 				utils.nodes.getAll.setData(undefined, context.previousAll);

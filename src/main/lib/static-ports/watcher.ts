@@ -21,11 +21,7 @@ class StaticPortsWatcher extends EventEmitter {
 		// Clean up existing watcher for this workspace
 		this.unwatch(workspaceId);
 
-		const portsPath = join(
-			worktreePath,
-			REPOSITORY_CASPIAN_DIR_NAME,
-			PORTS_FILE_NAME,
-		);
+		const portsPath = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME, PORTS_FILE_NAME);
 		const caspianDir = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME);
 
 		// Determine what to watch:
@@ -119,10 +115,7 @@ class StaticPortsWatcher extends EventEmitter {
 			watcher.unref();
 			this.watchers.set(workspaceId, watcher);
 		} catch (error) {
-			console.error(
-				`[StaticPortsWatcher] Failed to watch ${watchPath}:`,
-				error,
-			);
+			console.error(`[StaticPortsWatcher] Failed to watch ${watchPath}:`, error);
 		}
 	}
 

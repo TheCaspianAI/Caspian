@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+import { electronTrpc } from "renderer/lib/electron-trpc";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -9,37 +11,21 @@ import {
 import { Button } from "ui/components/ui/button";
 import { Label } from "ui/components/ui/label";
 import { toast } from "ui/components/ui/sonner";
-import { useMemo, useState } from "react";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import {
-	isItemVisible,
-	SETTING_ITEM_ID,
-	type SettingItemId,
-} from "../../../utils/settings-search";
+import { isItemVisible, SETTING_ITEM_ID, type SettingItemId } from "../../../utils/settings-search";
 
 interface SessionsSettingsProps {
 	visibleItems?: SettingItemId[] | null;
 }
 
 export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
-	const showSessions = isItemVisible(
-		SETTING_ITEM_ID.SESSIONS_ACTIVE,
-		visibleItems,
-	);
-	const showControls = isItemVisible(
-		SETTING_ITEM_ID.SESSIONS_CONTROLS,
-		visibleItems,
-	);
+	const showSessions = isItemVisible(SETTING_ITEM_ID.SESSIONS_ACTIVE, visibleItems);
+	const showControls = isItemVisible(SETTING_ITEM_ID.SESSIONS_CONTROLS, visibleItems);
 
 	const utils = electronTrpc.useUtils();
 
-	const { data: daemonSessions } =
-		electronTrpc.terminal.listDaemonSessions.useQuery();
+	const { data: daemonSessions } = electronTrpc.terminal.listDaemonSessions.useQuery();
 	const sessions = daemonSessions?.sessions ?? [];
-	const aliveSessions = useMemo(
-		() => sessions.filter((session) => session.isAlive),
-		[sessions],
-	);
+	const aliveSessions = useMemo(() => sessions.filter((session) => session.isAlive), [sessions]);
 	const sessionsSorted = useMemo(() => {
 		return [...aliveSessions].sort((a, b) => {
 			// Attached sessions first, then newest attach time.
@@ -54,65 +40,59 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 
 	const [confirmKillAllOpen, setConfirmKillAllOpen] = useState(false);
 	const [confirmClearHistoryOpen, setConfirmClearHistoryOpen] = useState(false);
-	const [confirmRestartDaemonOpen, setConfirmRestartDaemonOpen] =
-		useState(false);
+	const [confirmRestartDaemonOpen, setConfirmRestartDaemonOpen] = useState(false);
 	const [showSessionList, setShowSessionList] = useState(false);
 	const [pendingKillSession, setPendingKillSession] = useState<{
 		sessionId: string;
 		workspaceId: string;
 	} | null>(null);
 
-	const killAllDaemonSessions =
-		electronTrpc.terminal.killAllDaemonSessions.useMutation({
-			onMutate: async () => {
-				await utils.terminal.listDaemonSessions.cancel();
-				const previous = utils.terminal.listDaemonSessions.getData();
-				utils.terminal.listDaemonSessions.setData(undefined, {
-					sessions: [],
+	const killAllDaemonSessions = electronTrpc.terminal.killAllDaemonSessions.useMutation({
+		onMutate: async () => {
+			await utils.terminal.listDaemonSessions.cancel();
+			const previous = utils.terminal.listDaemonSessions.getData();
+			utils.terminal.listDaemonSessions.setData(undefined, {
+				sessions: [],
+			});
+			return { previous };
+		},
+		onSuccess: (result) => {
+			if (result.remainingCount > 0) {
+				toast.warning("Some sessions could not be killed", {
+					description: `${result.killedCount} terminated, ${result.remainingCount} remaining`,
 				});
-				return { previous };
-			},
-			onSuccess: (result) => {
-				if (result.remainingCount > 0) {
-					toast.warning("Some sessions could not be killed", {
-						description: `${result.killedCount} terminated, ${result.remainingCount} remaining`,
-					});
-				} else {
-					toast.success("Killed all terminal sessions", {
-						description: `${result.killedCount} sessions terminated`,
-					});
-				}
-			},
-			onError: (error, _vars, context) => {
-				if (context?.previous) {
-					utils.terminal.listDaemonSessions.setData(
-						undefined,
-						context.previous,
-					);
-				}
-				toast.error("Failed to kill sessions", {
-					description: error.message,
+			} else {
+				toast.success("Killed all terminal sessions", {
+					description: `${result.killedCount} sessions terminated`,
 				});
-			},
-			onSettled: () => {
-				setTimeout(() => {
-					utils.terminal.listDaemonSessions.invalidate();
-				}, 300);
-			},
-		});
-
-	const clearTerminalHistory =
-		electronTrpc.terminal.clearTerminalHistory.useMutation({
-			onSuccess: () => {
-				toast.success("Cleared terminal history");
+			}
+		},
+		onError: (error, _vars, context) => {
+			if (context?.previous) {
+				utils.terminal.listDaemonSessions.setData(undefined, context.previous);
+			}
+			toast.error("Failed to kill sessions", {
+				description: error.message,
+			});
+		},
+		onSettled: () => {
+			setTimeout(() => {
 				utils.terminal.listDaemonSessions.invalidate();
-			},
-			onError: (error) => {
-				toast.error("Failed to clear terminal history", {
-					description: error.message,
-				});
-			},
-		});
+			}, 300);
+		},
+	});
+
+	const clearTerminalHistory = electronTrpc.terminal.clearTerminalHistory.useMutation({
+		onSuccess: () => {
+			toast.success("Cleared terminal history");
+			utils.terminal.listDaemonSessions.invalidate();
+		},
+		onError: (error) => {
+			toast.error("Failed to clear terminal history", {
+				description: error.message,
+			});
+		},
+	});
 
 	const killDaemonSession = electronTrpc.terminal.kill.useMutation({
 		onSuccess: () => {
@@ -129,8 +109,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 	const restartDaemon = electronTrpc.terminal.restartDaemon.useMutation({
 		onSuccess: () => {
 			toast.success("Daemon restarted", {
-				description:
-					"Terminal daemon has been restarted. Open a terminal to spawn a fresh daemon.",
+				description: "Terminal daemon has been restarted. Open a terminal to spawn a fresh daemon.",
 			});
 			utils.terminal.listDaemonSessions.invalidate();
 		},
@@ -156,12 +135,13 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 							<div className="space-y-0.5">
 								<Label className="text-sm font-medium">Active Sessions</Label>
 								<p className="text-xs text-muted-foreground">
-									{aliveSessions.length} daemon session{aliveSessions.length !== 1 ? "s" : ""} running
+									{aliveSessions.length} daemon session{aliveSessions.length !== 1 ? "s" : ""}{" "}
+									running
 								</p>
 								{aliveSessions.length >= 20 && (
 									<p className="text-xs text-muted-foreground/70">
-										Large numbers of persistent terminals can increase CPU/memory
-										usage. Consider killing old sessions if you notice slowdowns.
+										Large numbers of persistent terminals can increase CPU/memory usage. Consider
+										killing old sessions if you notice slowdowns.
 									</p>
 								)}
 							</div>
@@ -190,47 +170,22 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 									<table className="w-full text-xs">
 										<thead className="sticky top-0 bg-background border-b border-border">
 											<tr className="text-muted-foreground">
-												<th className="px-3 py-2 text-left font-medium">
-													Node
-												</th>
-												<th className="px-3 py-2 text-left font-medium">
-													Session
-												</th>
-												<th className="px-3 py-2 text-right font-medium">
-													Clients
-												</th>
-												<th className="px-3 py-2 text-right font-medium">
-													PID
-												</th>
-												<th className="px-3 py-2 text-left font-medium">
-													Last attached
-												</th>
-												<th className="px-3 py-2 text-right font-medium">
-													Action
-												</th>
+												<th className="px-3 py-2 text-left font-medium">Node</th>
+												<th className="px-3 py-2 text-left font-medium">Session</th>
+												<th className="px-3 py-2 text-right font-medium">Clients</th>
+												<th className="px-3 py-2 text-right font-medium">PID</th>
+												<th className="px-3 py-2 text-left font-medium">Last attached</th>
+												<th className="px-3 py-2 text-right font-medium">Action</th>
 											</tr>
 										</thead>
 										<tbody className="divide-y divide-border">
 											{sessionsSorted.map((session) => (
-												<tr
-													key={session.sessionId}
-													className="hover:bg-muted/30"
-												>
-													<td className="px-3 py-2 font-mono">
-														{session.workspaceId}
-													</td>
-													<td className="px-3 py-2 font-mono">
-														{session.sessionId}
-													</td>
-													<td className="px-3 py-2 text-right">
-														{session.attachedClients}
-													</td>
-													<td className="px-3 py-2 text-right font-mono">
-														{session.pid ?? "-"}
-													</td>
-													<td className="px-3 py-2">
-														{formatTimestamp(session.lastAttachedAt)}
-													</td>
+												<tr key={session.sessionId} className="hover:bg-muted/30">
+													<td className="px-3 py-2 font-mono">{session.workspaceId}</td>
+													<td className="px-3 py-2 font-mono">{session.sessionId}</td>
+													<td className="px-3 py-2 text-right">{session.attachedClients}</td>
+													<td className="px-3 py-2 text-right font-mono">{session.pid ?? "-"}</td>
+													<td className="px-3 py-2">{formatTimestamp(session.lastAttachedAt)}</td>
 													<td className="px-3 py-2 text-right">
 														<Button
 															variant="ghost"
@@ -257,13 +212,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 
 				{/* Session Controls */}
 				{showControls && (
-					<div
-						className={
-							showSessions
-								? "space-y-4 pt-6 border-t"
-								: "space-y-4"
-						}
-					>
+					<div className={showSessions ? "space-y-4 pt-6 border-t" : "space-y-4"}>
 						<div className="space-y-0.5">
 							<Label className="text-sm font-medium">Session Controls</Label>
 							<p className="text-xs text-muted-foreground">
@@ -275,9 +224,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 							<Button
 								variant="destructive"
 								size="sm"
-								disabled={
-									aliveSessions.length === 0 || killAllDaemonSessions.isPending
-								}
+								disabled={aliveSessions.length === 0 || killAllDaemonSessions.isPending}
 								onClick={() => setConfirmKillAllOpen(true)}
 							>
 								Kill all sessions
@@ -285,9 +232,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 							<Button
 								variant="secondary"
 								size="sm"
-								disabled={
-									aliveSessions.length === 0 || clearTerminalHistory.isPending
-								}
+								disabled={aliveSessions.length === 0 || clearTerminalHistory.isPending}
 								onClick={() => setConfirmClearHistoryOpen(true)}
 							>
 								Clear terminal history
@@ -305,34 +250,25 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 				)}
 			</div>
 
-			<AlertDialog
-				open={confirmKillAllOpen}
-				onOpenChange={setConfirmKillAllOpen}
-			>
+			<AlertDialog open={confirmKillAllOpen} onOpenChange={setConfirmKillAllOpen}>
 				<AlertDialogContent className="max-w-[520px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Kill all terminal sessions?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Kill all terminal sessions?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
-									This will terminate all persistent terminal processes (builds,
-									tests, agents, etc.).
+									This will terminate all persistent terminal processes (builds, tests, agents,
+									etc.).
 								</span>
 								<span className="block">
-									You can't undo this action. Terminal panes will show "Process
-									exited" and can be restarted.
+									You can't undo this action. Terminal panes will show "Process exited" and can be
+									restarted.
 								</span>
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setConfirmKillAllOpen(false)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setConfirmKillAllOpen(false)}>
 							Cancel
 						</Button>
 						<Button
@@ -350,34 +286,24 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 				</AlertDialogContent>
 			</AlertDialog>
 
-			<AlertDialog
-				open={confirmClearHistoryOpen}
-				onOpenChange={setConfirmClearHistoryOpen}
-			>
+			<AlertDialog open={confirmClearHistoryOpen} onOpenChange={setConfirmClearHistoryOpen}>
 				<AlertDialogContent className="max-w-[520px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Clear terminal history?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Clear terminal history?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
-									This deletes the saved scrollback used for reboot/crash
-									recovery.
+									This deletes the saved scrollback used for reboot/crash recovery.
 								</span>
 								<span className="block">
-									Running terminal processes continue, but older output may no
-									longer be available after restarting the app.
+									Running terminal processes continue, but older output may no longer be available
+									after restarting the app.
 								</span>
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setConfirmClearHistoryOpen(false)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setConfirmClearHistoryOpen(false)}>
 							Cancel
 						</Button>
 						<Button
@@ -403,9 +329,7 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 			>
 				<AlertDialogContent className="max-w-[520px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Kill terminal session?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Kill terminal session?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
@@ -413,19 +337,14 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 								</span>
 								{pendingKillSession && (
 									<span className="block font-mono text-xs">
-										{pendingKillSession.workspaceId} /{" "}
-										{pendingKillSession.sessionId}
+										{pendingKillSession.workspaceId} / {pendingKillSession.sessionId}
 									</span>
 								)}
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setPendingKillSession(null)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setPendingKillSession(null)}>
 							Cancel
 						</Button>
 						<Button
@@ -445,35 +364,24 @@ export function SessionsSettings({ visibleItems }: SessionsSettingsProps) {
 				</AlertDialogContent>
 			</AlertDialog>
 
-			<AlertDialog
-				open={confirmRestartDaemonOpen}
-				onOpenChange={setConfirmRestartDaemonOpen}
-			>
+			<AlertDialog open={confirmRestartDaemonOpen} onOpenChange={setConfirmRestartDaemonOpen}>
 				<AlertDialogContent className="max-w-[520px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Restart terminal daemon?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Restart terminal daemon?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
-									This will shut down the terminal daemon process and kill all
-									running sessions. Use this to fix terminals that are stuck or
-									unresponsive.
+									This will shut down the terminal daemon process and kill all running sessions. Use
+									this to fix terminals that are stuck or unresponsive.
 								</span>
 								<span className="block">
-									A fresh daemon will start automatically when you open a new
-									terminal.
+									A fresh daemon will start automatically when you open a new terminal.
 								</span>
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setConfirmRestartDaemonOpen(false)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setConfirmRestartDaemonOpen(false)}>
 							Cancel
 						</Button>
 						<Button

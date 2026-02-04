@@ -111,6 +111,4 @@ export interface TerminalClearScrollbackInput {
 	paneId: string;
 }
 
-export type TerminalClearScrollbackMutate = (
-	input: TerminalClearScrollbackInput,
-) => void;
+export type TerminalClearScrollbackMutate = (input: TerminalClearScrollbackInput) => void;

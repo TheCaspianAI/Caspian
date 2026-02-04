@@ -20,8 +20,7 @@ export const createCacheRouter = () => {
 				console.error("[cache] Failed to clear Electric cache:", error);
 				return {
 					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to clear cache",
+					error: error instanceof Error ? error.message : "Failed to clear cache",
 				};
 			}
 		}),

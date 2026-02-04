@@ -8,8 +8,7 @@ function shortenHomePath(path: string, homeDir: string | undefined): string {
 
 	if (
 		normalizedHome &&
-		(normalizedPath === normalizedHome ||
-			normalizedPath.startsWith(`${normalizedHome}/`))
+		(normalizedPath === normalizedHome || normalizedPath.startsWith(`${normalizedHome}/`))
 	) {
 		return `~${normalizedPath.slice(normalizedHome.length)}`;
 	}

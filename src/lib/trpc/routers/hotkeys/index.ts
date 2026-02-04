@@ -62,14 +62,9 @@ export const createHotkeysRouter = (getWindow: () => BrowserWindow | null) => {
 
 			const exportFile = createHotkeysExport(appState.data.hotkeysState);
 			try {
-				await writeFile(
-					result.filePath,
-					JSON.stringify(exportFile, null, 2),
-					"utf-8",
-				);
+				await writeFile(result.filePath, JSON.stringify(exportFile, null, 2), "utf-8");
 			} catch (error) {
-				const message =
-					error instanceof Error ? error.message : "Failed to write file";
+				const message = error instanceof Error ? error.message : "Failed to write file";
 				return { canceled: false, error: message };
 			}
 
@@ -124,8 +119,7 @@ export const createHotkeysRouter = (getWindow: () => BrowserWindow | null) => {
 					raw: exportFile,
 				};
 			} catch (error) {
-				const message =
-					error instanceof Error ? error.message : "Invalid hotkeys file";
+				const message = error instanceof Error ? error.message : "Invalid hotkeys file";
 				return { canceled: false, error: message };
 			}
 		}),

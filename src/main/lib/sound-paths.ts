@@ -31,7 +31,6 @@ export function getSoundsDirectory(): string {
 		return join(process.resourcesPath, "app.asar.unpacked/resources/sounds");
 	}
 
-
 	if (isDev) {
 		// Development: source files in project
 		return join(app.getAppPath(), "src/resources/sounds");

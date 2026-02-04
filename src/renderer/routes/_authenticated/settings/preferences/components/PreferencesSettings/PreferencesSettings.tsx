@@ -1,4 +1,24 @@
 import type { BranchPrefixMode, TerminalLinkBehavior } from "lib/local-db";
+import { useEffect, useMemo, useState } from "react";
+import { HiMagnifyingGlass } from "react-icons/hi2";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import {
+	captureHotkeyFromEvent,
+	getHotkeyConflict,
+	useHotkeyDisplay,
+	useHotkeysByCategory,
+	useHotkeysStore,
+} from "renderer/stores/hotkeys";
+import {
+	formatHotkeyText,
+	HOTKEYS,
+	type HotkeyCategory,
+	type HotkeyId,
+	type HotkeysState,
+	isOsReservedHotkey,
+	isTerminalReservedHotkey,
+} from "shared/hotkeys";
+import { resolveBranchPrefix, sanitizeSegment } from "shared/utils/branch";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -20,35 +40,9 @@ import {
 } from "ui/components/ui/select";
 import { toast } from "ui/components/ui/sonner";
 import { Switch } from "ui/components/ui/switch";
-import { useEffect, useMemo, useState } from "react";
-import { HiMagnifyingGlass } from "react-icons/hi2";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import {
-	captureHotkeyFromEvent,
-	getHotkeyConflict,
-	useHotkeyDisplay,
-	useHotkeysByCategory,
-	useHotkeysStore,
-} from "renderer/stores/hotkeys";
-import {
-	formatHotkeyText,
-	HOTKEYS,
-	type HotkeyCategory,
-	type HotkeyId,
-	type HotkeysState,
-	isOsReservedHotkey,
-	isTerminalReservedHotkey,
-} from "shared/hotkeys";
-import { resolveBranchPrefix, sanitizeSegment } from "shared/utils/branch";
 import { BRANCH_PREFIX_MODE_LABELS } from "../../../utils/branch-prefix";
 
-const CATEGORY_ORDER: HotkeyCategory[] = [
-	"Node",
-	"Terminal",
-	"Layout",
-	"Window",
-	"Help",
-];
+const CATEGORY_ORDER: HotkeyCategory[] = ["Node", "Terminal", "Layout", "Window", "Help"];
 
 // ============================================================================
 // Keyboard Shortcuts Components
@@ -75,9 +69,7 @@ function HotkeyRow({
 		<div className="flex items-center justify-between gap-4 py-3 px-4">
 			<div className="flex flex-col">
 				<span className="text-sm text-foreground">{label}</span>
-				{description && (
-					<span className="text-xs text-muted-foreground">{description}</span>
-				)}
+				{description && <span className="text-xs text-muted-foreground">{description}</span>}
 			</div>
 			<div className="flex items-center gap-2">
 				<button
@@ -117,24 +109,19 @@ export function PreferencesSettings() {
 		electronTrpc.settings.getNotificationSoundsMuted.useQuery();
 	const isMuted = isMutedData ?? false;
 
-	const setMuted = electronTrpc.settings.setNotificationSoundsMuted.useMutation(
-		{
-			onMutate: async ({ muted }) => {
-				await utils.settings.getNotificationSoundsMuted.cancel();
-				const previous = utils.settings.getNotificationSoundsMuted.getData();
-				utils.settings.getNotificationSoundsMuted.setData(undefined, muted);
-				return { previous };
-			},
-			onError: (_err, _vars, context) => {
-				if (context?.previous !== undefined) {
-					utils.settings.getNotificationSoundsMuted.setData(
-						undefined,
-						context.previous,
-					);
-				}
-			},
+	const setMuted = electronTrpc.settings.setNotificationSoundsMuted.useMutation({
+		onMutate: async ({ muted }) => {
+			await utils.settings.getNotificationSoundsMuted.cancel();
+			const previous = utils.settings.getNotificationSoundsMuted.getData();
+			utils.settings.getNotificationSoundsMuted.setData(undefined, muted);
+			return { previous };
 		},
-	);
+		onError: (_err, _vars, context) => {
+			if (context?.previous !== undefined) {
+				utils.settings.getNotificationSoundsMuted.setData(undefined, context.previous);
+			}
+		},
+	});
 
 	const handleMutedToggle = (enabled: boolean) => {
 		setMuted.mutate({ muted: !enabled });
@@ -161,9 +148,7 @@ export function PreferencesSettings() {
 	const setHotkeysBatch = useHotkeysStore((state) => state.setHotkeysBatch);
 	const resetHotkey = useHotkeysStore((state) => state.resetHotkey);
 	const resetAllHotkeys = useHotkeysStore((state) => state.resetAllHotkeys);
-	const replaceHotkeysState = useHotkeysStore(
-		(state) => state.replaceHotkeysState,
-	);
+	const replaceHotkeysState = useHotkeysStore((state) => state.replaceHotkeysState);
 	const hotkeysByCategory = useHotkeysByCategory();
 
 	const exportMutation = electronTrpc.hotkeys.export.useMutation();
@@ -325,9 +310,7 @@ export function PreferencesSettings() {
 		electronTrpc.settings.getBranchPrefix.useQuery();
 	const { data: gitInfo } = electronTrpc.settings.getGitInfo.useQuery();
 
-	const [customPrefixInput, setCustomPrefixInput] = useState(
-		branchPrefix?.customPrefix ?? "",
-	);
+	const [customPrefixInput, setCustomPrefixInput] = useState(branchPrefix?.customPrefix ?? "");
 
 	useEffect(() => {
 		setCustomPrefixInput(branchPrefix?.customPrefix ?? "");
@@ -377,26 +360,22 @@ export function PreferencesSettings() {
 	const { data: terminalLinkBehavior, isLoading: isLoadingLinkBehavior } =
 		electronTrpc.settings.getTerminalLinkBehavior.useQuery();
 
-	const setTerminalLinkBehavior =
-		electronTrpc.settings.setTerminalLinkBehavior.useMutation({
-			onMutate: async ({ behavior }) => {
-				await utils.settings.getTerminalLinkBehavior.cancel();
-				const previous = utils.settings.getTerminalLinkBehavior.getData();
-				utils.settings.getTerminalLinkBehavior.setData(undefined, behavior);
-				return { previous };
-			},
-			onError: (_err, _vars, context) => {
-				if (context?.previous !== undefined) {
-					utils.settings.getTerminalLinkBehavior.setData(
-						undefined,
-						context.previous,
-					);
-				}
-			},
-			onSettled: () => {
-				utils.settings.getTerminalLinkBehavior.invalidate();
-			},
-		});
+	const setTerminalLinkBehavior = electronTrpc.settings.setTerminalLinkBehavior.useMutation({
+		onMutate: async ({ behavior }) => {
+			await utils.settings.getTerminalLinkBehavior.cancel();
+			const previous = utils.settings.getTerminalLinkBehavior.getData();
+			utils.settings.getTerminalLinkBehavior.setData(undefined, behavior);
+			return { previous };
+		},
+		onError: (_err, _vars, context) => {
+			if (context?.previous !== undefined) {
+				utils.settings.getTerminalLinkBehavior.setData(undefined, context.previous);
+			}
+		},
+		onSettled: () => {
+			utils.settings.getTerminalLinkBehavior.invalidate();
+		},
+	});
 
 	const handleLinkBehaviorChange = (value: string) => {
 		setTerminalLinkBehavior.mutate({
@@ -419,9 +398,7 @@ export function PreferencesSettings() {
 							<Label htmlFor="notification-sounds" className="text-sm font-medium">
 								Enable notification sounds
 							</Label>
-							<p className="text-xs text-muted-foreground">
-								Play a sound when tasks complete
-							</p>
+							<p className="text-xs text-muted-foreground">Play a sound when tasks complete</p>
 						</div>
 						<Switch
 							id="notification-sounds"
@@ -476,9 +453,7 @@ export function PreferencesSettings() {
 
 							return (
 								<div key={category}>
-									<h4 className="text-xs font-medium text-muted-foreground mb-2">
-										{category}
-									</h4>
+									<h4 className="text-xs font-medium text-muted-foreground mb-2">{category}</h4>
 									<div className="rounded-lg border border-border overflow-hidden">
 										<div className="flex items-center justify-between py-2 px-4 bg-accent/10 border-b border-border">
 											<span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -506,9 +481,7 @@ export function PreferencesSettings() {
 							);
 						})}
 
-						{CATEGORY_ORDER.every(
-							(cat) => (filteredHotkeysByCategory[cat] ?? []).length === 0,
-						) && (
+						{CATEGORY_ORDER.every((cat) => (filteredHotkeysByCategory[cat] ?? []).length === 0) && (
 							<div className="py-8 text-center text-sm text-muted-foreground">
 								No shortcuts found matching "{searchQuery}"
 							</div>
@@ -550,25 +523,20 @@ export function PreferencesSettings() {
 						<div className="flex items-center gap-2">
 							<Select
 								value={branchPrefix?.mode ?? "none"}
-								onValueChange={(value) =>
-									handleBranchPrefixModeChange(value as BranchPrefixMode)
-								}
+								onValueChange={(value) => handleBranchPrefixModeChange(value as BranchPrefixMode)}
 								disabled={isBranchPrefixLoading || setBranchPrefix.isPending}
 							>
 								<SelectTrigger className="w-[180px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									{(
-										Object.entries(BRANCH_PREFIX_MODE_LABELS) as [
-											BranchPrefixMode,
-											string,
-										][]
-									).map(([value, label]) => (
-										<SelectItem key={value} value={value}>
-											{label}
-										</SelectItem>
-									))}
+									{(Object.entries(BRANCH_PREFIX_MODE_LABELS) as [BranchPrefixMode, string][]).map(
+										([value, label]) => (
+											<SelectItem key={value} value={value}>
+												{label}
+											</SelectItem>
+										),
+									)}
 								</SelectContent>
 							</Select>
 							{branchPrefix?.mode === "custom" && (
@@ -591,10 +559,7 @@ export function PreferencesSettings() {
 
 					<div className="flex items-center justify-between">
 						<div className="space-y-0.5">
-							<Label
-								htmlFor="terminal-link-behavior"
-								className="text-sm font-medium"
-							>
+							<Label htmlFor="terminal-link-behavior" className="text-sm font-medium">
 								Terminal file links
 							</Label>
 							<p className="text-xs text-muted-foreground">
@@ -604,9 +569,7 @@ export function PreferencesSettings() {
 						<Select
 							value={terminalLinkBehavior ?? "external-editor"}
 							onValueChange={handleLinkBehaviorChange}
-							disabled={
-								isLoadingLinkBehavior || setTerminalLinkBehavior.isPending
-							}
+							disabled={isLoadingLinkBehavior || setTerminalLinkBehavior.isPending}
 						>
 							<SelectTrigger className="w-[180px]">
 								<SelectValue />
@@ -621,15 +584,10 @@ export function PreferencesSettings() {
 			</div>
 
 			{/* Conflict dialog */}
-			<AlertDialog
-				open={!!pendingConflict}
-				onOpenChange={() => setPendingConflict(null)}
-			>
+			<AlertDialog open={!!pendingConflict} onOpenChange={() => setPendingConflict(null)}>
 				<AlertDialogContent className="max-w-[380px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Shortcut already in use
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Shortcut already in use</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
@@ -637,9 +595,7 @@ export function PreferencesSettings() {
 										? `${formatHotkeyText(
 												pendingConflict.keys,
 												platform,
-											)} is already assigned to "${
-												HOTKEYS[pendingConflict.conflictId].label
-											}".`
+											)} is already assigned to "${HOTKEYS[pendingConflict.conflictId].label}".`
 										: ""}
 								</span>
 								<span className="block">Would you like to reassign it?</span>
@@ -647,18 +603,10 @@ export function PreferencesSettings() {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setPendingConflict(null)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setPendingConflict(null)}>
 							Cancel
 						</Button>
-						<Button
-							variant="secondary"
-							size="sm"
-							onClick={handleConflictReassign}
-						>
+						<Button variant="secondary" size="sm" onClick={handleConflictReassign}>
 							Reassign
 						</Button>
 					</AlertDialogFooter>
@@ -666,35 +614,24 @@ export function PreferencesSettings() {
 			</AlertDialog>
 
 			{/* Import dialog */}
-			<AlertDialog
-				open={!!pendingImport}
-				onOpenChange={() => setPendingImport(null)}
-			>
+			<AlertDialog open={!!pendingImport} onOpenChange={() => setPendingImport(null)}>
 				<AlertDialogContent className="max-w-[420px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Import keyboard shortcuts?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Import keyboard shortcuts?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
-								<span className="block">
-									This will replace your shortcuts on all platforms.
-								</span>
+								<span className="block">This will replace your shortcuts on all platforms.</span>
 								{pendingImport && (
 									<span className="block">
-										{pendingImport.summary.assigned} assigned,{" "}
-										{pendingImport.summary.disabled} disabled on {platform}.
+										{pendingImport.summary.assigned} assigned, {pendingImport.summary.disabled}{" "}
+										disabled on {platform}.
 									</span>
 								)}
 							</div>
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setPendingImport(null)}
-						>
+						<Button variant="ghost" size="sm" onClick={() => setPendingImport(null)}>
 							Cancel
 						</Button>
 						<Button variant="secondary" size="sm" onClick={handleConfirmImport}>

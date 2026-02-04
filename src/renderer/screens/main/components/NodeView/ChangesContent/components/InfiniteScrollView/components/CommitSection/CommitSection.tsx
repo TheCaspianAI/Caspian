@@ -43,13 +43,9 @@ export function CommitSection({
 				) : (
 					<LuChevronRight className="size-4 text-muted-foreground" />
 				)}
-				<span className="text-xs font-mono text-muted-foreground">
-					{commit.shortHash}
-				</span>
+				<span className="text-xs font-mono text-muted-foreground">{commit.shortHash}</span>
 				<span className="text-sm truncate flex-1">{commit.message}</span>
-				<span className="text-xs text-muted-foreground">
-					{commit.files.length} files
-				</span>
+				<span className="text-xs text-muted-foreground">{commit.files.length} files</span>
 			</button>
 			{isCommitExpanded && files.length > 0 && (
 				<div className="pl-4">

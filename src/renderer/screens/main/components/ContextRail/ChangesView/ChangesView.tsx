@@ -1,3 +1,10 @@
+import { useParams } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
+import { LuUndo2 } from "react-icons/lu";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useChangesStore } from "renderer/stores/changes";
+import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -9,13 +16,6 @@ import {
 import { Button } from "ui/components/ui/button";
 import { toast } from "ui/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { useParams } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
-import { LuUndo2 } from "react-icons/lu";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useChangesStore } from "renderer/stores/changes";
-import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import { CategorySection } from "./components/CategorySection";
 import { ChangesHeader } from "./components/ChangesHeader";
 import { CommitInput } from "./components/CommitInput";
@@ -23,11 +23,7 @@ import { CommitItem } from "./components/CommitItem";
 import { FileList } from "./components/FileList";
 
 interface ChangesViewProps {
-	onFileOpen?: (
-		file: ChangedFile,
-		category: ChangeCategory,
-		commitHash?: string,
-	) => void;
+	onFileOpen?: (file: ChangedFile, category: ChangeCategory, commitHash?: string) => void;
 	isExpandedView?: boolean;
 }
 
@@ -106,50 +102,43 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 		},
 	});
 
-	const discardChangesMutation =
-		electronTrpc.changes.discardChanges.useMutation({
-			onSuccess: () => refetch(),
-			onError: (error, variables) => {
-				console.error(
-					`Failed to discard changes for ${variables.filePath}:`,
-					error,
-				);
-				toast.error(`Failed to discard changes: ${error.message}`);
-			},
-		});
+	const discardChangesMutation = electronTrpc.changes.discardChanges.useMutation({
+		onSuccess: () => refetch(),
+		onError: (error, variables) => {
+			console.error(`Failed to discard changes for ${variables.filePath}:`, error);
+			toast.error(`Failed to discard changes: ${error.message}`);
+		},
+	});
 
-	const deleteUntrackedMutation =
-		electronTrpc.changes.deleteUntracked.useMutation({
-			onSuccess: () => refetch(),
-			onError: (error, variables) => {
-				console.error(`Failed to delete ${variables.filePath}:`, error);
-				toast.error(`Failed to delete file: ${error.message}`);
-			},
-		});
+	const deleteUntrackedMutation = electronTrpc.changes.deleteUntracked.useMutation({
+		onSuccess: () => refetch(),
+		onError: (error, variables) => {
+			console.error(`Failed to delete ${variables.filePath}:`, error);
+			toast.error(`Failed to delete file: ${error.message}`);
+		},
+	});
 
-	const discardAllUnstagedMutation =
-		electronTrpc.changes.discardAllUnstaged.useMutation({
-			onSuccess: () => {
-				toast.success("Discarded all unstaged changes");
-				refetch();
-			},
-			onError: (error) => {
-				console.error("Failed to discard all unstaged:", error);
-				toast.error(`Failed to discard: ${error.message}`);
-			},
-		});
+	const discardAllUnstagedMutation = electronTrpc.changes.discardAllUnstaged.useMutation({
+		onSuccess: () => {
+			toast.success("Discarded all unstaged changes");
+			refetch();
+		},
+		onError: (error) => {
+			console.error("Failed to discard all unstaged:", error);
+			toast.error(`Failed to discard: ${error.message}`);
+		},
+	});
 
-	const discardAllStagedMutation =
-		electronTrpc.changes.discardAllStaged.useMutation({
-			onSuccess: () => {
-				toast.success("Discarded all staged changes");
-				refetch();
-			},
-			onError: (error) => {
-				console.error("Failed to discard all staged:", error);
-				toast.error(`Failed to discard: ${error.message}`);
-			},
-		});
+	const discardAllStagedMutation = electronTrpc.changes.discardAllStaged.useMutation({
+		onSuccess: () => {
+			toast.success("Discarded all staged changes");
+			refetch();
+		},
+		onError: (error) => {
+			console.error("Failed to discard all staged:", error);
+			toast.error(`Failed to discard: ${error.message}`);
+		},
+	});
 
 	const stashMutation = electronTrpc.changes.stash.useMutation({
 		onSuccess: () => {
@@ -162,17 +151,16 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 		},
 	});
 
-	const stashIncludeUntrackedMutation =
-		electronTrpc.changes.stashIncludeUntracked.useMutation({
-			onSuccess: () => {
-				toast.success("All changes stashed (including untracked)");
-				refetch();
-			},
-			onError: (error) => {
-				console.error("Failed to stash:", error);
-				toast.error(`Failed to stash: ${error.message}`);
-			},
-		});
+	const stashIncludeUntrackedMutation = electronTrpc.changes.stashIncludeUntracked.useMutation({
+		onSuccess: () => {
+			toast.success("All changes stashed (including untracked)");
+			refetch();
+		},
+		onError: (error) => {
+			console.error("Failed to stash:", error);
+			toast.error(`Failed to stash: ${error.message}`);
+		},
+	});
 
 	const stashPopMutation = electronTrpc.changes.stashPop.useMutation({
 		onSuccess: () => {
@@ -185,8 +173,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 		},
 	});
 
-	const [showDiscardUnstagedDialog, setShowDiscardUnstagedDialog] =
-		useState(false);
+	const [showDiscardUnstagedDialog, setShowDiscardUnstagedDialog] = useState(false);
 	const [showDiscardStagedDialog, setShowDiscardStagedDialog] = useState(false);
 
 	const handleDiscard = (file: ChangedFile) => {
@@ -217,9 +204,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const selectedFile = selectedFileState?.file ?? null;
 	const selectedCommitHash = selectedFileState?.commitHash ?? null;
 
-	const [expandedCommits, setExpandedCommits] = useState<Set<string>>(
-		new Set(),
-	);
+	const [expandedCommits, setExpandedCommits] = useState<Set<string>>(new Set());
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: reset on workspace change
 	useEffect(() => {
@@ -244,10 +229,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	});
 
 	const combinedUnstaged = useMemo(
-		() =>
-			status?.unstaged && status?.untracked
-				? [...status.unstaged, ...status.untracked]
-				: [],
+		() => (status?.unstaged && status?.untracked ? [...status.unstaged, ...status.untracked] : []),
 		[status?.unstaged, status?.untracked],
 	);
 
@@ -331,9 +313,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				worktreePath={worktreePath}
 				workspaceId={workspaceId}
 				onStash={() => stashMutation.mutate({ worktreePath })}
-				onStashIncludeUntracked={() =>
-					stashIncludeUntrackedMutation.mutate({ worktreePath })
-				}
+				onStashIncludeUntracked={() => stashIncludeUntrackedMutation.mutate({ worktreePath })}
 				onStashPop={() => stashPopMutation.mutate({ worktreePath })}
 				isStashPending={
 					stashMutation.isPending ||
@@ -418,9 +398,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 											<LuUndo2 className="w-3.5 h-3.5" />
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent side="bottom">
-										Discard all staged
-									</TooltipContent>
+									<TooltipContent side="bottom">Discard all staged</TooltipContent>
 								</Tooltip>
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -481,9 +459,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 											<LuUndo2 className="w-3.5 h-3.5" />
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent side="bottom">
-										Discard all unstaged
-									</TooltipContent>
+									<TooltipContent side="bottom">Discard all unstaged</TooltipContent>
 								</Tooltip>
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -532,18 +508,15 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				</div>
 			)}
 
-			<AlertDialog
-				open={showDiscardUnstagedDialog}
-				onOpenChange={setShowDiscardUnstagedDialog}
-			>
+			<AlertDialog open={showDiscardUnstagedDialog} onOpenChange={setShowDiscardUnstagedDialog}>
 				<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
 						<AlertDialogTitle className="font-medium">
 							Discard all unstaged changes?
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							This will revert all unstaged modifications. Untracked files will
-							not be affected. This action cannot be undone.
+							This will revert all unstaged modifications. Untracked files will not be affected.
+							This action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
@@ -572,18 +545,13 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				</AlertDialogContent>
 			</AlertDialog>
 
-			<AlertDialog
-				open={showDiscardStagedDialog}
-				onOpenChange={setShowDiscardStagedDialog}
-			>
+			<AlertDialog open={showDiscardStagedDialog} onOpenChange={setShowDiscardStagedDialog}>
 				<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Discard all staged changes?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Discard all staged changes?</AlertDialogTitle>
 						<AlertDialogDescription>
-							This will unstage and revert all staged changes. Untracked files
-							will not be affected. This action cannot be undone.
+							This will unstage and revert all staged changes. Untracked files will not be affected.
+							This action cannot be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">

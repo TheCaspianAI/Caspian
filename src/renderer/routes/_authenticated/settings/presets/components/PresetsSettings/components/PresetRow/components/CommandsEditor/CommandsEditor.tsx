@@ -1,7 +1,7 @@
-import { Button } from "ui/components/ui/button";
-import { Input } from "ui/components/ui/input";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { HiMiniXMark } from "react-icons/hi2";
+import { Button } from "ui/components/ui/button";
+import { Input } from "ui/components/ui/input";
 
 interface CommandsEditorProps {
 	commands: string[];
@@ -40,21 +40,14 @@ export function CommandsEditor({
 		onChange(updated);
 	};
 
-	const handleCommandKeyDown = (
-		e: React.KeyboardEvent<HTMLInputElement>,
-		index: number,
-	) => {
+	const handleCommandKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
 		if (e.key === "Enter") {
 			e.preventDefault();
 			const updated = [...commands];
 			updated.splice(index + 1, 0, "");
 			onChange(updated);
 			setFocusIndex(index + 1);
-		} else if (
-			e.key === "Backspace" &&
-			commands[index] === "" &&
-			commands.length > 1
-		) {
+		} else if (e.key === "Backspace" && commands[index] === "" && commands.length > 1) {
 			e.preventDefault();
 			const updated = commands.filter((_, i) => i !== index);
 			onChange(updated);

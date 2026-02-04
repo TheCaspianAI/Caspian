@@ -69,12 +69,8 @@ export const DEFAULT_TERMINAL_COLORS_LIGHT: TerminalColors = {
 /**
  * Get default terminal colors based on theme type
  */
-export function getDefaultTerminalColors(
-	type: "dark" | "light",
-): TerminalColors {
-	return type === "dark"
-		? DEFAULT_TERMINAL_COLORS_DARK
-		: DEFAULT_TERMINAL_COLORS_LIGHT;
+export function getDefaultTerminalColors(type: "dark" | "light"): TerminalColors {
+	return type === "dark" ? DEFAULT_TERMINAL_COLORS_DARK : DEFAULT_TERMINAL_COLORS_LIGHT;
 }
 
 /**

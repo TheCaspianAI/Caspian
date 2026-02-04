@@ -22,30 +22,18 @@ const buttonVariants = cva(
 					"hover:shadow-[0_0_16px_oklch(0.72_0.25_328_/_0.25)]",
 				],
 				// Secondary - muted background
-				secondary: [
-					"bg-secondary text-secondary-foreground",
-					"hover:bg-secondary/70",
-				],
+				secondary: ["bg-secondary text-secondary-foreground", "hover:bg-secondary/70"],
 				// Outline - border, transparent bg
 				outline: [
 					"border border-border bg-transparent text-foreground",
 					"hover:bg-accent hover:text-accent-foreground",
 				],
 				// Ghost - no background until hover
-				ghost: [
-					"text-foreground",
-					"hover:bg-accent hover:text-accent-foreground",
-				],
+				ghost: ["text-foreground", "hover:bg-accent hover:text-accent-foreground"],
 				// Destructive
-				destructive: [
-					"bg-destructive text-destructive-foreground",
-					"hover:bg-destructive/90",
-				],
+				destructive: ["bg-destructive text-destructive-foreground", "hover:bg-destructive/90"],
 				// Link
-				link: [
-					"text-primary underline-offset-4",
-					"hover:underline",
-				],
+				link: ["text-primary underline-offset-4", "hover:underline"],
 			},
 			size: {
 				default: "h-9 px-4 py-2",

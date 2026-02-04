@@ -33,10 +33,7 @@ export function registerRoute(props: {
 
 	// Log successful loads
 	props.browserWindow.webContents.on("did-finish-load", () => {
-		console.log(
-			"[window-loader] Successfully loaded:",
-			props.browserWindow.webContents.getURL(),
-		);
+		console.log("[window-loader] Successfully loaded:", props.browserWindow.webContents.getURL());
 	});
 
 	// Log and handle load failures

@@ -9,11 +9,7 @@ interface NewTabDropZoneProps {
 	children: ReactNode;
 }
 
-export function NewTabDropZone({
-	onDrop,
-	isLastPaneInTab,
-	children,
-}: NewTabDropZoneProps) {
+export function NewTabDropZone({ onDrop, isLastPaneInTab, children }: NewTabDropZoneProps) {
 	const [{ isOver, canDrop }, drop] = useDrop<
 		unknown,
 		{ handled: true },
@@ -49,9 +45,7 @@ export function NewTabDropZone({
 			}}
 			className="relative flex items-center h-full flex-1 min-w-0 pl-2"
 		>
-			{isOver && canDrop && (
-				<div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/20" />
-			)}
+			{isOver && canDrop && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/20" />}
 			{children}
 		</div>
 	);

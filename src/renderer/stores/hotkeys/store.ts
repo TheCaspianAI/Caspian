@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { electronTrpcClient } from "renderer/lib/trpc-client";
-import {
-	setSkipNextHotkeysPersist,
-	trpcHotkeysStorage,
-} from "renderer/lib/trpc-storage";
+import { setSkipNextHotkeysPersist, trpcHotkeysStorage } from "renderer/lib/trpc-storage";
 import {
 	canonicalizeHotkeyForPlatform,
 	formatHotkeyDisplay,
@@ -72,19 +69,13 @@ export const useHotkeysStore = create<HotkeysStoreState>()(
 
 				setHotkey: (id, keys) => {
 					const platform = get().platform;
-					const canonical =
-						keys === null
-							? null
-							: canonicalizeHotkeyForPlatform(keys, platform);
+					const canonical = keys === null ? null : canonicalizeHotkeyForPlatform(keys, platform);
 					if (keys !== null && !canonical) return;
 					// App hotkeys must include ctrl or meta to work in terminal
 					if (canonical !== null && !hasPrimaryModifier(canonical)) return;
 
 					const defaultValue = getDefaultHotkey(id, platform);
-					const overrides = getOverridesForPlatform(
-						get().hotkeysState,
-						platform,
-					);
+					const overrides = getOverridesForPlatform(get().hotkeysState, platform);
 					const nextOverrides = { ...overrides };
 
 					if (canonical === defaultValue) {
@@ -94,28 +85,18 @@ export const useHotkeysStore = create<HotkeysStoreState>()(
 					}
 
 					set((state) => ({
-						hotkeysState: updateOverrides(
-							state.hotkeysState,
-							platform,
-							nextOverrides,
-						),
+						hotkeysState: updateOverrides(state.hotkeysState, platform, nextOverrides),
 					}));
 				},
 
 				setHotkeysBatch: (updates) => {
 					const platform = get().platform;
-					const overrides = getOverridesForPlatform(
-						get().hotkeysState,
-						platform,
-					);
+					const overrides = getOverridesForPlatform(get().hotkeysState, platform);
 					const nextOverrides = { ...overrides };
 
 					for (const [id, keys] of Object.entries(updates)) {
 						const hotkeyId = id as HotkeyId;
-						const canonical =
-							keys === null
-								? null
-								: canonicalizeHotkeyForPlatform(keys, platform);
+						const canonical = keys === null ? null : canonicalizeHotkeyForPlatform(keys, platform);
 						if (keys !== null && !canonical) continue;
 						// App hotkeys must include ctrl or meta to work in terminal
 						if (canonical !== null && !hasPrimaryModifier(canonical)) continue;
@@ -128,29 +109,18 @@ export const useHotkeysStore = create<HotkeysStoreState>()(
 					}
 
 					set((state) => ({
-						hotkeysState: updateOverrides(
-							state.hotkeysState,
-							platform,
-							nextOverrides,
-						),
+						hotkeysState: updateOverrides(state.hotkeysState, platform, nextOverrides),
 					}));
 				},
 
 				resetHotkey: (id) => {
 					const platform = get().platform;
-					const overrides = getOverridesForPlatform(
-						get().hotkeysState,
-						platform,
-					);
+					const overrides = getOverridesForPlatform(get().hotkeysState, platform);
 					if (!(id in overrides)) return;
 					const nextOverrides = { ...overrides };
 					delete nextOverrides[id];
 					set((state) => ({
-						hotkeysState: updateOverrides(
-							state.hotkeysState,
-							platform,
-							nextOverrides,
-						),
+						hotkeysState: updateOverrides(state.hotkeysState, platform, nextOverrides),
 					}));
 				},
 
@@ -183,10 +153,7 @@ export const useHotkeysStore = create<HotkeysStoreState>()(
 
 export function useHotkeyKeys(id: HotkeyId): string | null {
 	return useHotkeysStore((state) => {
-		const overrides = getOverridesForPlatform(
-			state.hotkeysState,
-			state.platform,
-		);
+		const overrides = getOverridesForPlatform(state.hotkeysState, state.platform);
 		return getEffectiveHotkey(id, overrides, state.platform);
 	});
 }
@@ -205,10 +172,7 @@ export function useHotkeyDisplay(id: HotkeyId): string[] {
 
 export function useHotkeyText(id: HotkeyId): string {
 	return useHotkeysStore((state) => {
-		const overrides = getOverridesForPlatform(
-			state.hotkeysState,
-			state.platform,
-		);
+		const overrides = getOverridesForPlatform(state.hotkeysState, state.platform);
 		const keys = getEffectiveHotkey(id, overrides, state.platform);
 		return formatHotkeyText(keys, state.platform);
 	});
@@ -227,10 +191,7 @@ export function useHotkeysByCategory(options?: {
 	includeHidden?: boolean;
 }): Record<HotkeyCategory, Array<HotkeyDefinition & { id: HotkeyId }>> {
 	return useMemo(() => {
-		const grouped: Record<
-			HotkeyCategory,
-			Array<HotkeyDefinition & { id: HotkeyId }>
-		> = {
+		const grouped: Record<HotkeyCategory, Array<HotkeyDefinition & { id: HotkeyId }>> = {
 			Node: [],
 			Layout: [],
 			Terminal: [],
@@ -257,10 +218,7 @@ export function isAppHotkeyEvent(event: KeyboardEvent): boolean {
 	});
 }
 
-export function getHotkeyConflict(
-	keys: string,
-	excludeId?: HotkeyId,
-): HotkeyId | null {
+export function getHotkeyConflict(keys: string, excludeId?: HotkeyId): HotkeyId | null {
 	const state = useHotkeysStore.getState();
 	const overrides = getOverridesForPlatform(state.hotkeysState, state.platform);
 	const effective = getEffectiveHotkeysMap(overrides, state.platform);
@@ -285,17 +243,12 @@ export function useHotkeysSync() {
 				.then((state: HotkeysState) => {
 					// Guard against null/undefined state from storage
 					if (!state) {
-						console.warn(
-							"[hotkeys] Storage returned null/undefined state, skipping sync",
-						);
+						console.warn("[hotkeys] Storage returned null/undefined state, skipping sync");
 						return;
 					}
 					const current = useHotkeysStore.getState().hotkeysState;
 					// Use structural comparison that's order-independent
-					const currentStr = JSON.stringify(
-						current,
-						Object.keys(current).sort(),
-					);
+					const currentStr = JSON.stringify(current, Object.keys(current).sort());
 					const newStr = JSON.stringify(state, Object.keys(state).sort());
 					if (currentStr === newStr) {
 						return;
@@ -334,10 +287,7 @@ export function useAppHotkey(
 
 	useEffect(() => {
 		if (!enabled || !keys) return;
-		if (
-			typeof document === "undefined" ||
-			typeof document.addEventListener !== "function"
-		) {
+		if (typeof document === "undefined" || typeof document.addEventListener !== "function") {
 			return;
 		}
 

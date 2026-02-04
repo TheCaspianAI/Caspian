@@ -1,7 +1,7 @@
 import { useParams } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { OpenInMenuButton } from "./components/OpenInMenuButton";
 import { AppMenu } from "./components/AppMenu";
+import { OpenInMenuButton } from "./components/OpenInMenuButton";
 import { WindowControls } from "./components/WindowControls";
 
 export function TopBar() {

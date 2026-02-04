@@ -10,11 +10,9 @@ function getRawMachineId(): string {
 		const os = platform();
 
 		if (os === "darwin") {
-			const output = execFileSync(
-				"ioreg",
-				["-rd1", "-c", "IOPlatformExpertDevice"],
-				{ encoding: "utf8" },
-			);
+			const output = execFileSync("ioreg", ["-rd1", "-c", "IOPlatformExpertDevice"], {
+				encoding: "utf8",
+			});
 			const match = output.match(/"IOPlatformUUID"\s*=\s*"([^"]+)"/);
 			if (match?.[1]) return match[1];
 		} else if (os === "linux") {
@@ -26,12 +24,7 @@ function getRawMachineId(): string {
 		} else if (os === "win32") {
 			const output = execFileSync(
 				"reg",
-				[
-					"query",
-					"HKLM\\SOFTWARE\\Microsoft\\Cryptography",
-					"/v",
-					"MachineGuid",
-				],
+				["query", "HKLM\\SOFTWARE\\Microsoft\\Cryptography", "/v", "MachineGuid"],
 				{ encoding: "utf8" },
 			);
 			const match = output.match(/MachineGuid\s+REG_SZ\s+(\S+)/);

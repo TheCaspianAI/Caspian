@@ -20,9 +20,7 @@ const fileViewerStateSchema = z.object({
 	viewMode: z.enum(["rendered", "raw", "diff"]),
 	isPinned: z.boolean(),
 	diffLayout: z.enum(["inline", "side-by-side"]),
-	diffCategory: z
-		.enum(["against-base", "committed", "staged", "unstaged"])
-		.optional(),
+	diffCategory: z.enum(["against-base", "committed", "staged", "unstaged"]).optional(),
 	commitHash: z.string().optional(),
 	oldPath: z.string().optional(),
 });
@@ -203,13 +201,11 @@ export const createUiStateRouter = () => {
 				return appState.data.tabsState;
 			}),
 
-			set: publicProcedure
-				.input(tabsStateSchema)
-				.mutation(async ({ input }) => {
-					appState.data.tabsState = input;
-					await appState.write();
-					return { success: true };
-				}),
+			set: publicProcedure.input(tabsStateSchema).mutation(async ({ input }) => {
+				appState.data.tabsState = input;
+				await appState.write();
+				return { success: true };
+			}),
 		}),
 
 		// Theme state procedures
@@ -218,13 +214,11 @@ export const createUiStateRouter = () => {
 				return appState.data.themeState;
 			}),
 
-			set: publicProcedure
-				.input(themeStateSchema)
-				.mutation(async ({ input }) => {
-					appState.data.themeState = input;
-					await appState.write();
-					return { success: true };
-				}),
+			set: publicProcedure.input(themeStateSchema).mutation(async ({ input }) => {
+				appState.data.themeState = input;
+				await appState.write();
+				return { success: true };
+			}),
 		}),
 
 		// Hotkeys state procedures
@@ -233,40 +227,27 @@ export const createUiStateRouter = () => {
 				return appState.data.hotkeysState;
 			}),
 
-			set: publicProcedure
-				.input(hotkeysStateSchema)
-				.mutation(async ({ input }) => {
-					const version =
-						input.version === HOTKEYS_STATE_VERSION
-							? input.version
-							: HOTKEYS_STATE_VERSION;
+			set: publicProcedure.input(hotkeysStateSchema).mutation(async ({ input }) => {
+				const version =
+					input.version === HOTKEYS_STATE_VERSION ? input.version : HOTKEYS_STATE_VERSION;
 
-					const normalized: HotkeysState = {
-						version,
-						byPlatform: {
-							darwin: buildOverridesFromBindings(
-								input.byPlatform.darwin ?? {},
-								"darwin",
-							),
-							win32: buildOverridesFromBindings(
-								input.byPlatform.win32 ?? {},
-								"win32",
-							),
-							linux: buildOverridesFromBindings(
-								input.byPlatform.linux ?? {},
-								"linux",
-							),
-						},
-					};
+				const normalized: HotkeysState = {
+					version,
+					byPlatform: {
+						darwin: buildOverridesFromBindings(input.byPlatform.darwin ?? {}, "darwin"),
+						win32: buildOverridesFromBindings(input.byPlatform.win32 ?? {}, "win32"),
+						linux: buildOverridesFromBindings(input.byPlatform.linux ?? {}, "linux"),
+					},
+				};
 
-					appState.data.hotkeysState = normalized;
-					await appState.write();
-					hotkeysEmitter.emit("change", {
-						version: normalized.version,
-						updatedAt: new Date().toISOString(),
-					});
-					return { success: true };
-				}),
+				appState.data.hotkeysState = normalized;
+				await appState.write();
+				hotkeysEmitter.emit("change", {
+					version: normalized.version,
+					updatedAt: new Date().toISOString(),
+				});
+				return { success: true };
+			}),
 
 			subscribe: publicProcedure.subscription(() => {
 				return observable<{ version: number; updatedAt: string }>((emit) => {

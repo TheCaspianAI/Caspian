@@ -1,11 +1,3 @@
-import { Button } from "ui/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "ui/components/ui/dialog";
 import { HiArrowTopRightOnSquare } from "react-icons/hi2";
 import { OpenInButton } from "renderer/components/OpenInButton";
 import { electronTrpc } from "renderer/lib/electron-trpc";
@@ -15,6 +7,14 @@ import {
 	useConfigModalRepositoryId,
 } from "renderer/stores/config-modal";
 import { EXTERNAL_LINKS } from "shared/constants";
+import { Button } from "ui/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "ui/components/ui/dialog";
 
 const CONFIG_TEMPLATE = `{
   "setup": [],
@@ -31,11 +31,10 @@ export function SetupConfigModal() {
 		{ enabled: !!repositoryId },
 	);
 
-	const { data: configFilePath } =
-		electronTrpc.config.getConfigFilePath.useQuery(
-			{ repositoryId: repositoryId ?? "" },
-			{ enabled: !!repositoryId },
-		);
+	const { data: configFilePath } = electronTrpc.config.getConfigFilePath.useQuery(
+		{ repositoryId: repositoryId ?? "" },
+		{ enabled: !!repositoryId },
+	);
 
 	const repositoryName = repository?.name ?? "your-repository";
 
@@ -49,8 +48,7 @@ export function SetupConfigModal() {
 				<DialogHeader>
 					<DialogTitle>Configure scripts</DialogTitle>
 					<DialogDescription>
-						Edit config.json to automate setting up workspaces and running your
-						app.
+						Edit config.json to automate setting up workspaces and running your app.
 					</DialogDescription>
 				</DialogHeader>
 
@@ -60,10 +58,7 @@ export function SetupConfigModal() {
 						<span className="text-sm text-muted-foreground font-mono">
 							{repositoryName}/.caspian/config.json
 						</span>
-						<OpenInButton
-							path={configFilePath ?? undefined}
-							label="config.json"
-						/>
+						<OpenInButton path={configFilePath ?? undefined} label="config.json" />
 					</div>
 
 					{/* Code preview */}
@@ -75,12 +70,7 @@ export function SetupConfigModal() {
 				</div>
 
 				<div className="mt-4">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleLearnMore}
-						className="gap-2"
-					>
+					<Button variant="outline" size="sm" onClick={handleLearnMore} className="gap-2">
 						Learn how to use scripts
 						<HiArrowTopRightOnSquare className="h-4 w-4" />
 					</Button>

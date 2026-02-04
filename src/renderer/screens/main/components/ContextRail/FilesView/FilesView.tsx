@@ -1,21 +1,17 @@
-import {
-	asyncDataLoaderFeature,
-	expandAllFeature,
-	selectionFeature,
-} from "@headless-tree/core";
+import { asyncDataLoaderFeature, expandAllFeature, selectionFeature } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import { LuFile, LuFolder } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import type { DirectoryEntry } from "shared/file-tree-types";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 import { FileSearchResultItem } from "./components/FileSearchResultItem";
 import { FileTreeItem } from "./components/FileTreeItem";
@@ -66,8 +62,7 @@ export function FilesView() {
 			},
 			getChildren: async (itemId: string): Promise<string[]> => {
 				if (!worktreePath) return [];
-				const dirPath =
-					itemId === "root" ? worktreePath : itemId.split(":::")[0];
+				const dirPath = itemId === "root" ? worktreePath : itemId.split(":::")[0];
 				if (!dirPath) return [];
 
 				try {
@@ -76,10 +71,7 @@ export function FilesView() {
 						rootPath: worktreePath,
 						includeHidden: showHiddenFiles,
 					});
-					return entries.map(
-						(e) =>
-							`${e.path}:::${e.name}:::${e.relativePath}:::${e.isDirectory}`,
-					);
+					return entries.map((e) => `${e.path}:::${e.name}:::${e.relativePath}:::${e.isDirectory}`);
 				} catch (error) {
 					console.error("[FilesView] Failed to load children:", error);
 					return [];
@@ -89,22 +81,21 @@ export function FilesView() {
 		features: [asyncDataLoaderFeature, selectionFeature, expandAllFeature],
 	});
 
-	const { createFile, createDirectory, rename, deleteItems, isDeleting } =
-		useFileTreeActions({
-			worktreePath,
-			onRefresh: async (parentPath: string) => {
-				const isRoot = parentPath === worktreePath;
-				const itemId = isRoot
-					? "root"
-					: tree
-							.getItems()
-							.find((item) => item.getItemData()?.path === parentPath)
-							?.getId();
-				if (itemId) {
-					await tree.getItemInstance(itemId)?.invalidateChildrenIds();
-				}
-			},
-		});
+	const { createFile, createDirectory, rename, deleteItems, isDeleting } = useFileTreeActions({
+		worktreePath,
+		onRefresh: async (parentPath: string) => {
+			const isRoot = parentPath === worktreePath;
+			const itemId = isRoot
+				? "root"
+				: tree
+						.getItems()
+						.find((item) => item.getItemData()?.path === parentPath)
+						?.getId();
+			if (itemId) {
+				await tree.getItemInstance(itemId)?.invalidateChildrenIds();
+			}
+		},
+	});
 
 	const {
 		searchResults,
@@ -117,8 +108,7 @@ export function FilesView() {
 	});
 
 	const addFileViewerPane = useTabsStore((s) => s.addFileViewerPane);
-	const openFileInEditorMutation =
-		electronTrpc.external.openFileInEditor.useMutation();
+	const openFileInEditorMutation = electronTrpc.external.openFileInEditor.useMutation();
 
 	const [newItemMode, setNewItemMode] = useState<NewItemMode>(null);
 	const [newItemParentPath, setNewItemParentPath] = useState<string>("");
@@ -149,9 +139,7 @@ export function FilesView() {
 	const handleNewFile = useCallback(
 		async (parentPath: string) => {
 			if (parentPath !== worktreePath) {
-				const item = tree
-					.getItems()
-					.find((i) => i.getItemData()?.path === parentPath);
+				const item = tree.getItems().find((i) => i.getItemData()?.path === parentPath);
 				if (item && !item.isExpanded()) {
 					await item.expand();
 				}
@@ -165,9 +153,7 @@ export function FilesView() {
 	const handleNewFolder = useCallback(
 		async (parentPath: string) => {
 			if (parentPath !== worktreePath) {
-				const item = tree
-					.getItems()
-					.find((i) => i.getItemData()?.path === parentPath);
+				const item = tree.getItems().find((i) => i.getItemData()?.path === parentPath);
 				if (item && !item.isExpanded()) {
 					await item.expand();
 				}
@@ -306,9 +292,7 @@ export function FilesView() {
 								</div>
 							) : (
 								<div className="flex-1 flex items-center justify-center text-muted-foreground text-sm p-4">
-									{isSearchFetching
-										? "Searching files..."
-										: "No matching files"}
+									{isSearchFetching ? "Searching files..." : "No matching files"}
 								</div>
 							)
 						) : (
@@ -317,9 +301,7 @@ export function FilesView() {
 									const data = item.getItemData();
 									if (!data || item.getId() === "root") return null;
 									const showNewItemInput =
-										newItemMode &&
-										data.isDirectory &&
-										data.path === newItemParentPath;
+										newItemMode && data.isDirectory && data.path === newItemParentPath;
 									const isRenaming = renameEntry?.path === data.path;
 									return (
 										<div key={item.getId()}>

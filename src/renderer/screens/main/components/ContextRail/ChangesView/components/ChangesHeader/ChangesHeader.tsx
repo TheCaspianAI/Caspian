@@ -1,3 +1,11 @@
+import { useEffect, useRef, useState } from "react";
+import { HiArrowPath, HiCheck } from "react-icons/hi2";
+import { LuGitBranch, LuLoaderCircle } from "react-icons/lu";
+import { VscGitStash, VscGitStashApply } from "react-icons/vsc";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { PRIcon } from "renderer/screens/main/components/PRIcon";
+import { usePRStatus } from "renderer/screens/main/hooks/usePRStatus";
+import { useChangesStore } from "renderer/stores/changes";
 import { Button } from "ui/components/ui/button";
 import {
 	DropdownMenu,
@@ -8,14 +16,6 @@ import {
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { useEffect, useRef, useState } from "react";
-import { HiArrowPath, HiCheck } from "react-icons/hi2";
-import { LuGitBranch, LuLoaderCircle } from "react-icons/lu";
-import { VscGitStash, VscGitStashApply } from "react-icons/vsc";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { PRIcon } from "renderer/screens/main/components/PRIcon";
-import { usePRStatus } from "renderer/screens/main/hooks";
-import { useChangesStore } from "renderer/stores/changes";
 import type { ChangesViewMode } from "../../types";
 import { ViewModeToggle } from "../ViewModeToggle";
 
@@ -33,11 +33,10 @@ interface ChangesHeaderProps {
 
 function BaseBranchSelector({ worktreePath }: { worktreePath: string }) {
 	const { baseBranch, setBaseBranch } = useChangesStore();
-	const { data: branchData, isLoading } =
-		electronTrpc.changes.getBranches.useQuery(
-			{ worktreePath },
-			{ enabled: !!worktreePath },
-		);
+	const { data: branchData, isLoading } = electronTrpc.changes.getBranches.useQuery(
+		{ worktreePath },
+		{ enabled: !!worktreePath },
+	);
 
 	const effectiveBaseBranch = baseBranch ?? branchData?.defaultBranch ?? "main";
 	const sortedBranches = [...(branchData?.remote ?? [])].sort((a, b) => {
@@ -56,12 +55,7 @@ function BaseBranchSelector({ worktreePath }: { worktreePath: string }) {
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<DropdownMenuTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="size-6 p-0"
-							disabled={isLoading}
-						>
+						<Button variant="ghost" size="icon" className="size-6 p-0" disabled={isLoading}>
 							<LuGitBranch className="size-3.5" />
 						</Button>
 					</DropdownMenuTrigger>
@@ -115,12 +109,7 @@ function StashDropdown({
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<DropdownMenuTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="size-6 p-0"
-							disabled={isPending}
-						>
+						<Button variant="ghost" size="icon" className="size-6 p-0" disabled={isPending}>
 							<VscGitStash className="size-4" />
 						</Button>
 					</DropdownMenuTrigger>
@@ -175,9 +164,7 @@ function RefreshButton({ onRefresh }: { onRefresh: () => void }) {
 					disabled={isSpinning}
 					className="size-6 p-0"
 				>
-					<HiArrowPath
-						className={`size-3.5 ${isSpinning ? "animate-spin" : ""}`}
-					/>
+					<HiArrowPath className={`size-3.5 ${isSpinning ? "animate-spin" : ""}`} />
 				</Button>
 			</TooltipTrigger>
 			<TooltipContent side="bottom" showArrow={false}>
@@ -194,9 +181,7 @@ function PRStatusLink({ nodeId }: { nodeId?: string }) {
 	});
 
 	if (isLoading) {
-		return (
-			<LuLoaderCircle className="w-4 h-4 animate-spin text-muted-foreground" />
-		);
+		return <LuLoaderCircle className="w-4 h-4 animate-spin text-muted-foreground" />;
 	}
 
 	if (!pr) return null;
@@ -209,9 +194,7 @@ function PRStatusLink({ nodeId }: { nodeId?: string }) {
 			className="flex items-center gap-1 hover:opacity-80 transition-opacity"
 		>
 			<PRIcon state={pr.state} className="w-4 h-4" />
-			<span className="text-xs text-muted-foreground font-mono">
-				#{pr.number}
-			</span>
+			<span className="text-xs text-muted-foreground font-mono">#{pr.number}</span>
 		</a>
 	);
 }

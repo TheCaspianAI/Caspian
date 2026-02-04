@@ -1,20 +1,15 @@
-import {
-	createFileRoute,
-	Outlet,
-	useMatchRoute,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
 import { ContextRail } from "renderer/screens/main/components/ContextRail";
-import { useAppHotkey } from "renderer/stores/hotkeys";
+import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
 import { useToggleDashboardModal } from "renderer/stores/dashboard-modal";
+import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
 import { useToggleNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
 import { useOpenSettings } from "renderer/stores/settings-state";
 import {
-	MIN_SIDEBAR_WIDTH,
 	MAX_SIDEBAR_WIDTH,
+	MIN_SIDEBAR_WIDTH,
 	useSidebarStore,
 } from "renderer/stores/sidebar-state";
 import { TopBar } from "./components/TopBar";
@@ -24,7 +19,6 @@ export const Route = createFileRoute("/_authenticated/_dashboard")({
 });
 
 function DashboardLayout() {
-	const navigate = useNavigate();
 	const toggleDashboardModal = useToggleDashboardModal();
 	const openNewNodeModal = useOpenNewNodeModal();
 	const toggleNodeSwitcher = useToggleNodeSwitcherModal();
@@ -36,37 +30,20 @@ function DashboardLayout() {
 		to: "/node/$nodeId",
 		fuzzy: true,
 	});
-	const currentNodeId =
-		currentNodeMatch !== false ? currentNodeMatch.nodeId : null;
+	const currentNodeId = currentNodeMatch !== false ? currentNodeMatch.nodeId : null;
 
 	const { data: currentNode } = electronTrpc.nodes.get.useQuery(
 		{ id: currentNodeId ?? "" },
 		{ enabled: !!currentNodeId },
 	);
 
-	const {
-		isSidebarOpen,
-		sidebarWidth,
-		setSidebarWidth,
-		isResizing,
-		setIsResizing,
-		toggleSidebar,
-	} = useSidebarStore();
+	const { isSidebarOpen, sidebarWidth, setSidebarWidth, isResizing, setIsResizing, toggleSidebar } =
+		useSidebarStore();
 
 	// Global hotkeys for dashboard
-	useAppHotkey(
-		"OPEN_SETTINGS",
-		() => openSettings(),
-		undefined,
-		[openSettings],
-	);
+	useAppHotkey("OPEN_SETTINGS", () => openSettings(), undefined, [openSettings]);
 
-	useAppHotkey(
-		"SHOW_HOTKEYS",
-		() => openSettings("preferences"),
-		undefined,
-		[openSettings],
-	);
+	useAppHotkey("SHOW_HOTKEYS", () => openSettings("preferences"), undefined, [openSettings]);
 
 	useAppHotkey(
 		"TOGGLE_NODE_SIDEBAR",
@@ -77,26 +54,14 @@ function DashboardLayout() {
 		[toggleSidebar],
 	);
 
-	useAppHotkey(
-		"NEW_NODE",
-		() => openNewNodeModal(currentNode?.repositoryId),
-		undefined,
-		[openNewNodeModal, currentNode?.repositoryId],
-	);
+	useAppHotkey("NEW_NODE", () => openNewNodeModal(currentNode?.repositoryId), undefined, [
+		openNewNodeModal,
+		currentNode?.repositoryId,
+	]);
 
-	useAppHotkey(
-		"SWITCH_WORKSPACE",
-		() => toggleNodeSwitcher(),
-		undefined,
-		[toggleNodeSwitcher],
-	);
+	useAppHotkey("SWITCH_WORKSPACE", () => toggleNodeSwitcher(), undefined, [toggleNodeSwitcher]);
 
-	useAppHotkey(
-		"OPEN_DASHBOARD",
-		() => toggleDashboardModal(),
-		undefined,
-		[toggleDashboardModal],
-	);
+	useAppHotkey("OPEN_DASHBOARD", () => toggleDashboardModal(), undefined, [toggleDashboardModal]);
 
 	// Only show ContextRail on node routes (requires node context for Files/Changes)
 	const isNodeRoute = !!currentNodeId;

@@ -10,11 +10,7 @@ import {
 } from "react";
 import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 
-function createFileKey(
-	file: ChangedFile,
-	category: ChangeCategory,
-	commitHash?: string,
-): string {
+function createFileKey(file: ChangedFile, category: ChangeCategory, commitHash?: string): string {
 	return `${category}:${commitHash ?? ""}:${file.path}`;
 }
 
@@ -25,11 +21,7 @@ interface ScrollContextValue {
 		commitHash: string | undefined,
 		ref: HTMLDivElement | null,
 	) => void;
-	scrollToFile: (
-		file: ChangedFile,
-		category: ChangeCategory,
-		commitHash?: string,
-	) => void;
+	scrollToFile: (file: ChangedFile, category: ChangeCategory, commitHash?: string) => void;
 	containerRef: RefObject<HTMLDivElement | null>;
 	// Viewed state tracking
 	viewedFiles: Set<string>;
@@ -102,19 +94,10 @@ export function ScrollProvider({ children }: { children: ReactNode }) {
 			activeFileKey,
 			setActiveFileKey,
 		}),
-		[
-			registerFileRef,
-			scrollToFile,
-			viewedFiles,
-			setFileViewed,
-			viewedCount,
-			activeFileKey,
-		],
+		[registerFileRef, scrollToFile, viewedFiles, setFileViewed, viewedCount, activeFileKey],
 	);
 
-	return (
-		<ScrollContext.Provider value={value}>{children}</ScrollContext.Provider>
-	);
+	return <ScrollContext.Provider value={value}>{children}</ScrollContext.Provider>;
 }
 
 export function useScrollContext() {

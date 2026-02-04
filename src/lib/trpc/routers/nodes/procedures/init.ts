@@ -1,13 +1,13 @@
-import { settings } from "lib/local-db";
 import { observable } from "@trpc/server/observable";
+import { settings } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { nodeInitManager } from "main/lib/node-init-manager";
 import type { NodeInitProgress } from "shared/types/node-init";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import { getRepository, getNodeWithRelations } from "../utils/db-helpers";
-import { loadSetupConfig } from "../utils/setup";
+import { getNodeWithRelations, getRepository } from "../utils/db-helpers";
 import { initializeNodeWorktree } from "../utils/node-init";
+import { loadSetupConfig } from "../utils/setup";
 
 function getDefaultPreset() {
 	const row = localDb.select().from(settings).get();
@@ -19,26 +19,18 @@ function getDefaultPreset() {
 export const createInitProcedures = () => {
 	return router({
 		onInitProgress: publicProcedure
-			.input(
-				z.object({ nodeIds: z.array(z.string()).optional() }).optional(),
-			)
+			.input(z.object({ nodeIds: z.array(z.string()).optional() }).optional())
 			.subscription(({ input }) => {
 				return observable<NodeInitProgress>((emit) => {
 					const handler = (progress: NodeInitProgress) => {
-						if (
-							input?.nodeIds &&
-							!input.nodeIds.includes(progress.nodeId)
-						) {
+						if (input?.nodeIds && !input.nodeIds.includes(progress.nodeId)) {
 							return;
 						}
 						emit.next(progress);
 					};
 
 					for (const progress of nodeInitManager.getAllProgress()) {
-						if (
-							!input?.nodeIds ||
-							input.nodeIds.includes(progress.nodeId)
-						) {
+						if (!input?.nodeIds || input.nodeIds.includes(progress.nodeId)) {
 							emit.next(progress);
 						}
 					}
@@ -63,9 +55,7 @@ export const createInitProcedures = () => {
 				const { node, worktree, repository } = relations;
 
 				if (node.deletingAt) {
-					throw new Error(
-						"Cannot retry initialization on a node being deleted",
-					);
+					throw new Error("Cannot retry initialization on a node being deleted");
 				}
 
 				if (!worktree) {
@@ -94,35 +84,31 @@ export const createInitProcedures = () => {
 				return { success: true };
 			}),
 
-		getInitProgress: publicProcedure
-			.input(z.object({ nodeId: z.string() }))
-			.query(({ input }) => {
-				return nodeInitManager.getProgress(input.nodeId) ?? null;
-			}),
+		getInitProgress: publicProcedure.input(z.object({ nodeId: z.string() })).query(({ input }) => {
+			return nodeInitManager.getProgress(input.nodeId) ?? null;
+		}),
 
-		getSetupCommands: publicProcedure
-			.input(z.object({ nodeId: z.string() }))
-			.query(({ input }) => {
-				const relations = getNodeWithRelations(input.nodeId);
+		getSetupCommands: publicProcedure.input(z.object({ nodeId: z.string() })).query(({ input }) => {
+			const relations = getNodeWithRelations(input.nodeId);
 
-				if (!relations) {
-					return null;
-				}
+			if (!relations) {
+				return null;
+			}
 
-				const repository = getRepository(relations.node.repositoryId);
+			const repository = getRepository(relations.node.repositoryId);
 
-				if (!repository) {
-					return null;
-				}
+			if (!repository) {
+				return null;
+			}
 
-				const setupConfig = loadSetupConfig(repository.mainRepoPath);
-				const defaultPreset = getDefaultPreset();
+			const setupConfig = loadSetupConfig(repository.mainRepoPath);
+			const defaultPreset = getDefaultPreset();
 
-				return {
-					repositoryId: repository.id,
-					initialCommands: setupConfig?.setup ?? null,
-					defaultPreset,
-				};
-			}),
+			return {
+				repositoryId: repository.id,
+				initialCommands: setupConfig?.setup ?? null,
+				defaultPreset,
+			};
+		}),
 	});
 };

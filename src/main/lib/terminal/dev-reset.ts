@@ -3,10 +3,7 @@ import { join } from "node:path";
 import { CASPIAN_HOME_DIR } from "main/lib/app-environment";
 import { appState } from "main/lib/app-state";
 import { defaultAppState } from "main/lib/app-state/schemas";
-import {
-	disposeTerminalHostClient,
-	getTerminalHostClient,
-} from "main/lib/terminal-host/client";
+import { disposeTerminalHostClient, getTerminalHostClient } from "main/lib/terminal-host/client";
 
 const TERMINAL_STATE_PATHS = [
 	"terminal-history",
@@ -25,10 +22,7 @@ export async function resetTerminalStateDev(): Promise<void> {
 		const client = getTerminalHostClient();
 		await client.shutdownIfRunning({ killSessions: true });
 	} catch (error) {
-		console.warn(
-			"[dev/reset-terminal-state] Failed to shutdown daemon (best-effort):",
-			error,
-		);
+		console.warn("[dev/reset-terminal-state] Failed to shutdown daemon (best-effort):", error);
 	} finally {
 		disposeTerminalHostClient();
 	}
@@ -36,11 +30,7 @@ export async function resetTerminalStateDev(): Promise<void> {
 	for (const relativePath of TERMINAL_STATE_PATHS) {
 		const fullPath = join(CASPIAN_HOME_DIR, relativePath);
 		await rm(fullPath, { recursive: true, force: true }).catch((error) => {
-			console.warn(
-				"[dev/reset-terminal-state] Failed to remove state path:",
-				fullPath,
-				error,
-			);
+			console.warn("[dev/reset-terminal-state] Failed to remove state path:", fullPath, error);
 		});
 	}
 
@@ -49,10 +39,7 @@ export async function resetTerminalStateDev(): Promise<void> {
 	try {
 		await appState.write();
 	} catch (error) {
-		console.warn(
-			"[dev/reset-terminal-state] Failed to persist app state reset:",
-			error,
-		);
+		console.warn("[dev/reset-terminal-state] Failed to persist app state reset:", error);
 	}
 
 	console.log("[dev/reset-terminal-state] Done.");

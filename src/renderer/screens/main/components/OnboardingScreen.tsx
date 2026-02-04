@@ -1,8 +1,8 @@
-import { Button } from "ui/components/ui/button";
 import { motion } from "framer-motion";
-import { LuGitBranch, LuBot, LuZap } from "react-icons/lu";
-import { AnimatedTerminal, TERMINAL_SCRIPTS } from "./AnimatedTerminal";
+import { LuBot, LuGitBranch, LuZap } from "react-icons/lu";
 import caspianLogo from "renderer/assets/caspian-logo.jpeg";
+import { Button } from "ui/components/ui/button";
+import { AnimatedTerminal, TERMINAL_SCRIPTS } from "./AnimatedTerminal";
 
 interface OnboardingScreenProps {
 	onContinue: () => void;
@@ -59,7 +59,8 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					transition={{ duration: 0.5, delay: 0.3 }}
 					className="text-lg text-foreground mb-12"
 				>
-					Caspian lets you run <span className="text-primary font-medium">multiple AI agents in parallel</span>
+					Caspian lets you run{" "}
+					<span className="text-primary font-medium">multiple AI agents in parallel</span>
 					<br />
 					each in its own isolated workspace called a <span className="font-semibold">node</span>.
 				</motion.p>
@@ -77,11 +78,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 						{ label: "Write tests", script: TERMINAL_SCRIPTS.writeTests, delay: 5000 },
 					].map((node) => (
 						<div key={node.label} className="flex flex-col items-center">
-							<AnimatedTerminal
-								title={node.label}
-								script={node.script}
-								delay={node.delay}
-							/>
+							<AnimatedTerminal title={node.label} script={node.script} delay={node.delay} />
 							<div className="w-px h-4 bg-border/40 mt-2" />
 						</div>
 					))}
@@ -128,11 +125,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 1 }}
 				>
-					<Button
-						size="lg"
-						onClick={onContinue}
-						className="px-8 py-6 text-base"
-					>
+					<Button size="lg" onClick={onContinue} className="px-8 py-6 text-base">
 						Get Started
 					</Button>
 				</motion.div>

@@ -10,10 +10,7 @@ const schema = z
 		message: "Must provide nodeId or nodeName",
 	});
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	let targetNodeId = params.nodeId;
 
 	// Lookup node by name if no ID provided
@@ -25,9 +22,7 @@ async function execute(
 
 		const searchName = params.nodeName.toLowerCase();
 		const found = nodes.find(
-			(n) =>
-				n.name.toLowerCase() === searchName ||
-				n.branch.toLowerCase() === searchName,
+			(n) => n.name.toLowerCase() === searchName || n.branch.toLowerCase() === searchName,
 		);
 
 		if (!found) {
@@ -52,8 +47,7 @@ async function execute(
 	} catch (error) {
 		return {
 			success: false,
-			error:
-				error instanceof Error ? error.message : "Failed to switch node",
+			error: error instanceof Error ? error.message : "Failed to switch node",
 		};
 	}
 }

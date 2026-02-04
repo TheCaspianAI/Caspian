@@ -98,9 +98,7 @@ export interface UseTerminalLifecycleOptions {
 	connectionErrorRef: MutableRefObject<string | null>;
 	initialThemeRef: MutableRefObject<ITheme | null>;
 	nodeCwdRef: MutableRefObject<string | null>;
-	handleFileLinkClickRef: MutableRefObject<
-		(path: string, line?: number, column?: number) => void
-	>;
+	handleFileLinkClickRef: MutableRefObject<(path: string, line?: number, column?: number) => void>;
 	paneInitialCommandsRef: MutableRefObject<string[] | undefined>;
 	paneInitialCwdRef: MutableRefObject<string | undefined>;
 	clearPaneInitialDataRef: MutableRefObject<(paneId: string) => void>;
@@ -215,8 +213,7 @@ export function useTerminalLifecycle({
 		} = createTerminalInstance(container, {
 			cwd: nodeCwdRef.current ?? undefined,
 			initialTheme: initialThemeRef.current,
-			onFileLinkClick: (path, line, column) =>
-				handleFileLinkClickRef.current(path, line, column),
+			onFileLinkClick: (path, line, column) => handleFileLinkClickRef.current(path, line, column),
 		});
 
 		const scheduleScrollToBottom = () => {
@@ -310,10 +307,7 @@ export function useTerminalLifecycle({
 			writeRef.current({ paneId, data });
 		};
 
-		const handleKeyPress = (event: {
-			key: string;
-			domEvent: KeyboardEvent;
-		}) => {
+		const handleKeyPress = (event: { key: string; domEvent: KeyboardEvent }) => {
 			if (isRestoredModeRef.current || connectionErrorRef.current) return;
 			const { domEvent } = event;
 			if (domEvent.key === "Enter") {
@@ -331,25 +325,15 @@ export function useTerminalLifecycle({
 			} else if (domEvent.key === "c" && domEvent.ctrlKey) {
 				commandBufferRef.current = "";
 				const currentPane = useTabsStore.getState().panes[paneId];
-				if (
-					currentPane?.status === "working" ||
-					currentPane?.status === "permission"
-				) {
+				if (currentPane?.status === "working" || currentPane?.status === "permission") {
 					useTabsStore.getState().setPaneStatus(paneId, "idle");
 				}
 			} else if (domEvent.key === "Escape") {
 				const currentPane = useTabsStore.getState().panes[paneId];
-				if (
-					currentPane?.status === "working" ||
-					currentPane?.status === "permission"
-				) {
+				if (currentPane?.status === "working" || currentPane?.status === "permission") {
 					useTabsStore.getState().setPaneStatus(paneId, "idle");
 				}
-			} else if (
-				domEvent.key.length === 1 &&
-				!domEvent.ctrlKey &&
-				!domEvent.metaKey
-			) {
+			} else if (domEvent.key.length === 1 && !domEvent.ctrlKey && !domEvent.metaKey) {
 				commandBufferRef.current += domEvent.key;
 			}
 		};
@@ -409,18 +393,14 @@ export function useTerminalLifecycle({
 									setIsRestoredMode(true);
 									setRestoredCwd(storedColdRestore.cwd);
 									if (storedColdRestore.scrollback && xterm) {
-										xterm.write(
-											storedColdRestore.scrollback,
-											scheduleScrollToBottom,
-										);
+										xterm.write(storedColdRestore.scrollback, scheduleScrollToBottom);
 									}
 									didFirstRenderRef.current = true;
 									return;
 								}
 
 								if (result.isColdRestore) {
-									const scrollback =
-										result.snapshot?.snapshotAnsi ?? result.scrollback;
+									const scrollback = result.snapshot?.snapshotAnsi ?? result.scrollback;
 									coldRestoreState.set(paneId, {
 										isRestored: true,
 										cwd: result.previousCwd || null,
@@ -449,9 +429,7 @@ export function useTerminalLifecycle({
 									return;
 								}
 								console.error("[Terminal] Failed to create/attach:", error);
-								setConnectionError(
-									error.message || "Failed to connect to terminal",
-								);
+								setConnectionError(error.message || "Failed to connect to terminal");
 								isStreamReadyRef.current = true;
 								flushPendingEvents();
 							},
@@ -496,14 +474,9 @@ export function useTerminalLifecycle({
 		registerClearCallbackRef.current(paneId, handleClear);
 		registerScrollToBottomCallbackRef.current(paneId, handleScrollToBottom);
 
-		const cleanupFocus = setupFocusListener(xterm, () =>
-			handleTerminalFocusRef.current(),
-		);
-		const cleanupResize = setupResizeHandlers(
-			container,
-			xterm,
-			fitAddon,
-			(cols, rows) => resizeRef.current({ paneId, cols, rows }),
+		const cleanupFocus = setupFocusListener(xterm, () => handleTerminalFocusRef.current());
+		const cleanupResize = setupResizeHandlers(container, xterm, fitAddon, (cols, rows) =>
+			resizeRef.current({ paneId, cols, rows }),
 		);
 		const cleanupPaste = setupPasteHandler(xterm, {
 			onPaste: (text) => {
@@ -533,8 +506,7 @@ export function useTerminalLifecycle({
 		};
 		document.addEventListener("visibilitychange", handleVisibilityChange);
 
-		const isPaneDestroyedInStore = () =>
-			isPaneDestroyed(useTabsStore.getState().panes, paneId);
+		const isPaneDestroyedInStore = () => isPaneDestroyed(useTabsStore.getState().panes, paneId);
 
 		return () => {
 			if (DEBUG_TERMINAL) {

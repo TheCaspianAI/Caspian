@@ -79,11 +79,7 @@ export const useNodeInitProgress = (nodeId: string) =>
 export const useIsNodeInitializing = (nodeId: string) =>
 	useNodeInitStore((state) => {
 		const progress = state.initProgress[nodeId];
-		return (
-			progress !== undefined &&
-			progress.step !== "ready" &&
-			progress.step !== "failed"
-		);
+		return progress !== undefined && progress.step !== "ready" && progress.step !== "failed";
 	});
 
 export const useHasNodeFailed = (nodeId: string) =>

@@ -1,10 +1,7 @@
-import { Kbd } from "ui/components/ui/kbd";
 import type { ReactNode } from "react";
-import {
-	useEffectiveHotkeysMap,
-	useHotkeysStore,
-} from "renderer/stores/hotkeys";
+import { useEffectiveHotkeysMap, useHotkeysStore } from "renderer/stores/hotkeys";
 import { formatHotkeyDisplay, type HotkeyId } from "shared/hotkeys";
+import { Kbd } from "ui/components/ui/kbd";
 
 export interface HotkeyTooltipContentItem {
 	label: string;
@@ -60,10 +57,7 @@ export function HotkeyTooltipContent({
 				{visibleItems.length > 0 && (
 					<div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
 						{visibleItems.map((item) => (
-							<span
-								key={item.id}
-								className="flex items-center justify-between gap-2"
-							>
+							<span key={item.id} className="flex items-center justify-between gap-2">
 								<span>{item.label}</span>
 								{renderShortcut(item.id)}
 							</span>

@@ -9,16 +9,13 @@
  * TerminalRuntime interface.
  */
 
-import {
-	type DaemonTerminalManager,
-	getDaemonTerminalManager,
-} from "../terminal";
+import { type DaemonTerminalManager, getDaemonTerminalManager } from "../terminal";
 import type {
+	NodeRuntime,
+	NodeRuntimeId,
 	TerminalCapabilities,
 	TerminalManagement,
 	TerminalRuntime,
-	NodeRuntime,
-	NodeRuntimeId,
 } from "./types";
 
 // =============================================================================
@@ -103,14 +100,11 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		return this.backend.killByWorkspaceId(workspaceId);
 	};
 
-	getSessionCountByWorkspaceId: TerminalRuntime["getSessionCountByWorkspaceId"] =
-		(workspaceId) => {
-			return this.backend.getSessionCountByWorkspaceId(workspaceId);
-		};
+	getSessionCountByWorkspaceId: TerminalRuntime["getSessionCountByWorkspaceId"] = (workspaceId) => {
+		return this.backend.getSessionCountByWorkspaceId(workspaceId);
+	};
 
-	refreshPromptsForWorkspace: TerminalRuntime["refreshPromptsForWorkspace"] = (
-		workspaceId,
-	) => {
+	refreshPromptsForWorkspace: TerminalRuntime["refreshPromptsForWorkspace"] = (workspaceId) => {
 		return this.backend.refreshPromptsForWorkspace(workspaceId);
 	};
 
@@ -139,18 +133,12 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		return this.backend.emit(event, ...args);
 	}
 
-	addListener(
-		event: string | symbol,
-		listener: (...args: unknown[]) => void,
-	): this {
+	addListener(event: string | symbol, listener: (...args: unknown[]) => void): this {
 		this.backend.addListener(event, listener);
 		return this;
 	}
 
-	removeListener(
-		event: string | symbol,
-		listener: (...args: unknown[]) => void,
-	): this {
+	removeListener(event: string | symbol, listener: (...args: unknown[]) => void): this {
 		this.backend.removeListener(event, listener);
 		return this;
 	}
@@ -179,25 +167,16 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		return this.backend.rawListeners(event);
 	}
 
-	listenerCount(
-		event: string | symbol,
-		listener?: (...args: unknown[]) => void,
-	): number {
+	listenerCount(event: string | symbol, listener?: (...args: unknown[]) => void): number {
 		return this.backend.listenerCount(event, listener);
 	}
 
-	prependListener(
-		event: string | symbol,
-		listener: (...args: unknown[]) => void,
-	): this {
+	prependListener(event: string | symbol, listener: (...args: unknown[]) => void): this {
 		this.backend.prependListener(event, listener);
 		return this;
 	}
 
-	prependOnceListener(
-		event: string | symbol,
-		listener: (...args: unknown[]) => void,
-	): this {
+	prependOnceListener(event: string | symbol, listener: (...args: unknown[]) => void): this {
 		this.backend.prependOnceListener(event, listener);
 		return this;
 	}

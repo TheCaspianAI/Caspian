@@ -1,15 +1,8 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LuChevronsDownUp, LuCircleDot, LuFile, LuFolder, LuRefreshCw, LuX } from "react-icons/lu";
 import { Button } from "ui/components/ui/button";
 import { Input } from "ui/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-	LuChevronsDownUp,
-	LuFile,
-	LuFolder,
-	LuRefreshCw,
-	LuX,
-	LuCircleDot,
-} from "react-icons/lu";
 import { SEARCH_DEBOUNCE_MS } from "../../constants";
 
 interface FileTreeToolbarProps {
@@ -104,12 +97,7 @@ export function FileTreeToolbar({
 			<div className="flex items-center gap-2 text-muted-foreground">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="size-6"
-							onClick={onNewFile}
-						>
+						<Button variant="ghost" size="icon" className="size-6" onClick={onNewFile}>
 							<LuFile className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
@@ -118,12 +106,7 @@ export function FileTreeToolbar({
 
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="size-6"
-							onClick={onNewFolder}
-						>
+						<Button variant="ghost" size="icon" className="size-6" onClick={onNewFolder}>
 							<LuFolder className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
@@ -150,12 +133,7 @@ export function FileTreeToolbar({
 
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="size-6"
-							onClick={onCollapseAll}
-						>
+						<Button variant="ghost" size="icon" className="size-6" onClick={onCollapseAll}>
 							<LuChevronsDownUp className="size-3.5" />
 						</Button>
 					</TooltipTrigger>
@@ -171,9 +149,7 @@ export function FileTreeToolbar({
 							onClick={onRefresh}
 							disabled={isRefreshing}
 						>
-							<LuRefreshCw
-								className={`size-3.5 ${isRefreshing ? "animate-spin" : ""}`}
-							/>
+							<LuRefreshCw className={`size-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">Refresh</TooltipContent>

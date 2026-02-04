@@ -1,10 +1,5 @@
 import { z } from "zod";
-import type {
-	BulkItemError,
-	CommandResult,
-	ToolContext,
-	ToolDefinition,
-} from "./types";
+import type { BulkItemError, CommandResult, ToolContext, ToolDefinition } from "./types";
 import { buildBulkResult } from "./types";
 
 const nodeInputSchema = z.object({
@@ -23,10 +18,7 @@ interface CreatedNode {
 	branch: string;
 }
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	// Derive repositoryId from current node or use the only available repository
 	const nodes = ctx.getNodes();
 	if (!nodes || nodes.length === 0) {
@@ -37,9 +29,7 @@ async function execute(
 	let repositoryId: string | null = null;
 	const activeNodeId = ctx.getActiveNodeId();
 	if (activeNodeId) {
-		const activeNode = nodes.find(
-			(n) => n.id === activeNodeId,
-		);
+		const activeNode = nodes.find((n) => n.id === activeNodeId);
 		if (activeNode) {
 			repositoryId = activeNode.repositoryId;
 		}
@@ -47,9 +37,7 @@ async function execute(
 
 	// Fall back to the most recently used node's repository
 	if (!repositoryId) {
-		const sorted = [...nodes].sort(
-			(a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0),
-		);
+		const sorted = [...nodes].sort((a, b) => (b.lastOpenedAt ?? 0) - (a.lastOpenedAt ?? 0));
 		repositoryId = sorted[0].repositoryId;
 	}
 
@@ -75,8 +63,7 @@ async function execute(
 				index: i,
 				name: input.name,
 				branchName: input.branchName,
-				error:
-					error instanceof Error ? error.message : "Failed to create node",
+				error: error instanceof Error ? error.message : "Failed to create node",
 			});
 		}
 	}

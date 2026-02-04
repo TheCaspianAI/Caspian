@@ -1,4 +1,12 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { LuPlus } from "react-icons/lu";
+import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
+import { useDashboardModalOpen, useToggleDashboardModal } from "renderer/stores/dashboard-modal";
+import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
+import { useOpenNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -6,21 +14,10 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from "ui/components/ui/context-menu";
-import { useParams, useNavigate } from "@tanstack/react-router";
-import { LuPlus } from "react-icons/lu";
-import { useRef, useEffect } from "react";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
-import { useOpenNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
-import {
-	useDashboardModalOpen,
-	useToggleDashboardModal,
-} from "renderer/stores/dashboard-modal";
-import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
-import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
-import { DeleteNodeDialog } from "../NodesListView/components/DeleteNodeDialog/DeleteNodeDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useNodeRename } from "../../hooks/useNodeRename/useNodeRename";
 import { useRepositoryRename } from "../../hooks/useRepositoryRename/useRepositoryRename";
+import { DeleteNodeDialog } from "../NodesListView/components/DeleteNodeDialog/DeleteNodeDialog";
 
 export function ContextHeader() {
 	const { nodeId } = useParams({ strict: false });
@@ -29,8 +26,7 @@ export function ContextHeader() {
 	const openNodeSwitcher = useOpenNodeSwitcherModal();
 	const isDashboardOpen = useDashboardModalOpen();
 	const toggleDashboard = useToggleDashboardModal();
-	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } =
-		useNodeDeleteHandler();
+	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
 
 	const { data: node } = electronTrpc.nodes.get.useQuery(
 		{ id: nodeId ?? "" },
@@ -43,10 +39,7 @@ export function ContextHeader() {
 
 	// Rename hooks
 	const nodeRename = useNodeRename(nodeId ?? "", node?.name ?? "");
-	const repoRename = useRepositoryRename(
-		node?.repositoryId ?? "",
-		repository?.name ?? "",
-	);
+	const repoRename = useRepositoryRename(node?.repositoryId ?? "", repository?.name ?? "");
 
 	// Refs for rename inputs
 	const nodeInputRef = useRef<HTMLInputElement>(null);
@@ -181,7 +174,9 @@ export function ContextHeader() {
 													role="button"
 													tabIndex={0}
 													onClick={handleNewNode}
-													onKeyDown={(e) => e.key === "Enter" && handleNewNode(e as unknown as React.MouseEvent)}
+													onKeyDown={(e) =>
+														e.key === "Enter" && handleNewNode(e as unknown as React.MouseEvent)
+													}
 													className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground focus:opacity-100 focus:outline-none"
 												>
 													<LuPlus className="size-3.5" />
@@ -202,16 +197,10 @@ export function ContextHeader() {
 				</ContextMenuTrigger>
 				<ContextMenuContent>
 					{/* Node actions */}
-					<ContextMenuItem
-						onSelect={() => nodeRename.startRename()}
-						disabled={!nodeId}
-					>
+					<ContextMenuItem onSelect={() => nodeRename.startRename()} disabled={!nodeId}>
 						Rename node
 					</ContextMenuItem>
-					<ContextMenuItem
-						onSelect={handleOpenInFinder}
-						disabled={!node?.worktreePath}
-					>
+					<ContextMenuItem onSelect={handleOpenInFinder} disabled={!node?.worktreePath}>
 						Open in Finder
 					</ContextMenuItem>
 					<ContextMenuItem
@@ -225,10 +214,7 @@ export function ContextHeader() {
 					<ContextMenuSeparator />
 
 					{/* Repository actions */}
-					<ContextMenuItem
-						onSelect={() => repoRename.startRename()}
-						disabled={!node?.repositoryId}
-					>
+					<ContextMenuItem onSelect={() => repoRename.startRename()} disabled={!node?.repositoryId}>
 						Rename repository
 					</ContextMenuItem>
 					<ContextMenuItem

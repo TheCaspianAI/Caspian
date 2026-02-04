@@ -1,10 +1,10 @@
-import { cn } from "ui/lib/utils";
 import { useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
-import { useMarkdownStyle } from "renderer/stores";
+import { useMarkdownStyle } from "renderer/stores/markdown-preferences";
+import { cn } from "ui/lib/utils";
 import { SelectionContextMenu } from "./components";
 import { defaultConfig } from "./styles/default/config";
 import { tufteConfig } from "./styles/tufte/config";
@@ -20,11 +20,7 @@ interface MarkdownRendererProps {
 	className?: string;
 }
 
-export function MarkdownRenderer({
-	content,
-	style: styleProp,
-	className,
-}: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, style: styleProp, className }: MarkdownRendererProps) {
 	const globalStyle = useMarkdownStyle();
 	const style = styleProp ?? globalStyle;
 	const config = styleConfigs[style];

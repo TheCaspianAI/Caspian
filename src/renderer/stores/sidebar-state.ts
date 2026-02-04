@@ -44,8 +44,7 @@ export const useSidebarStore = create<SidebarState>()(
 				rightSidebarTab: RightSidebarTab.Changes,
 
 				toggleSidebar: () => {
-					const { isSidebarOpen, lastOpenSidebarWidth, currentMode, lastMode } =
-						get();
+					const { isSidebarOpen, lastOpenSidebarWidth, currentMode, lastMode } = get();
 					if (isSidebarOpen) {
 						set({
 							isSidebarOpen: false,
@@ -81,10 +80,7 @@ export const useSidebarStore = create<SidebarState>()(
 				},
 
 				setSidebarWidth: (width) => {
-					const clampedWidth = Math.max(
-						MIN_SIDEBAR_WIDTH,
-						Math.min(MAX_SIDEBAR_WIDTH, width),
-					);
+					const clampedWidth = Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, width));
 
 					if (width > 0) {
 						set({

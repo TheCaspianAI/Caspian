@@ -333,10 +333,7 @@ export interface TerminalErrorEvent {
 	code?: "WRITE_QUEUE_FULL" | "SUBPROCESS_ERROR" | "WRITE_FAILED" | "UNKNOWN";
 }
 
-export type TerminalEvent =
-	| TerminalDataEvent
-	| TerminalExitEvent
-	| TerminalErrorEvent;
+export type TerminalEvent = TerminalDataEvent | TerminalExitEvent | TerminalErrorEvent;
 
 // =============================================================================
 // Request/Response Type Map

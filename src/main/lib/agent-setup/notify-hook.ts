@@ -6,11 +6,7 @@ import { HOOKS_DIR } from "./paths";
 export const NOTIFY_SCRIPT_NAME = "notify.sh";
 export const NOTIFY_SCRIPT_MARKER = "# Caspian agent notification hook";
 
-const NOTIFY_SCRIPT_TEMPLATE_PATH = path.join(
-	__dirname,
-	"templates",
-	"notify-hook.template.sh",
-);
+const NOTIFY_SCRIPT_TEMPLATE_PATH = path.join(__dirname, "templates", "notify-hook.template.sh");
 
 export function getNotifyScriptPath(): string {
 	return path.join(HOOKS_DIR, NOTIFY_SCRIPT_NAME);

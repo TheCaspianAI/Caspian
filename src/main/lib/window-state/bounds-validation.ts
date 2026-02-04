@@ -27,10 +27,7 @@ export function isVisibleOnAnyDisplay(bounds: Rectangle): boolean {
  * Clamps dimensions to not exceed the primary display work area.
  * Handles DPI/resolution changes since last save.
  */
-function clampToWorkArea(
-	width: number,
-	height: number,
-): { width: number; height: number } {
+function clampToWorkArea(width: number, height: number): { width: number; height: number } {
 	const { workAreaSize } = screen.getPrimaryDisplay();
 	return {
 		width: Math.min(Math.max(width, MIN_WINDOW_SIZE), workAreaSize.width),
@@ -54,9 +51,7 @@ export interface InitialWindowBounds {
  * - Saved position visible → restore exactly
  * - Saved position not visible (monitor disconnected) → use saved size, but center
  */
-export function getInitialWindowBounds(
-	savedState: WindowState | null,
-): InitialWindowBounds {
+export function getInitialWindowBounds(savedState: WindowState | null): InitialWindowBounds {
 	const { workAreaSize } = screen.getPrimaryDisplay();
 
 	// No saved state → default to primary display size, centered
@@ -69,10 +64,7 @@ export function getInitialWindowBounds(
 		};
 	}
 
-	const { width, height } = clampToWorkArea(
-		savedState.width,
-		savedState.height,
-	);
+	const { width, height } = clampToWorkArea(savedState.width, savedState.height);
 
 	const savedBounds: Rectangle = {
 		x: savedState.x,

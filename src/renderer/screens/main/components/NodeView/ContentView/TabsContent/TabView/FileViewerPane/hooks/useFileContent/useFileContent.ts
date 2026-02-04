@@ -47,12 +47,10 @@ export function useFileContent({
 				oldPath,
 				category: diffCategory ?? "unstaged",
 				commitHash,
-				defaultBranch:
-					diffCategory === "against-base" ? effectiveBaseBranch : undefined,
+				defaultBranch: diffCategory === "against-base" ? effectiveBaseBranch : undefined,
 			},
 			{
-				enabled:
-					viewMode === "diff" && !!diffCategory && !!filePath && !!worktreePath,
+				enabled: viewMode === "diff" && !!diffCategory && !!filePath && !!worktreePath,
 			},
 		);
 

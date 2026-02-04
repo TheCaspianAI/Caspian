@@ -11,16 +11,12 @@ const GHRepoOwnerResponseSchema = z.object({
  * Fetches the GitHub owner (user or org) for a repository using the `gh` CLI.
  * Returns null if `gh` is not installed, not authenticated, or on error.
  */
-export async function fetchGitHubOwner(
-	repoPath: string,
-): Promise<string | null> {
+export async function fetchGitHubOwner(repoPath: string): Promise<string | null> {
 	try {
 		console.log("[fetchGitHubOwner] Running gh repo view in:", repoPath);
-		const { stdout, stderr } = await execWithShellEnv(
-			"gh",
-			["repo", "view", "--json", "owner"],
-			{ cwd: repoPath },
-		);
+		const { stdout, stderr } = await execWithShellEnv("gh", ["repo", "view", "--json", "owner"], {
+			cwd: repoPath,
+		});
 		if (stderr) {
 			console.log("[fetchGitHubOwner] stderr:", stderr);
 		}

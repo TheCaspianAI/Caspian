@@ -10,11 +10,7 @@ type Collections = Record<string, never>;
 const CollectionsContext = createContext<Collections | null>(null);
 
 export function CollectionsProvider({ children }: { children: ReactNode }) {
-	return (
-		<CollectionsContext.Provider value={{}}>
-			{children}
-		</CollectionsContext.Provider>
-	);
+	return <CollectionsContext.Provider value={{}}>{children}</CollectionsContext.Provider>;
 }
 
 export function useCollections(): Collections {

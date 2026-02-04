@@ -1,6 +1,3 @@
-import { Button } from "ui/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { cn } from "ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { getEmptyImage } from "react-dnd-html5-backend";
@@ -11,6 +8,9 @@ import { StatusIndicator } from "renderer/screens/main/components/StatusIndicato
 import { useDragPaneStore } from "renderer/stores/drag-pane-store";
 import type { PaneStatus, Tab } from "renderer/stores/tabs/types";
 import { getTabDisplayName } from "renderer/stores/tabs/utils";
+import { Button } from "ui/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { cn } from "ui/lib/utils";
 
 export const TAB_TYPE = "TAB";
 
@@ -78,21 +78,12 @@ export function GroupItem({
 					return item.tabId !== tab.id;
 				}
 				// Pane drop
-				const { draggingPaneId, draggingSourceTabId } =
-					useDragPaneStore.getState();
-				return (
-					!!draggingPaneId &&
-					!!draggingSourceTabId &&
-					draggingSourceTabId !== tab.id
-				);
+				const { draggingPaneId, draggingSourceTabId } = useDragPaneStore.getState();
+				return !!draggingPaneId && !!draggingSourceTabId && draggingSourceTabId !== tab.id;
 			},
 			hover: (item, monitor) => {
 				const itemType = monitor.getItemType();
-				if (
-					itemType === TAB_TYPE &&
-					item.index !== undefined &&
-					item.index !== index
-				) {
+				if (itemType === TAB_TYPE && item.index !== undefined && item.index !== index) {
 					onReorder?.(item.index, index);
 					item.index = index;
 				}
@@ -104,13 +95,8 @@ export function GroupItem({
 					return { handled: true };
 				}
 				// Pane drop
-				const { draggingPaneId, draggingSourceTabId, clearDragging } =
-					useDragPaneStore.getState();
-				if (
-					draggingPaneId &&
-					draggingSourceTabId &&
-					draggingSourceTabId !== tab.id
-				) {
+				const { draggingPaneId, draggingSourceTabId, clearDragging } = useDragPaneStore.getState();
+				if (draggingPaneId && draggingSourceTabId && draggingSourceTabId !== tab.id) {
 					onPaneDrop?.(draggingPaneId);
 				}
 				clearDragging();
@@ -204,9 +190,7 @@ export function GroupItem({
 							<span className="text-sm whitespace-nowrap overflow-hidden flex-1 text-left">
 								{displayName}
 							</span>
-							{status && status !== "idle" && (
-								<StatusIndicator status={status} />
-							)}
+							{status && status !== "idle" && <StatusIndicator status={status} />}
 						</button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom" sideOffset={4}>
@@ -218,9 +202,7 @@ export function GroupItem({
 						) : (
 							<>
 								<span>{displayName}</span>
-								<span className="text-muted-foreground ml-1.5">
-									Double-click to rename
-								</span>
+								<span className="text-muted-foreground ml-1.5">Double-click to rename</span>
 							</>
 						)}
 					</TooltipContent>

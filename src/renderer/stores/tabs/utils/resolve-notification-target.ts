@@ -27,9 +27,7 @@ export function resolveNotificationTarget(
 	// Resolve tabId: prefer pane's tabId, fallback to event tabId
 	const resolvedTabId = pane?.tabId ?? tabId;
 
-	const tab = resolvedTabId
-		? state.tabs.find((t) => t.id === resolvedTabId)
-		: undefined;
+	const tab = resolvedTabId ? state.tabs.find((t) => t.id === resolvedTabId) : undefined;
 
 	// Resolve nodeId: prefer event, fallback to tab's node
 	const resolvedNodeId = nodeId || tab?.nodeId;

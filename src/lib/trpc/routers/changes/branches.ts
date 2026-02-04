@@ -1,62 +1,53 @@
-import { worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
+import { worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import simpleGit from "simple-git";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import {
-	assertRegisteredWorktree,
-	getRegisteredWorktree,
-	gitSwitchBranch,
-} from "./security";
+import { assertRegisteredWorktree, getRegisteredWorktree, gitSwitchBranch } from "./security";
 
 export const createBranchesRouter = () => {
 	return router({
-		getBranches: publicProcedure
-			.input(z.object({ worktreePath: z.string() }))
-			.query(
-				async ({
-					input,
-				}): Promise<{
-					local: Array<{ branch: string; lastCommitDate: number }>;
-					remote: string[];
-					defaultBranch: string;
-					checkedOutBranches: Record<string, string>;
-				}> => {
-					assertRegisteredWorktree(input.worktreePath);
+		getBranches: publicProcedure.input(z.object({ worktreePath: z.string() })).query(
+			async ({
+				input,
+			}): Promise<{
+				local: Array<{ branch: string; lastCommitDate: number }>;
+				remote: string[];
+				defaultBranch: string;
+				checkedOutBranches: Record<string, string>;
+			}> => {
+				assertRegisteredWorktree(input.worktreePath);
 
-					const git = simpleGit(input.worktreePath);
+				const git = simpleGit(input.worktreePath);
 
-					const branchSummary = await git.branch(["-a"]);
+				const branchSummary = await git.branch(["-a"]);
 
-					const localBranches: string[] = [];
-					const remote: string[] = [];
+				const localBranches: string[] = [];
+				const remote: string[] = [];
 
-					for (const name of Object.keys(branchSummary.branches)) {
-						if (name.startsWith("remotes/origin/")) {
-							if (name === "remotes/origin/HEAD") continue;
-							const remoteName = name.replace("remotes/origin/", "");
-							remote.push(remoteName);
-						} else {
-							localBranches.push(name);
-						}
+				for (const name of Object.keys(branchSummary.branches)) {
+					if (name.startsWith("remotes/origin/")) {
+						if (name === "remotes/origin/HEAD") continue;
+						const remoteName = name.replace("remotes/origin/", "");
+						remote.push(remoteName);
+					} else {
+						localBranches.push(name);
 					}
+				}
 
-					const local = await getLocalBranchesWithDates(git, localBranches);
-					const defaultBranch = await getDefaultBranch(git, remote);
-					const checkedOutBranches = await getCheckedOutBranches(
-						git,
-						input.worktreePath,
-					);
+				const local = await getLocalBranchesWithDates(git, localBranches);
+				const defaultBranch = await getDefaultBranch(git, remote);
+				const checkedOutBranches = await getCheckedOutBranches(git, input.worktreePath);
 
-					return {
-						local,
-						remote: remote.sort(),
-						defaultBranch,
-						checkedOutBranches,
-					};
-				},
-			),
+				return {
+					local,
+					remote: remote.sort(),
+					defaultBranch,
+					checkedOutBranches,
+				};
+			},
+		),
 
 		switchBranch: publicProcedure
 			.input(

@@ -1,8 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { useTabsStore } from "renderer/stores/tabs/store";
-import { useAgentsData } from "./useAgentsData";
 import { StatusLane } from "./StatusLane";
+import { useAgentsData } from "./useAgentsData";
 
 interface DashboardContentProps {
 	onClose: () => void;
@@ -32,7 +32,7 @@ export function DashboardContent({ onClose }: DashboardContentProps) {
 			// Close the modal
 			onClose();
 		},
-		[navigate, tabs, setActiveTab, setFocusedPane, onClose]
+		[navigate, tabs, setActiveTab, setFocusedPane, onClose],
 	);
 
 	return (

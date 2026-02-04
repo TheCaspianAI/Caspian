@@ -1,7 +1,7 @@
-import { Button } from "ui/components/ui/button";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useCreateNode } from "renderer/react-query/nodes";
+import { Button } from "ui/components/ui/button";
 
 function getBasename(path: string): string {
 	// Handle both Unix and Windows paths
@@ -24,12 +24,7 @@ interface InitGitDialogProps {
 	onError: (error: string) => void;
 }
 
-export function InitGitDialog({
-	isOpen,
-	selectedPath,
-	onClose,
-	onError,
-}: InitGitDialogProps) {
+export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGitDialogProps) {
 	const utils = electronTrpc.useUtils();
 	const initGitAndOpen = electronTrpc.repositories.initGitAndOpen.useMutation();
 	const createNode = useCreateNode();
@@ -59,8 +54,7 @@ export function InitGitDialog({
 			previouslyFocusedRef.current = document.activeElement as HTMLElement;
 			// Move focus to the first focusable element in the dialog
 			requestAnimationFrame(() => {
-				const firstFocusable =
-					dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+				const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
 				firstFocusable?.focus();
 			});
 		} else {
@@ -168,12 +162,8 @@ export function InitGitDialog({
 				</p>
 
 				<div className="bg-background border border-border rounded-md px-3 py-2 mb-6">
-					<span className="text-sm text-foreground font-mono">
-						{folderName}
-					</span>
-					<span className="text-xs text-muted-foreground block mt-1 break-all">
-						{selectedPath}
-					</span>
+					<span className="text-sm text-foreground font-mono">{folderName}</span>
+					<span className="text-xs text-muted-foreground block mt-1 break-all">{selectedPath}</span>
 				</div>
 
 				<p className="text-sm text-muted-foreground mb-6">

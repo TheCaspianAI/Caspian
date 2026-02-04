@@ -1,16 +1,3 @@
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "ui/components/ui/collapsible";
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
-import { cn } from "ui/lib/utils";
 import type { ReactNode } from "react";
 import { HiChevronRight } from "react-icons/hi2";
 import {
@@ -21,6 +8,15 @@ import {
 	LuPlus,
 	LuUndo2,
 } from "react-icons/lu";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
+import { cn } from "ui/lib/utils";
 import { usePathActions } from "../../hooks";
 
 interface FolderRowProps {
@@ -80,9 +76,7 @@ function FolderRowHeader({
 				<span
 					className={cn(
 						"truncate",
-						isGrouped
-							? "w-0 grow text-left"
-							: "flex-1 min-w-0 text-xs text-foreground",
+						isGrouped ? "w-0 grow text-left" : "flex-1 min-w-0 text-xs text-foreground",
 					)}
 					dir={isGrouped ? "rtl" : undefined}
 				>
@@ -117,11 +111,10 @@ export function FolderRow({
 	const isRoot = folderPath === "";
 	const absolutePath = isRoot ? worktreePath : `${worktreePath}/${folderPath}`;
 
-	const { copyPath, copyRelativePath, revealInFinder, openInEditor } =
-		usePathActions({
-			absolutePath,
-			relativePath: folderPath || undefined,
-		});
+	const { copyPath, copyRelativePath, revealInFinder, openInEditor } = usePathActions({
+		absolutePath,
+		relativePath: folderPath || undefined,
+	});
 
 	const triggerContent = (
 		<CollapsibleTrigger
@@ -203,12 +196,7 @@ export function FolderRow({
 				<ContextMenuTrigger asChild>{triggerContent}</ContextMenuTrigger>
 				{contextMenuContent}
 			</ContextMenu>
-			<CollapsibleContent
-				className={cn(
-					"min-w-0",
-					isGrouped && "ml-1.5 pl-0.5",
-				)}
-			>
+			<CollapsibleContent className={cn("min-w-0", isGrouped && "ml-1.5 pl-0.5")}>
 				{children}
 			</CollapsibleContent>
 		</Collapsible>

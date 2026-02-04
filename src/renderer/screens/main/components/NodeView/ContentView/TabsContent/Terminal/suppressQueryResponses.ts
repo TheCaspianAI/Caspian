@@ -40,9 +40,7 @@ export function suppressQueryResponses(terminal: Terminal): () => void {
 	// CSI sequences ending in 'y' with '$' intermediate - Mode Reports (SAFE)
 	// Query: ESC[?Ps$p (ends in 'p'), Response: ESC[?Ps;Pm$y (ends in 'y')
 	// Different final bytes, so suppressing '$y' only catches responses
-	disposables.push(
-		parser.registerCsiHandler({ intermediates: "$", final: "y" }, () => true),
-	);
+	disposables.push(parser.registerCsiHandler({ intermediates: "$", final: "y" }, () => true));
 
 	return () => {
 		for (const disposable of disposables) {

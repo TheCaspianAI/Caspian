@@ -97,11 +97,7 @@ export function MonacoProvider({ children }: MonacoProviderProps) {
 		monaco.editor.defineTheme(CASPIAN_THEME, monacoTheme);
 	}, [isReady, monacoTheme]);
 
-	return (
-		<MonacoContext.Provider value={{ isReady }}>
-			{children}
-		</MonacoContext.Provider>
-	);
+	return <MonacoContext.Provider value={{ isReady }}>{children}</MonacoContext.Provider>;
 }
 
 export const MONACO_EDITOR_OPTIONS = {
@@ -111,8 +107,7 @@ export const MONACO_EDITOR_OPTIONS = {
 	fontSize: 13,
 	lineHeight: 20,
 	lineNumbersMinChars: 3,
-	fontFamily:
-		"ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace",
+	fontFamily: "ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace",
 	padding: { top: 8, bottom: 8 },
 	scrollbar: {
 		verticalScrollbarSize: 8,

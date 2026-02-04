@@ -22,9 +22,7 @@ interface PortsConfig {
 function validatePortEntry(
 	entry: PortEntry,
 	index: number,
-):
-	| { valid: true; port: number; label: string }
-	| { valid: false; error: string } {
+): { valid: true; port: number; label: string } | { valid: false; error: string } {
 	if (typeof entry !== "object" || entry === null) {
 		return { valid: false, error: `ports[${index}] must be an object` };
 	}
@@ -74,11 +72,7 @@ function validatePortEntry(
  * @returns StaticPortsResult with exists flag, ports array, and any error message
  */
 export function loadStaticPorts(worktreePath: string): StaticPortsResult {
-	const portsPath = join(
-		worktreePath,
-		REPOSITORY_CASPIAN_DIR_NAME,
-		PORTS_FILE_NAME,
-	);
+	const portsPath = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME, PORTS_FILE_NAME);
 
 	if (!existsSync(portsPath)) {
 		return { exists: false, ports: null, error: null };
@@ -155,10 +149,6 @@ export function loadStaticPorts(worktreePath: string): StaticPortsResult {
  * @returns true if .caspian/ports.json exists
  */
 export function hasStaticPortsConfig(worktreePath: string): boolean {
-	const portsPath = join(
-		worktreePath,
-		REPOSITORY_CASPIAN_DIR_NAME,
-		PORTS_FILE_NAME,
-	);
+	const portsPath = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME, PORTS_FILE_NAME);
 	return existsSync(portsPath);
 }

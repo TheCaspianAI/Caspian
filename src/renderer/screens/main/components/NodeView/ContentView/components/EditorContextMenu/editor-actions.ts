@@ -14,9 +14,7 @@ export function registerCopyPathLineAction(
 	editor.addAction({
 		id: "copy-path-line",
 		label: "Copy Path:Line",
-		keybindings: [
-			monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyC,
-		],
+		keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyC],
 		run: (ed) => {
 			const selection = ed.getSelection();
 			if (!selection) return;

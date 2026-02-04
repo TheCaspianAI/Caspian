@@ -29,15 +29,10 @@ export function setUserId(_id: string | null): void {
 	// userId = id;
 }
 
-export function track(
-	_event: string,
-	_properties?: Record<string, unknown>,
-): void {
+export function track(_event: string, _properties?: Record<string, unknown>): void {
 	// if (!userId) return;
-
 	// const client = getClient();
 	// if (!client) return;
-
 	// client.capture({
 	// 	distinctId: userId,
 	// 	event,

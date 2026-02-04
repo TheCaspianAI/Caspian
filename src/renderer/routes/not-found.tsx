@@ -9,9 +9,7 @@ export function NotFound() {
 				<div className="flex flex-col items-center w-full max-w-md px-8">
 					<div className="text-center">
 						<h1 className="text-6xl font-bold text-foreground mb-4">404</h1>
-						<h2 className="text-xl font-semibold text-foreground mb-2">
-							Page Not Found
-						</h2>
+						<h2 className="text-xl font-semibold text-foreground mb-2">Page Not Found</h2>
 						<p className="text-sm text-muted-foreground mb-8">
 							The page you're looking for doesn't exist.
 						</p>

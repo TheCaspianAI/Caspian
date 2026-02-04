@@ -1,19 +1,15 @@
-import { cn } from "ui/lib/utils";
-import { Button } from "ui/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";
 import { LuExpand, LuShrink, LuX } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useChangesStore } from "renderer/stores/changes";
-import {
-	RightSidebarTab,
-	SidebarMode,
-	useSidebarStore,
-} from "renderer/stores/sidebar-state";
+import { RightSidebarTab, SidebarMode, useSidebarStore } from "renderer/stores/sidebar-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import type { ChangeCategory, ChangedFile } from "shared/changes-types";
+import { Button } from "ui/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { cn } from "ui/lib/utils";
 import { useScrollContext } from "../NodeView/ChangesContent";
 import { ChangesView } from "./ChangesView";
 import { FilesView } from "./FilesView";
@@ -56,7 +52,7 @@ export function FilesChangesPane() {
 		{ enabled: !!worktreePath },
 	);
 	const effectiveBaseBranch = baseBranch ?? branchData?.defaultBranch ?? "main";
-	const { data: status } = electronTrpc.changes.getStatus.useQuery(
+	electronTrpc.changes.getStatus.useQuery(
 		{ worktreePath: worktreePath || "", defaultBranch: effectiveBaseBranch },
 		{
 			enabled: !!worktreePath,
@@ -64,13 +60,8 @@ export function FilesChangesPane() {
 			refetchOnWindowFocus: true,
 		},
 	);
-	const {
-		currentMode,
-		rightSidebarTab,
-		setRightSidebarTab,
-		toggleSidebar,
-		setMode,
-	} = useSidebarStore();
+	const { currentMode, rightSidebarTab, setRightSidebarTab, toggleSidebar, setMode } =
+		useSidebarStore();
 	const isExpanded = currentMode === SidebarMode.Changes;
 	const showChangesTab = !!worktreePath;
 
@@ -135,11 +126,7 @@ export function FilesChangesPane() {
 	);
 
 	const handleFileOpen =
-		nodeId && worktreePath
-			? isExpanded
-				? handleFileScrollTo
-				: handleFileOpenPane
-			: undefined;
+		nodeId && worktreePath ? (isExpanded ? handleFileScrollTo : handleFileOpenPane) : undefined;
 
 	return (
 		<div className="flex flex-col flex-1 min-h-0 overflow-hidden">
@@ -159,17 +146,8 @@ export function FilesChangesPane() {
 				<div className="flex-1" />
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={handleExpandToggle}
-							className="size-6 p-0"
-						>
-							{isExpanded ? (
-								<LuShrink className="size-3.5" />
-							) : (
-								<LuExpand className="size-3.5" />
-							)}
+						<Button variant="ghost" size="icon" onClick={handleExpandToggle} className="size-6 p-0">
+							{isExpanded ? <LuShrink className="size-3.5" /> : <LuExpand className="size-3.5" />}
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom" showArrow={false}>
@@ -178,12 +156,7 @@ export function FilesChangesPane() {
 				</Tooltip>
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							onClick={toggleSidebar}
-							className="size-6 p-0"
-						>
+						<Button variant="ghost" size="icon" onClick={toggleSidebar} className="size-6 p-0">
 							<LuX className="size-3.5" />
 						</Button>
 					</TooltipTrigger>

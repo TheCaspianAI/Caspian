@@ -40,26 +40,14 @@ export const createNotificationsRouter = () => {
 					emit.next({ type: NOTIFICATION_EVENTS.TERMINAL_EXIT, data });
 				};
 
-				notificationsEmitter.on(
-					NOTIFICATION_EVENTS.AGENT_LIFECYCLE,
-					onLifecycle,
-				);
+				notificationsEmitter.on(NOTIFICATION_EVENTS.AGENT_LIFECYCLE, onLifecycle);
 				notificationsEmitter.on(NOTIFICATION_EVENTS.FOCUS_TAB, onFocusTab);
-				notificationsEmitter.on(
-					NOTIFICATION_EVENTS.TERMINAL_EXIT,
-					onTerminalExit,
-				);
+				notificationsEmitter.on(NOTIFICATION_EVENTS.TERMINAL_EXIT, onTerminalExit);
 
 				return () => {
-					notificationsEmitter.off(
-						NOTIFICATION_EVENTS.AGENT_LIFECYCLE,
-						onLifecycle,
-					);
+					notificationsEmitter.off(NOTIFICATION_EVENTS.AGENT_LIFECYCLE, onLifecycle);
 					notificationsEmitter.off(NOTIFICATION_EVENTS.FOCUS_TAB, onFocusTab);
-					notificationsEmitter.off(
-						NOTIFICATION_EVENTS.TERMINAL_EXIT,
-						onTerminalExit,
-					);
+					notificationsEmitter.off(NOTIFICATION_EVENTS.TERMINAL_EXIT, onTerminalExit);
 				};
 			});
 		}),

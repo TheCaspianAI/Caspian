@@ -4,7 +4,7 @@ export { useCreateFromPr } from "./useCreateFromPr";
 export { useCreateNode } from "./useCreateNode";
 export { useDeleteNode } from "./useDeleteNode";
 export { useDeleteWorktree } from "./useDeleteWorktree";
+export { useNodeDeleteHandler } from "./useNodeDeleteHandler";
 export { useOpenWorktree } from "./useOpenWorktree";
 export { useReorderNodes } from "./useReorderNodes";
 export { useUpdateNode } from "./useUpdateNode";
-export { useNodeDeleteHandler } from "./useNodeDeleteHandler";

@@ -16,20 +16,19 @@ export function useFileSearch({
 }: UseFileSearchParams) {
 	const trimmedQuery = searchTerm.trim();
 
-	const { data: searchResults, isFetching } =
-		electronTrpc.filesystem.searchFiles.useQuery(
-			{
-				rootPath: worktreePath ?? "",
-				query: trimmedQuery,
-				includeHidden,
-				limit,
-			},
-			{
-				enabled: Boolean(worktreePath) && trimmedQuery.length > 0,
-				staleTime: 1000,
-				placeholderData: (previous) => previous ?? [],
-			},
-		);
+	const { data: searchResults, isFetching } = electronTrpc.filesystem.searchFiles.useQuery(
+		{
+			rootPath: worktreePath ?? "",
+			query: trimmedQuery,
+			includeHidden,
+			limit,
+		},
+		{
+			enabled: Boolean(worktreePath) && trimmedQuery.length > 0,
+			staleTime: 1000,
+			placeholderData: (previous) => previous ?? [],
+		},
+	);
 
 	return {
 		searchResults: searchResults ?? [],

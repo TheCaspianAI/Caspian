@@ -1,9 +1,9 @@
-import { toast } from "ui/components/ui/sonner";
 import { useNavigate } from "@tanstack/react-router";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { useOpenConfigModal } from "renderer/stores/config-modal";
 import { useTabsStore } from "renderer/stores/tabs/store";
+import { toast } from "ui/components/ui/sonner";
 
 /**
  * Mutation hook for opening an existing worktree as a new node
@@ -12,9 +12,7 @@ import { useTabsStore } from "renderer/stores/tabs/store";
  * Shows config toast if no setup commands are configured
  */
 export function useOpenWorktree(
-	options?: Parameters<
-		typeof electronTrpc.nodes.openWorktree.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.nodes.openWorktree.useMutation>[0],
 ) {
 	const navigate = useNavigate();
 	const utils = electronTrpc.useUtils();
@@ -22,8 +20,7 @@ export function useOpenWorktree(
 	const setTabAutoTitle = useTabsStore((state) => state.setTabAutoTitle);
 	const createOrAttach = electronTrpc.terminal.createOrAttach.useMutation();
 	const openConfigModal = useOpenConfigModal();
-	const dismissConfigToast =
-		electronTrpc.config.dismissConfigToast.useMutation();
+	const dismissConfigToast = electronTrpc.config.dismissConfigToast.useMutation();
 
 	return electronTrpc.nodes.openWorktree.useMutation({
 		...options,

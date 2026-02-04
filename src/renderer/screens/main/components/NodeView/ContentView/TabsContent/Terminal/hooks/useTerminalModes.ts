@@ -55,8 +55,7 @@ export function useTerminalModes(): UseTerminalModesReturn {
 		const enableBracketedIndex = combined.lastIndexOf("\x1b[?2004h");
 		const disableBracketedIndex = combined.lastIndexOf("\x1b[?2004l");
 		if (enableBracketedIndex !== -1 || disableBracketedIndex !== -1) {
-			isBracketedPasteRef.current =
-				enableBracketedIndex > disableBracketedIndex;
+			isBracketedPasteRef.current = enableBracketedIndex > disableBracketedIndex;
 		}
 
 		// Keep a small tail in case the next chunk starts mid-sequence.

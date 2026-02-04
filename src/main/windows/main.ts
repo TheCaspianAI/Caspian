@@ -1,9 +1,9 @@
 import { join } from "node:path";
-import { nodes, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
 import type { BrowserWindow } from "electron";
 import { Notification } from "electron";
 import { createWindow } from "lib/electron-app/factories/windows/create";
+import { nodes, worktrees } from "lib/local-db";
 import { createAppRouter } from "lib/trpc/routers";
 import { localDb } from "main/lib/local-db";
 import { NOTIFICATION_EVENTS, PORTS } from "shared/constants";
@@ -11,6 +11,7 @@ import { createIPCHandler } from "trpc-electron/main";
 import { productName } from "~/package.json";
 import { appState } from "../lib/app-state";
 import { createApplicationMenu, registerMenuHotkeyUpdates } from "../lib/menu";
+import { getNodeRuntimeRegistry } from "../lib/node-runtime";
 import { playNotificationSound } from "../lib/notification-sound";
 import {
 	type AgentLifecycleEvent,
@@ -23,12 +24,7 @@ import {
 	getNotificationTitle,
 	isPaneVisible,
 } from "../lib/notifications/utils";
-import {
-	getInitialWindowBounds,
-	loadWindowState,
-	saveWindowState,
-} from "../lib/window-state";
-import { getNodeRuntimeRegistry } from "../lib/node-runtime";
+import { getInitialWindowBounds, loadWindowState, saveWindowState } from "../lib/window-state";
 
 // Singleton IPC handler to prevent duplicate handlers on window reopen (macOS)
 let ipcHandler: ReturnType<typeof createIPCHandler> | null = null;
@@ -36,17 +32,9 @@ let ipcHandler: ReturnType<typeof createIPCHandler> | null = null;
 function getNodeNameFromDb(nodeId: string | undefined): string {
 	if (!nodeId) return "Node";
 	try {
-		const node = localDb
-			.select()
-			.from(nodes)
-			.where(eq(nodes.id, nodeId))
-			.get();
+		const node = localDb.select().from(nodes).where(eq(nodes.id, nodeId)).get();
 		const worktree = node?.worktreeId
-			? localDb
-					.select()
-					.from(worktrees)
-					.where(eq(worktrees.id, node.worktreeId))
-					.get()
+			? localDb.select().from(worktrees).where(eq(worktrees.id, node.worktreeId)).get()
 			: undefined;
 		return getNodeName({ node, worktree });
 	} catch (error) {
@@ -107,80 +95,62 @@ export async function MainWindow() {
 	}
 
 	// Start notifications HTTP server
-	const server = notificationsApp.listen(
-		PORTS.NOTIFICATIONS,
-		"127.0.0.1",
-		() => {
-			console.log(
-				`[notifications] Listening on http://127.0.0.1:${PORTS.NOTIFICATIONS}`,
-			);
-		},
-	);
+	const server = notificationsApp.listen(PORTS.NOTIFICATIONS, "127.0.0.1", () => {
+		console.log(`[notifications] Listening on http://127.0.0.1:${PORTS.NOTIFICATIONS}`);
+	});
 
 	// Handle agent lifecycle notifications (Stop = completion, PermissionRequest = needs input)
-	notificationsEmitter.on(
-		NOTIFICATION_EVENTS.AGENT_LIFECYCLE,
-		(event: AgentLifecycleEvent) => {
-			// Only notify on Stop (completion) and PermissionRequest - not on Start
-			if (event.eventType === "Start") return;
+	notificationsEmitter.on(NOTIFICATION_EVENTS.AGENT_LIFECYCLE, (event: AgentLifecycleEvent) => {
+		// Only notify on Stop (completion) and PermissionRequest - not on Start
+		if (event.eventType === "Start") return;
 
-			// Skip notification if user is already viewing this pane (Slack pattern)
-			if (
-				window.isFocused() &&
-				event.nodeId &&
-				event.tabId &&
-				event.paneId
-			) {
-				const isVisible = isPaneVisible({
-					currentNodeId: extractNodeIdFromUrl(
-						window.webContents.getURL(),
-					),
-					tabsState: appState.data?.tabsState,
-					pane: {
-						nodeId: event.nodeId,
-						tabId: event.tabId,
-						paneId: event.paneId,
-					},
-				});
-				if (isVisible) return;
-			}
-
-			if (!Notification.isSupported()) return;
-
-			const nodeName = getNodeNameFromDb(event.nodeId);
-			const title = getNotificationTitle({
-				tabId: event.tabId,
-				paneId: event.paneId,
-				tabs: appState.data?.tabsState?.tabs,
-				panes: appState.data?.tabsState?.panes,
-			});
-
-			const isPermissionRequest = event.eventType === "PermissionRequest";
-			const notification = new Notification({
-				title: isPermissionRequest
-					? `Input Needed — ${nodeName}`
-					: `Agent Complete — ${nodeName}`,
-				body: isPermissionRequest
-					? `"${title}" needs your attention`
-					: `"${title}" has finished its task`,
-				silent: true,
-			});
-
-			playNotificationSound();
-
-			notification.on("click", () => {
-				window.show();
-				window.focus();
-				notificationsEmitter.emit(NOTIFICATION_EVENTS.FOCUS_TAB, {
-					paneId: event.paneId,
-					tabId: event.tabId,
+		// Skip notification if user is already viewing this pane (Slack pattern)
+		if (window.isFocused() && event.nodeId && event.tabId && event.paneId) {
+			const isVisible = isPaneVisible({
+				currentNodeId: extractNodeIdFromUrl(window.webContents.getURL()),
+				tabsState: appState.data?.tabsState,
+				pane: {
 					nodeId: event.nodeId,
-				});
+					tabId: event.tabId,
+					paneId: event.paneId,
+				},
 			});
+			if (isVisible) return;
+		}
 
-			notification.show();
-		},
-	);
+		if (!Notification.isSupported()) return;
+
+		const nodeName = getNodeNameFromDb(event.nodeId);
+		const title = getNotificationTitle({
+			tabId: event.tabId,
+			paneId: event.paneId,
+			tabs: appState.data?.tabsState?.tabs,
+			panes: appState.data?.tabsState?.panes,
+		});
+
+		const isPermissionRequest = event.eventType === "PermissionRequest";
+		const notification = new Notification({
+			title: isPermissionRequest ? `Input Needed — ${nodeName}` : `Agent Complete — ${nodeName}`,
+			body: isPermissionRequest
+				? `"${title}" needs your attention`
+				: `"${title}" has finished its task`,
+			silent: true,
+		});
+
+		playNotificationSound();
+
+		notification.on("click", () => {
+			window.show();
+			window.focus();
+			notificationsEmitter.emit(NOTIFICATION_EVENTS.FOCUS_TAB, {
+				paneId: event.paneId,
+				tabId: event.tabId,
+				nodeId: event.nodeId,
+			});
+		});
+
+		notification.show();
+	});
 
 	// Forward low-volume terminal lifecycle events to the renderer via the existing
 	// notifications subscription. This is used only for correctness (e.g. clearing
@@ -217,17 +187,14 @@ export async function MainWindow() {
 		window.show();
 	});
 
-	window.webContents.on(
-		"did-fail-load",
-		(_event, errorCode, errorDescription, validatedURL) => {
-			console.error("[main-window] Failed to load renderer:");
-			console.error(`  Error code: ${errorCode}`);
-			console.error(`  Description: ${errorDescription}`);
-			console.error(`  URL: ${validatedURL}`);
-			// Show the window anyway so user can see something is wrong
-			window.show();
-		},
-	);
+	window.webContents.on("did-fail-load", (_event, errorCode, errorDescription, validatedURL) => {
+		console.error("[main-window] Failed to load renderer:");
+		console.error(`  Error code: ${errorCode}`);
+		console.error(`  Description: ${errorDescription}`);
+		console.error(`  URL: ${validatedURL}`);
+		// Show the window anyway so user can see something is wrong
+		window.show();
+	});
 
 	window.webContents.on("render-process-gone", (_event, details) => {
 		console.error("[main-window] Renderer process gone:", details);

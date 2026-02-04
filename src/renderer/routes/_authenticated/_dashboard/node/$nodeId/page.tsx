@@ -3,13 +3,13 @@ import { useCallback, useMemo } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { usePresets } from "renderer/react-query/presets";
-import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { usePresetHotkeys } from "renderer/routes/_authenticated/_dashboard/node/$nodeId/hooks/usePresetHotkeys";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { NotFound } from "renderer/routes/not-found";
 import { NodeInitializingView } from "renderer/screens/main/components/NodeView/NodeInitializingView/NodeInitializingView";
 import { NodeLayout } from "renderer/screens/main/components/NodeView/NodeLayout/NodeLayout";
 import { useAppHotkey } from "renderer/stores/hotkeys";
-import { useSidebarStore } from "renderer/stores/sidebar-state";
+import { useHasNodeFailed, useIsNodeInitializing } from "renderer/stores/node-init";
 import { getPaneDimensions } from "renderer/stores/tabs/pane-refs";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import type { Tab } from "renderer/stores/tabs/types";
@@ -21,27 +21,17 @@ import {
 	getPreviousPaneId,
 	resolveActiveTabIdForNode,
 } from "renderer/stores/tabs/utils";
-import {
-	useHasNodeFailed,
-	useIsNodeInitializing,
-} from "renderer/stores/node-init";
 
-export const Route = createFileRoute(
-	"/_authenticated/_dashboard/node/$nodeId/",
-)({
+export const Route = createFileRoute("/_authenticated/_dashboard/node/$nodeId/")({
 	component: NodePage,
 	notFoundComponent: NotFound,
 	loader: async ({ params, context }) => {
-		const queryKey = [
-			["nodes", "get"],
-			{ input: { id: params.nodeId }, type: "query" },
-		];
+		const queryKey = [["nodes", "get"], { input: { id: params.nodeId }, type: "query" }];
 
 		try {
 			await context.queryClient.ensureQueryData({
 				queryKey,
-				queryFn: () =>
-					trpcClient.nodes.get.query({ id: params.nodeId }),
+				queryFn: () => trpcClient.nodes.get.query({ id: params.nodeId }),
 			});
 		} catch (error) {
 			// If node not found, throw notFound() to render 404 page
@@ -68,8 +58,7 @@ function NodePage() {
 	// Check for incomplete init after app restart
 	const gitStatus = node?.worktree?.gitStatus;
 	const hasIncompleteInit =
-		node?.type === "worktree" &&
-		(gitStatus === null || gitStatus === undefined);
+		node?.type === "worktree" && (gitStatus === null || gitStatus === undefined);
 
 	// Show full-screen initialization view for:
 	// - Actively initializing nodes (shows progress)
@@ -81,22 +70,13 @@ function NodePage() {
 	const activeTabIds = useTabsStore((s) => s.activeTabIds);
 	const tabHistoryStacks = useTabsStore((s) => s.tabHistoryStacks);
 	const focusedPaneIds = useTabsStore((s) => s.focusedPaneIds);
-	const {
-		addTab,
-		splitPaneAuto,
-		splitPaneVertical,
-		splitPaneHorizontal,
-		openPreset,
-	} = useTabsWithPresets();
+	const { addTab, splitPaneAuto, splitPaneVertical, splitPaneHorizontal, openPreset } =
+		useTabsWithPresets();
 	const setActiveTab = useTabsStore((s) => s.setActiveTab);
 	const removePane = useTabsStore((s) => s.removePane);
 	const setFocusedPane = useTabsStore((s) => s.setFocusedPane);
-	const isSidebarOpen = useSidebarStore((s) => s.isSidebarOpen);
 
-	const tabs = useMemo(
-		() => allTabs.filter((tab) => tab.nodeId === nodeId),
-		[nodeId, allTabs],
-	);
+	const tabs = useMemo(() => allTabs.filter((tab) => tab.nodeId === nodeId), [nodeId, allTabs]);
 
 	const activeTabId = useMemo(() => {
 		return resolveActiveTabIdForNode({
@@ -128,10 +108,7 @@ function NodePage() {
 		[presets, nodeId, addTab, openPreset],
 	);
 
-	useAppHotkey("NEW_GROUP", () => addTab(nodeId), undefined, [
-		nodeId,
-		addTab,
-	]);
+	useAppHotkey("NEW_GROUP", () => addTab(nodeId), undefined, [nodeId, addTab]);
 	usePresetHotkeys(openTabWithPreset);
 
 	useAppHotkey(
@@ -162,8 +139,7 @@ function NodePage() {
 		() => {
 			if (!activeTabId || tabs.length === 0) return;
 			const index = tabs.findIndex((t) => t.id === activeTabId);
-			const nextIndex =
-				index >= tabs.length - 1 || index === -1 ? 0 : index + 1;
+			const nextIndex = index >= tabs.length - 1 || index === -1 ? 0 : index + 1;
 			setActiveTab(nodeId, tabs[nextIndex].id);
 		},
 		undefined,
@@ -197,8 +173,7 @@ function NodePage() {
 	);
 
 	// Open in last used app shortcut
-	const { data: lastUsedApp = "cursor" } =
-		electronTrpc.settings.getLastUsedApp.useQuery();
+	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery();
 	const openInApp = electronTrpc.external.openInApp.useMutation();
 	useAppHotkey(
 		"OPEN_IN_APP",
@@ -246,11 +221,7 @@ function NodePage() {
 		"SPLIT_AUTO",
 		() => {
 			if (activeTabId && focusedPaneId && activeTab) {
-				const target = resolveSplitTarget(
-					focusedPaneId,
-					activeTabId,
-					activeTab,
-				);
+				const target = resolveSplitTarget(focusedPaneId, activeTabId, activeTab);
 				if (!target) return;
 				const dimensions = getPaneDimensions(target.paneId);
 				if (dimensions) {
@@ -266,54 +237,33 @@ function NodePage() {
 		"SPLIT_RIGHT",
 		() => {
 			if (activeTabId && focusedPaneId && activeTab) {
-				const target = resolveSplitTarget(
-					focusedPaneId,
-					activeTabId,
-					activeTab,
-				);
+				const target = resolveSplitTarget(focusedPaneId, activeTabId, activeTab);
 				if (!target) return;
 				splitPaneVertical(activeTabId, target.paneId, target.path);
 			}
 		},
 		undefined,
-		[
-			activeTabId,
-			focusedPaneId,
-			activeTab,
-			splitPaneVertical,
-			resolveSplitTarget,
-		],
+		[activeTabId, focusedPaneId, activeTab, splitPaneVertical, resolveSplitTarget],
 	);
 
 	useAppHotkey(
 		"SPLIT_DOWN",
 		() => {
 			if (activeTabId && focusedPaneId && activeTab) {
-				const target = resolveSplitTarget(
-					focusedPaneId,
-					activeTabId,
-					activeTab,
-				);
+				const target = resolveSplitTarget(focusedPaneId, activeTabId, activeTab);
 				if (!target) return;
 				splitPaneHorizontal(activeTabId, target.paneId, target.path);
 			}
 		},
 		undefined,
-		[
-			activeTabId,
-			focusedPaneId,
-			activeTab,
-			splitPaneHorizontal,
-			resolveSplitTarget,
-		],
+		[activeTabId, focusedPaneId, activeTab, splitPaneHorizontal, resolveSplitTarget],
 	);
 
 	// Navigate to previous node (⌘↑)
-	const getPreviousNode =
-		electronTrpc.nodes.getPreviousNode.useQuery(
-			{ id: nodeId },
-			{ enabled: !!nodeId },
-		);
+	const getPreviousNode = electronTrpc.nodes.getPreviousNode.useQuery(
+		{ id: nodeId },
+		{ enabled: !!nodeId },
+	);
 	useAppHotkey(
 		"PREV_NODE",
 		() => {

@@ -30,8 +30,7 @@ function groupFilesByFolder(files: ChangedFile[]): FolderGroup[] {
 
 	for (const file of files) {
 		const pathParts = file.path.split("/");
-		const folderPath =
-			pathParts.length > 1 ? pathParts.slice(0, -1).join("/") : "";
+		const folderPath = pathParts.length > 1 ? pathParts.slice(0, -1).join("/") : "";
 
 		if (!folderMap.has(folderPath)) {
 			folderMap.set(folderPath, []);
@@ -42,8 +41,7 @@ function groupFilesByFolder(files: ChangedFile[]): FolderGroup[] {
 	return Array.from(folderMap.entries())
 		.map(([folderPath, files]) => {
 			const pathParts = folderPath.split("/");
-			const folderName =
-				folderPath === "" ? "" : pathParts[pathParts.length - 1];
+			const folderName = folderPath === "" ? "" : pathParts[pathParts.length - 1];
 
 			return {
 				folderPath,

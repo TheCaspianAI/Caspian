@@ -56,9 +56,7 @@ export function getLocale(baseEnv: Record<string, string>): string {
 	return "en_US.UTF-8";
 }
 
-export function sanitizeEnv(
-	env: NodeJS.ProcessEnv,
-): Record<string, string> | undefined {
+export function sanitizeEnv(env: NodeJS.ProcessEnv): Record<string, string> | undefined {
 	const sanitized: Record<string, string> = {};
 
 	for (const [key, value] of Object.entries(env)) {
@@ -316,9 +314,7 @@ export function buildSafeEnv(
 /**
  * @deprecated Use buildSafeEnv instead. Kept for backward compatibility.
  */
-export function removeAppEnvVars(
-	env: Record<string, string>,
-): Record<string, string> {
+export function removeAppEnvVars(env: Record<string, string>): Record<string, string> {
 	return buildSafeEnv(env);
 }
 
@@ -331,15 +327,7 @@ export function buildTerminalEnv(params: {
 	workspacePath?: string;
 	rootPath?: string;
 }): Record<string, string> {
-	const {
-		shell,
-		paneId,
-		tabId,
-		workspaceId,
-		workspaceName,
-		workspacePath,
-		rootPath,
-	} = params;
+	const { shell, paneId, tabId, workspaceId, workspaceName, workspacePath, rootPath } = params;
 
 	// Get Electron's process.env and filter to only allowlisted safe vars
 	// This prevents secrets and app config from leaking to user terminals
@@ -366,8 +354,7 @@ export function buildTerminalEnv(params: {
 		CASPIAN_ROOT_PATH: rootPath || "",
 		CASPIAN_PORT: String(PORTS.NOTIFICATIONS),
 		// Environment identifier for dev/prod separation
-		CASPIAN_ENV:
-			process.env.NODE_ENV === "development" ? "development" : "production",
+		CASPIAN_ENV: process.env.NODE_ENV === "development" ? "development" : "production",
 		// Hook protocol version for forward compatibility
 		CASPIAN_HOOK_VERSION: HOOK_PROTOCOL_VERSION,
 	};

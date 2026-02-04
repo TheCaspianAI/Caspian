@@ -10,9 +10,7 @@ export function unregisterPaneRef(paneId: string) {
 	paneRefs.delete(paneId);
 }
 
-export function getPaneDimensions(
-	paneId: string,
-): { width: number; height: number } | null {
+export function getPaneDimensions(paneId: string): { width: number; height: number } | null {
 	const element = paneRefs.get(paneId);
 	if (!element) return null;
 	const { width, height } = element.getBoundingClientRect();

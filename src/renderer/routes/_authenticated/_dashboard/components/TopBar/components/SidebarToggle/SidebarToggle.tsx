@@ -1,7 +1,7 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { LuPanelLeft, LuPanelLeftClose, LuPanelLeftOpen } from "react-icons/lu";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
-import { useNodeSidebarStore } from "renderer/stores";
+import { useNodeSidebarStore } from "renderer/stores/node-sidebar-state";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 export function SidebarToggle() {
 	const { isCollapsed, toggleCollapsed } = useNodeSidebarStore();
@@ -31,16 +31,11 @@ export function SidebarToggle() {
 					className="no-drag group flex items-center justify-center size-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
 				>
 					<span className="group-hover:hidden">{getToggleIcon(false)}</span>
-					<span className="hidden group-hover:block">
-						{getToggleIcon(true)}
-					</span>
+					<span className="hidden group-hover:block">{getToggleIcon(true)}</span>
 				</button>
 			</TooltipTrigger>
 			<TooltipContent side="right">
-				<HotkeyTooltipContent
-					label="Toggle context pane"
-					hotkeyId="TOGGLE_NODE_SIDEBAR"
-				/>
+				<HotkeyTooltipContent label="Toggle context pane" hotkeyId="TOGGLE_NODE_SIDEBAR" />
 			</TooltipContent>
 		</Tooltip>
 	);

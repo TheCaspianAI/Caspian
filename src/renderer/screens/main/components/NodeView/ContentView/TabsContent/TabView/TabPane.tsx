@@ -1,9 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { MosaicBranch } from "react-mosaic-component";
-import {
-	registerPaneRef,
-	unregisterPaneRef,
-} from "renderer/stores/tabs/pane-refs";
+import { registerPaneRef, unregisterPaneRef } from "renderer/stores/tabs/pane-refs";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { useTerminalCallbacksStore } from "renderer/stores/tabs/terminal-callbacks";
 import type { Tab } from "renderer/stores/tabs/types";
@@ -24,16 +21,8 @@ interface TabPaneProps {
 		dimensions: { width: number; height: number },
 		path?: MosaicBranch[],
 	) => void;
-	splitPaneHorizontal: (
-		tabId: string,
-		sourcePaneId: string,
-		path?: MosaicBranch[],
-	) => void;
-	splitPaneVertical: (
-		tabId: string,
-		sourcePaneId: string,
-		path?: MosaicBranch[],
-	) => void;
+	splitPaneHorizontal: (tabId: string, sourcePaneId: string, path?: MosaicBranch[]) => void;
+	splitPaneVertical: (tabId: string, sourcePaneId: string, path?: MosaicBranch[]) => void;
 	removePane: (paneId: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
 	availableTabs: Tab[];
@@ -62,9 +51,7 @@ export function TabPane({
 
 	const terminalContainerRef = useRef<HTMLDivElement>(null);
 	const getClearCallback = useTerminalCallbacksStore((s) => s.getClearCallback);
-	const getScrollToBottomCallback = useTerminalCallbacksStore(
-		(s) => s.getScrollToBottomCallback,
-	);
+	const getScrollToBottomCallback = useTerminalCallbacksStore((s) => s.getScrollToBottomCallback);
 
 	useEffect(() => {
 		const container = terminalContainerRef.current;

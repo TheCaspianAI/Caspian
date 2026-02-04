@@ -19,13 +19,13 @@ export {
 	resetNodeRuntimeRegistry,
 } from "./registry";
 export type {
+	NodeRuntime,
+	NodeRuntimeId,
+	NodeRuntimeRegistry,
 	TerminalCapabilities,
 	TerminalEventSource,
 	TerminalManagement,
 	TerminalRuntime,
 	TerminalSessionOperations,
 	TerminalWorkspaceOperations,
-	NodeRuntime,
-	NodeRuntimeId,
-	NodeRuntimeRegistry,
 } from "./types";

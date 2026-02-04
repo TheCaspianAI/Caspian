@@ -1,12 +1,3 @@
-import { Button } from "ui/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "ui/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useParams } from "@tanstack/react-router";
 import { useCallback, useMemo, useState } from "react";
 import {
@@ -16,20 +7,23 @@ import {
 	HiMiniPlus,
 	HiStar,
 } from "react-icons/hi2";
-import {
-	getPresetIcon,
-	useIsDarkTheme,
-} from "renderer/assets/app-icons/preset-icons";
+import { getPresetIcon, useIsDarkTheme } from "renderer/assets/app-icons/preset-icons";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { usePresets } from "renderer/react-query/presets";
 import { useOpenSettings } from "renderer/stores/settings-state";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import { useTabsWithPresets } from "renderer/stores/tabs/useTabsWithPresets";
-import {
-	isLastPaneInTab,
-	resolveActiveTabIdForNode,
-} from "renderer/stores/tabs/utils";
+import { isLastPaneInTab, resolveActiveTabIdForNode } from "renderer/stores/tabs/utils";
 import { type ActivePaneStatus, pickHigherStatus } from "shared/tabs-types";
+import { Button } from "ui/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "ui/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { PresetMenuItemShortcut } from "./components/PresetMenuItemShortcut";
 import { GroupItem } from "./GroupItem";
 import { NewTabDropZone } from "./NewTabDropZone";
@@ -55,10 +49,7 @@ export function GroupStrip() {
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 
 	const tabs = useMemo(
-		() =>
-			activeWorkspaceId
-				? allTabs.filter((tab) => tab.nodeId === activeWorkspaceId)
-				: [],
+		() => (activeWorkspaceId ? allTabs.filter((tab) => tab.nodeId === activeWorkspaceId) : []),
 		[activeWorkspaceId, allTabs],
 	);
 
@@ -149,11 +140,7 @@ export function GroupStrip() {
 						const isPrevOfActive = index === activeTabIndex - 1;
 						const isNextOfActive = index === activeTabIndex + 1;
 						return (
-							<div
-								key={tab.id}
-								className="h-full shrink-0"
-								style={{ width: "160px" }}
-							>
+							<div key={tab.id} className="h-full shrink-0" style={{ width: "160px" }}>
 								<GroupItem
 									tab={tab}
 									index={index}
@@ -164,13 +151,7 @@ export function GroupStrip() {
 									onRename={(newName) => handleRenameGroup(tab.id, newName)}
 									onPaneDrop={(paneId) => movePaneToTab(paneId, tab.id)}
 									onReorder={handleReorderTabs}
-									navHint={
-										isPrevOfActive
-											? "prev"
-											: isNextOfActive
-												? "next"
-												: undefined
-									}
+									navHint={isPrevOfActive ? "prev" : isNextOfActive ? "next" : undefined}
 								/>
 							</div>
 						);
@@ -199,11 +180,7 @@ export function GroupStrip() {
 							</TooltipContent>
 						</Tooltip>
 						<DropdownMenuTrigger asChild>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="size-7 rounded-l-none px-1"
-							>
+							<Button variant="ghost" size="icon" className="size-7 rounded-l-none px-1">
 								<HiMiniChevronDown className="size-3" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -220,17 +197,11 @@ export function GroupStrip() {
 											className="gap-2"
 										>
 											{presetIcon ? (
-												<img
-													src={presetIcon}
-													alt=""
-													className="size-4 object-contain"
-												/>
+												<img src={presetIcon} alt="" className="size-4 object-contain" />
 											) : (
 												<HiMiniCommandLine className="size-4" />
 											)}
-											<span className="truncate">
-												{preset.name || "default"}
-											</span>
+											<span className="truncate">{preset.name || "default"}</span>
 											{preset.isDefault && (
 												<HiStar className="size-3 text-yellow-500 flex-shrink-0" />
 											)}
@@ -241,10 +212,7 @@ export function GroupStrip() {
 								<DropdownMenuSeparator />
 							</>
 						)}
-						<DropdownMenuItem
-							onClick={handleOpenPresetsSettings}
-							className="gap-2"
-						>
+						<DropdownMenuItem onClick={handleOpenPresetsSettings} className="gap-2">
 							<HiMiniCog6Tooth className="size-4" />
 							<span>Configure Presets</span>
 						</DropdownMenuItem>

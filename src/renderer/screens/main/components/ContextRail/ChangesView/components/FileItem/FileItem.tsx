@@ -1,3 +1,15 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
+import {
+	LuClipboard,
+	LuExternalLink,
+	LuFolderOpen,
+	LuMinus,
+	LuPlus,
+	LuTrash2,
+	LuUndo2,
+} from "react-icons/lu";
+import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -16,18 +28,6 @@ import {
 } from "ui/components/ui/context-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
-import {
-	LuClipboard,
-	LuExternalLink,
-	LuFolderOpen,
-	LuMinus,
-	LuPlus,
-	LuTrash2,
-	LuUndo2,
-} from "react-icons/lu";
-import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import { createFileKey, useScrollContext } from "../../../../NodeView/ChangesContent";
 import { usePathActions } from "../../hooks";
 import { getStatusColor, getStatusIndicator } from "../../utils";
@@ -89,8 +89,7 @@ export function FileItem({
 	const fileName = getFileName(file.path);
 	const statusBadgeColor = getStatusColor(file.status);
 	const statusIndicator = getStatusIndicator(file.status);
-	const showStatsDisplay =
-		showStats && (file.additions > 0 || file.deletions > 0);
+	const showStatsDisplay = showStats && (file.additions > 0 || file.deletions > 0);
 	const hasIndent = level > 0;
 	const hasAction = onStage || onUnstage;
 
@@ -100,12 +99,11 @@ export function FileItem({
 
 	const absolutePath = worktreePath ? `${worktreePath}/${file.path}` : null;
 
-	const { copyPath, copyRelativePath, revealInFinder, openInEditor } =
-		usePathActions({
-			absolutePath,
-			relativePath: file.path,
-			cwd: worktreePath,
-		});
+	const { copyPath, copyRelativePath, revealInFinder, openInEditor } = usePathActions({
+		absolutePath,
+		relativePath: file.path,
+		cwd: worktreePath,
+	});
 
 	const handleClick = useCallback(() => {
 		if (clickTimeoutRef.current) {
@@ -173,14 +171,9 @@ export function FileItem({
 				type="button"
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
-				className={cn(
-					"flex items-center gap-2 flex-1 min-w-0",
-					hasIndent ? "py-1" : "py-1.5",
-				)}
+				className={cn("flex items-center gap-2 flex-1 min-w-0", hasIndent ? "py-1" : "py-1.5")}
 			>
-				<span
-					className={cn("shrink-0 flex items-center text-xs", statusBadgeColor)}
-				>
+				<span className={cn("shrink-0 flex items-center text-xs", statusBadgeColor)}>
 					{statusIndicator}
 				</span>
 				<span className="flex-1 min-w-0 flex items-center gap-1">
@@ -195,14 +188,10 @@ export function FileItem({
 					{showStatsDisplay && (
 						<span className="flex items-center gap-0.5 text-caption font-mono shrink-0 whitespace-nowrap opacity-60">
 							{file.additions > 0 && (
-								<span className="text-green-600 dark:text-green-500">
-									+{file.additions}
-								</span>
+								<span className="text-green-600 dark:text-green-500">+{file.additions}</span>
 							)}
 							{file.deletions > 0 && (
-								<span className="text-red-600 dark:text-red-400">
-									-{file.deletions}
-								</span>
+								<span className="text-red-600 dark:text-red-400">-{file.deletions}</span>
 							)}
 						</span>
 					)}
@@ -317,12 +306,8 @@ export function FileItem({
 			<AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
 				<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							{discardDialogTitle}
-						</AlertDialogTitle>
-						<AlertDialogDescription>
-							{discardDialogDescription}
-						</AlertDialogDescription>
+						<AlertDialogTitle className="font-medium">{discardDialogTitle}</AlertDialogTitle>
+						<AlertDialogDescription>{discardDialogDescription}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
 						<Button

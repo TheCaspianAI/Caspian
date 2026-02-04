@@ -22,11 +22,7 @@ import {
 } from "./hooks";
 import { ScrollToBottomButton } from "./ScrollToBottomButton";
 import { TerminalSearch } from "./TerminalSearch";
-import type {
-	TerminalExitReason,
-	TerminalProps,
-	TerminalStreamEvent,
-} from "./types";
+import type { TerminalExitReason, TerminalProps, TerminalStreamEvent } from "./types";
 import { shellEscapePaths } from "./utils";
 
 export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
@@ -40,9 +36,7 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 	const searchAddonRef = useRef<SearchAddon | null>(null);
 	const rendererRef = useRef<TerminalRendererRef | null>(null);
 	const isExitedRef = useRef(false);
-	const [exitStatus, setExitStatus] = useState<"killed" | "exited" | null>(
-		null,
-	);
+	const [exitStatus, setExitStatus] = useState<"killed" | "exited" | null>(null);
 	const wasKilledByUserRef = useRef(false);
 	const pendingEventsRef = useRef<TerminalStreamEvent[]>([]);
 	const commandBufferRef = useRef("");
@@ -96,10 +90,7 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 		(exitCode: number, xterm: XTerm, reason?: TerminalExitReason) => void
 	>(() => {});
 	const handleStreamErrorRef = useRef<
-		(
-			event: Extract<TerminalStreamEvent, { type: "error" }>,
-			xterm: XTerm,
-		) => void
+		(event: Extract<TerminalStreamEvent, { type: "error" }>, xterm: XTerm) => void
 	>(() => {});
 
 	const {
@@ -192,19 +183,18 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 	connectionErrorRef.current = connectionError;
 
 	// Stream handling
-	const { handleTerminalExit, handleStreamError, handleStreamData } =
-		useTerminalStream({
-			paneId,
-			xtermRef,
-			isStreamReadyRef,
-			isExitedRef,
-			wasKilledByUserRef,
-			pendingEventsRef,
-			setExitStatus,
-			setConnectionError,
-			updateModesFromData,
-			updateCwdFromData,
-		});
+	const { handleTerminalExit, handleStreamError, handleStreamData } = useTerminalStream({
+		paneId,
+		xtermRef,
+		isStreamReadyRef,
+		isExitedRef,
+		wasKilledByUserRef,
+		pendingEventsRef,
+		setExitStatus,
+		setConnectionError,
+		updateModesFromData,
+		updateCwdFromData,
+	});
 
 	// Populate handler refs for flushPendingEvents to use
 	handleTerminalExitRef.current = handleTerminalExit;
@@ -312,9 +302,7 @@ export const Terminal = ({ paneId, tabId, nodeId }: TerminalProps) => {
 			{exitStatus === "killed" && !connectionError && !isRestoredMode && (
 				<SessionKilledOverlay onRestart={restartTerminal} />
 			)}
-			{connectionError && (
-				<ConnectionErrorOverlay onRetry={handleRetryConnection} />
-			)}
+			{connectionError && <ConnectionErrorOverlay onRetry={handleRetryConnection} />}
 			<div ref={terminalRef} className="h-full w-full" />
 		</div>
 	);

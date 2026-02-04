@@ -1,6 +1,6 @@
+import { LuPower } from "react-icons/lu";
 import { Button } from "ui/components/ui/button";
 import { Card } from "ui/components/ui/card";
-import { LuPower } from "react-icons/lu";
 
 interface SessionKilledOverlayProps {
 	onRestart: () => void;
@@ -14,9 +14,7 @@ export function SessionKilledOverlay({ onRestart }: SessionKilledOverlayProps) {
 					<LuPower className="size-5 text-muted-foreground" />
 					<div className="space-y-0.5">
 						<p className="text-sm font-medium">Session killed</p>
-						<p className="text-xs text-muted-foreground">
-							You terminated this shell session
-						</p>
+						<p className="text-xs text-muted-foreground">You terminated this shell session</p>
 					</div>
 				</div>
 				<div className="px-4">

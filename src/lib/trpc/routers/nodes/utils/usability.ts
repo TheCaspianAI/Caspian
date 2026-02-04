@@ -3,11 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { nodeInitManager } from "main/lib/node-init-manager";
 import type { NodeInitProgress } from "shared/types/node-init";
 
-export type NodeUsabilityReason =
-	| "initializing"
-	| "failed"
-	| "path_missing"
-	| "not_found";
+export type NodeUsabilityReason = "initializing" | "failed" | "path_missing" | "not_found";
 
 export interface NodeUsabilityCheck {
 	usable: boolean;
@@ -62,10 +58,7 @@ export function checkNodeUsability(
  * The error includes a `cause` object with details that the frontend can use
  * to display appropriate UI (e.g., progress view for initializing, error for failed).
  */
-export function assertNodeUsable(
-	nodeId: string,
-	worktreePath: string | null | undefined,
-): void {
+export function assertNodeUsable(nodeId: string, worktreePath: string | null | undefined): void {
 	const check = checkNodeUsability(nodeId, worktreePath);
 
 	if (!check.usable) {

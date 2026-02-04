@@ -1,8 +1,8 @@
-import { cn } from "ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { LuFolderOpen, LuGlobe, LuX } from "react-icons/lu";
 import { useOpenFromPath, useOpenNew } from "renderer/react-query/repositories";
+import { cn } from "ui/lib/utils";
 import { CloneRepoDialog } from "./CloneRepoDialog";
 import { InitGitDialog } from "./InitGitDialog";
 
@@ -185,9 +185,7 @@ export function StartView() {
 							<div className="w-16 h-16 rounded-2xl border-2 border-dashed border-white/30 flex items-center justify-center">
 								<LuFolderOpen className="w-8 h-8 text-white/60" />
 							</div>
-							<span className="text-sm text-white/60 font-medium">
-								Drop to open project
-							</span>
+							<span className="text-sm text-white/60 font-medium">Drop to open project</span>
 						</div>
 					</div>
 				)}
@@ -207,14 +205,10 @@ export function StartView() {
 					/>
 
 					{/* Title */}
-					<h1 className="text-[44px] font-semibold text-white tracking-tight mb-3">
-						Caspian
-					</h1>
+					<h1 className="text-[44px] font-semibold text-white tracking-tight mb-3">Caspian</h1>
 
 					{/* Subtext */}
-					<p className="text-[18px] text-neutral-500 mb-12">
-						Ship faster, one node at a time.
-					</p>
+					<p className="text-[18px] text-neutral-500 mb-12">Ship faster, one node at a time.</p>
 
 					{/* Action buttons row */}
 					<div className="flex items-center gap-3">

@@ -1,10 +1,5 @@
 import { z } from "zod";
-import type {
-	BulkItemError,
-	CommandResult,
-	ToolContext,
-	ToolDefinition,
-} from "./types";
+import type { BulkItemError, CommandResult, ToolContext, ToolDefinition } from "./types";
 import { buildBulkResult } from "./types";
 
 const nodeUpdateSchema = z.object({
@@ -21,10 +16,7 @@ interface UpdatedNode {
 	name: string;
 }
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	const updated: UpdatedNode[] = [];
 	const errors: BulkItemError[] = [];
 
@@ -43,8 +35,7 @@ async function execute(
 			errors.push({
 				index: i,
 				nodeId: update.nodeId,
-				error:
-					error instanceof Error ? error.message : "Failed to update node",
+				error: error instanceof Error ? error.message : "Failed to update node",
 			});
 		}
 	}

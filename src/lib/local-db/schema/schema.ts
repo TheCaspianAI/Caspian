@@ -129,21 +129,15 @@ export const settings = sqliteTable("settings", {
 	id: integer("id").primaryKey().default(1),
 	lastActiveNodeId: text("last_active_node_id"),
 	lastUsedApp: text("last_used_app").$type<ExternalApp>(),
-	terminalPresets: text("terminal_presets", { mode: "json" }).$type<
-		TerminalPreset[]
-	>(),
+	terminalPresets: text("terminal_presets", { mode: "json" }).$type<TerminalPreset[]>(),
 	terminalPresetsInitialized: integer("terminal_presets_initialized", {
 		mode: "boolean",
 	}),
 	selectedRingtoneId: text("selected_ringtone_id"),
 	activeOrganizationId: text("active_organization_id"),
 	confirmOnQuit: integer("confirm_on_quit", { mode: "boolean" }),
-	terminalLinkBehavior: text(
-		"terminal_link_behavior",
-	).$type<TerminalLinkBehavior>(),
-	terminalPersistence: integer("persist_terminal", { mode: "boolean" }).default(
-		true,
-	),
+	terminalLinkBehavior: text("terminal_link_behavior").$type<TerminalLinkBehavior>(),
+	terminalPersistence: integer("persist_terminal", { mode: "boolean" }).default(true),
 	autoApplyDefaultPreset: integer("auto_apply_default_preset", {
 		mode: "boolean",
 	}),

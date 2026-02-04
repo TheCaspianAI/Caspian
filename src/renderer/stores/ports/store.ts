@@ -35,9 +35,7 @@ export const usePortsStore = create<PortsState>()(
 
 				removePort: (paneId, port) =>
 					set((state) => ({
-						ports: state.ports.filter(
-							(p) => !(p.paneId === paneId && p.port === port),
-						),
+						ports: state.ports.filter((p) => !(p.paneId === paneId && p.port === port)),
 					})),
 
 				removePortsForPane: (paneId) =>
@@ -49,8 +47,7 @@ export const usePortsStore = create<PortsState>()(
 
 				setListCollapsed: (collapsed) => set({ isListCollapsed: collapsed }),
 
-				toggleListCollapsed: () =>
-					set({ isListCollapsed: !get().isListCollapsed }),
+				toggleListCollapsed: () => set({ isListCollapsed: !get().isListCollapsed }),
 			}),
 			{
 				name: "ports-store",

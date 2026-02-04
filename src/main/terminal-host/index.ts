@@ -13,14 +13,7 @@
  */
 
 import { randomBytes } from "node:crypto";
-import {
-	chmodSync,
-	existsSync,
-	mkdirSync,
-	readFileSync,
-	unlinkSync,
-	writeFileSync,
-} from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { createServer, type Server, Socket } from "node:net";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -53,8 +46,7 @@ import { TerminalHost } from "./terminal-host";
 const DAEMON_VERSION = "1.0.0";
 
 // Determine caspian directory based on NODE_ENV
-const CASPIAN_DIR_NAME =
-	process.env.NODE_ENV === "development" ? ".caspian-dev" : ".caspian";
+const CASPIAN_DIR_NAME = process.env.NODE_ENV === "development" ? ".caspian-dev" : ".caspian";
 const CASPIAN_HOME_DIR = join(homedir(), CASPIAN_DIR_NAME);
 
 // Socket and token paths
@@ -66,11 +58,7 @@ const PID_PATH = join(CASPIAN_HOME_DIR, "terminal-host.pid");
 // Logging
 // =============================================================================
 
-function log(
-	level: "info" | "warn" | "error",
-	message: string,
-	data?: unknown,
-) {
+function log(level: "info" | "warn" | "error", message: string, data?: unknown) {
 	const timestamp = new Date().toISOString();
 	const prefix = `[${timestamp}] [terminal-host] [${level.toUpperCase()}]`;
 	if (data !== undefined) {
@@ -125,10 +113,7 @@ class NdjsonParser {
 				} catch {
 					// Truncate and redact potentially sensitive data in error logs
 					const maxLen = 100;
-					const truncated =
-						line.length > maxLen
-							? `${line.slice(0, maxLen)}... (truncated)`
-							: line;
+					const truncated = line.length > maxLen ? `${line.slice(0, maxLen)}... (truncated)` : line;
 					// Redact anything that looks like a token or secret
 					const redacted = truncated.replace(
 						/["']?(?:token|secret|password|key|auth)["']?\s*[:=]\s*["']?[^"'\s,}]+["']?/gi,
@@ -148,10 +133,7 @@ class NdjsonParser {
 	}
 }
 
-function sendResponse(
-	socket: Socket,
-	response: IpcSuccessResponse | IpcErrorResponse,
-) {
+function sendResponse(socket: Socket, response: IpcSuccessResponse | IpcErrorResponse) {
 	socket.write(`${JSON.stringify(response)}\n`);
 }
 
@@ -223,9 +205,7 @@ function broadcastEventToAllStreamSockets(event: IpcEvent): void {
 	}
 }
 
-function getStreamSocketForClient(
-	clientState: ClientState,
-): Socket | undefined {
+function getStreamSocketForClient(clientState: ClientState): Socket | undefined {
 	const clientId = clientState.clientId;
 	if (!clientId) return undefined;
 	return clientsById.get(clientId)?.stream;
@@ -269,8 +249,7 @@ const handlers: Record<string, RequestHandler> = {
 		// Register the socket under the clientId/role. Replace any existing socket for
 		// the same role to avoid ghost connections that can re-introduce backpressure.
 		const existing = clientsById.get(request.clientId) ?? {};
-		const previousSocket =
-			request.role === "control" ? existing.control : existing.stream;
+		const previousSocket = request.role === "control" ? existing.control : existing.stream;
 		if (previousSocket && previousSocket !== socket) {
 			try {
 				terminalHost.detachFromAllSessions(previousSocket);
@@ -314,22 +293,14 @@ const handlers: Record<string, RequestHandler> = {
 		try {
 			const streamSocket = getStreamSocketForClient(clientState);
 			if (!streamSocket) {
-				sendError(
-					socket,
-					id,
-					"STREAM_NOT_CONNECTED",
-					"Stream socket not connected",
-				);
+				sendError(socket, id, "STREAM_NOT_CONNECTED", "Stream socket not connected");
 				return;
 			}
 
 			const response = await terminalHost.createOrAttach(streamSocket, request);
 			sendSuccess(socket, id, response);
 
-			log(
-				"info",
-				`Session ${request.sessionId} ${response.isNew ? "created" : "attached"}`,
-			);
+			log("info", `Session ${request.sessionId} ${response.isNew ? "created" : "attached"}`);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Unknown error";
 			sendError(socket, id, "CREATE_ATTACH_FAILED", message);
@@ -421,12 +392,7 @@ const handlers: Record<string, RequestHandler> = {
 		const request = payload as DetachRequest;
 		const streamSocket = getStreamSocketForClient(clientState);
 		if (!streamSocket) {
-			sendError(
-				socket,
-				id,
-				"STREAM_NOT_CONNECTED",
-				"Stream socket not connected",
-			);
+			sendError(socket, id, "STREAM_NOT_CONNECTED", "Stream socket not connected");
 			return;
 		}
 		const response = terminalHost.detach(streamSocket, request);
@@ -547,12 +513,7 @@ async function handleRequest(
 	const handler = handlers[request.type];
 
 	if (!handler) {
-		sendError(
-			socket,
-			request.id,
-			"UNKNOWN_REQUEST",
-			`Unknown request type: ${request.type}`,
-		);
+		sendError(socket, request.id, "UNKNOWN_REQUEST", `Unknown request type: ${request.type}`);
 		return;
 	}
 
@@ -602,10 +563,7 @@ function handleConnection(socket: Socket) {
 		if (clientId && role) {
 			const entry = clientsById.get(clientId);
 			if (entry) {
-				const matches =
-					role === "control"
-						? entry.control === socket
-						: entry.stream === socket;
+				const matches = role === "control" ? entry.control === socket : entry.stream === socket;
 				if (matches) {
 					const next: ClientSockets = { ...entry };
 					if (role === "control") {

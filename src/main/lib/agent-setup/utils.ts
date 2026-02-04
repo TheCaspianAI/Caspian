@@ -35,18 +35,14 @@ function findBinaryPathsWindows(name: string): string[] {
 export function findRealBinary(name: string): string | null {
 	try {
 		const isWindows = process.platform === "win32";
-		const allPaths = isWindows
-			? findBinaryPathsWindows(name)
-			: findBinaryPathsUnix(name);
+		const allPaths = isWindows ? findBinaryPathsWindows(name) : findBinaryPathsUnix(name);
 
 		const homedir = os.homedir();
 		const caspianBinDirs = [
 			path.join(homedir, CASPIAN_DIR_NAMES.PROD, "bin"),
 			path.join(homedir, CASPIAN_DIR_NAMES.DEV, "bin"),
 		];
-		const paths = allPaths.filter(
-			(p) => p && !caspianBinDirs.some((dir) => p.startsWith(dir)),
-		);
+		const paths = allPaths.filter((p) => p && !caspianBinDirs.some((dir) => p.startsWith(dir)));
 		return paths[0] || null;
 	} catch {
 		return null;

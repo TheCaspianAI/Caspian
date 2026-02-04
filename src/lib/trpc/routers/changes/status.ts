@@ -5,11 +5,7 @@ import { publicProcedure, router } from "../..";
 import { getStatusNoLock } from "../nodes/utils/git";
 import { assertRegisteredWorktree, secureFs } from "./security";
 import { applyNumstatToFiles } from "./utils/apply-numstat";
-import {
-	parseGitLog,
-	parseGitStatus,
-	parseNameStatus,
-} from "./utils/parse-status";
+import { parseGitLog, parseGitStatus, parseNameStatus } from "./utils/parse-status";
 
 export const createStatusRouter = () => {
 	return router({
@@ -35,11 +31,7 @@ export const createStatusRouter = () => {
 				const [branchComparison, trackingStatus] = await Promise.all([
 					getBranchComparison(git, defaultBranch),
 					getTrackingBranchStatus(git),
-					applyNumstatToFiles(git, parsed.staged, [
-						"diff",
-						"--cached",
-						"--numstat",
-					]),
+					applyNumstatToFiles(git, parsed.staged, ["diff", "--cached", "--numstat"]),
 					applyNumstatToFiles(git, parsed.unstaged, ["diff", "--numstat"]),
 					applyUntrackedLineCount(input.worktreePath, parsed.untracked),
 				]);
@@ -129,11 +121,7 @@ async function getBranchComparison(
 		commits = parseGitLog(logOutput);
 
 		if (ahead > 0) {
-			const nameStatus = await git.raw([
-				"diff",
-				"--name-status",
-				`origin/${defaultBranch}...HEAD`,
-			]);
+			const nameStatus = await git.raw(["diff", "--name-status", `origin/${defaultBranch}...HEAD`]);
 			againstBase = parseNameStatus(nameStatus);
 
 			await applyNumstatToFiles(git, againstBase, [
@@ -175,25 +163,14 @@ interface TrackingStatus {
 	hasUpstream: boolean;
 }
 
-async function getTrackingBranchStatus(
-	git: ReturnType<typeof simpleGit>,
-): Promise<TrackingStatus> {
+async function getTrackingBranchStatus(git: ReturnType<typeof simpleGit>): Promise<TrackingStatus> {
 	try {
-		const upstream = await git.raw([
-			"rev-parse",
-			"--abbrev-ref",
-			"@{upstream}",
-		]);
+		const upstream = await git.raw(["rev-parse", "--abbrev-ref", "@{upstream}"]);
 		if (!upstream.trim()) {
 			return { pushCount: 0, pullCount: 0, hasUpstream: false };
 		}
 
-		const tracking = await git.raw([
-			"rev-list",
-			"--left-right",
-			"--count",
-			"@{upstream}...HEAD",
-		]);
+		const tracking = await git.raw(["rev-list", "--left-right", "--count", "@{upstream}...HEAD"]);
 		const [pullStr, pushStr] = tracking.trim().split(/\s+/);
 		return {
 			pushCount: Number.parseInt(pushStr || "0", 10),

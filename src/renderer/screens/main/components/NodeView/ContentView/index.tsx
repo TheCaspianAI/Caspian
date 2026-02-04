@@ -9,9 +9,7 @@ export function ContentView() {
 
 	return (
 		<div className="h-full flex flex-col overflow-hidden">
-			<ContentHeader
-				leadingAction={!isSidebarOpen ? <SidebarControl /> : undefined}
-			>
+			<ContentHeader leadingAction={!isSidebarOpen ? <SidebarControl /> : undefined}>
 				<GroupStrip />
 			</ContentHeader>
 			<TabsContent />

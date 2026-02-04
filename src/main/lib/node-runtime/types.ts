@@ -99,9 +99,7 @@ export interface TerminalSessionOperations {
 	ackColdRestore(paneId: string): void;
 
 	/** Get session info */
-	getSession(
-		paneId: string,
-	): { isAlive: boolean; cwd: string; lastActive: number } | null;
+	getSession(paneId: string): { isAlive: boolean; cwd: string; lastActive: number } | null;
 }
 
 // =============================================================================
@@ -114,9 +112,7 @@ export interface TerminalSessionOperations {
  */
 export interface TerminalWorkspaceOperations {
 	/** Kill all sessions for a workspace */
-	killByWorkspaceId(
-		workspaceId: string,
-	): Promise<{ killed: number; failed: number }>;
+	killByWorkspaceId(workspaceId: string): Promise<{ killed: number; failed: number }>;
 
 	/** Get count of alive sessions for a workspace */
 	getSessionCountByWorkspaceId(workspaceId: string): Promise<number>;

@@ -1,9 +1,9 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { cn } from "ui/lib/utils";
 import type { Terminal } from "@xterm/xterm";
 import { useCallback, useEffect, useState } from "react";
 import { HiArrowDown } from "react-icons/hi2";
 import { useHotkeyText } from "renderer/stores/hotkeys";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
+import { cn } from "ui/lib/utils";
 import { scrollToBottom } from "../utils";
 
 interface ScrollToBottomButtonProps {
@@ -50,9 +50,7 @@ export function ScrollToBottomButton({ terminal }: ScrollToBottomButtonProps) {
 		<div
 			className={cn(
 				"absolute bottom-4 left-1/2 z-10 -translate-x-1/2 transition-all duration-200",
-				isVisible
-					? "translate-y-0 opacity-100"
-					: "pointer-events-none translate-y-2 opacity-0",
+				isVisible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0",
 			)}
 		>
 			<Tooltip delayDuration={500}>

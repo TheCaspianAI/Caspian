@@ -1,17 +1,17 @@
 import { existsSync, statSync } from "node:fs";
 import { access } from "node:fs/promises";
 import { basename, join } from "node:path";
-import {
-	BRANCH_PREFIX_MODES,
-	repositories,
-	type SelectRepository,
-	settings,
-	nodes,
-} from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { and, desc, eq, inArray, isNull, not } from "drizzle-orm";
 import type { BrowserWindow } from "electron";
 import { dialog } from "electron";
+import {
+	BRANCH_PREFIX_MODES,
+	nodes,
+	repositories,
+	type SelectRepository,
+	settings,
+} from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
 import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
@@ -47,11 +47,7 @@ type OpenNewNeedsGitInit = {
 	selectedPath: string;
 };
 type OpenNewError = { canceled: false; error: string };
-export type OpenNewResult =
-	| OpenNewCanceled
-	| OpenNewSuccess
-	| OpenNewNeedsGitInit
-	| OpenNewError;
+export type OpenNewResult = OpenNewCanceled | OpenNewSuccess | OpenNewNeedsGitInit | OpenNewError;
 
 /**
  * Creates or updates a repository record in the database.
@@ -243,215 +239,197 @@ function extractRepoName(urlInput: string): string | null {
 
 export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) => {
 	return router({
-		get: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.query(({ input }): Repository => {
+		get: publicProcedure.input(z.object({ id: z.string() })).query(({ input }): Repository => {
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, input.id))
+				.get();
+
+			if (!repository) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: `Repository ${input.id} not found`,
+				});
+			}
+
+			return repository;
+		}),
+
+		getRecents: publicProcedure.query((): Repository[] => {
+			return localDb.select().from(repositories).orderBy(desc(repositories.lastOpenedAt)).all();
+		}),
+
+		getBranches: publicProcedure.input(z.object({ repositoryId: z.string() })).query(
+			async ({
+				input,
+			}): Promise<{
+				branches: Array<{
+					name: string;
+					lastCommitDate: number;
+					isLocal: boolean;
+					isRemote: boolean;
+				}>;
+				defaultBranch: string;
+			}> => {
 				const repository = localDb
 					.select()
 					.from(repositories)
-					.where(eq(repositories.id, input.id))
+					.where(eq(repositories.id, input.repositoryId))
 					.get();
-
 				if (!repository) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: `Repository ${input.id} not found`,
-					});
+					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
 
-				return repository;
-			}),
+				const git = simpleGit(repository.mainRepoPath);
 
-		getRecents: publicProcedure.query((): Repository[] => {
-			return localDb
-				.select()
-				.from(repositories)
-				.orderBy(desc(repositories.lastOpenedAt))
-				.all();
-		}),
+				// Check if origin remote exists
+				let hasOrigin = false;
+				try {
+					const remotes = await git.getRemotes();
+					hasOrigin = remotes.some((r) => r.name === "origin");
+				} catch {
+					// If we can't get remotes, assume no origin
+				}
 
-		getBranches: publicProcedure
-			.input(z.object({ repositoryId: z.string() }))
-			.query(
-				async ({
-					input,
-				}): Promise<{
-					branches: Array<{
-						name: string;
-						lastCommitDate: number;
-						isLocal: boolean;
-						isRemote: boolean;
-					}>;
-					defaultBranch: string;
-				}> => {
-					const repository = localDb
-						.select()
-						.from(repositories)
-						.where(eq(repositories.id, input.repositoryId))
-						.get();
-					if (!repository) {
-						throw new Error(`Repository ${input.repositoryId} not found`);
+				const branchSummary = await git.branch(["-a"]);
+
+				const localBranchSet = new Set<string>();
+				const remoteBranchSet = new Set<string>();
+
+				for (const name of Object.keys(branchSummary.branches)) {
+					if (name.startsWith("remotes/origin/")) {
+						if (name === "remotes/origin/HEAD") continue;
+						const remoteName = name.replace("remotes/origin/", "");
+						remoteBranchSet.add(remoteName);
+					} else {
+						localBranchSet.add(name);
 					}
+				}
 
-					const git = simpleGit(repository.mainRepoPath);
+				// Get branch dates for sorting - fetch from both local and remote
+				const branchMap = new Map<
+					string,
+					{ lastCommitDate: number; isLocal: boolean; isRemote: boolean }
+				>();
 
-					// Check if origin remote exists
-					let hasOrigin = false;
+				// First, get remote branch dates (if origin exists)
+				if (hasOrigin) {
 					try {
-						const remotes = await git.getRemotes();
-						hasOrigin = remotes.some((r) => r.name === "origin");
-					} catch {
-						// If we can't get remotes, assume no origin
-					}
-
-					const branchSummary = await git.branch(["-a"]);
-
-					const localBranchSet = new Set<string>();
-					const remoteBranchSet = new Set<string>();
-
-					for (const name of Object.keys(branchSummary.branches)) {
-						if (name.startsWith("remotes/origin/")) {
-							if (name === "remotes/origin/HEAD") continue;
-							const remoteName = name.replace("remotes/origin/", "");
-							remoteBranchSet.add(remoteName);
-						} else {
-							localBranchSet.add(name);
-						}
-					}
-
-					// Get branch dates for sorting - fetch from both local and remote
-					const branchMap = new Map<
-						string,
-						{ lastCommitDate: number; isLocal: boolean; isRemote: boolean }
-					>();
-
-					// First, get remote branch dates (if origin exists)
-					if (hasOrigin) {
-						try {
-							const remoteBranchInfo = await git.raw([
-								"for-each-ref",
-								"--sort=-committerdate",
-								"--format=%(refname:short) %(committerdate:unix)",
-								"refs/remotes/origin/",
-							]);
-
-							for (const line of remoteBranchInfo.trim().split("\n")) {
-								if (!line) continue;
-								const lastSpaceIdx = line.lastIndexOf(" ");
-								let branch = line.substring(0, lastSpaceIdx);
-								const timestamp = Number.parseInt(
-									line.substring(lastSpaceIdx + 1),
-									10,
-								);
-
-								// Normalize remote branch names
-								if (branch.startsWith("origin/")) {
-									branch = branch.replace("origin/", "");
-								}
-
-								if (branch === "HEAD") continue;
-
-								branchMap.set(branch, {
-									lastCommitDate: timestamp * 1000,
-									isLocal: localBranchSet.has(branch),
-									isRemote: true,
-								});
-							}
-						} catch {
-							// Fallback for remote branches
-							for (const name of remoteBranchSet) {
-								branchMap.set(name, {
-									lastCommitDate: 0,
-									isLocal: localBranchSet.has(name),
-									isRemote: true,
-								});
-							}
-						}
-					}
-
-					// Then, add local-only branches
-					try {
-						const localBranchInfo = await git.raw([
+						const remoteBranchInfo = await git.raw([
 							"for-each-ref",
 							"--sort=-committerdate",
 							"--format=%(refname:short) %(committerdate:unix)",
-							"refs/heads/",
+							"refs/remotes/origin/",
 						]);
 
-						for (const line of localBranchInfo.trim().split("\n")) {
+						for (const line of remoteBranchInfo.trim().split("\n")) {
 							if (!line) continue;
 							const lastSpaceIdx = line.lastIndexOf(" ");
-							const branch = line.substring(0, lastSpaceIdx);
-							const timestamp = Number.parseInt(
-								line.substring(lastSpaceIdx + 1),
-								10,
-							);
+							let branch = line.substring(0, lastSpaceIdx);
+							const timestamp = Number.parseInt(line.substring(lastSpaceIdx + 1), 10);
+
+							// Normalize remote branch names
+							if (branch.startsWith("origin/")) {
+								branch = branch.replace("origin/", "");
+							}
 
 							if (branch === "HEAD") continue;
 
-							// Only add if not already in map (remote takes precedence for date)
-							if (!branchMap.has(branch)) {
-								branchMap.set(branch, {
-									lastCommitDate: timestamp * 1000,
-									isLocal: true,
-									isRemote: remoteBranchSet.has(branch),
-								});
-							} else {
-								// Update isLocal flag for branches that exist both locally and remotely
-								const existing = branchMap.get(branch);
-								if (existing) {
-									existing.isLocal = true;
-								}
-							}
+							branchMap.set(branch, {
+								lastCommitDate: timestamp * 1000,
+								isLocal: localBranchSet.has(branch),
+								isRemote: true,
+							});
 						}
 					} catch {
-						// Fallback for local branches
-						for (const name of localBranchSet) {
-							if (!branchMap.has(name)) {
-								branchMap.set(name, {
-									lastCommitDate: 0,
-									isLocal: true,
-									isRemote: remoteBranchSet.has(name),
-								});
+						// Fallback for remote branches
+						for (const name of remoteBranchSet) {
+							branchMap.set(name, {
+								lastCommitDate: 0,
+								isLocal: localBranchSet.has(name),
+								isRemote: true,
+							});
+						}
+					}
+				}
+
+				// Then, add local-only branches
+				try {
+					const localBranchInfo = await git.raw([
+						"for-each-ref",
+						"--sort=-committerdate",
+						"--format=%(refname:short) %(committerdate:unix)",
+						"refs/heads/",
+					]);
+
+					for (const line of localBranchInfo.trim().split("\n")) {
+						if (!line) continue;
+						const lastSpaceIdx = line.lastIndexOf(" ");
+						const branch = line.substring(0, lastSpaceIdx);
+						const timestamp = Number.parseInt(line.substring(lastSpaceIdx + 1), 10);
+
+						if (branch === "HEAD") continue;
+
+						// Only add if not already in map (remote takes precedence for date)
+						if (!branchMap.has(branch)) {
+							branchMap.set(branch, {
+								lastCommitDate: timestamp * 1000,
+								isLocal: true,
+								isRemote: remoteBranchSet.has(branch),
+							});
+						} else {
+							// Update isLocal flag for branches that exist both locally and remotely
+							const existing = branchMap.get(branch);
+							if (existing) {
+								existing.isLocal = true;
 							}
 						}
 					}
-
-					const branches = Array.from(branchMap.entries()).map(
-						([name, data]) => ({
-							name,
-							...data,
-						}),
-					);
-
-					// Sync with remote in case the default branch changed (e.g. master -> main)
-					const remoteDefaultBranch = await refreshDefaultBranch(
-						repository.mainRepoPath,
-					);
-
-					const defaultBranch =
-						remoteDefaultBranch ||
-						repository.defaultBranch ||
-						(await getDefaultBranch(repository.mainRepoPath));
-
-					if (defaultBranch !== repository.defaultBranch) {
-						localDb
-							.update(repositories)
-							.set({ defaultBranch })
-							.where(eq(repositories.id, input.repositoryId))
-							.run();
+				} catch {
+					// Fallback for local branches
+					for (const name of localBranchSet) {
+						if (!branchMap.has(name)) {
+							branchMap.set(name, {
+								lastCommitDate: 0,
+								isLocal: true,
+								isRemote: remoteBranchSet.has(name),
+							});
+						}
 					}
+				}
 
-					// Sort: default branch first, then by date
-					branches.sort((a, b) => {
-						if (a.name === defaultBranch) return -1;
-						if (b.name === defaultBranch) return 1;
-						return b.lastCommitDate - a.lastCommitDate;
-					});
+				const branches = Array.from(branchMap.entries()).map(([name, data]) => ({
+					name,
+					...data,
+				}));
 
-					return { branches, defaultBranch };
-				},
-			),
+				// Sync with remote in case the default branch changed (e.g. master -> main)
+				const remoteDefaultBranch = await refreshDefaultBranch(repository.mainRepoPath);
+
+				const defaultBranch =
+					remoteDefaultBranch ||
+					repository.defaultBranch ||
+					(await getDefaultBranch(repository.mainRepoPath));
+
+				if (defaultBranch !== repository.defaultBranch) {
+					localDb
+						.update(repositories)
+						.set({ defaultBranch })
+						.where(eq(repositories.id, input.repositoryId))
+						.run();
+				}
+
+				// Sort: default branch first, then by date
+				branches.sort((a, b) => {
+					if (a.name === defaultBranch) return -1;
+					if (b.name === defaultBranch) return 1;
+					return b.lastCommitDate - a.lastCommitDate;
+				});
+
+				return { branches, defaultBranch };
+			},
+		),
 
 		openNew: publicProcedure.mutation(async (): Promise<OpenNewResult> => {
 			const window = getWindow();
@@ -564,10 +542,7 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					await git.init(["--initial-branch=main"]);
 				} catch (err) {
 					// Likely an older Git version that doesn't support --initial-branch
-					console.warn(
-						"Git init with --initial-branch failed, using fallback:",
-						err,
-					);
+					console.warn("Git init with --initial-branch failed, using fallback:", err);
 					await git.init();
 				}
 
@@ -693,10 +668,7 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 							};
 						} catch {
 							// Directory is missing - remove the stale repository record and continue with clone
-							localDb
-								.delete(repositories)
-								.where(eq(repositories.id, existingRepository.id))
-								.run();
+							localDb.delete(repositories).where(eq(repositories.id, existingRepository.id)).run();
 						}
 					}
 
@@ -741,8 +713,7 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						repository,
 					};
 				} catch (error) {
-					const errorMessage =
-						error instanceof Error ? error.message : String(error);
+					const errorMessage = error instanceof Error ? error.message : String(error);
 					return {
 						canceled: false as const,
 						success: false as const,
@@ -854,14 +825,9 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					throw new Error(`Repository ${input.id} not found`);
 				}
 
-				const remoteDefaultBranch = await refreshDefaultBranch(
-					repository.mainRepoPath,
-				);
+				const remoteDefaultBranch = await refreshDefaultBranch(repository.mainRepoPath);
 
-				if (
-					remoteDefaultBranch &&
-					remoteDefaultBranch !== repository.defaultBranch
-				) {
+				if (remoteDefaultBranch && remoteDefaultBranch !== repository.defaultBranch) {
 					localDb
 						.update(repositories)
 						.set({ defaultBranch: remoteDefaultBranch })
@@ -889,79 +855,68 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 				};
 			}),
 
-		close: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.mutation(async ({ input }) => {
-				const repository = localDb
-					.select()
-					.from(repositories)
-					.where(eq(repositories.id, input.id))
-					.get();
+		close: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, input.id))
+				.get();
 
-				if (!repository) {
-					throw new Error("Repository not found");
-				}
+			if (!repository) {
+				throw new Error("Repository not found");
+			}
 
-				const repositoryNodes = localDb
-					.select()
-					.from(nodes)
-					.where(eq(nodes.repositoryId, input.id))
-					.all();
+			const repositoryNodes = localDb
+				.select()
+				.from(nodes)
+				.where(eq(nodes.repositoryId, input.id))
+				.all();
 
-				let totalFailed = 0;
-				const registry = getNodeRuntimeRegistry();
-				for (const node of repositoryNodes) {
-					const terminal = registry.getForNodeId(node.id).terminal;
-					const terminalResult = await terminal.killByWorkspaceId(node.id);
-					totalFailed += terminalResult.failed;
-				}
+			let totalFailed = 0;
+			const registry = getNodeRuntimeRegistry();
+			for (const node of repositoryNodes) {
+				const terminal = registry.getForNodeId(node.id).terminal;
+				const terminalResult = await terminal.killByWorkspaceId(node.id);
+				totalFailed += terminalResult.failed;
+			}
 
-				const closedNodeIds = repositoryNodes.map((n) => n.id);
+			const closedNodeIds = repositoryNodes.map((n) => n.id);
 
-				if (closedNodeIds.length > 0) {
-					localDb
-						.delete(nodes)
-						.where(inArray(nodes.id, closedNodeIds))
-						.run();
-				}
+			if (closedNodeIds.length > 0) {
+				localDb.delete(nodes).where(inArray(nodes.id, closedNodeIds)).run();
+			}
 
-				// Hide the repository by setting tabOrder to null
+			// Hide the repository by setting tabOrder to null
+			localDb
+				.update(repositories)
+				.set({ tabOrder: null })
+				.where(eq(repositories.id, input.id))
+				.run();
+
+			// Update active node if it was in this repository
+			const currentSettings = localDb.select().from(settings).get();
+			if (
+				currentSettings?.lastActiveNodeId &&
+				closedNodeIds.includes(currentSettings.lastActiveNodeId)
+			) {
+				const remainingNodes = localDb.select().from(nodes).orderBy(desc(nodes.lastOpenedAt)).all();
+
 				localDb
-					.update(repositories)
-					.set({ tabOrder: null })
-					.where(eq(repositories.id, input.id))
+					.update(settings)
+					.set({
+						lastActiveNodeId: remainingNodes[0]?.id ?? null,
+					})
+					.where(eq(settings.id, 1))
 					.run();
+			}
 
-				// Update active node if it was in this repository
-				const currentSettings = localDb.select().from(settings).get();
-				if (
-					currentSettings?.lastActiveNodeId &&
-					closedNodeIds.includes(currentSettings.lastActiveNodeId)
-				) {
-					const remainingNodes = localDb
-						.select()
-						.from(nodes)
-						.orderBy(desc(nodes.lastOpenedAt))
-						.all();
+			const terminalWarning =
+				totalFailed > 0 ? `${totalFailed} terminal process(es) may still be running` : undefined;
 
-					localDb
-						.update(settings)
-						.set({
-							lastActiveNodeId: remainingNodes[0]?.id ?? null,
-						})
-						.where(eq(settings.id, 1))
-						.run();
-				}
+			track("repository_closed", { repository_id: input.id });
 
-				const terminalWarning =
-					totalFailed > 0
-						? `${totalFailed} terminal process(es) may still be running`
-						: undefined;
-
-				track("repository_closed", { repository_id: input.id });
-
-				return { success: true, terminalWarning };
-			}),
+			return { success: true, terminalWarning };
+		}),
 
 		getGitHubAvatar: publicProcedure
 			.input(z.object({ id: z.string() }))
@@ -978,20 +933,14 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 				}
 
 				if (repository.githubOwner) {
-					console.log(
-						"[getGitHubAvatar] Using cached owner:",
-						repository.githubOwner,
-					);
+					console.log("[getGitHubAvatar] Using cached owner:", repository.githubOwner);
 					return {
 						owner: repository.githubOwner,
 						avatarUrl: getGitHubAvatarUrl(repository.githubOwner),
 					};
 				}
 
-				console.log(
-					"[getGitHubAvatar] Fetching owner for:",
-					repository.mainRepoPath,
-				);
+				console.log("[getGitHubAvatar] Fetching owner for:", repository.mainRepoPath);
 				const owner = await fetchGitHubOwner(repository.mainRepoPath);
 
 				if (!owner) {
@@ -1013,29 +962,27 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 				};
 			}),
 
-		getGitAuthor: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.query(async ({ input }) => {
-				const repository = localDb
-					.select()
-					.from(repositories)
-					.where(eq(repositories.id, input.id))
-					.get();
+		getGitAuthor: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, input.id))
+				.get();
 
-				if (!repository) {
-					return null;
-				}
+			if (!repository) {
+				return null;
+			}
 
-				const authorName = await getGitAuthorName(repository.mainRepoPath);
-				if (!authorName) {
-					return null;
-				}
+			const authorName = await getGitAuthorName(repository.mainRepoPath);
+			if (!authorName) {
+				return null;
+			}
 
-				return {
-					name: authorName,
-					prefix: sanitizeAuthorPrefix(authorName),
-				};
-			}),
+			return {
+				name: authorName,
+				prefix: sanitizeAuthorPrefix(authorName),
+			};
+		}),
 	});
 };
 

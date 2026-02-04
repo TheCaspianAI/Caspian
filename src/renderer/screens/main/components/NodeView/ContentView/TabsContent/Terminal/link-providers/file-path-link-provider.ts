@@ -1,3 +1,4 @@
+import type { ILink, ILinkProvider, Terminal } from "@xterm/xterm";
 import {
 	decodeUrlEncodedPath,
 	detectFallbackLinks,
@@ -7,7 +8,6 @@ import {
 	type IParsedLink,
 	removeLinkSuffix,
 } from "shared/terminal-link-parsing";
-import type { ILink, ILinkProvider, Terminal } from "@xterm/xterm";
 
 /**
  * A link provider that detects file paths in terminal output using VSCode's
@@ -36,10 +36,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 		) => void,
 	) {}
 
-	provideLinks(
-		bufferLineNumber: number,
-		callback: (links: ILink[] | undefined) => void,
-	): void {
+	provideLinks(bufferLineNumber: number, callback: (links: ILink[] | undefined) => void): void {
 		const lineIndex = bufferLineNumber - 1;
 		const line = this.terminal.buffer.active.getLine(lineIndex);
 		if (!line) {
@@ -61,8 +58,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 		// Get next line if it's wrapped (for handling wrapped paths)
 		const nextLine = this.terminal.buffer.active.getLine(lineIndex + 1);
 		const nextLineIsWrapped = nextLine?.isWrapped ?? false;
-		const nextLineText =
-			nextLineIsWrapped && nextLine ? nextLine.translateToString(true) : "";
+		const nextLineText = nextLineIsWrapped && nextLine ? nextLine.translateToString(true) : "";
 
 		// Combine lines for multi-line path detection
 		const combinedText = prevLineText + lineText + nextLineText;
@@ -185,10 +181,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 	 * This handles cases like "See ./path/file." where the period is sentence punctuation,
 	 * not part of the path.
 	 */
-	private stripTrailingPunctuation(
-		parsedLink: IParsedLink,
-		combinedText: string,
-	): IParsedLink {
+	private stripTrailingPunctuation(parsedLink: IParsedLink, combinedText: string): IParsedLink {
 		const pathText = parsedLink.path.text;
 		const linkEnd = parsedLink.path.index + pathText.length;
 
@@ -225,11 +218,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 		return parsedLink;
 	}
 
-	private isUrl(
-		pathText: string,
-		linkStart: number,
-		combinedText: string,
-	): boolean {
+	private isUrl(pathText: string, linkStart: number, combinedText: string): boolean {
 		if (
 			pathText.startsWith("http://") ||
 			pathText.startsWith("https://") ||
@@ -308,10 +297,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 		this.onOpen(event, cleanPath, line, column, lineEnd, columnEnd);
 	}
 
-	private handleFallbackActivation(
-		event: MouseEvent,
-		fallback: IFallbackLink,
-	): void {
+	private handleFallbackActivation(event: MouseEvent, fallback: IFallbackLink): void {
 		if (!event.metaKey && !event.ctrlKey) {
 			return;
 		}
@@ -339,8 +325,7 @@ export class FilePathLinkProvider implements ILinkProvider {
 		const currentLineStart = prevLineLength;
 		const currentLineEnd = prevLineLength + lineLength;
 
-		const startsInPrevLine =
-			isCurrentLineWrapped && matchIndex < currentLineStart;
+		const startsInPrevLine = isCurrentLineWrapped && matchIndex < currentLineStart;
 		const endsInNextLine = nextLineIsWrapped && matchEnd > currentLineEnd;
 
 		let startY: number;

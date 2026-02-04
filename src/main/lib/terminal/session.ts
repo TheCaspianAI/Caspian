@@ -35,9 +35,7 @@ export function createHeadlessTerminal(params: {
 
 	const serializer = new SerializeAddon();
 	// SerializeAddon types expect browser Terminal, but works with headless at runtime
-	headless.loadAddon(
-		serializer as unknown as Parameters<typeof headless.loadAddon>[0],
-	);
+	headless.loadAddon(serializer as unknown as Parameters<typeof headless.loadAddon>[0]);
 
 	return { headless, serializer };
 }
@@ -206,19 +204,13 @@ export function setupDataHandler(
 							const timeout = new Promise<void>((resolve) =>
 								setTimeout(resolve, AGENT_HOOKS_TIMEOUT_MS),
 							);
-							await Promise.race([beforeInitialCommands, timeout]).catch(
-								(error) => {
-									console.warn(
-										"[terminal/session] Initial command preconditions failed:",
-										{
-											paneId: session.paneId,
-											workspaceId: session.workspaceId,
-											error:
-												error instanceof Error ? error.message : String(error),
-										},
-									);
-								},
-							);
+							await Promise.race([beforeInitialCommands, timeout]).catch((error) => {
+								console.warn("[terminal/session] Initial command preconditions failed:", {
+									paneId: session.paneId,
+									workspaceId: session.workspaceId,
+									error: error instanceof Error ? error.message : String(error),
+								});
+							});
 						}
 
 						if (session.isAlive) {

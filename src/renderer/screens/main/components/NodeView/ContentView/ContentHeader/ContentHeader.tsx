@@ -9,20 +9,12 @@ interface ContentHeaderProps {
 	trailingAction?: ReactNode;
 }
 
-export function ContentHeader({
-	leadingAction,
-	children,
-	trailingAction,
-}: ContentHeaderProps) {
+export function ContentHeader({ leadingAction, children, trailingAction }: ContentHeaderProps) {
 	return (
 		<div className="flex items-end bg-background shrink-0 h-10 border-b">
-			{leadingAction && (
-				<div className="flex items-center h-10 pl-3 pr-1">{leadingAction}</div>
-			)}
+			{leadingAction && <div className="flex items-center h-10 pl-3 pr-1">{leadingAction}</div>}
 			<div className="flex-1 min-w-0">{children}</div>
-			{trailingAction && (
-				<div className="flex items-center h-10 pr-2">{trailingAction}</div>
-			)}
+			{trailingAction && <div className="flex items-center h-10 pr-2">{trailingAction}</div>}
 		</div>
 	);
 }

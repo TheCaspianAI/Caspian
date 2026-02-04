@@ -108,21 +108,13 @@ export type ExternalApp = (typeof EXTERNAL_APPS)[number];
 /**
  * Terminal link behavior options
  */
-export const TERMINAL_LINK_BEHAVIORS = [
-	"external-editor",
-	"file-viewer",
-] as const;
+export const TERMINAL_LINK_BEHAVIORS = ["external-editor", "file-viewer"] as const;
 
 export type TerminalLinkBehavior = (typeof TERMINAL_LINK_BEHAVIORS)[number];
 
 /**
  * Branch prefix modes for node branch naming
  */
-export const BRANCH_PREFIX_MODES = [
-	"github",
-	"author",
-	"custom",
-	"none",
-] as const;
+export const BRANCH_PREFIX_MODES = ["github", "author", "custom", "none"] as const;
 
 export type BranchPrefixMode = (typeof BRANCH_PREFIX_MODES)[number];

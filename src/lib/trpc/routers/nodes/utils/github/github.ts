@@ -3,11 +3,7 @@ import { promisify } from "node:util";
 import type { CheckItem, GitHubStatus } from "lib/local-db";
 import { branchExistsOnRemote } from "../git";
 import { execWithShellEnv } from "../shell-env";
-import {
-	type GHPRResponse,
-	GHPRResponseSchema,
-	GHRepoResponseSchema,
-} from "./types";
+import { type GHPRResponse, GHPRResponseSchema, GHRepoResponseSchema } from "./types";
 
 const execFileAsync = promisify(execFile);
 
@@ -20,9 +16,7 @@ const CACHE_TTL_MS = 10_000;
  * Returns null if `gh` is not installed, not authenticated, or on error.
  * Results are cached for 10 seconds.
  */
-export async function fetchGitHubPRStatus(
-	worktreePath: string,
-): Promise<GitHubStatus | null> {
+export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubStatus | null> {
 	// Check cache first
 	const cached = cache.get(worktreePath);
 	if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
@@ -73,11 +67,9 @@ export async function fetchGitHubPRStatus(
 
 async function getRepoUrl(worktreePath: string): Promise<string | null> {
 	try {
-		const { stdout } = await execWithShellEnv(
-			"gh",
-			["repo", "view", "--json", "url"],
-			{ cwd: worktreePath },
-		);
+		const { stdout } = await execWithShellEnv("gh", ["repo", "view", "--json", "url"], {
+			cwd: worktreePath,
+		});
 		const raw = JSON.parse(stdout);
 		const result = GHRepoResponseSchema.safeParse(raw);
 		if (!result.success) {
@@ -91,10 +83,7 @@ async function getRepoUrl(worktreePath: string): Promise<string | null> {
 	}
 }
 
-async function getPRForBranch(
-	worktreePath: string,
-	_branch: string,
-): Promise<GitHubStatus["pr"]> {
+async function getPRForBranch(worktreePath: string, _branch: string): Promise<GitHubStatus["pr"]> {
 	try {
 		// Use execWithShellEnv to handle macOS GUI app PATH issues
 		// Important: Do NOT pass the branch name argument. When `gh pr view` is
@@ -138,10 +127,7 @@ async function getPRForBranch(
 		};
 	} catch (error) {
 		// "no pull requests found" is not an error - just no PR
-		if (
-			error instanceof Error &&
-			error.message.includes("no pull requests found")
-		) {
+		if (error instanceof Error && error.message.includes("no pull requests found")) {
 			return null;
 		}
 		// Re-throw other errors to be caught by parent
@@ -183,11 +169,7 @@ function parseChecks(rollup: GHPRResponse["statusCheckRollup"]): CheckItem[] {
 		let status: CheckItem["status"];
 		if (rawStatus === "SUCCESS") {
 			status = "success";
-		} else if (
-			rawStatus === "FAILURE" ||
-			rawStatus === "ERROR" ||
-			rawStatus === "TIMED_OUT"
-		) {
+		} else if (rawStatus === "FAILURE" || rawStatus === "ERROR" || rawStatus === "TIMED_OUT") {
 			status = "failure";
 		} else if (rawStatus === "SKIPPED" || rawStatus === "NEUTRAL") {
 			status = "skipped";
@@ -217,12 +199,7 @@ function computeChecksStatus(
 
 		if (status === "FAILURE" || status === "ERROR" || status === "TIMED_OUT") {
 			hasFailure = true;
-		} else if (
-			status === "PENDING" ||
-			status === "" ||
-			status === null ||
-			status === undefined
-		) {
+		} else if (status === "PENDING" || status === "" || status === null || status === undefined) {
 			hasPending = true;
 		}
 	}

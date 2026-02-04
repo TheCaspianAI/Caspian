@@ -1,9 +1,6 @@
 import { app, BrowserWindow, shell } from "electron";
 
-import {
-	installExtension,
-	REACT_DEVELOPER_TOOLS,
-} from "electron-extension-installer";
+import { installExtension, REACT_DEVELOPER_TOOLS } from "electron-extension-installer";
 import { PLATFORM } from "shared/constants";
 import { makeAppId } from "shared/utils";
 import { ignoreConsoleWarnings } from "../../utils/ignore-console-warnings";
@@ -72,8 +69,7 @@ export async function makeAppSetup(
 
 PLATFORM.IS_LINUX && app.disableHardwareAcceleration();
 
-PLATFORM.IS_WINDOWS &&
-	app.setAppUserModelId(isDev ? process.execPath : makeAppId());
+PLATFORM.IS_WINDOWS && app.setAppUserModelId(isDev ? process.execPath : makeAppId());
 
 app.commandLine.appendSwitch("force-color-profile", "srgb");
 

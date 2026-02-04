@@ -12,11 +12,7 @@ import { write as fsWrite } from "node:fs";
 import type { IPty } from "node-pty";
 import * as pty from "node-pty";
 import treeKill from "tree-kill";
-import {
-	PtySubprocessFrameDecoder,
-	PtySubprocessIpcType,
-	writeFrame,
-} from "./pty-subprocess-ipc";
+import { PtySubprocessFrameDecoder, PtySubprocessIpcType, writeFrame } from "./pty-subprocess-ipc";
 
 // =============================================================================
 // Types (kept local to avoid bundling/import surprises)
@@ -188,19 +184,14 @@ function flush(): void {
 						writeBackoffMs === 0
 							? MIN_WRITE_BACKOFF_MS
 							: Math.min(writeBackoffMs * 2, MAX_WRITE_BACKOFF_MS);
-					if (
-						DEBUG_OUTPUT_BATCHING &&
-						writeBackoffMs === MIN_WRITE_BACKOFF_MS
-					) {
+					if (DEBUG_OUTPUT_BATCHING && writeBackoffMs === MIN_WRITE_BACKOFF_MS) {
 						console.error("[pty-subprocess] PTY input backpressured (EAGAIN)");
 					}
 					setTimeout(flush, writeBackoffMs);
 					return;
 				}
 
-				sendError(
-					`Write failed: ${err instanceof Error ? err.message : String(err)}`,
-				);
+				sendError(`Write failed: ${err instanceof Error ? err.message : String(err)}`);
 				writeQueue.length = 0;
 				queuedBytes = 0;
 				flushing = false;
@@ -242,9 +233,7 @@ function flush(): void {
 	try {
 		ptyProcess.write(chunk.toString("utf8"));
 	} catch (error) {
-		sendError(
-			`Write failed: ${error instanceof Error ? error.message : String(error)}`,
-		);
+		sendError(`Write failed: ${error instanceof Error ? error.message : String(error)}`);
 		writeQueue.length = 0;
 		queuedBytes = 0;
 		flushing = false;
@@ -332,9 +321,7 @@ function handleSpawn(payload: Buffer): void {
 		pidPayload.writeUInt32LE(ptyProcess.pid ?? 0, 0);
 		send(PtySubprocessIpcType.Spawned, pidPayload);
 	} catch (error) {
-		sendError(
-			`Spawn failed: ${error instanceof Error ? error.message : String(error)}`,
-		);
+		sendError(`Spawn failed: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
 
@@ -392,9 +379,7 @@ function handleKill(payload: Buffer): void {
 		const forceExitTimer = setTimeout(() => {
 			if (!ptyProcess) return; // Finally exited via onExit
 
-			console.error(
-				`[pty-subprocess] Force exit: onExit never fired for pid ${pid}`,
-			);
+			console.error(`[pty-subprocess] Force exit: onExit never fired for pid ${pid}`);
 
 			// Synthesize Exit frame since onExit won't fire
 			const exitPayload = Buffer.allocUnsafe(8);
@@ -491,9 +476,7 @@ process.stdin.on("data", (chunk: Buffer) => {
 			}
 		}
 	} catch (error) {
-		sendError(
-			`Failed to parse frame: ${error instanceof Error ? error.message : String(error)}`,
-		);
+		sendError(`Failed to parse frame: ${error instanceof Error ? error.message : String(error)}`);
 	}
 });
 

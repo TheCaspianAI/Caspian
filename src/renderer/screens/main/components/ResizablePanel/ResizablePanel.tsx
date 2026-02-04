@@ -1,5 +1,5 @@
-import { cn } from "ui/lib/utils";
 import { useCallback, useEffect, useRef } from "react";
+import { cn } from "ui/lib/utils";
 
 interface ResizablePanelProps {
 	/** The content to render inside the panel */
@@ -63,9 +63,7 @@ export function ResizablePanel({
 			// For right handle, dragging right increases width (normal delta)
 			const adjustedDelta = handleSide === "left" ? -delta : delta;
 			const newWidth = startWidthRef.current + adjustedDelta;
-			const finalWidth = clampWidth
-				? Math.max(minWidth, Math.min(maxWidth, newWidth))
-				: newWidth;
+			const finalWidth = clampWidth ? Math.max(minWidth, Math.min(maxWidth, newWidth)) : newWidth;
 			onWidthChange(finalWidth);
 		},
 		[isResizing, onWidthChange, minWidth, maxWidth, handleSide, clampWidth],
@@ -94,10 +92,7 @@ export function ResizablePanel({
 	}, [isResizing, handleMouseMove, handleMouseUp]);
 
 	return (
-		<div
-			className={cn("relative h-full shrink-0 overflow-hidden", className)}
-			style={{ width }}
-		>
+		<div className={cn("relative h-full shrink-0 overflow-hidden", className)} style={{ width }}>
 			{children}
 			{/* biome-ignore lint/a11y/useSemanticElements: <hr> is not appropriate for interactive resize handles */}
 			<div
@@ -114,9 +109,7 @@ export function ResizablePanel({
 					"hover:after:opacity-100 hover:after:bg-border/60",
 					"focus:outline-none focus:after:opacity-100 focus:after:bg-primary/40",
 					isResizing && "after:opacity-100 after:bg-primary/60 after:h-16",
-					handleSide === "left"
-						? "-left-2 after:right-1.5"
-						: "-right-2 after:left-1.5",
+					handleSide === "left" ? "-left-2 after:right-1.5" : "-right-2 after:left-1.5",
 				)}
 			/>
 		</div>

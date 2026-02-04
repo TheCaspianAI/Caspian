@@ -3,10 +3,7 @@ import type { CommandResult, ToolContext, ToolDefinition } from "./types";
 
 const schema = z.object({});
 
-async function execute(
-	_params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(_params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	// Hash routing: path is in window.location.hash (e.g., "#/workspace/abc123")
 	const hash = window.location.hash;
 	const pathname = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -19,8 +16,7 @@ async function execute(
 	let currentNode = null;
 	if (currentNodeId) {
 		const nodes = ctx.getNodes();
-		currentNode =
-			nodes?.find((n) => n.id === currentNodeId) ?? null;
+		currentNode = nodes?.find((n) => n.id === currentNodeId) ?? null;
 	}
 
 	return {

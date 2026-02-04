@@ -3,11 +3,7 @@ import { detectLanguage } from "shared/detect-language";
 import simpleGit from "simple-git";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import {
-	assertRegisteredWorktree,
-	PathValidationError,
-	secureFs,
-} from "./security";
+import { assertRegisteredWorktree, PathValidationError, secureFs } from "./security";
 
 /** Maximum file size for reading (2 MiB) */
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
@@ -22,12 +18,7 @@ type ReadWorkingFileResult =
 	| { ok: true; content: string; truncated: boolean; byteLength: number }
 	| {
 			ok: false;
-			reason:
-				| "not-found"
-				| "too-large"
-				| "binary"
-				| "outside-worktree"
-				| "symlink-escape";
+			reason: "not-found" | "too-large" | "binary" | "outside-worktree" | "symlink-escape";
 	  };
 
 /**
@@ -89,11 +80,7 @@ export const createFileContentsRouter = () => {
 				}),
 			)
 			.mutation(async ({ input }): Promise<{ success: boolean }> => {
-				await secureFs.writeFile(
-					input.worktreePath,
-					input.filePath,
-					input.content,
-				);
+				await secureFs.writeFile(input.worktreePath, input.filePath, input.content);
 				return { success: true };
 			}),
 
@@ -115,10 +102,7 @@ export const createFileContentsRouter = () => {
 						return { ok: false, reason: "too-large" };
 					}
 
-					const buffer = await secureFs.readFileBuffer(
-						input.worktreePath,
-						input.filePath,
-					);
+					const buffer = await secureFs.readFileBuffer(input.worktreePath, input.filePath);
 
 					if (isBinaryContent(buffer)) {
 						return { ok: false, reason: "binary" };
@@ -178,10 +162,7 @@ async function getFileVersions(
 }
 
 /** Helper to safely get git show content with size limit and memory protection */
-async function safeGitShow(
-	git: ReturnType<typeof simpleGit>,
-	spec: string,
-): Promise<string> {
+async function safeGitShow(git: ReturnType<typeof simpleGit>, spec: string): Promise<string> {
 	try {
 		// Preflight: check blob size before loading into memory
 		// This prevents memory spikes from large files in git history

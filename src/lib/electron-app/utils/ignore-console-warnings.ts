@@ -5,9 +5,7 @@ export function ignoreConsoleWarnings(warningsToIgnore: string[]) {
 		if (
 			typeof warning === "string" &&
 			warningsToIgnore.length > 0 &&
-			warningsToIgnore.some((ignoredWarning) =>
-				warning.includes(ignoredWarning),
-			)
+			warningsToIgnore.some((ignoredWarning) => warning.includes(ignoredWarning))
 		) {
 			return;
 		}

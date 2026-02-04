@@ -52,11 +52,7 @@ export function useTerminalCwd({
 
 	// Sync terminal cwd to store for DirectoryNavigator (debounced)
 	useEffect(() => {
-		debouncedUpdatePaneCwdRef.current(
-			paneId,
-			terminalCwd,
-			cwdConfirmed ?? false,
-		);
+		debouncedUpdatePaneCwdRef.current(paneId, terminalCwd, cwdConfirmed ?? false);
 	}, [terminalCwd, cwdConfirmed, paneId]);
 
 	// Cleanup debounced function on unmount

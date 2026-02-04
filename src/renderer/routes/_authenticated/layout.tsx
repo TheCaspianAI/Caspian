@@ -1,8 +1,4 @@
-import {
-	createFileRoute,
-	Outlet,
-	useNavigate,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { DndProvider } from "react-dnd";
 import { DashboardModal } from "renderer/components/DashboardModal";
 import { NewNodeModal } from "renderer/components/NewNodeModal";
@@ -13,9 +9,9 @@ import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { NodeInitEffects } from "renderer/screens/main/components/NodeInitEffects";
 import { useHotkeysSync } from "renderer/stores/hotkeys";
+import { useNodeInitStore } from "renderer/stores/node-init";
 import { useSettingsStore } from "renderer/stores/settings-state";
 import { useAgentHookListener } from "renderer/stores/tabs/useAgentHookListener";
-import { useNodeInitStore } from "renderer/stores/node-init";
 import { AgentHooks } from "./components/AgentHooks";
 import { CollectionsProvider } from "./providers/CollectionsProvider";
 

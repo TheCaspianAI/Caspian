@@ -1,14 +1,4 @@
 import { EXECUTION_MODES, type ExecutionMode } from "lib/local-db";
-import { Button } from "ui/components/ui/button";
-import { Input } from "ui/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "ui/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { HiOutlineStar, HiStar } from "react-icons/hi2";
@@ -19,6 +9,16 @@ import {
 	type PresetColumnKey,
 	type TerminalPreset,
 } from "renderer/routes/_authenticated/settings/presets/types";
+import { Button } from "ui/components/ui/button";
+import { Input } from "ui/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "ui/components/ui/select";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { CommandsEditor } from "./components/CommandsEditor";
 
 const PRESET_TYPE = "TERMINAL_PRESET";
@@ -184,9 +184,7 @@ export function PresetRow({
 							size="sm"
 							onClick={handleToggleDefault}
 							className={`h-8 w-8 p-0 ${preset.isDefault ? "text-yellow-500 hover:text-yellow-600" : "text-muted-foreground hover:text-foreground"}`}
-							aria-label={
-								preset.isDefault ? "Remove default" : "Set as default"
-							}
+							aria-label={preset.isDefault ? "Remove default" : "Set as default"}
 						>
 							{preset.isDefault ? (
 								<HiStar className="h-4 w-4" />
@@ -196,9 +194,7 @@ export function PresetRow({
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="top">
-						{preset.isDefault
-							? "Remove as default"
-							: "Set as default for new terminals"}
+						{preset.isDefault ? "Remove as default" : "Set as default for new terminals"}
 					</TooltipContent>
 				</Tooltip>
 				<Button

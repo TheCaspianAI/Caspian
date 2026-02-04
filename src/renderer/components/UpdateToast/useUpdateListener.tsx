@@ -1,7 +1,7 @@
-import { toast } from "ui/components/ui/sonner";
 import { useRef } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { AUTO_UPDATE_STATUS } from "shared/auto-update";
+import { toast } from "ui/components/ui/sonner";
 import { UpdateToast } from "./UpdateToast";
 
 export function useUpdateListener() {
@@ -11,10 +11,7 @@ export function useUpdateListener() {
 		onData: (event) => {
 			const { status, version, error } = event;
 
-			if (
-				status === AUTO_UPDATE_STATUS.IDLE ||
-				status === AUTO_UPDATE_STATUS.CHECKING
-			) {
+			if (status === AUTO_UPDATE_STATUS.IDLE || status === AUTO_UPDATE_STATUS.CHECKING) {
 				if (toastIdRef.current !== null) {
 					toast.dismiss(toastIdRef.current);
 					toastIdRef.current = null;
@@ -32,14 +29,7 @@ export function useUpdateListener() {
 				}
 
 				const toastId = toast.custom(
-					(id) => (
-						<UpdateToast
-							toastId={id}
-							status={status}
-							version={version}
-							error={error}
-						/>
-					),
+					(id) => <UpdateToast toastId={id} status={status} version={version} error={error} />,
 					{
 						duration: Number.POSITIVE_INFINITY,
 						position: "bottom-right",

@@ -1,6 +1,6 @@
+import { useEffect } from "react";
 import { useSettingsStore } from "renderer/stores/settings-state";
 import { SettingsContent } from "./SettingsContent";
-import { useEffect } from "react";
 
 export function SettingsModal() {
 	const isOpen = useSettingsStore((s) => s.isOpen);
@@ -29,6 +29,10 @@ export function SettingsModal() {
 			<div
 				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
 				onClick={closeSettings}
+				onKeyDown={(e) => e.key === "Escape" && closeSettings()}
+				role="button"
+				tabIndex={0}
+				aria-label="Close settings"
 			/>
 			{/* Modal content */}
 			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-xl elevation-3 bg-background flex flex-col">

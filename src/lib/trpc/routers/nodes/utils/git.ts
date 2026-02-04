@@ -25,10 +25,7 @@ interface ExecFileException extends Error {
 }
 
 function isExecFileException(error: unknown): error is ExecFileException {
-	return (
-		error instanceof Error &&
-		("code" in error || "signal" in error || "killed" in error)
-	);
+	return error instanceof Error && ("code" in error || "signal" in error || "killed" in error);
 }
 
 async function getGitEnv(): Promise<Record<string, string>> {
@@ -65,16 +62,7 @@ export async function getStatusNoLock(repoPath: string): Promise<StatusResult> {
 		// Note: porcelain=v1 already includes rename info (R/C status codes) without needing -M
 		const { stdout } = await execFileAsync(
 			"git",
-			[
-				"--no-optional-locks",
-				"-C",
-				repoPath,
-				"status",
-				"--porcelain=v1",
-				"-b",
-				"-z",
-				"-uall",
-			],
+			["--no-optional-locks", "-C", repoPath, "status", "--porcelain=v1", "-b", "-z", "-uall"],
 			{ env, timeout: 30_000 },
 		);
 
@@ -197,8 +185,7 @@ function parsePortelainStatus(stdout: string): StatusResult {
 			} else if (indexStatus === "D") {
 				stagedSet.add(path);
 				deletedSet.add(path);
-			} else if (indexStatus === "R" || indexStatus === "C")
-				stagedSet.add(path);
+			} else if (indexStatus === "R" || indexStatus === "C") stagedSet.add(path);
 			else if (indexStatus === "U") conflictedSet.add(path);
 			else if (indexStatus !== " " && indexStatus !== "?") stagedSet.add(path);
 
@@ -227,8 +214,7 @@ function parsePortelainStatus(stdout: string): StatusResult {
 		tracking,
 		detached: isDetached,
 		isClean: () =>
-			files.length === 0 ||
-			files.every((f) => f.index === "?" && f.working_dir === "?"),
+			files.length === 0 || files.every((f) => f.index === "?" && f.working_dir === "?"),
 	};
 }
 
@@ -270,12 +256,7 @@ async function repoUsesLfs(repoPath: string): Promise<boolean> {
 		const sampleFiles = lsFiles.split("\n").filter(Boolean).slice(0, 20);
 
 		if (sampleFiles.length > 0) {
-			const checkAttr = await git.raw([
-				"check-attr",
-				"filter",
-				"--",
-				...sampleFiles,
-			]);
+			const checkAttr = await git.raw(["check-attr", "filter", "--", ...sampleFiles]);
 			if (checkAttr.includes("filter: lfs")) {
 				return true;
 			}
@@ -287,9 +268,7 @@ async function repoUsesLfs(repoPath: string): Promise<boolean> {
 
 function isEnoent(error: unknown): boolean {
 	return (
-		error instanceof Error &&
-		"code" in error &&
-		(error as NodeJS.ErrnoException).code === "ENOENT"
+		error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "ENOENT"
 	);
 }
 
@@ -298,9 +277,7 @@ const MAX_ATTEMPTS = 10;
 /** Maximum suffix value to try in fallback (exclusive), e.g., 0-99 */
 const FALLBACK_MAX_SUFFIX = 100;
 
-export async function getGitAuthorName(
-	repoPath?: string,
-): Promise<string | null> {
+export async function getGitAuthorName(repoPath?: string): Promise<string | null> {
 	try {
 		const git = repoPath ? simpleGit(repoPath) : simpleGit();
 		const name = await git.getConfig("user.name");
@@ -311,17 +288,14 @@ export async function getGitAuthorName(
 	}
 }
 
-export async function getGitHubUsername(
-	_repoPath?: string,
-): Promise<string | null> {
+export async function getGitHubUsername(_repoPath?: string): Promise<string | null> {
 	const env = await getGitEnv();
 
 	try {
-		const { stdout } = await execFileAsync(
-			"gh",
-			["api", "user", "--jq", ".login"],
-			{ env, timeout: 10_000 },
-		);
+		const { stdout } = await execFileAsync("gh", ["api", "user", "--jq", ".login"], {
+			env,
+			timeout: 10_000,
+		});
 		return stdout.trim() || null;
 	} catch (error) {
 		console.warn(
@@ -332,9 +306,7 @@ export async function getGitHubUsername(
 	}
 }
 
-export async function getAuthorPrefix(
-	repoPath?: string,
-): Promise<string | null> {
+export async function getAuthorPrefix(repoPath?: string): Promise<string | null> {
 	const githubUsername = await getGitHubUsername(repoPath);
 	if (githubUsername) {
 		return githubUsername;
@@ -389,8 +361,7 @@ export function generateBranchName({
 	const words = friendlyWords.objects as string[];
 	const existingSet = new Set(existingBranches.map((b) => b.toLowerCase()));
 
-	const prefixWouldCollide =
-		authorPrefix && existingSet.has(authorPrefix.toLowerCase());
+	const prefixWouldCollide = authorPrefix && existingSet.has(authorPrefix.toLowerCase());
 	const safePrefix = prefixWouldCollide ? undefined : authorPrefix;
 
 	const addPrefix = (name: string): string => {
@@ -472,9 +443,7 @@ export async function createWorktree(
 			{ env, timeout: 120_000 },
 		);
 
-		console.log(
-			`Created worktree at ${worktreePath} with branch ${branch} from ${startPoint}`,
-		);
+		console.log(`Created worktree at ${worktreePath} with branch ${branch} from ${startPoint}`);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const lowerError = errorMessage.toLowerCase();
@@ -485,9 +454,7 @@ export async function createWorktree(
 			(lowerError.includes(".lock") && lowerError.includes("file exists"));
 
 		if (isLockError) {
-			console.error(
-				`Git lock file error during worktree creation: ${errorMessage}`,
-			);
+			console.error(`Git lock file error during worktree creation: ${errorMessage}`);
 			throw new Error(
 				`Failed to create worktree: The git repository is locked by another process. ` +
 					`This usually happens when another git operation is in progress, or a previous operation crashed. ` +
@@ -516,13 +483,10 @@ export async function createWorktree(
 			lowerError.includes("not a valid object name") ||
 			lowerError.includes("invalid reference") ||
 			lowerError.includes("unknown revision") ||
-			(lowerError.includes("does not have any commits") &&
-				lowerError.includes("branch"));
+			(lowerError.includes("does not have any commits") && lowerError.includes("branch"));
 
 		if (isInvalidRefError) {
-			console.error(
-				`Invalid start point error during worktree creation: ${errorMessage}`,
-			);
+			console.error(`Invalid start point error during worktree creation: ${errorMessage}`);
 			throw new Error(
 				`Failed to create worktree: The repository has no commits or the specified branch doesn't exist. ` +
 					`Please ensure the repository has at least one commit, or try fetching from the remote first with "git fetch origin".`,
@@ -572,11 +536,10 @@ export async function createWorktreeFromExistingBranch({
 
 		if (branchExistsLocally) {
 			// Branch exists locally - just checkout into the worktree
-			await execFileAsync(
-				"git",
-				["-C", mainRepoPath, "worktree", "add", worktreePath, branch],
-				{ env, timeout: 120_000 },
-			);
+			await execFileAsync("git", ["-C", mainRepoPath, "worktree", "add", worktreePath, branch], {
+				env,
+				timeout: 120_000,
+			});
 		} else {
 			// Branch doesn't exist locally - check if it's a remote branch
 			const remoteBranches = await git.branch(["-r"]);
@@ -600,15 +563,11 @@ export async function createWorktreeFromExistingBranch({
 					{ env, timeout: 120_000 },
 				);
 			} else {
-				throw new Error(
-					`Branch "${branch}" does not exist locally or on remote`,
-				);
+				throw new Error(`Branch "${branch}" does not exist locally or on remote`);
 			}
 		}
 
-		console.log(
-			`Created worktree at ${worktreePath} using existing branch ${branch}`,
-		);
+		console.log(`Created worktree at ${worktreePath} using existing branch ${branch}`);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const lowerError = errorMessage.toLowerCase();
@@ -619,9 +578,7 @@ export async function createWorktreeFromExistingBranch({
 			(lowerError.includes(".lock") && lowerError.includes("file exists"));
 
 		if (isLockError) {
-			console.error(
-				`Git lock file error during worktree creation: ${errorMessage}`,
-			);
+			console.error(`Git lock file error during worktree creation: ${errorMessage}`);
 			throw new Error(
 				`Failed to create worktree: The git repository is locked by another process. ` +
 					`This usually happens when another git operation is in progress, or a previous operation crashed. ` +
@@ -661,10 +618,7 @@ export async function createWorktreeFromExistingBranch({
 	}
 }
 
-export async function removeWorktree(
-	mainRepoPath: string,
-	worktreePath: string,
-): Promise<void> {
+export async function removeWorktree(mainRepoPath: string, worktreePath: string): Promise<void> {
 	try {
 		const env = await getGitEnv();
 
@@ -692,10 +646,7 @@ export async function getGitRoot(path: string): Promise<string> {
 	}
 }
 
-export async function worktreeExists(
-	mainRepoPath: string,
-	worktreePath: string,
-): Promise<boolean> {
+export async function worktreeExists(mainRepoPath: string, worktreePath: string): Promise<boolean> {
 	try {
 		const git = simpleGit(mainRepoPath);
 		const worktrees = await git.raw(["worktree", "list", "--porcelain"]);
@@ -770,10 +721,7 @@ export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 	if (hasRemote) {
 		// Try to get the default branch from origin/HEAD
 		try {
-			const headRef = await git.raw([
-				"symbolic-ref",
-				"refs/remotes/origin/HEAD",
-			]);
+			const headRef = await git.raw(["symbolic-ref", "refs/remotes/origin/HEAD"]);
 			const match = headRef.trim().match(/refs\/remotes\/origin\/(.+)/);
 			if (match) return match[1];
 		} catch {}
@@ -841,9 +789,7 @@ export async function fetchDefaultBranch(
  * @param mainRepoPath - Path to the main repository
  * @returns The current default branch name, or null if unable to determine
  */
-export async function refreshDefaultBranch(
-	mainRepoPath: string,
-): Promise<string | null> {
+export async function refreshDefaultBranch(mainRepoPath: string): Promise<string | null> {
 	const git = simpleGit(mainRepoPath);
 
 	const hasRemote = await hasOriginRemote(mainRepoPath);
@@ -883,41 +829,23 @@ export async function checkNeedsRebase(
 	defaultBranch: string,
 ): Promise<boolean> {
 	const git = simpleGit(worktreePath);
-	const behindCount = await git.raw([
-		"rev-list",
-		"--count",
-		`HEAD..origin/${defaultBranch}`,
-	]);
+	const behindCount = await git.raw(["rev-list", "--count", `HEAD..origin/${defaultBranch}`]);
 	return Number.parseInt(behindCount.trim(), 10) > 0;
 }
 
-export async function hasUncommittedChanges(
-	worktreePath: string,
-): Promise<boolean> {
+export async function hasUncommittedChanges(worktreePath: string): Promise<boolean> {
 	const status = await getStatusNoLock(worktreePath);
 	return !status.isClean();
 }
 
-export async function hasUnpushedCommits(
-	worktreePath: string,
-): Promise<boolean> {
+export async function hasUnpushedCommits(worktreePath: string): Promise<boolean> {
 	const git = simpleGit(worktreePath);
 	try {
-		const aheadCount = await git.raw([
-			"rev-list",
-			"--count",
-			"@{upstream}..HEAD",
-		]);
+		const aheadCount = await git.raw(["rev-list", "--count", "@{upstream}..HEAD"]);
 		return Number.parseInt(aheadCount.trim(), 10) > 0;
 	} catch {
 		try {
-			const localCommits = await git.raw([
-				"rev-list",
-				"--count",
-				"HEAD",
-				"--not",
-				"--remotes",
-			]);
+			const localCommits = await git.raw(["rev-list", "--count", "HEAD", "--not", "--remotes"]);
 			return Number.parseInt(localCommits.trim(), 10) > 0;
 		} catch {
 			return false;
@@ -990,13 +918,10 @@ function categorizeGitError(errorMessage: string): BranchExistsResult {
 		};
 	}
 
-	if (
-		GIT_ERROR_PATTERNS.remoteNotConfigured.some((p) => lowerMessage.includes(p))
-	) {
+	if (GIT_ERROR_PATTERNS.remoteNotConfigured.some((p) => lowerMessage.includes(p))) {
 		return {
 			status: "error",
-			message:
-				"Remote 'origin' is not configured or the repository was not found.",
+			message: "Remote 'origin' is not configured or the repository was not found.",
 		};
 	}
 
@@ -1017,15 +942,7 @@ export async function branchExistsOnRemote(
 		// simple-git doesn't expose exit codes in a predictable way
 		await execFileAsync(
 			"git",
-			[
-				"-C",
-				worktreePath,
-				"ls-remote",
-				"--exit-code",
-				"--heads",
-				"origin",
-				branchName,
-			],
+			["-C", worktreePath, "ls-remote", "--exit-code", "--heads", "origin", branchName],
 			{ env, timeout: 30_000 },
 		);
 		// Exit code 0 = branch exists (--exit-code flag ensures this)
@@ -1085,9 +1002,7 @@ export async function branchExistsOnRemote(
  * Returns true if the remote is empty (no branches), false otherwise.
  * Returns null if we cannot determine (network error, etc.)
  */
-export async function isRemoteEmpty(
-	mainRepoPath: string,
-): Promise<boolean | null> {
+export async function isRemoteEmpty(mainRepoPath: string): Promise<boolean | null> {
 	const env = await getGitEnv();
 
 	try {
@@ -1108,20 +1023,13 @@ export async function isRemoteEmpty(
  * Initialize an empty repository with a first commit and push to origin.
  * Creates a README.md and pushes to the specified branch.
  */
-export async function initializeEmptyRepo(
-	mainRepoPath: string,
-	branchName: string,
-): Promise<void> {
+export async function initializeEmptyRepo(mainRepoPath: string, branchName: string): Promise<void> {
 	const git = simpleGit(mainRepoPath);
 	const readmePath = `${mainRepoPath}/README.md`;
 
 	// Create a minimal README
 	const fs = await import("node:fs/promises");
-	await fs.writeFile(
-		readmePath,
-		"# Project\n\nInitialized by Caspian.\n",
-		"utf-8",
-	);
+	await fs.writeFile(readmePath, "# Project\n\nInitialized by Caspian.\n", "utf-8");
 
 	// For empty repos, we need to checkout the branch first (creates orphan branch)
 	// This handles the case where git config might default to 'master' but we want 'main'
@@ -1151,13 +1059,9 @@ export async function detectBaseBranch(
 	const git = simpleGit(worktreePath);
 
 	// Candidate base branches to check, in priority order
-	const candidates = [
-		defaultBranch,
-		"main",
-		"master",
-		"develop",
-		"development",
-	].filter((b, i, arr) => arr.indexOf(b) === i); // dedupe
+	const candidates = [defaultBranch, "main", "master", "develop", "development"].filter(
+		(b, i, arr) => arr.indexOf(b) === i,
+	); // dedupe
 
 	let bestCandidate: string | null = null;
 	let bestAheadCount = Number.POSITIVE_INFINITY;
@@ -1174,11 +1078,7 @@ export async function detectBaseBranch(
 			// Count how many commits the current branch is ahead of the merge-base
 			// The branch with the fewest commits "ahead" is likely the base
 			const mergeBase = await git.raw(["merge-base", "HEAD", remoteBranch]);
-			const aheadCount = await git.raw([
-				"rev-list",
-				"--count",
-				`${mergeBase.trim()}..HEAD`,
-			]);
+			const aheadCount = await git.raw(["rev-list", "--count", `${mergeBase.trim()}..HEAD`]);
 
 			const count = Number.parseInt(aheadCount.trim(), 10);
 			if (count < bestAheadCount) {
@@ -1228,9 +1128,7 @@ export async function listBranches(
  * @param repoPath - Path to the repository
  * @returns The current branch name, or null if in detached HEAD state
  */
-export async function getCurrentBranch(
-	repoPath: string,
-): Promise<string | null> {
+export async function getCurrentBranch(repoPath: string): Promise<string | null> {
 	const git = simpleGit(repoPath);
 	try {
 		const branch = await git.revparse(["--abbrev-ref", "HEAD"]);
@@ -1260,9 +1158,7 @@ export interface CheckoutSafetyResult {
  * @param repoPath - Path to the repository
  * @returns Safety check result indicating if checkout is safe
  */
-export async function checkBranchCheckoutSafety(
-	repoPath: string,
-): Promise<CheckoutSafetyResult> {
+export async function checkBranchCheckoutSafety(repoPath: string): Promise<CheckoutSafetyResult> {
 	try {
 		const status = await getStatusNoLock(repoPath);
 
@@ -1324,10 +1220,7 @@ export async function checkBranchCheckoutSafety(
  * @param repoPath - Path to the repository
  * @param branch - The branch name to checkout
  */
-export async function checkoutBranch(
-	repoPath: string,
-	branch: string,
-): Promise<void> {
+export async function checkoutBranch(repoPath: string, branch: string): Promise<void> {
 	const git = simpleGit(repoPath);
 
 	const localBranches = await git.branchLocal();
@@ -1360,10 +1253,7 @@ export async function checkoutBranch(
  * @param ref - The ref to check (e.g., "main", "origin/main")
  * @returns true if the ref exists locally, false otherwise
  */
-export async function refExistsLocally(
-	repoPath: string,
-	ref: string,
-): Promise<boolean> {
+export async function refExistsLocally(repoPath: string, ref: string): Promise<boolean> {
 	const git = simpleGit(repoPath);
 	try {
 		// Use --verify --quiet to check if ref exists without output
@@ -1389,10 +1279,7 @@ export function sanitizeGitError(message: string): string {
 		.trim();
 }
 
-export async function safeCheckoutBranch(
-	repoPath: string,
-	branch: string,
-): Promise<void> {
+export async function safeCheckoutBranch(repoPath: string, branch: string): Promise<void> {
 	const currentBranch = await getCurrentBranch(repoPath);
 	if (currentBranch === branch) {
 		return;
@@ -1525,14 +1412,9 @@ export async function getPrInfo({
 			}
 			const stderr = error.stderr || error.message || "";
 			if (stderr.includes("not logged in")) {
-				throw new Error(
-					"Not logged in to GitHub CLI. Please run 'gh auth login' first.",
-				);
+				throw new Error("Not logged in to GitHub CLI. Please run 'gh auth login' first.");
 			}
-			if (
-				stderr.includes("Could not resolve") ||
-				stderr.includes("not found")
-			) {
+			if (stderr.includes("Could not resolve") || stderr.includes("not found")) {
 				throw new Error(`PR #${prNumber} not found in ${owner}/${repo}`);
 			}
 		}
@@ -1572,20 +1454,18 @@ export async function fetchPrBranch({
 			console.log(`[git] Added remote ${remoteName} -> ${forkUrl}`);
 		}
 
-		await execFileAsync(
-			"git",
-			["-C", repoPath, "fetch", remoteName, headBranch],
-			{ env, timeout: 120_000 },
-		);
+		await execFileAsync("git", ["-C", repoPath, "fetch", remoteName, headBranch], {
+			env,
+			timeout: 120_000,
+		});
 
 		return `${remoteName}/${headBranch}`;
 	}
 
-	await execFileAsync(
-		"git",
-		["-C", repoPath, "fetch", "origin", prInfo.headRefName],
-		{ env, timeout: 120_000 },
-	);
+	await execFileAsync("git", ["-C", repoPath, "fetch", "origin", prInfo.headRefName], {
+		env,
+		timeout: 120_000,
+	});
 
 	return prInfo.headRefName;
 }
@@ -1617,9 +1497,7 @@ export async function createWorktreeFromPr({
 		const remoteRef = prInfo.isCrossRepository
 			? `refs/remotes/${prInfo.headRepositoryOwner.login.toLowerCase()}/${prInfo.headRefName}`
 			: `refs/remotes/origin/${prInfo.headRefName}`;
-		const branchName = prInfo.isCrossRepository
-			? localBranchName
-			: prInfo.headRefName;
+		const branchName = prInfo.isCrossRepository ? localBranchName : prInfo.headRefName;
 		const branchExists = localBranches.all.includes(branchName);
 
 		if (branchExists) {
@@ -1630,14 +1508,7 @@ export async function createWorktreeFromPr({
 				try {
 					await execFileAsync(
 						"git",
-						[
-							"-C",
-							mainRepoPath,
-							"merge-base",
-							"--is-ancestor",
-							localCommit,
-							remoteCommit,
-						],
+						["-C", mainRepoPath, "merge-base", "--is-ancestor", localCommit, remoteCommit],
 						{ env, timeout: 10_000 },
 					);
 				} catch {
@@ -1655,11 +1526,10 @@ export async function createWorktreeFromPr({
 			);
 
 			if (localCommit !== remoteCommit) {
-				await execFileAsync(
-					"git",
-					["-C", worktreePath, "reset", "--hard", remoteRef],
-					{ env, timeout: 30_000 },
-				);
+				await execFileAsync("git", ["-C", worktreePath, "reset", "--hard", remoteRef], {
+					env,
+					timeout: 30_000,
+				});
 			}
 		} else {
 			const args = ["-C", mainRepoPath, "worktree", "add"];
@@ -1670,9 +1540,7 @@ export async function createWorktreeFromPr({
 			await execFileAsync("git", args, { env, timeout: 120_000 });
 		}
 
-		console.log(
-			`[git] Created worktree at ${worktreePath} for PR #${prInfo.number}`,
-		);
+		console.log(`[git] Created worktree at ${worktreePath} for PR #${prInfo.number}`);
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		const lowerError = errorMessage.toLowerCase();
@@ -1681,9 +1549,7 @@ export async function createWorktreeFromPr({
 			lowerError.includes("already checked out") ||
 			lowerError.includes("is already used by worktree")
 		) {
-			throw new Error(
-				`This PR's branch is already checked out in another worktree.`,
-			);
+			throw new Error(`This PR's branch is already checked out in another worktree.`);
 		}
 
 		throw new Error(`Failed to create worktree from PR: ${errorMessage}`);

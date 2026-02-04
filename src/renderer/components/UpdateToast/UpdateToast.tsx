@@ -1,9 +1,9 @@
-import { COMPANY } from "shared/shared-constants";
-import { Button } from "ui/components/ui/button";
-import { toast } from "ui/components/ui/sonner";
 import { HiMiniXMark } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { AUTO_UPDATE_STATUS } from "shared/auto-update";
+import { COMPANY } from "shared/shared-constants";
+import { Button } from "ui/components/ui/button";
+import { toast } from "ui/components/ui/sonner";
 
 interface UpdateToastProps {
 	toastId: string | number;
@@ -12,12 +12,7 @@ interface UpdateToastProps {
 	error?: string;
 }
 
-export function UpdateToast({
-	toastId,
-	status,
-	version,
-	error,
-}: UpdateToastProps) {
+export function UpdateToast({ toastId, status, version, error: _error }: UpdateToastProps) {
 	const openUrl = electronTrpc.external.openUrl.useMutation();
 	const installMutation = electronTrpc.autoUpdate.install.useMutation();
 	const dismissMutation = electronTrpc.autoUpdate.dismiss.useMutation({
@@ -55,12 +50,8 @@ export function UpdateToast({
 			<div className="flex flex-col gap-0.5">
 				{isError ? (
 					<>
-						<span className="font-medium text-sm text-destructive">
-							Update failed
-						</span>
-						<span className="text-sm text-muted-foreground">
-							Please try again later
-						</span>
+						<span className="font-medium text-sm text-destructive">Update failed</span>
+						<span className="text-sm text-muted-foreground">Please try again later</span>
 					</>
 				) : isDownloading ? (
 					<>
@@ -73,9 +64,7 @@ export function UpdateToast({
 					<>
 						<span className="font-medium text-sm">Update available</span>
 						<span className="text-sm text-muted-foreground">
-							{version
-								? `Version ${version} is ready to install`
-								: "Ready to install"}
+							{version ? `Version ${version} is ready to install` : "Ready to install"}
 						</span>
 					</>
 				)}
@@ -85,11 +74,7 @@ export function UpdateToast({
 					<Button variant="ghost" size="sm" onClick={handleSeeChanges}>
 						See changes
 					</Button>
-					<Button
-						size="sm"
-						onClick={handleInstall}
-						disabled={installMutation.isPending}
-					>
+					<Button size="sm" onClick={handleInstall} disabled={installMutation.isPending}>
 						{installMutation.isPending ? "Installing..." : "Install"}
 					</Button>
 				</div>

@@ -7,12 +7,7 @@ interface CategoryHeaderProps {
 	onToggle: () => void;
 }
 
-export function CategoryHeader({
-	title,
-	count,
-	isExpanded,
-	onToggle,
-}: CategoryHeaderProps) {
+export function CategoryHeader({ title, count, isExpanded, onToggle }: CategoryHeaderProps) {
 	if (count === 0) return null;
 
 	return (

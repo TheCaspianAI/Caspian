@@ -15,17 +15,8 @@ import {
 	OPENCODE_PLUGIN_MARKER,
 	WRAPPER_MARKER,
 } from "./agent-wrappers";
-import {
-	getNotifyScriptContent,
-	getNotifyScriptPath,
-	NOTIFY_SCRIPT_MARKER,
-} from "./notify-hook";
-import {
-	BIN_DIR,
-	HOOKS_DIR,
-	OPENCODE_CONFIG_DIR,
-	OPENCODE_PLUGIN_DIR,
-} from "./paths";
+import { getNotifyScriptContent, getNotifyScriptPath, NOTIFY_SCRIPT_MARKER } from "./notify-hook";
+import { BIN_DIR, HOOKS_DIR, OPENCODE_CONFIG_DIR, OPENCODE_PLUGIN_DIR } from "./paths";
 
 let inFlight: Promise<void> | null = null;
 
@@ -108,10 +99,7 @@ export function ensureAgentHooks(): Promise<void> {
 				recursive: true,
 			});
 		} catch (error) {
-			console.warn(
-				"[agent-setup] Failed to create global OpenCode plugin directory:",
-				error,
-			);
+			console.warn("[agent-setup] Failed to create global OpenCode plugin directory:", error);
 		}
 
 		const notifyPath = getNotifyScriptPath();
@@ -158,10 +146,7 @@ export function ensureAgentHooks(): Promise<void> {
 				logLabel: "OpenCode global plugin",
 			});
 		} catch (error) {
-			console.warn(
-				"[agent-setup] Failed to write global OpenCode plugin:",
-				error,
-			);
+			console.warn("[agent-setup] Failed to write global OpenCode plugin:", error);
 		}
 
 		await ensureScriptFile({

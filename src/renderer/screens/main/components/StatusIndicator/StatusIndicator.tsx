@@ -1,5 +1,5 @@
-import { cn } from "ui/lib/utils";
 import type { ActivePaneStatus } from "shared/tabs-types";
+import { cn } from "ui/lib/utils";
 
 // Re-export for consumers
 export type { ActivePaneStatus } from "shared/tabs-types";
@@ -53,12 +53,7 @@ export function StatusIndicator({ status, className }: StatusIndicatorProps) {
 					)}
 				/>
 			)}
-			<span
-				className={cn(
-					"relative inline-flex size-2 rounded-full",
-					config.dotColor,
-				)}
-			/>
+			<span className={cn("relative inline-flex size-2 rounded-full", config.dotColor)} />
 		</span>
 	);
 }

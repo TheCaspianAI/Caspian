@@ -20,16 +20,9 @@ const queryClient = new QueryClient({
  * Provider for Electron IPC tRPC client.
  * QueryClient is shared with router context for loader prefetching.
  */
-export function ElectronTRPCProvider({
-	children,
-}: {
-	children: React.ReactNode;
-}) {
+export function ElectronTRPCProvider({ children }: { children: React.ReactNode }) {
 	return (
-		<electronTrpc.Provider
-			client={electronReactClient}
-			queryClient={queryClient}
-		>
+		<electronTrpc.Provider client={electronReactClient} queryClient={queryClient}>
 			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 		</electronTrpc.Provider>
 	);

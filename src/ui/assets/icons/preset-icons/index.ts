@@ -19,10 +19,7 @@ export const PRESET_ICONS: Record<string, PresetIconSet> = {
 	opencode: { light: opencodeIcon, dark: opencodeWhiteIcon },
 };
 
-export function getPresetIcon(
-	presetName: string,
-	isDark: boolean,
-): string | undefined {
+export function getPresetIcon(presetName: string, isDark: boolean): string | undefined {
 	const normalizedName = presetName.toLowerCase().trim();
 	const iconSet = PRESET_ICONS[normalizedName];
 	if (!iconSet) return undefined;

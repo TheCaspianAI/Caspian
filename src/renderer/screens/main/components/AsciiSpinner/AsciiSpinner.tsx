@@ -1,5 +1,5 @@
-import { cn } from "ui/lib/utils";
 import { useEffect, useState } from "react";
+import { cn } from "ui/lib/utils";
 
 /** Braille-based spinner frames for a smooth animation */
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -27,10 +27,7 @@ export function AsciiSpinner({ className }: AsciiSpinnerProps) {
 	}, []);
 
 	return (
-		<span
-			className={cn("text-amber-500 font-mono select-none", className)}
-			aria-hidden="true"
-		>
+		<span className={cn("text-amber-500 font-mono select-none", className)} aria-hidden="true">
 			{SPINNER_FRAMES[frameIndex]}
 		</span>
 	);

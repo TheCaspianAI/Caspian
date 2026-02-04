@@ -26,7 +26,7 @@ export function AgentRow({ agent, onSelect }: AgentRowProps) {
 				"text-left transition-colors",
 				"hover:bg-muted/40",
 				"focus:outline-none focus-visible:bg-muted/60",
-				agent.status === "error" && "bg-red-500/5"
+				agent.status === "error" && "bg-red-500/5",
 			)}
 		>
 			{/* Status indicator - primary visual element */}
@@ -34,7 +34,7 @@ export function AgentRow({ agent, onSelect }: AgentRowProps) {
 				className={cn(
 					"w-1.5 h-1.5 rounded-full shrink-0",
 					indicator.color,
-					indicator.animate && "animate-pulse"
+					indicator.animate && "animate-pulse",
 				)}
 			/>
 

@@ -86,11 +86,7 @@ class PortManager extends EventEmitter {
 	 * Use this when the terminal runs in the daemon process (terminal persistence mode).
 	 * Can be called multiple times to update the PID when it becomes available or changes.
 	 */
-	upsertDaemonSession(
-		paneId: string,
-		nodeId: string,
-		pid: number | null,
-	): void {
+	upsertDaemonSession(paneId: string, nodeId: string, pid: number | null): void {
 		this.daemonSessions.set(paneId, { nodeId, pid });
 	}
 
@@ -208,10 +204,7 @@ class PortManager extends EventEmitter {
 				const portInfos = await getListeningPortsForPids(pids);
 				this.updatePortsForPane(paneId, nodeId, portInfos);
 			} catch (error) {
-				console.error(
-					`[PortManager] Error scanning daemon pane ${paneId}:`,
-					error,
-				);
+				console.error(`[PortManager] Error scanning daemon pane ${paneId}:`, error);
 			}
 		}
 	}
@@ -225,10 +218,7 @@ class PortManager extends EventEmitter {
 		this.isScanning = true;
 
 		try {
-			const panePortMap = new Map<
-				string,
-				{ nodeId: string; pids: number[] }
-			>();
+			const panePortMap = new Map<string, { nodeId: string; pids: number[] }>();
 			// Track panes with empty process trees for self-healing
 			const emptyTreePanes = new Set<string>();
 
@@ -282,9 +272,7 @@ class PortManager extends EventEmitter {
 			// Cleanup: remove ports for panes that are no longer registered
 			// (not in sessions AND not in daemonSessions)
 			for (const [key, port] of this.ports) {
-				const isRegistered =
-					this.sessions.has(port.paneId) ||
-					this.daemonSessions.has(port.paneId);
+				const isRegistered = this.sessions.has(port.paneId) || this.daemonSessions.has(port.paneId);
 				if (!isRegistered) {
 					this.ports.delete(key);
 					this.emit("port:remove", port);
@@ -310,9 +298,7 @@ class PortManager extends EventEmitter {
 	): void {
 		const now = Date.now();
 
-		const validPortInfos = portInfos.filter(
-			(info) => !IGNORED_PORTS.has(info.port),
-		);
+		const validPortInfos = portInfos.filter((info) => !IGNORED_PORTS.has(info.port));
 
 		const seenKeys = new Set<string>();
 
@@ -333,10 +319,7 @@ class PortManager extends EventEmitter {
 				};
 				this.ports.set(key, detectedPort);
 				this.emit("port:add", detectedPort);
-			} else if (
-				existing.pid !== info.pid ||
-				existing.processName !== info.processName
-			) {
+			} else if (existing.pid !== info.pid || existing.processName !== info.processName) {
 				const updatedPort: DetectedPort = {
 					...existing,
 					pid: info.pid,
@@ -383,9 +366,7 @@ class PortManager extends EventEmitter {
 	 * Get all detected ports
 	 */
 	getAllPorts(): DetectedPort[] {
-		return Array.from(this.ports.values()).sort(
-			(a, b) => b.detectedAt - a.detectedAt,
-		);
+		return Array.from(this.ports.values()).sort((a, b) => b.detectedAt - a.detectedAt);
 	}
 
 	/**

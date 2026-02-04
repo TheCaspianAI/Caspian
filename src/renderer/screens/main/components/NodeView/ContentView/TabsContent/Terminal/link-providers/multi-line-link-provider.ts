@@ -32,10 +32,7 @@ export abstract class MultiLineLinkProvider implements ILinkProvider {
 		return match;
 	}
 
-	provideLinks(
-		bufferLineNumber: number,
-		callback: (links: ILink[] | undefined) => void,
-	): void {
+	provideLinks(bufferLineNumber: number, callback: (links: ILink[] | undefined) => void): void {
 		const lineIndex = bufferLineNumber - 1;
 		const line = this.terminal.buffer.active.getLine(lineIndex);
 		if (!line) {
@@ -55,8 +52,7 @@ export abstract class MultiLineLinkProvider implements ILinkProvider {
 
 		const nextLine = this.terminal.buffer.active.getLine(lineIndex + 1);
 		const nextLineIsWrapped = nextLine?.isWrapped ?? false;
-		const nextLineText =
-			nextLineIsWrapped && nextLine ? nextLine.translateToString(true) : "";
+		const nextLineText = nextLineIsWrapped && nextLine ? nextLine.translateToString(true) : "";
 
 		const combinedText = prevLineText + lineText + nextLineText;
 		const currentLineOffset = prevLineLength;
@@ -127,8 +123,7 @@ export abstract class MultiLineLinkProvider implements ILinkProvider {
 		const currentLineStart = prevLineLength;
 		const currentLineEnd = prevLineLength + lineLength;
 
-		const startsInPrevLine =
-			isCurrentLineWrapped && matchIndex < currentLineStart;
+		const startsInPrevLine = isCurrentLineWrapped && matchIndex < currentLineStart;
 		const endsInNextLine = nextLineIsWrapped && matchEnd > currentLineEnd;
 
 		let startY: number;

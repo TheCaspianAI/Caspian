@@ -112,11 +112,7 @@ export class Session {
 	private snapshotBoundaryWaiters: Array<() => void> = [];
 
 	// Callbacks
-	private onSessionExit?: (
-		sessionId: string,
-		exitCode: number,
-		signal?: number,
-	) => void;
+	private onSessionExit?: (sessionId: string, exitCode: number, signal?: number) => void;
 
 	constructor(options: SessionOptions) {
 		this.sessionId = options.sessionId;
@@ -145,11 +141,7 @@ export class Session {
 		// Listen for emulator output (query responses)
 		this.emulator.onData((data) => {
 			// If no clients attached, send responses back to PTY
-			if (
-				this.attachedClients.size === 0 &&
-				this.subprocess &&
-				this.subprocessReady
-			) {
+			if (this.attachedClients.size === 0 && this.subprocess && this.subprocessReady) {
 				this.sendWriteToSubprocess(data);
 			}
 		});
@@ -158,12 +150,7 @@ export class Session {
 	/**
 	 * Spawn the PTY process via subprocess
 	 */
-	spawn(options: {
-		cwd: string;
-		cols: number;
-		rows: number;
-		env?: Record<string, string>;
-	}): void {
+	spawn(options: { cwd: string; cols: number; rows: number; env?: Record<string, string> }): void {
 		if (this.subprocess) {
 			throw new Error("PTY already spawned");
 		}
@@ -171,10 +158,7 @@ export class Session {
 		const { cwd, cols, rows, env = {} } = options;
 
 		// Merge process.env with passed env (passed takes precedence), then filter
-		const processEnv = buildSafeEnv({ ...process.env, ...env } as Record<
-			string,
-			string
-		>);
+		const processEnv = buildSafeEnv({ ...process.env, ...env } as Record<string, string>);
 		processEnv.TERM = "xterm-256color";
 
 		const shellArgs = this.getShellArgs(this.shell);
@@ -197,19 +181,14 @@ export class Session {
 						this.handleSubprocessFrame(frame.type, frame.payload);
 					}
 				} catch (error) {
-					console.error(
-						`[Session ${this.sessionId}] Failed to parse subprocess frames:`,
-						error,
-					);
+					console.error(`[Session ${this.sessionId}] Failed to parse subprocess frames:`, error);
 				}
 			});
 		}
 
 		// Handle subprocess exit
 		this.subprocess.on("exit", (code) => {
-			console.log(
-				`[Session ${this.sessionId}] Subprocess exited with code ${code}`,
-			);
+			console.log(`[Session ${this.sessionId}] Subprocess exited with code ${code}`);
 			this.handleSubprocessExit(code ?? -1);
 		});
 
@@ -241,10 +220,7 @@ export class Session {
 	/**
 	 * Handle frames from the PTY subprocess
 	 */
-	private handleSubprocessFrame(
-		type: PtySubprocessIpcType,
-		payload: Buffer,
-	): void {
+	private handleSubprocessFrame(type: PtySubprocessIpcType, payload: Buffer): void {
 		switch (type) {
 			case PtySubprocessIpcType.Ready:
 				this.subprocessReady = true;
@@ -287,31 +263,20 @@ export class Session {
 					signal: signal !== 0 ? signal : undefined,
 				} satisfies TerminalExitEvent);
 
-				this.onSessionExit?.(
-					this.sessionId,
-					exitCode,
-					signal !== 0 ? signal : undefined,
-				);
+				this.onSessionExit?.(this.sessionId, exitCode, signal !== 0 ? signal : undefined);
 				break;
 			}
 
 			case PtySubprocessIpcType.Error: {
 				const errorMessage =
-					payload.length > 0
-						? payload.toString("utf8")
-						: "Unknown subprocess error";
+					payload.length > 0 ? payload.toString("utf8") : "Unknown subprocess error";
 
-				console.error(
-					`[Session ${this.sessionId}] Subprocess error:`,
-					errorMessage,
-				);
+				console.error(`[Session ${this.sessionId}] Subprocess error:`, errorMessage);
 
 				this.broadcastEvent("error", {
 					type: "error",
 					error: errorMessage,
-					code: errorMessage.includes("Write queue full")
-						? "WRITE_QUEUE_FULL"
-						: "SUBPROCESS_ERROR",
+					code: errorMessage.includes("Write queue full") ? "WRITE_QUEUE_FULL" : "SUBPROCESS_ERROR",
 				} satisfies TerminalErrorEvent);
 				break;
 			}
@@ -389,20 +354,14 @@ export class Session {
 	 * Send a frame to the subprocess.
 	 * Returns false if write buffer is full (caller should handle).
 	 */
-	private sendFrameToSubprocess(
-		type: PtySubprocessIpcType,
-		payload?: Buffer,
-	): boolean {
+	private sendFrameToSubprocess(type: PtySubprocessIpcType, payload?: Buffer): boolean {
 		if (!this.subprocess?.stdin || this.disposed) return false;
 
 		const payloadBuffer = payload ?? Buffer.alloc(0);
 		const frameSize = 5 + payloadBuffer.length; // 5-byte header + payload
 
 		// Check queue limit to prevent OOM under backpressure
-		if (
-			this.subprocessStdinQueuedBytes + frameSize >
-			MAX_SUBPROCESS_STDIN_QUEUE_BYTES
-		) {
+		if (this.subprocessStdinQueuedBytes + frameSize > MAX_SUBPROCESS_STDIN_QUEUE_BYTES) {
 			console.warn(
 				`[Session ${this.sessionId}] stdin queue full (${this.subprocessStdinQueuedBytes} bytes), dropping frame`,
 			);
@@ -428,9 +387,7 @@ export class Session {
 		this.flushSubprocessStdinQueue();
 
 		if (this.subprocessStdinDrainArmed && !wasBackpressured) {
-			console.warn(
-				`[Session ${this.sessionId}] stdin buffer full, write may be delayed`,
-			);
+			console.warn(`[Session ${this.sessionId}] stdin buffer full, write may be delayed`);
 		}
 
 		return !this.subprocessStdinDrainArmed;
@@ -457,11 +414,7 @@ export class Session {
 
 		for (let offset = 0; offset < data.length; offset += MAX_CHUNK_CHARS) {
 			const part = data.slice(offset, offset + MAX_CHUNK_CHARS);
-			ok =
-				this.sendFrameToSubprocess(
-					PtySubprocessIpcType.Write,
-					Buffer.from(part, "utf8"),
-				) && ok;
+			ok = this.sendFrameToSubprocess(PtySubprocessIpcType.Write, Buffer.from(part, "utf8")) && ok;
 		}
 
 		return ok;
@@ -523,8 +476,7 @@ export class Session {
 
 		// Keep the daemon responsive while still ensuring the emulator catches up eventually.
 		const baseBudgetMs = hasClients ? 5 : 25;
-		const budgetMs =
-			backlogBytes > 1024 * 1024 ? Math.max(baseBudgetMs, 25) : baseBudgetMs;
+		const budgetMs = backlogBytes > 1024 * 1024 ? Math.max(baseBudgetMs, 25) : baseBudgetMs;
 		const MAX_CHUNK_CHARS = 8192;
 
 		while (this.emulatorWriteQueue.length > 0) {
@@ -614,9 +566,7 @@ export class Session {
 			this.scheduleEmulatorWrite();
 		});
 
-		const timeoutPromise = new Promise<void>((resolve) =>
-			setTimeout(resolve, timeoutMs),
-		);
+		const timeoutPromise = new Promise<void>((resolve) => setTimeout(resolve, timeoutMs));
 
 		await Promise.race([boundaryPromise, timeoutPromise]);
 
@@ -698,9 +648,7 @@ export class Session {
 		// Use snapshot boundary flush for consistent state with continuous output.
 		// This ensures we capture all data received BEFORE attach was called,
 		// even if new data continues to arrive during the flush.
-		const reachedBoundary = await this.flushToSnapshotBoundary(
-			ATTACH_FLUSH_TIMEOUT_MS,
-		);
+		const reachedBoundary = await this.flushToSnapshotBoundary(ATTACH_FLUSH_TIMEOUT_MS);
 
 		if (!reachedBoundary) {
 			console.warn(
@@ -862,9 +810,7 @@ export class Session {
 	/**
 	 * Set exit callback
 	 */
-	onExit(
-		callback: (sessionId: string, exitCode: number, signal?: number) => void,
-	): void {
+	onExit(callback: (sessionId: string, exitCode: number, signal?: number) => void): void {
 		this.onSessionExit = callback;
 	}
 

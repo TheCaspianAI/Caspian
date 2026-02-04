@@ -10,10 +10,7 @@ const schema = z
 		message: "Must provide nodeId or nodeName",
 	});
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	let targetNodeId = params.nodeId;
 
 	// Look up by name if no ID provided
@@ -25,9 +22,7 @@ async function execute(
 
 		const searchName = params.nodeName.toLowerCase();
 		const found = nodes.find(
-			(n) =>
-				n.name.toLowerCase() === searchName ||
-				n.branch.toLowerCase() === searchName,
+			(n) => n.name.toLowerCase() === searchName || n.branch.toLowerCase() === searchName,
 		);
 
 		if (!found) {

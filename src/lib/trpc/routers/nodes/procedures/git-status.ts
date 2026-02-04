@@ -1,11 +1,11 @@
-import { nodes, worktrees } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
+import { nodes, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
 import {
-	getRepository,
 	getNode,
+	getRepository,
 	getWorktree,
 	updateRepositoryDefaultBranch,
 } from "../utils/db-helpers";
@@ -27,13 +27,9 @@ export const createGitStatusProcedures = () => {
 					throw new Error(`Node ${input.nodeId} not found`);
 				}
 
-				const worktree = node.worktreeId
-					? getWorktree(node.worktreeId)
-					: null;
+				const worktree = node.worktreeId ? getWorktree(node.worktreeId) : null;
 				if (!worktree) {
-					throw new Error(
-						`Worktree for node ${input.nodeId} not found`,
-					);
+					throw new Error(`Worktree for node ${input.nodeId} not found`);
 				}
 
 				const repository = getRepository(node.repositoryId);
@@ -42,9 +38,7 @@ export const createGitStatusProcedures = () => {
 				}
 
 				// Sync with remote in case the default branch changed (e.g. master -> main)
-				const remoteDefaultBranch = await refreshDefaultBranch(
-					repository.mainRepoPath,
-				);
+				const remoteDefaultBranch = await refreshDefaultBranch(repository.mainRepoPath);
 
 				let defaultBranch = repository.defaultBranch;
 				if (!defaultBranch) {
@@ -62,10 +56,7 @@ export const createGitStatusProcedures = () => {
 				await fetchDefaultBranch(repository.mainRepoPath, defaultBranch);
 
 				// Check if worktree branch is behind origin/{defaultBranch}
-				const needsRebase = await checkNeedsRebase(
-					worktree.path,
-					defaultBranch,
-				);
+				const needsRebase = await checkNeedsRebase(worktree.path, defaultBranch);
 
 				const gitStatus = {
 					branch: worktree.branch,
@@ -74,11 +65,7 @@ export const createGitStatusProcedures = () => {
 				};
 
 				// Update worktree in db
-				localDb
-					.update(worktrees)
-					.set({ gitStatus })
-					.where(eq(worktrees.id, worktree.id))
-					.run();
+				localDb.update(worktrees).set({ gitStatus }).where(eq(worktrees.id, worktree.id)).run();
 
 				return { gitStatus, defaultBranch };
 			}),
@@ -91,9 +78,7 @@ export const createGitStatusProcedures = () => {
 					return null;
 				}
 
-				const worktree = node.worktreeId
-					? getWorktree(node.worktreeId)
-					: null;
+				const worktree = node.worktreeId ? getWorktree(node.worktreeId) : null;
 				if (!worktree) {
 					return null;
 				}
@@ -113,31 +98,27 @@ export const createGitStatusProcedures = () => {
 				return freshStatus;
 			}),
 
-		getWorktreeInfo: publicProcedure
-			.input(z.object({ nodeId: z.string() }))
-			.query(({ input }) => {
-				const node = getNode(input.nodeId);
-				if (!node) {
-					return null;
-				}
+		getWorktreeInfo: publicProcedure.input(z.object({ nodeId: z.string() })).query(({ input }) => {
+			const node = getNode(input.nodeId);
+			if (!node) {
+				return null;
+			}
 
-				const worktree = node.worktreeId
-					? getWorktree(node.worktreeId)
-					: null;
-				if (!worktree) {
-					return null;
-				}
+			const worktree = node.worktreeId ? getWorktree(node.worktreeId) : null;
+			if (!worktree) {
+				return null;
+			}
 
-				// Extract worktree name from path (last segment)
-				const worktreeName = worktree.path.split("/").pop() ?? worktree.branch;
+			// Extract worktree name from path (last segment)
+			const worktreeName = worktree.path.split("/").pop() ?? worktree.branch;
 
-				return {
-					worktreeName,
-					createdAt: worktree.createdAt,
-					gitStatus: worktree.gitStatus ?? null,
-					githubStatus: worktree.githubStatus ?? null,
-				};
-			}),
+			return {
+				worktreeName,
+				createdAt: worktree.createdAt,
+				gitStatus: worktree.gitStatus ?? null,
+				githubStatus: worktree.githubStatus ?? null,
+			};
+		}),
 
 		getWorktreesByRepository: publicProcedure
 			.input(z.object({ repositoryId: z.string() }))
@@ -152,12 +133,7 @@ export const createGitStatusProcedures = () => {
 					const node = localDb
 						.select()
 						.from(nodes)
-						.where(
-							and(
-								eq(nodes.worktreeId, wt.id),
-								isNull(nodes.deletingAt),
-							),
-						)
+						.where(and(eq(nodes.worktreeId, wt.id), isNull(nodes.deletingAt)))
 						.get();
 					return {
 						...wt,

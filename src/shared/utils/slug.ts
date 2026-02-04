@@ -8,11 +8,7 @@
  * @param randomLength - Number of random characters to append (default: 4)
  * @returns A URL-safe slug
  */
-export function generateSlug(
-	title: string,
-	maxLength = 50,
-	randomLength = 4,
-): string {
+export function generateSlug(title: string, maxLength = 50, randomLength = 4): string {
 	// Convert to lowercase and replace spaces/special chars with hyphens
 	let slug = title
 		.toLowerCase()

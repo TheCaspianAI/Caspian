@@ -1,5 +1,5 @@
-import { repositories, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
+import { repositories, worktrees } from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
 import { nodeInitManager } from "main/lib/node-init-manager";
@@ -71,11 +71,7 @@ export async function initializeNodeWorktree({
 			if (skipWorktreeCreation) {
 				manager.markWorktreeCreated(nodeId);
 			} else {
-				manager.updateProgress(
-					nodeId,
-					"creating_worktree",
-					"Creating git worktree...",
-				);
+				manager.updateProgress(nodeId, "creating_worktree", "Creating git worktree...");
 				await createWorktreeFromExistingBranch({
 					mainRepoPath,
 					branch,
@@ -88,29 +84,19 @@ export async function initializeNodeWorktree({
 				try {
 					await removeWorktree(mainRepoPath, worktreePath);
 				} catch (e) {
-					console.error(
-						"[node-init] Failed to cleanup worktree after cancel:",
-						e,
-					);
+					console.error("[node-init] Failed to cleanup worktree after cancel:", e);
 				}
 				return;
 			}
 
-			manager.updateProgress(
-				nodeId,
-				"copying_config",
-				"Copying configuration...",
-			);
+			manager.updateProgress(nodeId, "copying_config", "Copying configuration...");
 			copyCaspianConfigToWorktree(mainRepoPath, worktreePath);
 
 			if (manager.isCancellationRequested(nodeId)) {
 				try {
 					await removeWorktree(mainRepoPath, worktreePath);
 				} catch (e) {
-					console.error(
-						"[node-init] Failed to cleanup worktree after cancel:",
-						e,
-					);
+					console.error("[node-init] Failed to cleanup worktree after cancel:", e);
 				}
 				return;
 			}
@@ -179,11 +165,7 @@ export async function initializeNodeWorktree({
 			return;
 		}
 
-		manager.updateProgress(
-			nodeId,
-			"verifying",
-			"Verifying base branch...",
-		);
+		manager.updateProgress(nodeId, "verifying", "Verifying base branch...");
 		const hasRemote = await hasOriginRemote(mainRepoPath);
 
 		type LocalStartPointResult = {
@@ -199,18 +181,14 @@ export async function initializeNodeWorktree({
 			if (checkOriginRefs) {
 				const originRef = `origin/${effectiveBaseBranch}`;
 				if (await refExistsLocally(mainRepoPath, originRef)) {
-					console.log(
-						`[node-init] ${reason}. Using local tracking ref: ${originRef}`,
-					);
+					console.log(`[node-init] ${reason}. Using local tracking ref: ${originRef}`);
 					return { ref: originRef };
 				}
 			}
 
 			// Try local branch
 			if (await refExistsLocally(mainRepoPath, effectiveBaseBranch)) {
-				console.log(
-					`[node-init] ${reason}. Using local branch: ${effectiveBaseBranch}`,
-				);
+				console.log(`[node-init] ${reason}. Using local branch: ${effectiveBaseBranch}`);
 				return { ref: effectiveBaseBranch };
 			}
 
@@ -230,16 +208,12 @@ export async function initializeNodeWorktree({
 				if (checkOriginRefs) {
 					const fallbackOriginRef = `origin/${branch}`;
 					if (await refExistsLocally(mainRepoPath, fallbackOriginRef)) {
-						console.log(
-							`[node-init] ${reason}. Using fallback tracking ref: ${fallbackOriginRef}`,
-						);
+						console.log(`[node-init] ${reason}. Using fallback tracking ref: ${fallbackOriginRef}`);
 						return { ref: fallbackOriginRef, fallbackBranch: branch };
 					}
 				}
 				if (await refExistsLocally(mainRepoPath, branch)) {
-					console.log(
-						`[node-init] ${reason}. Using fallback local branch: ${branch}`,
-					);
+					console.log(`[node-init] ${reason}. Using fallback local branch: ${branch}`);
 					return { ref: branch, fallbackBranch: branch };
 				}
 			}
@@ -262,10 +236,7 @@ export async function initializeNodeWorktree({
 
 		let startPoint: string;
 		if (hasRemote) {
-			const branchCheck = await branchExistsOnRemote(
-				mainRepoPath,
-				effectiveBaseBranch,
-			);
+			const branchCheck = await branchExistsOnRemote(mainRepoPath, effectiveBaseBranch);
 
 			if (branchCheck.status === "error") {
 				const sanitizedError = sanitizeGitError(branchCheck.message);
@@ -280,10 +251,7 @@ export async function initializeNodeWorktree({
 					sanitizedError,
 				);
 
-				const localResult = await resolveLocalStartPoint(
-					"Remote unavailable",
-					true,
-				);
+				const localResult = await resolveLocalStartPoint("Remote unavailable", true);
 				if (!localResult) {
 					manager.updateProgress(
 						nodeId,
@@ -333,13 +301,8 @@ export async function initializeNodeWorktree({
 						);
 						startPoint = `origin/${effectiveBaseBranch}`;
 					} catch (initError) {
-						const errorMsg =
-							initError instanceof Error
-								? initError.message
-								: String(initError);
-						console.error(
-							`[node-init] Failed to initialize empty repo: ${errorMsg}`,
-						);
+						const errorMsg = initError instanceof Error ? initError.message : String(initError);
+						console.error(`[node-init] Failed to initialize empty repo: ${errorMsg}`);
 						manager.updateProgress(
 							nodeId,
 							"failed",
@@ -350,10 +313,7 @@ export async function initializeNodeWorktree({
 					}
 				} else if (!baseBranchWasExplicit) {
 					// Remote has branches but not the one we want - try fallbacks
-					const localResult = await resolveLocalStartPoint(
-						"Branch not found on remote",
-						true,
-					);
+					const localResult = await resolveLocalStartPoint("Branch not found on remote", true);
 
 					if (localResult) {
 						if (localResult.fallbackBranch) {
@@ -389,10 +349,7 @@ export async function initializeNodeWorktree({
 				startPoint = `origin/${effectiveBaseBranch}`;
 			}
 		} else {
-			const localResult = await resolveLocalStartPoint(
-				"No remote configured",
-				false,
-			);
+			const localResult = await resolveLocalStartPoint("No remote configured", false);
 			if (!localResult) {
 				manager.updateProgress(
 					nodeId,
@@ -420,11 +377,7 @@ export async function initializeNodeWorktree({
 			return;
 		}
 
-		manager.updateProgress(
-			nodeId,
-			"fetching",
-			"Fetching latest changes...",
-		);
+		manager.updateProgress(nodeId, "fetching", "Fetching latest changes...");
 		if (hasRemote) {
 			try {
 				await fetchDefaultBranch(mainRepoPath, effectiveBaseBranch);
@@ -441,9 +394,7 @@ export async function initializeNodeWorktree({
 					);
 					if (!localResult) {
 						const sanitizedError = sanitizeGitError(
-							fetchError instanceof Error
-								? fetchError.message
-								: String(fetchError),
+							fetchError instanceof Error ? fetchError.message : String(fetchError),
 						);
 						manager.updateProgress(
 							nodeId,
@@ -477,11 +428,7 @@ export async function initializeNodeWorktree({
 			return;
 		}
 
-		manager.updateProgress(
-			nodeId,
-			"creating_worktree",
-			"Creating git worktree...",
-		);
+		manager.updateProgress(nodeId, "creating_worktree", "Creating git worktree...");
 		await createWorktree(mainRepoPath, branch, worktreePath, startPoint);
 		manager.markWorktreeCreated(nodeId);
 
@@ -489,29 +436,19 @@ export async function initializeNodeWorktree({
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
 			} catch (e) {
-				console.error(
-					"[node-init] Failed to cleanup worktree after cancel:",
-					e,
-				);
+				console.error("[node-init] Failed to cleanup worktree after cancel:", e);
 			}
 			return;
 		}
 
-		manager.updateProgress(
-			nodeId,
-			"copying_config",
-			"Copying configuration...",
-		);
+		manager.updateProgress(nodeId, "copying_config", "Copying configuration...");
 		copyCaspianConfigToWorktree(mainRepoPath, worktreePath);
 
 		if (manager.isCancellationRequested(nodeId)) {
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
 			} catch (e) {
-				console.error(
-					"[node-init] Failed to cleanup worktree after cancel:",
-					e,
-				);
+				console.error("[node-init] Failed to cleanup worktree after cancel:", e);
 			}
 			return;
 		}
@@ -540,31 +477,18 @@ export async function initializeNodeWorktree({
 		});
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.error(
-			`[node-init] Failed to initialize ${nodeId}:`,
-			errorMessage,
-		);
+		console.error(`[node-init] Failed to initialize ${nodeId}:`, errorMessage);
 
 		if (manager.wasWorktreeCreated(nodeId)) {
 			try {
 				await removeWorktree(mainRepoPath, worktreePath);
-				console.log(
-					`[node-init] Cleaned up partial worktree at ${worktreePath}`,
-				);
+				console.log(`[node-init] Cleaned up partial worktree at ${worktreePath}`);
 			} catch (cleanupError) {
-				console.error(
-					"[node-init] Failed to cleanup partial worktree:",
-					cleanupError,
-				);
+				console.error("[node-init] Failed to cleanup partial worktree:", cleanupError);
 			}
 		}
 
-		manager.updateProgress(
-			nodeId,
-			"failed",
-			"Initialization failed",
-			errorMessage,
-		);
+		manager.updateProgress(nodeId, "failed", "Initialization failed", errorMessage);
 	} finally {
 		// Always finalize the job to unblock waitForInit() callers (e.g., delete mutation)
 		manager.finalizeJob(nodeId);

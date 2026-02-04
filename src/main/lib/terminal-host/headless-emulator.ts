@@ -9,11 +9,7 @@
 
 import { SerializeAddon } from "@xterm/addon-serialize";
 import { Terminal } from "@xterm/headless";
-import {
-	DEFAULT_MODES,
-	type TerminalModes,
-	type TerminalSnapshot,
-} from "./types";
+import { DEFAULT_MODES, type TerminalModes, type TerminalSnapshot } from "./types";
 
 // =============================================================================
 // Mode Tracking Constants
@@ -23,8 +19,7 @@ import {
 const ESC = "\x1b";
 const BEL = "\x07";
 
-const DEBUG_EMULATOR_TIMING =
-	process.env.CASPIAN_TERMINAL_EMULATOR_DEBUG === "1";
+const DEBUG_EMULATOR_TIMING = process.env.CASPIAN_TERMINAL_EMULATOR_DEBUG === "1";
 
 /**
  * DECSET/DECRST mode numbers we track
@@ -353,9 +348,7 @@ export class HeadlessEmulator {
 
 		if (incompleteSequence) {
 			// Cap buffer size to prevent unbounded growth
-			if (
-				incompleteSequence.length <= HeadlessEmulator.MAX_ESCAPE_BUFFER_SIZE
-			) {
+			if (incompleteSequence.length <= HeadlessEmulator.MAX_ESCAPE_BUFFER_SIZE) {
 				this.escapeSequenceBuffer = incompleteSequence;
 			}
 			// If buffer too large, just discard it (likely malformed or attack)
@@ -393,8 +386,7 @@ export class HeadlessEmulator {
 				const matches = afterLastEsc.match(globalPattern);
 				if (matches) {
 					const lastMatch = matches[matches.length - 1];
-					const lastMatchEnd =
-						afterLastEsc.lastIndexOf(lastMatch) + lastMatch.length;
+					const lastMatchEnd = afterLastEsc.lastIndexOf(lastMatch) + lastMatch.length;
 					const remainder = afterLastEsc.slice(lastMatchEnd);
 					if (remainder.includes(ESC)) {
 						return this.findIncompleteTrackedSequence(remainder);
@@ -437,10 +429,7 @@ export class HeadlessEmulator {
 		// Examples: ESC[?1h (enable app cursor), ESC[?2004l (disable bracketed paste)
 		// Also handles multiple modes: ESC[?1;2004h
 		// Using string-based regex to avoid control character linter errors
-		const modeRegex = new RegExp(
-			`${escapeRegex(ESC)}\\[\\?([0-9;]+)([hl])`,
-			"g",
-		);
+		const modeRegex = new RegExp(`${escapeRegex(ESC)}\\[\\?([0-9;]+)([hl])`, "g");
 
 		for (const match of data.matchAll(modeRegex)) {
 			const modesStr = match[1];
@@ -448,9 +437,7 @@ export class HeadlessEmulator {
 			const enable = action === "h";
 
 			// Split on semicolons for multiple modes
-			const modeNumbers = modesStr
-				.split(";")
-				.map((s) => Number.parseInt(s, 10));
+			const modeNumbers = modesStr.split(";").map((s) => Number.parseInt(s, 10));
 
 			for (const modeNum of modeNumbers) {
 				const modeName = MODE_MAP[modeNum];
@@ -510,11 +497,7 @@ export class HeadlessEmulator {
 		const sequences: string[] = [];
 
 		// Helper to add DECSET/DECRST sequence
-		const addModeSequence = (
-			modeNum: number,
-			enabled: boolean,
-			defaultEnabled: boolean,
-		) => {
+		const addModeSequence = (modeNum: number, enabled: boolean, defaultEnabled: boolean) => {
 			// Only add sequence if different from default
 			if (enabled !== defaultEnabled) {
 				sequences.push(`${ESC}[?${modeNum}${enabled ? "h" : "l"}`);
@@ -572,10 +555,7 @@ function escapeRegex(str: string): string {
 /**
  * Apply a snapshot to a headless emulator (for testing round-trip)
  */
-export function applySnapshot(
-	emulator: HeadlessEmulator,
-	snapshot: TerminalSnapshot,
-): void {
+export function applySnapshot(emulator: HeadlessEmulator, snapshot: TerminalSnapshot): void {
 	// First, write the rehydrate sequences to restore mode state
 	emulator.write(snapshot.rehydrateSequences);
 

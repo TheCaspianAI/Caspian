@@ -1,7 +1,7 @@
-import { cn } from "ui/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { LuCheck, LuX } from "react-icons/lu";
 import type { DirectoryEntry } from "shared/file-tree-types";
+import { cn } from "ui/lib/utils";
 import { getFileIcon } from "../../utils";
 
 interface RenameInputProps {
@@ -11,12 +11,7 @@ interface RenameInputProps {
 	level?: number;
 }
 
-export function RenameInput({
-	entry,
-	onSubmit,
-	onCancel,
-	level = 0,
-}: RenameInputProps) {
+export function RenameInput({ entry, onSubmit, onCancel, level = 0 }: RenameInputProps) {
 	const [value, setValue] = useState(entry.name);
 	const inputRef = useRef<HTMLInputElement>(null);
 
@@ -56,11 +51,7 @@ export function RenameInput({
 		}
 	};
 
-	const { icon: Icon, color } = getFileIcon(
-		entry.name,
-		entry.isDirectory,
-		false,
-	);
+	const { icon: Icon, color } = getFileIcon(entry.name, entry.isDirectory, false);
 
 	return (
 		<div
@@ -81,11 +72,7 @@ export function RenameInput({
 					"bg-background border border-ring rounded outline-none",
 				)}
 			/>
-			<button
-				type="button"
-				onClick={handleSubmit}
-				className="p-0.5 hover:bg-background/50 rounded"
-			>
+			<button type="button" onClick={handleSubmit} className="p-0.5 hover:bg-background/50 rounded">
 				<LuCheck className="size-3 text-muted-foreground" />
 			</button>
 			<button

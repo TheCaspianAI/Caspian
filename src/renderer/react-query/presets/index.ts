@@ -1,9 +1,7 @@
 import { electronTrpc } from "renderer/lib/electron-trpc";
 
 function useCreateTerminalPreset(
-	options?: Parameters<
-		typeof electronTrpc.settings.createTerminalPreset.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.settings.createTerminalPreset.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
@@ -17,9 +15,7 @@ function useCreateTerminalPreset(
 }
 
 function useUpdateTerminalPreset(
-	options?: Parameters<
-		typeof electronTrpc.settings.updateTerminalPreset.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.settings.updateTerminalPreset.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
@@ -33,9 +29,7 @@ function useUpdateTerminalPreset(
 }
 
 function useDeleteTerminalPreset(
-	options?: Parameters<
-		typeof electronTrpc.settings.deleteTerminalPreset.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.settings.deleteTerminalPreset.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
@@ -49,9 +43,7 @@ function useDeleteTerminalPreset(
 }
 
 function useSetDefaultPreset(
-	options?: Parameters<
-		typeof electronTrpc.settings.setDefaultPreset.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.settings.setDefaultPreset.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
@@ -66,9 +58,7 @@ function useSetDefaultPreset(
 }
 
 function useReorderTerminalPresets(
-	options?: Parameters<
-		typeof electronTrpc.settings.reorderTerminalPresets.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.settings.reorderTerminalPresets.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 
@@ -86,11 +76,9 @@ function useReorderTerminalPresets(
  * Provides easy access to presets data and mutations from anywhere in the app
  */
 export function usePresets() {
-	const { data: presets = [], isLoading } =
-		electronTrpc.settings.getTerminalPresets.useQuery();
+	const { data: presets = [], isLoading } = electronTrpc.settings.getTerminalPresets.useQuery();
 
-	const { data: defaultPreset } =
-		electronTrpc.settings.getDefaultPreset.useQuery();
+	const { data: defaultPreset } = electronTrpc.settings.getDefaultPreset.useQuery();
 
 	const createPreset = useCreateTerminalPreset();
 	const updatePreset = useUpdateTerminalPreset();

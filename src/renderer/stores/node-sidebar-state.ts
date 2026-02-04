@@ -98,8 +98,7 @@ export const useNodeSidebarStore = create<NodeSidebarState>()(
 
 				toggleCollapsed: () => {
 					const { width, lastExpandedWidth } = get();
-					const isCurrentlyCollapsed =
-						width === COLLAPSED_NODE_SIDEBAR_WIDTH;
+					const isCurrentlyCollapsed = width === COLLAPSED_NODE_SIDEBAR_WIDTH;
 
 					if (isCurrentlyCollapsed) {
 						set({ width: lastExpandedWidth });

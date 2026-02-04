@@ -16,8 +16,7 @@ export function resolveCwd(
 	worktreePath: string | undefined,
 ): string | undefined {
 	// Validate worktreePath exists if provided
-	const validWorktreePath =
-		worktreePath && existsSync(worktreePath) ? worktreePath : undefined;
+	const validWorktreePath = worktreePath && existsSync(worktreePath) ? worktreePath : undefined;
 
 	if (!cwdOverride) {
 		return validWorktreePath;
@@ -39,9 +38,7 @@ export function resolveCwd(
 
 	// Relative path - resolve against worktree
 	// Handles both "apps/foo" and "./apps/foo"
-	const relativePath = cwdOverride.startsWith("./")
-		? cwdOverride.slice(2)
-		: cwdOverride;
+	const relativePath = cwdOverride.startsWith("./") ? cwdOverride.slice(2) : cwdOverride;
 
 	const resolvedPath = join(validWorktreePath, relativePath);
 

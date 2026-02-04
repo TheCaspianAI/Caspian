@@ -1,10 +1,5 @@
 import { z } from "zod";
-import type {
-	BulkItemError,
-	CommandResult,
-	ToolContext,
-	ToolDefinition,
-} from "./types";
+import type { BulkItemError, CommandResult, ToolContext, ToolDefinition } from "./types";
 import { buildBulkResult } from "./types";
 
 const schema = z.object({
@@ -15,10 +10,7 @@ interface DeletedNode {
 	nodeId: string;
 }
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	const deleted: DeletedNode[] = [];
 	const errors: BulkItemError[] = [];
 
@@ -41,8 +33,7 @@ async function execute(
 			errors.push({
 				index: i,
 				nodeId,
-				error:
-					error instanceof Error ? error.message : "Failed to delete node",
+				error: error instanceof Error ? error.message : "Failed to delete node",
 			});
 		}
 	}

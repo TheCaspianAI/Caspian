@@ -34,9 +34,7 @@ export interface UseTerminalRefsReturn {
 	paneInitialCwdRef: MutableRefObject<string | undefined>;
 	clearPaneInitialDataRef: MutableRefObject<(paneId: string) => void>;
 	nodeCwdRef: MutableRefObject<string | null>;
-	handleFileLinkClickRef: MutableRefObject<
-		(path: string, line?: number, column?: number) => void
-	>;
+	handleFileLinkClickRef: MutableRefObject<(path: string, line?: number, column?: number) => void>;
 	debouncedSetPaneNameRef: MutableRefObject<DebouncedPaneNameSetter>;
 	setPaneLastCompletedRef: MutableRefObject<(paneId: string) => void>;
 	handleTerminalFocusRef: MutableRefObject<() => void>;

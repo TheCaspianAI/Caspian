@@ -28,8 +28,7 @@ export const SETTING_ITEM_ID = {
 	REPOSITORY_BRANCH_PREFIX: "repository-branch-prefix",
 } as const;
 
-export type SettingItemId =
-	(typeof SETTING_ITEM_ID)[keyof typeof SETTING_ITEM_ID];
+export type SettingItemId = (typeof SETTING_ITEM_ID)[keyof typeof SETTING_ITEM_ID];
 
 export interface SettingsItem {
 	id: SettingItemId;
@@ -175,9 +174,7 @@ export function searchSettings(query: string): SettingsItem[] {
 	);
 }
 
-export function getMatchCountBySection(
-	query: string,
-): Partial<Record<SettingsSection, number>> {
+export function getMatchCountBySection(query: string): Partial<Record<SettingsSection, number>> {
 	const matches = searchSettings(query);
 	const counts: Partial<Record<SettingsSection, number>> = {};
 

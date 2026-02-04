@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
-import {
-	LuCopy,
-	LuFileOutput,
-	LuPencilLine,
-	LuPlus,
-	LuX,
-} from "react-icons/lu";
+import { LuCopy, LuFileOutput, LuPencilLine, LuPlus, LuX } from "react-icons/lu";
 import type { FileStatus } from "shared/changes-types";
 
 export function getStatusColor(status: FileStatus): string {

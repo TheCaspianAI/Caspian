@@ -16,7 +16,6 @@ export function initPostHog() {
 	// 	console.log("[posthog] No key configured, skipping");
 	// 	return;
 	// }
-
 	// posthogFull.init(POSTHOG_KEY, {
 	// 	api_host: POSTHOG_HOST,
 	// 	defaults: "2025-11-30",

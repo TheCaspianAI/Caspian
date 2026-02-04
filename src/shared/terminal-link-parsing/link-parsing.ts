@@ -51,7 +51,6 @@ class Lazy<T> {
 			this._value = this._factory();
 			this._isInitialized = true;
 		}
-		// biome-ignore lint/style/noNonNullAssertion: value is guaranteed to be set after initialization
 		return this._value!;
 	}
 }
@@ -60,9 +59,7 @@ class Lazy<T> {
  * A regex that extracts the link suffix which contains line and column information. The link suffix
  * must terminate at the end of line.
  */
-const linkSuffixRegexEol = new Lazy<RegExp>(() =>
-	generateLinkSuffixRegex(true),
-);
+const linkSuffixRegexEol = new Lazy<RegExp>(() => generateLinkSuffixRegex(true));
 /**
  * A regex that extracts the link suffix which contains line and column information.
  */
@@ -247,9 +244,7 @@ export function getCurrentOS(): OperatingSystem {
 	return OperatingSystem.Linux;
 }
 
-export function toLinkSuffix(
-	match: RegExpExecArray | null,
-): ILinkSuffix | null {
+export function toLinkSuffix(match: RegExpExecArray | null): ILinkSuffix | null {
 	const groups = match?.groups;
 	if (!groups || match.length < 1) {
 		return null;
@@ -257,12 +252,8 @@ export function toLinkSuffix(
 	return {
 		row: parseIntOptional(groups.row0 || groups.row1 || groups.row2),
 		col: parseIntOptional(groups.col0 || groups.col1 || groups.col2),
-		rowEnd: parseIntOptional(
-			groups.rowEnd0 || groups.rowEnd1 || groups.rowEnd2,
-		),
-		colEnd: parseIntOptional(
-			groups.colEnd0 || groups.colEnd1 || groups.colEnd2,
-		),
+		rowEnd: parseIntOptional(groups.rowEnd0 || groups.rowEnd1 || groups.rowEnd2),
+		colEnd: parseIntOptional(groups.colEnd0 || groups.colEnd1 || groups.colEnd2),
 		suffix: { index: match.index, text: match[0] },
 	};
 }
@@ -278,8 +269,7 @@ function parseIntOptional(value: string | undefined): number | undefined {
 // characters the path is not allowed to _start_ with, the second `[]` includes characters not
 // allowed at all in the path. If the characters show up in both regexes the link will stop at that
 // character, otherwise it will stop at a space character.
-const linkWithSuffixPathCharacters =
-	/(?<path>(?:file:\/\/\/)?[^\s|<>[({][^\s|<>]*)$/;
+const linkWithSuffixPathCharacters = /(?<path>(?:file:\/\/\/)?[^\s|<>[({][^\s|<>]*)$/;
 
 export function detectLinks(line: string, os: OperatingSystem): IParsedLink[] {
 	// 1: Detect all links on line via suffixes first
@@ -302,12 +292,7 @@ function binaryInsertList(list: IParsedLink[], newItems: IParsedLink[]) {
 	}
 }
 
-function binaryInsert(
-	list: IParsedLink[],
-	newItem: IParsedLink,
-	low: number,
-	high: number,
-): void {
+function binaryInsert(list: IParsedLink[], newItem: IParsedLink, low: number, high: number): void {
 	if (list.length === 0) {
 		list.push(newItem);
 		return;
@@ -332,9 +317,7 @@ function binaryInsert(
 			(midItem &&
 				newItem.path.index + newItem.path.text.length < midItem.path.index &&
 				(mid === 0 ||
-					(prevItem &&
-						newItem.path.index >
-							prevItem.path.index + prevItem.path.text.length)))
+					(prevItem && newItem.path.index > prevItem.path.index + prevItem.path.text.length)))
 		) {
 			list.splice(mid, 0, newItem);
 		}
@@ -389,8 +372,7 @@ function detectLinksViaSuffix(line: string): IParsedLink[] {
 				// If this fails on a multi-character prefix, just keep the original.
 				if (prefixMatch.groups.prefix.length > 1) {
 					const suffixFirstChar = suffix.suffix.text[0];
-					const prefixLastChar =
-						prefixMatch.groups.prefix[prefixMatch.groups.prefix.length - 1];
+					const prefixLastChar = prefixMatch.groups.prefix[prefixMatch.groups.prefix.length - 1];
 					if (
 						suffixFirstChar &&
 						prefixLastChar &&
@@ -421,8 +403,7 @@ function detectLinksViaSuffix(line: string): IParsedLink[] {
 				if (bracket) {
 					results.push({
 						path: {
-							index:
-								linkStartIndex + (prefix?.text.length || 0) + match.index + 1,
+							index: linkStartIndex + (prefix?.text.length || 0) + match.index + 1,
 							text: path.substring(match.index + bracket.length),
 						},
 						prefix,
@@ -489,11 +470,9 @@ function detectPathsNoSuffix(line: string, os: OperatingSystem): IParsedLink[] {
 		if (
 			// --- a/foo/bar
 			// +++ b/foo/bar
-			((line.startsWith("--- a/") || line.startsWith("+++ b/")) &&
-				index === 4) ||
+			((line.startsWith("--- a/") || line.startsWith("+++ b/")) && index === 4) ||
 			// diff --git a/foo/bar b/foo/bar
-			(line.startsWith("diff --git") &&
-				(text.startsWith("a/") || text.startsWith("b/")))
+			(line.startsWith("diff --git") && (text.startsWith("a/") || text.startsWith("b/")))
 		) {
 			text = text.substring(2);
 			index += 2;

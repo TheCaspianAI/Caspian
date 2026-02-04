@@ -33,8 +33,7 @@ const listenerMap = new WeakMap<IpcListener, IpcListener>();
  */
 const ipcRendererAPI = {
 	// biome-ignore lint/suspicious/noExplicitAny: IPC invoke requires any for dynamic channel types
-	invoke: (channel: string, ...args: any[]) =>
-		ipcRenderer.invoke(channel, ...args),
+	invoke: (channel: string, ...args: any[]) => ipcRenderer.invoke(channel, ...args),
 
 	// biome-ignore lint/suspicious/noExplicitAny: IPC send requires any for dynamic channel types
 	send: (channel: string, ...args: any[]) => ipcRenderer.send(channel, ...args),

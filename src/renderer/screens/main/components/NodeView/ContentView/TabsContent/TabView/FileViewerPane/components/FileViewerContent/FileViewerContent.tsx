@@ -4,9 +4,9 @@ import { type MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { LuLoader } from "react-icons/lu";
 import { MarkdownRenderer } from "renderer/components/MarkdownRenderer";
 import {
+	CASPIAN_THEME,
 	MONACO_EDITOR_OPTIONS,
 	registerSaveAction,
-	CASPIAN_THEME,
 	useMonacoReady,
 } from "renderer/providers/MonacoProvider";
 import type { Tab } from "renderer/stores/tabs/types";
@@ -24,12 +24,7 @@ interface RawFileData {
 
 interface RawFileError {
 	ok: false;
-	reason:
-		| "too-large"
-		| "binary"
-		| "outside-worktree"
-		| "symlink-escape"
-		| "not-found";
+	reason: "too-large" | "binary" | "outside-worktree" | "symlink-escape" | "not-found";
 }
 
 type RawFileResult = RawFileData | RawFileError | undefined;
@@ -122,14 +117,7 @@ export function FileViewerContent({
 			registerSaveAction(editor, onSaveRaw);
 			registerCopyPathLineAction(editor, filePath);
 		},
-		[
-			onSaveRaw,
-			editorRef,
-			originalContentRef,
-			draftContentRef,
-			setIsDirty,
-			filePath,
-		],
+		[onSaveRaw, editorRef, originalContentRef, draftContentRef, setIsDirty, filePath],
 	);
 
 	useEffect(() => {
@@ -159,14 +147,7 @@ export function FileViewerContent({
 		editor.focus();
 
 		hasAppliedInitialLocationRef.current = true;
-	}, [
-		viewMode,
-		initialLine,
-		initialColumn,
-		isLoadingRaw,
-		rawFileData,
-		editorRef,
-	]);
+	}, [viewMode, initialLine, initialColumn, isLoadingRaw, rawFileData, editorRef]);
 
 	if (viewMode === "diff") {
 		if (isLoadingDiff) {

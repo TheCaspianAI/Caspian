@@ -1,3 +1,4 @@
+import { LuLoader } from "react-icons/lu";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -9,7 +10,6 @@ import {
 	AlertDialogTitle,
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
-import { LuLoader } from "react-icons/lu";
 
 interface UnsavedChangesDialogProps {
 	open: boolean;

@@ -11,11 +11,9 @@
 
 export function initSentry(): void {
 	// if (sentryInitialized) return;
-
 	// if (!SENTRY_DSN || process.env.NODE_ENV !== "production") {
 	// 	return;
 	// }
-
 	// try {
 	// 	Sentry.init({
 	// 		dsn: SENTRY_DSN,
@@ -28,7 +26,6 @@ export function initSentry(): void {
 	// 			session.fromPartition("persist:caspian"),
 	// 		],
 	// 	});
-
 	// 	sentryInitialized = true;
 	// 	console.log("[sentry] Initialized in main process");
 	// } catch (error) {

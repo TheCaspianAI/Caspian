@@ -27,11 +27,7 @@ export const useConfigModalStore = create<ConfigModalState>()(
 );
 
 // Convenience hooks
-export const useConfigModalOpen = () =>
-	useConfigModalStore((state) => state.isOpen);
-export const useConfigModalRepositoryId = () =>
-	useConfigModalStore((state) => state.repositoryId);
-export const useOpenConfigModal = () =>
-	useConfigModalStore((state) => state.openModal);
-export const useCloseConfigModal = () =>
-	useConfigModalStore((state) => state.closeModal);
+export const useConfigModalOpen = () => useConfigModalStore((state) => state.isOpen);
+export const useConfigModalRepositoryId = () => useConfigModalStore((state) => state.repositoryId);
+export const useOpenConfigModal = () => useConfigModalStore((state) => state.openModal);
+export const useCloseConfigModal = () => useConfigModalStore((state) => state.closeModal);

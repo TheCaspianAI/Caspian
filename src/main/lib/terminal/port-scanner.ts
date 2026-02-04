@@ -31,9 +31,7 @@ export async function getProcessTree(pid: number): Promise<number[]> {
  * Get listening TCP ports for a set of PIDs
  * Cross-platform implementation using lsof (macOS/Linux) or netstat (Windows)
  */
-export async function getListeningPortsForPids(
-	pids: number[],
-): Promise<PortInfo[]> {
+export async function getListeningPortsForPids(pids: number[]): Promise<PortInfo[]> {
 	if (pids.length === 0) return [];
 
 	const platform = os.platform();
@@ -231,10 +229,9 @@ export async function getProcessName(pid: number): Promise<string> {
 
 	// macOS/Linux
 	try {
-		const { stdout: output } = await execAsync(
-			`ps -p ${pid} -o comm= 2>/dev/null || true`,
-			{ timeout: EXEC_TIMEOUT_MS },
-		);
+		const { stdout: output } = await execAsync(`ps -p ${pid} -o comm= 2>/dev/null || true`, {
+			timeout: EXEC_TIMEOUT_MS,
+		});
 		const name = output.trim();
 		// On macOS, comm may be truncated. The full path can be gotten with -o command=
 		// but comm is usually sufficient for display purposes

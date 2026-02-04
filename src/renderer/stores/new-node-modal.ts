@@ -27,11 +27,8 @@ export const useNewNodeModalStore = create<NewNodeModalState>()(
 );
 
 // Convenience hooks
-export const useNewNodeModalOpen = () =>
-	useNewNodeModalStore((state) => state.isOpen);
-export const useOpenNewNodeModal = () =>
-	useNewNodeModalStore((state) => state.openModal);
-export const useCloseNewNodeModal = () =>
-	useNewNodeModalStore((state) => state.closeModal);
+export const useNewNodeModalOpen = () => useNewNodeModalStore((state) => state.isOpen);
+export const useOpenNewNodeModal = () => useNewNodeModalStore((state) => state.openModal);
+export const useCloseNewNodeModal = () => useNewNodeModalStore((state) => state.closeModal);
 export const usePreSelectedRepositoryId = () =>
 	useNewNodeModalStore((state) => state.preSelectedRepositoryId);

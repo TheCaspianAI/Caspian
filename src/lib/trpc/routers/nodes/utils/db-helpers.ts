@@ -1,13 +1,13 @@
+import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import {
+	nodes,
 	repositories,
-	type SelectRepository,
 	type SelectNode,
+	type SelectRepository,
 	type SelectWorktree,
 	settings,
-	nodes,
 	worktrees,
 } from "lib/local-db";
-import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { localDb } from "main/lib/local-db";
 
 /**
@@ -33,13 +33,9 @@ export function getMaxNodeTabOrder(repositoryId: string): number {
 	const repositoryNodes = localDb
 		.select()
 		.from(nodes)
-		.where(
-			and(eq(nodes.repositoryId, repositoryId), isNull(nodes.deletingAt)),
-		)
+		.where(and(eq(nodes.repositoryId, repositoryId), isNull(nodes.deletingAt)))
 		.all();
-	return repositoryNodes.length > 0
-		? Math.max(...repositoryNodes.map((n) => n.tabOrder))
-		: -1;
+	return repositoryNodes.length > 0 ? Math.max(...repositoryNodes.map((n) => n.tabOrder)) : -1;
 }
 
 /**
@@ -68,8 +64,7 @@ export function activateRepository(repository: SelectRepository): void {
 		.update(repositories)
 		.set({
 			lastOpenedAt: Date.now(),
-			tabOrder:
-				repository.tabOrder === null ? maxRepositoryTabOrder + 1 : repository.tabOrder,
+			tabOrder: repository.tabOrder === null ? maxRepositoryTabOrder + 1 : repository.tabOrder,
 		})
 		.where(eq(repositories.id, repository.id))
 		.run();
@@ -133,9 +128,7 @@ export function selectNextActiveNode(): string | null {
  * Update settings to point to the next active node if the current
  * active node was removed.
  */
-export function updateActiveNodeIfRemoved(
-	removedNodeId: string,
-): void {
+export function updateActiveNodeIfRemoved(removedNodeId: string): void {
 	const settingsRow = localDb.select().from(settings).get();
 	if (settingsRow?.lastActiveNodeId === removedNodeId) {
 		const newActiveId = selectNextActiveNode();
@@ -147,11 +140,7 @@ export function updateActiveNodeIfRemoved(
  * Fetch a node by ID.
  */
 export function getNode(nodeId: string): SelectNode | undefined {
-	return localDb
-		.select()
-		.from(nodes)
-		.where(eq(nodes.id, nodeId))
-		.get();
+	return localDb.select().from(nodes).where(eq(nodes.id, nodeId)).get();
 }
 
 /**
@@ -159,9 +148,7 @@ export function getNode(nodeId: string): SelectNode | undefined {
  * Use this for operations that shouldn't operate on deleting nodes
  * (e.g., setActive, update, setUnread).
  */
-export function getNodeNotDeleting(
-	nodeId: string,
-): SelectNode | undefined {
+export function getNodeNotDeleting(nodeId: string): SelectNode | undefined {
 	return localDb
 		.select()
 		.from(nodes)
@@ -173,22 +160,14 @@ export function getNodeNotDeleting(
  * Fetch a repository by ID.
  */
 export function getRepository(repositoryId: string): SelectRepository | undefined {
-	return localDb
-		.select()
-		.from(repositories)
-		.where(eq(repositories.id, repositoryId))
-		.get();
+	return localDb.select().from(repositories).where(eq(repositories.id, repositoryId)).get();
 }
 
 /**
  * Fetch a worktree by ID.
  */
 export function getWorktree(worktreeId: string): SelectWorktree | undefined {
-	return localDb
-		.select()
-		.from(worktrees)
-		.where(eq(worktrees.id, worktreeId))
-		.get();
+	return localDb.select().from(worktrees).where(eq(worktrees.id, worktreeId)).get();
 }
 
 /**
@@ -205,9 +184,7 @@ export function getNodeWithRelations(nodeId: string): {
 		return null;
 	}
 
-	const worktree = node.worktreeId
-		? (getWorktree(node.worktreeId) ?? null)
-		: null;
+	const worktree = node.worktreeId ? (getWorktree(node.worktreeId) ?? null) : null;
 	const repository = getRepository(node.repositoryId) ?? null;
 
 	return { node, worktree, repository };
@@ -238,20 +215,12 @@ export function touchNode(
 
 /** Hides node from queries immediately, before slow deletion operations. */
 export function markNodeAsDeleting(nodeId: string): void {
-	localDb
-		.update(nodes)
-		.set({ deletingAt: Date.now() })
-		.where(eq(nodes.id, nodeId))
-		.run();
+	localDb.update(nodes).set({ deletingAt: Date.now() }).where(eq(nodes.id, nodeId)).run();
 }
 
 /** Restores node visibility after a failed deletion. */
 export function clearNodeDeletingStatus(nodeId: string): void {
-	localDb
-		.update(nodes)
-		.set({ deletingAt: null })
-		.where(eq(nodes.id, nodeId))
-		.run();
+	localDb.update(nodes).set({ deletingAt: null }).where(eq(nodes.id, nodeId)).run();
 }
 
 /**
@@ -273,18 +242,12 @@ export function deleteWorktreeRecord(worktreeId: string): void {
  * Each repository can only have one branch node (type='branch').
  * Returns undefined if no branch node exists.
  */
-export function getBranchNode(
-	repositoryId: string,
-): SelectNode | undefined {
+export function getBranchNode(repositoryId: string): SelectNode | undefined {
 	return localDb
 		.select()
 		.from(nodes)
 		.where(
-			and(
-				eq(nodes.repositoryId, repositoryId),
-				eq(nodes.type, "branch"),
-				isNull(nodes.deletingAt),
-			),
+			and(eq(nodes.repositoryId, repositoryId), eq(nodes.type, "branch"), isNull(nodes.deletingAt)),
 		)
 		.get();
 }
@@ -292,10 +255,7 @@ export function getBranchNode(
 /**
  * Update a repository's default branch.
  */
-export function updateRepositoryDefaultBranch(
-	repositoryId: string,
-	defaultBranch: string,
-): void {
+export function updateRepositoryDefaultBranch(repositoryId: string, defaultBranch: string): void {
 	localDb
 		.update(repositories)
 		.set({ defaultBranch })

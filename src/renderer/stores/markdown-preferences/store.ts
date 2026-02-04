@@ -26,7 +26,5 @@ export const useMarkdownPreferencesStore = create<MarkdownPreferencesState>()(
 	),
 );
 
-export const useMarkdownStyle = () =>
-	useMarkdownPreferencesStore((state) => state.style);
-export const useSetMarkdownStyle = () =>
-	useMarkdownPreferencesStore((state) => state.setStyle);
+export const useMarkdownStyle = () => useMarkdownPreferencesStore((state) => state.style);
+export const useSetMarkdownStyle = () => useMarkdownPreferencesStore((state) => state.setStyle);

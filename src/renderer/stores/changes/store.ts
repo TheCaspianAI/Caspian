@@ -1,8 +1,4 @@
-import type {
-	ChangeCategory,
-	ChangedFile,
-	DiffViewMode,
-} from "shared/changes-types";
+import type { ChangeCategory, ChangedFile, DiffViewMode } from "shared/changes-types";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 

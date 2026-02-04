@@ -12,8 +12,7 @@ const MAX_CONCURRENT_ATTACHES = 3;
 
 // Debug logging (enable via localStorage.setItem('CASPIAN_TERMINAL_DEBUG', '1'))
 const DEBUG_SCHEDULER =
-	typeof localStorage !== "undefined" &&
-	localStorage.getItem("CASPIAN_TERMINAL_DEBUG") === "1";
+	typeof localStorage !== "undefined" && localStorage.getItem("CASPIAN_TERMINAL_DEBUG") === "1";
 
 let inFlight = 0;
 const queue: AttachTask[] = [];
@@ -28,9 +27,7 @@ const waitingByPaneId = new Map<string, AttachTask>();
 function pump(): void {
 	while (inFlight < MAX_CONCURRENT_ATTACHES && queue.length > 0) {
 		// Pick highest priority (lowest number), FIFO within same priority.
-		queue.sort(
-			(a, b) => a.priority - b.priority || a.enqueuedAt - b.enqueuedAt,
-		);
+		queue.sort((a, b) => a.priority - b.priority || a.enqueuedAt - b.enqueuedAt);
 		const task = queue.shift();
 		if (!task) return;
 		if (task.canceled) {
@@ -105,9 +102,7 @@ function pump(): void {
 				waitingByPaneId.delete(task.paneId);
 				queue.push(waiting);
 				if (DEBUG_SCHEDULER) {
-					console.log(
-						`[AttachScheduler] Re-queued waiting task: ${task.paneId}`,
-					);
+					console.log(`[AttachScheduler] Re-queued waiting task: ${task.paneId}`);
 				}
 			}
 
@@ -147,9 +142,7 @@ export function scheduleTerminalAttach({
 		existing.canceled = true;
 		pendingByPaneId.delete(paneId);
 		if (DEBUG_SCHEDULER) {
-			console.log(
-				`[AttachScheduler] Canceled existing pending task: ${paneId}`,
-			);
+			console.log(`[AttachScheduler] Canceled existing pending task: ${paneId}`);
 		}
 	}
 
@@ -184,9 +177,7 @@ export function scheduleTerminalAttach({
 			runningByPaneId.delete(paneId);
 			inFlight = Math.max(0, inFlight - 1);
 			if (DEBUG_SCHEDULER) {
-				console.log(
-					`[AttachScheduler] Cancel running task: ${paneId}, inFlight=${inFlight}`,
-				);
+				console.log(`[AttachScheduler] Cancel running task: ${paneId}, inFlight=${inFlight}`);
 			}
 			// Re-queue any task that was waiting for this one to complete
 			// (mirrors done() behavior for the "done never fires" scenario)
@@ -195,9 +186,7 @@ export function scheduleTerminalAttach({
 				waitingByPaneId.delete(paneId);
 				queue.push(waiting);
 				if (DEBUG_SCHEDULER) {
-					console.log(
-						`[AttachScheduler] Re-queued waiting task after cancel: ${paneId}`,
-					);
+					console.log(`[AttachScheduler] Re-queued waiting task after cancel: ${paneId}`);
 				}
 			}
 			// Pump to start any waiting tasks now that we have capacity

@@ -1,14 +1,9 @@
-import { Button } from "ui/components/ui/button";
-import { cn } from "ui/lib/utils";
 import { useCallback, useEffect, useState } from "react";
-import {
-	HiArrowTopRightOnSquare,
-	HiDocumentArrowUp,
-	HiPlus,
-	HiXMark,
-} from "react-icons/hi2";
+import { HiArrowTopRightOnSquare, HiDocumentArrowUp, HiPlus, HiXMark } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { EXTERNAL_LINKS } from "shared/constants";
+import { Button } from "ui/components/ui/button";
+import { cn } from "ui/lib/utils";
 
 interface ScriptEntry {
 	id: string;
@@ -57,12 +52,7 @@ interface ScriptEntryRowProps {
 	onFileDrop: (id: string, content: string) => void;
 }
 
-function ScriptEntryRow({
-	script,
-	onChange,
-	onRemove,
-	onFileDrop,
-}: ScriptEntryRowProps) {
+function ScriptEntryRow({ script, onChange, onRemove, onFileDrop }: ScriptEntryRowProps) {
 	const [isDragOver, setIsDragOver] = useState(false);
 
 	const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -84,18 +74,13 @@ function ScriptEntryRow({
 			setIsDragOver(false);
 
 			const files = Array.from(e.dataTransfer.files);
-			const scriptFile = files.find((f) =>
-				f.name.match(/\.(sh|bash|zsh|command)$/i),
-			);
+			const scriptFile = files.find((f) => f.name.match(/\.(sh|bash|zsh|command)$/i));
 
 			if (scriptFile) {
 				const filePath = window.webUtils.getPathForFile(scriptFile);
 				if (filePath) {
 					try {
-						const response = await window.ipcRenderer.invoke(
-							"read-script-file",
-							filePath,
-						);
+						const response = await window.ipcRenderer.invoke("read-script-file", filePath);
 						if (response && typeof response === "string") {
 							onFileDrop(script.id, response);
 						}
@@ -115,9 +100,7 @@ function ScriptEntryRow({
 			aria-label="Script editor with file drop support"
 			className={cn(
 				"relative group rounded-lg border transition-colors",
-				isDragOver
-					? "border-primary bg-primary/5"
-					: "border-border hover:border-border/80",
+				isDragOver ? "border-primary bg-primary/5" : "border-border hover:border-border/80",
 			)}
 			onDragOver={handleDragOver}
 			onDragLeave={handleDragLeave}
@@ -191,9 +174,7 @@ function ScriptsSection({
 					))}
 				</div>
 			) : (
-				<div className="text-sm text-muted-foreground italic">
-					No scripts configured
-				</div>
+				<div className="text-sm text-muted-foreground italic">No scripts configured</div>
 			)}
 
 			<div className="flex gap-2">
@@ -201,12 +182,7 @@ function ScriptsSection({
 					<HiPlus className="h-4 w-4" />
 					Add Script
 				</Button>
-				<Button
-					variant="ghost"
-					size="sm"
-					onClick={onImportFile}
-					className="gap-1.5"
-				>
+				<Button variant="ghost" size="sm" onClick={onImportFile} className="gap-1.5">
 					<HiDocumentArrowUp className="h-4 w-4" />
 					Import File
 				</Button>
@@ -215,18 +191,13 @@ function ScriptsSection({
 	);
 }
 
-export function ScriptsEditor({
-	repositoryId,
-	repositoryName,
-	className,
-}: ScriptsEditorProps) {
+export function ScriptsEditor({ repositoryId, repositoryName, className }: ScriptsEditorProps) {
 	const utils = electronTrpc.useUtils();
 
-	const { data: configData, isLoading } =
-		electronTrpc.config.getConfigContent.useQuery(
-			{ repositoryId },
-			{ enabled: !!repositoryId },
-		);
+	const { data: configData, isLoading } = electronTrpc.config.getConfigContent.useQuery(
+		{ repositoryId },
+		{ enabled: !!repositoryId },
+	);
 
 	const [setupScripts, setSetupScripts] = useState<ScriptEntry[]>([]);
 	const [teardownScripts, setTeardownScripts] = useState<ScriptEntry[]>([]);
@@ -250,16 +221,12 @@ export function ScriptsEditor({
 	});
 
 	const handleSetupChange = useCallback((id: string, content: string) => {
-		setSetupScripts((prev) =>
-			prev.map((s) => (s.id === id ? { ...s, content } : s)),
-		);
+		setSetupScripts((prev) => prev.map((s) => (s.id === id ? { ...s, content } : s)));
 		setHasChanges(true);
 	}, []);
 
 	const handleTeardownChange = useCallback((id: string, content: string) => {
-		setTeardownScripts((prev) =>
-			prev.map((s) => (s.id === id ? { ...s, content } : s)),
-		);
+		setTeardownScripts((prev) => prev.map((s) => (s.id === id ? { ...s, content } : s)));
 		setHasChanges(true);
 	}, []);
 
@@ -284,16 +251,12 @@ export function ScriptsEditor({
 	}, []);
 
 	const handleFileDropSetup = useCallback((id: string, content: string) => {
-		setSetupScripts((prev) =>
-			prev.map((s) => (s.id === id ? { ...s, content } : s)),
-		);
+		setSetupScripts((prev) => prev.map((s) => (s.id === id ? { ...s, content } : s)));
 		setHasChanges(true);
 	}, []);
 
 	const handleFileDropTeardown = useCallback((id: string, content: string) => {
-		setTeardownScripts((prev) =>
-			prev.map((s) => (s.id === id ? { ...s, content } : s)),
-		);
+		setTeardownScripts((prev) => prev.map((s) => (s.id === id ? { ...s, content } : s)));
 		setHasChanges(true);
 	}, []);
 
@@ -303,10 +266,7 @@ export function ScriptsEditor({
 				filters: [{ name: "Scripts", extensions: ["sh", "bash", "zsh"] }],
 			});
 			if (result && typeof result === "string") {
-				const content = await window.ipcRenderer.invoke(
-					"read-script-file",
-					result,
-				);
+				const content = await window.ipcRenderer.invoke("read-script-file", result);
 				if (content && typeof content === "string") {
 					setSetupScripts((prev) => [...prev, { id: generateId(), content }]);
 					setHasChanges(true);
@@ -323,15 +283,9 @@ export function ScriptsEditor({
 				filters: [{ name: "Scripts", extensions: ["sh", "bash", "zsh"] }],
 			});
 			if (result && typeof result === "string") {
-				const content = await window.ipcRenderer.invoke(
-					"read-script-file",
-					result,
-				);
+				const content = await window.ipcRenderer.invoke("read-script-file", result);
 				if (content && typeof content === "string") {
-					setTeardownScripts((prev) => [
-						...prev,
-						{ id: generateId(), content },
-					]);
+					setTeardownScripts((prev) => [...prev, { id: generateId(), content }]);
 					setHasChanges(true);
 				}
 			}
@@ -341,12 +295,8 @@ export function ScriptsEditor({
 	}, []);
 
 	const handleSave = useCallback(() => {
-		const setup = setupScripts
-			.map((s) => s.content.trim())
-			.filter((s) => s.length > 0);
-		const teardown = teardownScripts
-			.map((s) => s.content.trim())
-			.filter((s) => s.length > 0);
+		const setup = setupScripts.map((s) => s.content.trim()).filter((s) => s.length > 0);
+		const teardown = teardownScripts.map((s) => s.content.trim()).filter((s) => s.length > 0);
 
 		updateConfigMutation.mutate({ repositoryId, setup, teardown });
 	}, [repositoryId, setupScripts, teardownScripts, updateConfigMutation]);
@@ -373,21 +323,12 @@ export function ScriptsEditor({
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleLearnMore}
-						className="gap-1.5"
-					>
+					<Button variant="outline" size="sm" onClick={handleLearnMore} className="gap-1.5">
 						Learn more
 						<HiArrowTopRightOnSquare className="h-3.5 w-3.5" />
 					</Button>
 					{hasChanges && (
-						<Button
-							size="sm"
-							onClick={handleSave}
-							disabled={updateConfigMutation.isPending}
-						>
+						<Button size="sm" onClick={handleSave} disabled={updateConfigMutation.isPending}>
 							{updateConfigMutation.isPending ? "Saving..." : "Save Changes"}
 						</Button>
 					)}

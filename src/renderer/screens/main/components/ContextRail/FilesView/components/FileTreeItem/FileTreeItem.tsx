@@ -1,13 +1,5 @@
 import type { ItemInstance } from "@headless-tree/core";
 import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
-import { cn } from "ui/lib/utils";
-import {
 	LuChevronDown,
 	LuChevronRight,
 	LuClipboard,
@@ -20,6 +12,14 @@ import {
 	LuTrash2,
 } from "react-icons/lu";
 import type { DirectoryEntry } from "shared/file-tree-types";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
+import { cn } from "ui/lib/utils";
 import { usePathActions } from "../../../ChangesView/hooks";
 import { getFileIcon } from "../../utils";
 
@@ -59,12 +59,11 @@ export function FileTreeItem({
 		? entry.path
 		: entry.path.split("/").slice(0, -1).join("/") || worktreePath;
 
-	const { copyPath, copyRelativePath, revealInFinder, openInEditor } =
-		usePathActions({
-			absolutePath: entry.path,
-			relativePath: entry.relativePath,
-			cwd: worktreePath,
-		});
+	const { copyPath, copyRelativePath, revealInFinder, openInEditor } = usePathActions({
+		absolutePath: entry.path,
+		relativePath: entry.relativePath,
+		cwd: worktreePath,
+	});
 
 	const handleClick = (e: React.MouseEvent) => {
 		e.stopPropagation();
@@ -131,7 +130,9 @@ export function FileTreeItem({
 
 			<Icon className={cn("size-4 shrink-0 opacity-50", color)} />
 
-			<span className={cn("flex-1 min-w-0 text-xs truncate", isFolder && "font-medium")}>{entry.name}</span>
+			<span className={cn("flex-1 min-w-0 text-xs truncate", isFolder && "font-medium")}>
+				{entry.name}
+			</span>
 		</div>
 	);
 

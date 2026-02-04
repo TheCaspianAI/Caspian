@@ -2,11 +2,7 @@ import {
 	containsClearScrollbackSequence,
 	extractContentAfterClear,
 } from "../../terminal-escape-filter";
-import {
-	HistoryReader,
-	HistoryWriter,
-	truncateUtf8ToLastBytes,
-} from "../../terminal-history";
+import { HistoryReader, HistoryWriter, truncateUtf8ToLastBytes } from "../../terminal-history";
 import { MAX_HISTORY_SCROLLBACK_BYTES } from "./constants";
 import type { SessionInfo } from "./types";
 
@@ -36,23 +32,15 @@ export class HistoryManager {
 		let safeScrollback = initialScrollback;
 		if (initialScrollback !== undefined) {
 			if (typeof initialScrollback !== "string") {
-				console.warn(
-					`[HistoryManager] initialScrollback for ${paneId} is not a string, ignoring`,
-				);
+				console.warn(`[HistoryManager] initialScrollback for ${paneId} is not a string, ignoring`);
 				safeScrollback = undefined;
 			} else {
-				const initialScrollbackBytes = Buffer.byteLength(
-					initialScrollback,
-					"utf8",
-				);
+				const initialScrollbackBytes = Buffer.byteLength(initialScrollback, "utf8");
 				if (initialScrollbackBytes > MAX_HISTORY_SCROLLBACK_BYTES) {
 					console.warn(
 						`[HistoryManager] initialScrollback for ${paneId} too large (${initialScrollbackBytes} bytes), truncating to ${MAX_HISTORY_SCROLLBACK_BYTES}`,
 					);
-					safeScrollback = truncateUtf8ToLastBytes(
-						initialScrollback,
-						MAX_HISTORY_SCROLLBACK_BYTES,
-					);
+					safeScrollback = truncateUtf8ToLastBytes(initialScrollback, MAX_HISTORY_SCROLLBACK_BYTES);
 				}
 			}
 		}
@@ -69,21 +57,14 @@ export class HistoryManager {
 				writer.write(data);
 			}
 		} catch (error) {
-			console.error(
-				`[HistoryManager] Failed to init history writer for ${paneId}:`,
-				error,
-			);
+			console.error(`[HistoryManager] Failed to init history writer for ${paneId}:`, error);
 		} finally {
 			this.historyInitializing.delete(paneId);
 			this.pendingHistoryData.delete(paneId);
 		}
 	}
 
-	writeToHistory(
-		paneId: string,
-		data: string,
-		getSession: () => SessionInfo | undefined,
-	): void {
+	writeToHistory(paneId: string, data: string, getSession: () => SessionInfo | undefined): void {
 		if (this.historyInitializing.has(paneId)) {
 			const buffer = this.pendingHistoryData.get(paneId);
 			if (buffer) {
@@ -101,10 +82,7 @@ export class HistoryManager {
 			const session = getSession();
 			if (session) {
 				writer.close().catch((error) => {
-					console.warn(
-						`[HistoryManager] Failed to close history writer for ${paneId}:`,
-						error,
-					);
+					console.warn(`[HistoryManager] Failed to close history writer for ${paneId}:`, error);
 				});
 				this.historyWriters.delete(paneId);
 
@@ -133,10 +111,7 @@ export class HistoryManager {
 		const writer = this.historyWriters.get(paneId);
 		if (writer) {
 			writer.close(exitCode).catch((error) => {
-				console.error(
-					`[HistoryManager] Failed to close history writer for ${paneId}:`,
-					error,
-				);
+				console.error(`[HistoryManager] Failed to close history writer for ${paneId}:`, error);
 			});
 			this.historyWriters.delete(paneId);
 		}
@@ -152,10 +127,7 @@ export class HistoryManager {
 			const reader = new HistoryReader(workspaceId, paneId);
 			await reader.cleanup();
 		} catch (error) {
-			console.error(
-				`[HistoryManager] Failed to cleanup history for ${paneId}:`,
-				error,
-			);
+			console.error(`[HistoryManager] Failed to cleanup history for ${paneId}:`, error);
 		}
 	}
 
@@ -168,10 +140,7 @@ export class HistoryManager {
 		for (const [paneId, writer] of this.historyWriters.entries()) {
 			closePromises.push(
 				writer.close().catch((error) => {
-					console.warn(
-						`[HistoryManager] Failed to close history for ${paneId}:`,
-						error,
-					);
+					console.warn(`[HistoryManager] Failed to close history for ${paneId}:`, error);
 				}),
 			);
 		}
@@ -192,10 +161,7 @@ export class HistoryManager {
 					rows: session.rows,
 					initialScrollback: undefined,
 				}).catch((error) => {
-					console.warn(
-						`[HistoryManager] Failed to reinitialize history for ${paneId}:`,
-						error,
-					);
+					console.warn(`[HistoryManager] Failed to reinitialize history for ${paneId}:`, error);
 				}),
 			);
 		}
@@ -207,10 +173,7 @@ export class HistoryManager {
 		for (const [paneId, writer] of this.historyWriters.entries()) {
 			closePromises.push(
 				writer.close().catch((error) => {
-					console.error(
-						`[HistoryManager] Failed to close history for ${paneId}:`,
-						error,
-					);
+					console.error(`[HistoryManager] Failed to close history for ${paneId}:`, error);
 				}),
 			);
 		}
@@ -223,10 +186,7 @@ export class HistoryManager {
 	async forceCloseAll(): Promise<void> {
 		for (const writer of this.historyWriters.values()) {
 			await writer.close().catch((error) => {
-				console.warn(
-					"[HistoryManager] Failed to close history writer during forceKillAll:",
-					error,
-				);
+				console.warn("[HistoryManager] Failed to close history writer during forceKillAll:", error);
 			});
 		}
 		this.historyWriters.clear();

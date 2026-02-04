@@ -6,10 +6,7 @@ const schema = z.object({
 	command: z.string(),
 });
 
-async function execute(
-	params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	const activeNodeId = ctx.getActiveNodeId();
 	if (!activeNodeId) {
 		return { success: false, error: "No active node" };

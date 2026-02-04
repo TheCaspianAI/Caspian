@@ -5,10 +5,7 @@ export function shellEscapePaths(paths: string[]): string {
 	return quote(paths);
 }
 
-export function scrollToBottom(
-	terminal: Terminal,
-	behavior: ScrollBehavior = "instant",
-): void {
+export function scrollToBottom(terminal: Terminal, behavior: ScrollBehavior = "instant"): void {
 	const viewport = terminal.element?.querySelector(".xterm-viewport");
 	if (viewport) {
 		viewport.scrollTo({

@@ -66,10 +66,7 @@ export interface AddFileViewerPaneOptions {
  */
 export interface TabsStore extends TabsState {
 	// Tab operations
-	addTab: (
-		nodeId: string,
-		options?: AddTabOptions,
-	) => { tabId: string; paneId: string };
+	addTab: (nodeId: string, options?: AddTabOptions) => { tabId: string; paneId: string };
 	addTabWithMultiplePanes: (
 		nodeId: string,
 		options: AddTabWithMultiplePanesOptions,
@@ -78,24 +75,14 @@ export interface TabsStore extends TabsState {
 	renameTab: (tabId: string, newName: string) => void;
 	setTabAutoTitle: (tabId: string, title: string) => void;
 	setActiveTab: (nodeId: string, tabId: string) => void;
-	reorderTabs: (
-		nodeId: string,
-		startIndex: number,
-		endIndex: number,
-	) => void;
+	reorderTabs: (nodeId: string, startIndex: number, endIndex: number) => void;
 	reorderTabById: (tabId: string, targetIndex: number) => void;
 	updateTabLayout: (tabId: string, layout: MosaicNode<string>) => void;
 
 	// Pane operations
 	addPane: (tabId: string, options?: AddTabOptions) => string;
-	addPanesToTab: (
-		tabId: string,
-		options: AddTabWithMultiplePanesOptions,
-	) => string[];
-	addFileViewerPane: (
-		nodeId: string,
-		options: AddFileViewerPaneOptions,
-	) => string;
+	addPanesToTab: (tabId: string, options: AddTabWithMultiplePanesOptions) => string[];
+	addFileViewerPane: (nodeId: string, options: AddFileViewerPaneOptions) => string;
 	removePane: (paneId: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
 	markPaneAsUsed: (paneId: string) => void;
@@ -105,11 +92,7 @@ export interface TabsStore extends TabsState {
 	/** Mark when a command was last completed in a terminal pane */
 	setPaneLastCompleted: (paneId: string) => void;
 	clearNodeAttentionStatus: (nodeId: string) => void;
-	updatePaneCwd: (
-		paneId: string,
-		cwd: string | null,
-		confirmed: boolean,
-	) => void;
+	updatePaneCwd: (paneId: string, cwd: string | null, confirmed: boolean) => void;
 	clearPaneInitialData: (paneId: string) => void;
 	/** Pin a file-viewer pane so it won't be replaced by new file clicks */
 	pinPane: (paneId: string) => void;

@@ -5,9 +5,7 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
  * Used when dragging folders into the sidebar
  */
 export function useOpenFromPath(
-	options?: Parameters<
-		typeof electronTrpc.repositories.openFromPath.useMutation
-	>[0],
+	options?: Parameters<typeof electronTrpc.repositories.openFromPath.useMutation>[0],
 ) {
 	const utils = electronTrpc.useUtils();
 

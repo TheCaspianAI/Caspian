@@ -8,8 +8,8 @@ import {
 	clearNodeDeletingStatus,
 	deleteNode,
 	deleteWorktreeRecord,
-	getRepository,
 	getNode,
+	getRepository,
 	getWorktree,
 	hideRepositoryIfNoNodes,
 	markNodeAsDeleting,
@@ -88,25 +88,19 @@ export const createDeleteProcedures = () => {
 					};
 				}
 
-				const worktree = node.worktreeId
-					? getWorktree(node.worktreeId)
-					: null;
+				const worktree = node.worktreeId ? getWorktree(node.worktreeId) : null;
 				const repository = getRepository(node.repositoryId);
 
 				if (worktree && repository) {
 					try {
-						const exists = await worktreeExists(
-							repository.mainRepoPath,
-							worktree.path,
-						);
+						const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 
 						if (!exists) {
 							return {
 								canDelete: true,
 								reason: null,
 								node,
-								warning:
-									"Worktree not found in git (may have been manually removed)",
+								warning: "Worktree not found in git (may have been manually removed)",
 								activeTerminalCount,
 								hasChanges: false,
 								hasUnpushedCommits: false,
@@ -150,151 +144,132 @@ export const createDeleteProcedures = () => {
 				};
 			}),
 
-		delete: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.mutation(async ({ input }) => {
-				const node = getNode(input.id);
+		delete: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+			const node = getNode(input.id);
 
-				if (!node) {
-					return { success: false, error: "Node not found" };
+			if (!node) {
+				return { success: false, error: "Node not found" };
+			}
+
+			markNodeAsDeleting(input.id);
+			updateActiveNodeIfRemoved(input.id);
+
+			// Wait for any ongoing init to complete to avoid racing git operations
+			if (nodeInitManager.isInitializing(input.id)) {
+				console.log(`[node/delete] Cancelling init for ${input.id}, waiting for completion...`);
+				nodeInitManager.cancel(input.id);
+				try {
+					await nodeInitManager.waitForInit(input.id, 30000);
+				} catch (error) {
+					// Clear deleting status so node reappears in UI
+					console.error(`[node/delete] Failed to wait for init cancellation:`, error);
+					clearNodeDeletingStatus(input.id);
+					return {
+						success: false,
+						error: "Failed to cancel node initialization. Please try again.",
+					};
 				}
+			}
 
-				markNodeAsDeleting(input.id);
-				updateActiveNodeIfRemoved(input.id);
+			// Kill all terminal processes in this node first
+			const terminalResult = await getNodeRuntimeRegistry()
+				.getForNodeId(input.id)
+				.terminal.killByWorkspaceId(input.id);
 
-				// Wait for any ongoing init to complete to avoid racing git operations
-				if (nodeInitManager.isInitializing(input.id)) {
-					console.log(
-						`[node/delete] Cancelling init for ${input.id}, waiting for completion...`,
-					);
-					nodeInitManager.cancel(input.id);
+			const repository = getRepository(node.repositoryId);
+
+			let worktree: SelectWorktree | undefined;
+
+			if (node.type === "worktree" && node.worktreeId) {
+				worktree = getWorktree(node.worktreeId);
+
+				if (worktree && repository) {
+					// Prevents racing with concurrent init operations
+					await nodeInitManager.acquireRepositoryLock(repository.id);
+
 					try {
-						await nodeInitManager.waitForInit(input.id, 30000);
-					} catch (error) {
-						// Clear deleting status so node reappears in UI
-						console.error(
-							`[node/delete] Failed to wait for init cancellation:`,
-							error,
-						);
-						clearNodeDeletingStatus(input.id);
-						return {
-							success: false,
-							error:
-								"Failed to cancel node initialization. Please try again.",
-						};
-					}
-				}
+						const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 
-				// Kill all terminal processes in this node first
-				const terminalResult = await getNodeRuntimeRegistry()
-					.getForNodeId(input.id)
-					.terminal.killByWorkspaceId(input.id);
-
-				const repository = getRepository(node.repositoryId);
-
-				let worktree: SelectWorktree | undefined;
-
-				if (node.type === "worktree" && node.worktreeId) {
-					worktree = getWorktree(node.worktreeId);
-
-					if (worktree && repository) {
-						// Prevents racing with concurrent init operations
-						await nodeInitManager.acquireRepositoryLock(repository.id);
-
-						try {
-							const exists = await worktreeExists(
+						if (exists) {
+							const teardownResult = await runTeardown(
 								repository.mainRepoPath,
 								worktree.path,
+								node.name,
+								node.customTeardownScript,
 							);
-
-							if (exists) {
-								const teardownResult = await runTeardown(
-									repository.mainRepoPath,
-									worktree.path,
-									node.name,
-									node.customTeardownScript,
-								);
-								if (!teardownResult.success) {
-									console.error(
-										`Teardown failed for node ${node.name}:`,
-										teardownResult.error,
-									);
-								}
+							if (!teardownResult.success) {
+								console.error(`Teardown failed for node ${node.name}:`, teardownResult.error);
 							}
-
-							try {
-								if (exists) {
-									await removeWorktree(repository.mainRepoPath, worktree.path);
-								} else {
-									console.warn(
-										`Worktree ${worktree.path} not found in git, skipping removal`,
-									);
-								}
-							} catch (error) {
-								const errorMessage =
-									error instanceof Error ? error.message : String(error);
-								console.error("Failed to remove worktree:", errorMessage);
-								clearNodeDeletingStatus(input.id);
-								return {
-									success: false,
-									error: `Failed to remove worktree: ${errorMessage}`,
-								};
-							}
-						} finally {
-							nodeInitManager.releaseRepositoryLock(repository.id);
 						}
+
+						try {
+							if (exists) {
+								await removeWorktree(repository.mainRepoPath, worktree.path);
+							} else {
+								console.warn(`Worktree ${worktree.path} not found in git, skipping removal`);
+							}
+						} catch (error) {
+							const errorMessage = error instanceof Error ? error.message : String(error);
+							console.error("Failed to remove worktree:", errorMessage);
+							clearNodeDeletingStatus(input.id);
+							return {
+								success: false,
+								error: `Failed to remove worktree: ${errorMessage}`,
+							};
+						}
+					} finally {
+						nodeInitManager.releaseRepositoryLock(repository.id);
 					}
 				}
+			}
 
-				deleteNode(input.id);
+			deleteNode(input.id);
 
-				if (worktree) {
-					deleteWorktreeRecord(worktree.id);
-				}
+			if (worktree) {
+				deleteWorktreeRecord(worktree.id);
+			}
 
-				if (repository) {
-					hideRepositoryIfNoNodes(node.repositoryId);
-				}
-
-				const terminalWarning =
-					terminalResult.failed > 0
-						? `${terminalResult.failed} terminal process(es) may still be running`
-						: undefined;
-
-				track("node_deleted", { node_id: input.id });
-
-				// Clear after cleanup so cancellation signals remain visible during deletion
-				nodeInitManager.clearJob(input.id);
-
-				return { success: true, terminalWarning };
-			}),
-
-		close: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.mutation(async ({ input }) => {
-				const node = getNode(input.id);
-
-				if (!node) {
-					throw new Error("Node not found");
-				}
-
-				const terminalResult = await getNodeRuntimeRegistry()
-					.getForNodeId(input.id)
-					.terminal.killByWorkspaceId(input.id);
-
-				deleteNode(input.id); // keeps worktree on disk
+			if (repository) {
 				hideRepositoryIfNoNodes(node.repositoryId);
-				updateActiveNodeIfRemoved(input.id);
+			}
 
-				const terminalWarning =
-					terminalResult.failed > 0
-						? `${terminalResult.failed} terminal process(es) may still be running`
-						: undefined;
+			const terminalWarning =
+				terminalResult.failed > 0
+					? `${terminalResult.failed} terminal process(es) may still be running`
+					: undefined;
 
-				track("node_closed", { node_id: input.id });
+			track("node_deleted", { node_id: input.id });
 
-				return { success: true, terminalWarning };
-			}),
+			// Clear after cleanup so cancellation signals remain visible during deletion
+			nodeInitManager.clearJob(input.id);
+
+			return { success: true, terminalWarning };
+		}),
+
+		close: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+			const node = getNode(input.id);
+
+			if (!node) {
+				throw new Error("Node not found");
+			}
+
+			const terminalResult = await getNodeRuntimeRegistry()
+				.getForNodeId(input.id)
+				.terminal.killByWorkspaceId(input.id);
+
+			deleteNode(input.id); // keeps worktree on disk
+			hideRepositoryIfNoNodes(node.repositoryId);
+			updateActiveNodeIfRemoved(input.id);
+
+			const terminalWarning =
+				terminalResult.failed > 0
+					? `${terminalResult.failed} terminal process(es) may still be running`
+					: undefined;
+
+			track("node_closed", { node_id: input.id });
+
+			return { success: true, terminalWarning };
+		}),
 
 		// Check if a closed worktree (no active node) can be deleted
 		canDeleteWorktree: publicProcedure
@@ -341,18 +316,14 @@ export const createDeleteProcedures = () => {
 				}
 
 				try {
-					const exists = await worktreeExists(
-						repository.mainRepoPath,
-						worktree.path,
-					);
+					const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 
 					if (!exists) {
 						return {
 							canDelete: true,
 							reason: null,
 							worktree,
-							warning:
-								"Worktree not found in git (may have been manually removed)",
+							warning: "Worktree not found in git (may have been manually removed)",
 							hasChanges: false,
 							hasUnpushedCommits: false,
 						};
@@ -402,10 +373,7 @@ export const createDeleteProcedures = () => {
 				await nodeInitManager.acquireRepositoryLock(repository.id);
 
 				try {
-					const exists = await worktreeExists(
-						repository.mainRepoPath,
-						worktree.path,
-					);
+					const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 
 					if (exists) {
 						const teardownResult = await runTeardown(
@@ -425,13 +393,10 @@ export const createDeleteProcedures = () => {
 						if (exists) {
 							await removeWorktree(repository.mainRepoPath, worktree.path);
 						} else {
-							console.warn(
-								`Worktree ${worktree.path} not found in git, skipping removal`,
-							);
+							console.warn(`Worktree ${worktree.path} not found in git, skipping removal`);
 						}
 					} catch (error) {
-						const errorMessage =
-							error instanceof Error ? error.message : String(error);
+						const errorMessage = error instanceof Error ? error.message : String(error);
 						console.error("Failed to remove worktree:", errorMessage);
 						return {
 							success: false,

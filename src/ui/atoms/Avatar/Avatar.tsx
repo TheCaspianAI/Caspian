@@ -1,5 +1,5 @@
-import { getInitials } from "shared/names";
 import { cva, type VariantProps } from "class-variance-authority";
+import { getInitials } from "shared/names";
 import {
 	Avatar as AvatarBase,
 	AvatarFallback as AvatarFallbackBase,

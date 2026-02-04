@@ -15,18 +15,12 @@ interface UseFileTreeReturn {
 	loadChildren: (nodeId: string, nodePath: string) => Promise<FileTreeNode[]>;
 }
 
-export function useFileTree({
-	worktreePath,
-}: UseFileTreeProps): UseFileTreeReturn {
+export function useFileTree({ worktreePath }: UseFileTreeProps): UseFileTreeReturn {
 	const [treeData, setTreeData] = useState<FileTreeNode[]>([]);
-	const [childrenCache, setChildrenCache] = useState<
-		Record<string, FileTreeNode[]>
-	>({});
+	const [childrenCache, setChildrenCache] = useState<Record<string, FileTreeNode[]>>({});
 
 	const { showHiddenFiles, expandedFolders } = useFileExplorerStore();
-	const currentExpandedFolders = worktreePath
-		? expandedFolders[worktreePath] || []
-		: [];
+	const currentExpandedFolders = worktreePath ? expandedFolders[worktreePath] || [] : [];
 
 	const trpcUtils = electronTrpc.useUtils();
 

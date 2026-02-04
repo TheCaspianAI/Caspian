@@ -1,14 +1,12 @@
+import { LuTerminal } from "react-icons/lu";
 import { Button } from "ui/components/ui/button";
 import { Card } from "ui/components/ui/card";
-import { LuTerminal } from "react-icons/lu";
 
 interface RestoredModeOverlayProps {
 	onStartShell: () => void;
 }
 
-export function RestoredModeOverlay({
-	onStartShell,
-}: RestoredModeOverlayProps) {
+export function RestoredModeOverlay({ onStartShell }: RestoredModeOverlayProps) {
 	return (
 		<div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
 			<Card className="gap-3 py-4 px-2">

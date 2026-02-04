@@ -1,12 +1,4 @@
 import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
-import { cn } from "ui/lib/utils";
-import {
 	LuClipboard,
 	LuCopy,
 	LuExternalLink,
@@ -17,6 +9,14 @@ import {
 	LuTrash2,
 } from "react-icons/lu";
 import type { DirectoryEntry } from "shared/file-tree-types";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
+import { cn } from "ui/lib/utils";
 import { usePathActions } from "../../../ChangesView/hooks";
 import { SEARCH_RESULT_ROW_HEIGHT } from "../../constants";
 import { getFileIcon } from "../../utils";
@@ -61,27 +61,19 @@ export function FileSearchResultItem({
 	onRename,
 	onDelete,
 }: FileSearchResultItemProps) {
-	const { icon: Icon, color } = getFileIcon(
-		entry.name,
-		entry.isDirectory,
-		false,
-	);
+	const { icon: Icon, color } = getFileIcon(entry.name, entry.isDirectory, false);
 	const folderLabel = getFolderLabel(entry.relativePath);
-	const folderLabelDisplay = truncatePathStart(
-		folderLabel,
-		PATH_LABEL_MAX_CHARS,
-	);
+	const folderLabelDisplay = truncatePathStart(folderLabel, PATH_LABEL_MAX_CHARS);
 
 	const parentPath = entry.isDirectory
 		? entry.path
 		: entry.path.split("/").slice(0, -1).join("/") || worktreePath;
 
-	const { copyPath, copyRelativePath, revealInFinder, openInEditor } =
-		usePathActions({
-			absolutePath: entry.path,
-			relativePath: entry.relativePath,
-			cwd: worktreePath,
-		});
+	const { copyPath, copyRelativePath, revealInFinder, openInEditor } = usePathActions({
+		absolutePath: entry.path,
+		relativePath: entry.relativePath,
+		cwd: worktreePath,
+	});
 
 	const handleClick = () => {
 		if (!entry.isDirectory) {
@@ -117,10 +109,7 @@ export function FileSearchResultItem({
 		>
 			<span className="flex items-center justify-center w-4 h-4 shrink-0" />
 			<div className="flex flex-col min-w-0 flex-1 gap-0.5">
-				<span
-					className="text-caption text-muted-foreground truncate"
-					title={entry.relativePath}
-				>
+				<span className="text-caption text-muted-foreground truncate" title={entry.relativePath}>
 					{folderLabelDisplay}
 				</span>
 				<div className="flex items-center gap-1 min-w-0">

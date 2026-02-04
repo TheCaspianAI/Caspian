@@ -1,23 +1,14 @@
-import { settings } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { clipboard, shell } from "electron";
+import { settings } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
-import {
-	EXTERNAL_APPS,
-	type ExternalApp,
-	getAppCommand,
-	resolvePath,
-	spawnAsync,
-} from "./helpers";
+import { EXTERNAL_APPS, type ExternalApp, getAppCommand, resolvePath, spawnAsync } from "./helpers";
 
 const ExternalAppSchema = z.enum(EXTERNAL_APPS);
 
-async function openPathInApp(
-	filePath: string,
-	app: ExternalApp,
-): Promise<void> {
+async function openPathInApp(filePath: string, app: ExternalApp): Promise<void> {
 	if (app === "finder") {
 		shell.showItemInFolder(filePath);
 		return;
@@ -42,8 +33,7 @@ export const createExternalRouter = () => {
 			try {
 				await shell.openExternal(input);
 			} catch (error) {
-				const errorMessage =
-					error instanceof Error ? error.message : "Unknown error";
+				const errorMessage = error instanceof Error ? error.message : "Unknown error";
 				console.error("[external/openUrl] Failed to open URL:", input, error);
 				throw new TRPCError({
 					code: "INTERNAL_SERVER_ERROR",
@@ -52,11 +42,9 @@ export const createExternalRouter = () => {
 			}
 		}),
 
-		openInFinder: publicProcedure
-			.input(z.string())
-			.mutation(async ({ input }) => {
-				shell.showItemInFolder(input);
-			}),
+		openInFinder: publicProcedure.input(z.string()).mutation(async ({ input }) => {
+			shell.showItemInFolder(input);
+		}),
 
 		openInApp: publicProcedure
 			.input(

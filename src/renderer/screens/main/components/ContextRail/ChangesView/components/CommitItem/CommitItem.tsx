@@ -27,9 +27,7 @@ function CommitHeader({
 }) {
 	return (
 		<>
-			<span className="text-caption font-mono text-muted-foreground shrink-0">
-				{shortHash}
-			</span>
+			<span className="text-caption font-mono text-muted-foreground shrink-0">{shortHash}</span>
 			<span className="text-label flex-1 truncate">{message}</span>
 			<span className="text-caption text-muted-foreground shrink-0">
 				{formatRelativeDate(date)}
@@ -64,11 +62,7 @@ export function CommitItem({
 			triggerClassName="mx-0.5"
 			contentClassName="ml-4 pl-1.5 border-l border-border mt-0.5 mb-0.5"
 			header={
-				<CommitHeader
-					shortHash={commit.shortHash}
-					message={commit.message}
-					date={commit.date}
-				/>
+				<CommitHeader shortHash={commit.shortHash} message={commit.message} date={commit.date} />
 			}
 		>
 			{hasFiles && (

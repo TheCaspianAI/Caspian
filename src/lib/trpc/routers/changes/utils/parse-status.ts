@@ -1,9 +1,4 @@
-import type {
-	ChangedFile,
-	CommitInfo,
-	FileStatus,
-	GitChangesStatus,
-} from "shared/changes-types";
+import type { ChangedFile, CommitInfo, FileStatus, GitChangesStatus } from "shared/changes-types";
 import type { StatusResult } from "simple-git";
 
 function mapGitStatus(gitIndex: string, gitWorking: string): FileStatus {
@@ -15,11 +10,7 @@ function mapGitStatus(gitIndex: string, gitWorking: string): FileStatus {
 	return "modified";
 }
 
-function toChangedFile(
-	path: string,
-	gitIndex: string,
-	gitWorking: string,
-): ChangedFile {
+function toChangedFile(path: string, gitIndex: string, gitWorking: string): ChangedFile {
 	return {
 		path,
 		status: mapGitStatus(gitIndex, gitWorking),
@@ -159,8 +150,7 @@ export function parseNameStatus(nameStatusOutput: string): ChangedFile[] {
 		const statusCode = parts[0];
 		if (!statusCode) continue;
 
-		const isRenameOrCopy =
-			statusCode.startsWith("R") || statusCode.startsWith("C");
+		const isRenameOrCopy = statusCode.startsWith("R") || statusCode.startsWith("C");
 		const path = isRenameOrCopy ? parts[2] : parts[1];
 		const oldPath = isRenameOrCopy ? parts[1] : undefined;
 

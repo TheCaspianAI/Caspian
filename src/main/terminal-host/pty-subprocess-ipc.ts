@@ -27,10 +27,7 @@ const EMPTY_PAYLOAD = Buffer.alloc(0);
 // PTY data is untrusted input in practice (terminal apps can emit arbitrarily).
 const MAX_FRAME_BYTES = 64 * 1024 * 1024; // 64MB
 
-export function createFrameHeader(
-	type: PtySubprocessIpcType,
-	payloadLength: number,
-): Buffer {
+export function createFrameHeader(type: PtySubprocessIpcType, payloadLength: number): Buffer {
 	const header = Buffer.allocUnsafe(HEADER_BYTES);
 	header.writeUInt8(type, 0);
 	header.writeUInt32LE(payloadLength, 1);
@@ -85,14 +82,11 @@ export class PtySubprocessFrameDecoder {
 				const payloadLength = this.header.readUInt32LE(1);
 
 				if (payloadLength > MAX_FRAME_BYTES) {
-					throw new Error(
-						`PtySubprocess IPC frame too large: ${payloadLength} bytes`,
-					);
+					throw new Error(`PtySubprocess IPC frame too large: ${payloadLength} bytes`);
 				}
 
 				this.frameType = type;
-				this.payload =
-					payloadLength > 0 ? Buffer.allocUnsafe(payloadLength) : null;
+				this.payload = payloadLength > 0 ? Buffer.allocUnsafe(payloadLength) : null;
 				this.payloadOffset = 0;
 				this.headerOffset = 0;
 

@@ -1,6 +1,6 @@
-import { repositories, nodes, worktrees } from "lib/local-db";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
+import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
@@ -19,11 +19,7 @@ function getNodesInVisualOrder(): string[] {
 		.all()
 		.sort((a, b) => (a.tabOrder ?? 0) - (b.tabOrder ?? 0));
 
-	const allNodes = localDb
-		.select()
-		.from(nodes)
-		.where(isNull(nodes.deletingAt))
-		.all();
+	const allNodes = localDb.select().from(nodes).where(isNull(nodes.deletingAt)).all();
 
 	const orderedIds: string[] = [];
 	for (const repository of activeRepositories) {
@@ -40,92 +36,82 @@ function getNodesInVisualOrder(): string[] {
 
 export const createQueryProcedures = () => {
 	return router({
-		get: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.query(async ({ input }) => {
-				const node = getNode(input.id);
-				if (!node) {
-					throw new TRPCError({
-						code: "NOT_FOUND",
-						message: `Node ${input.id} not found`,
-					});
-				}
+		get: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+			const node = getNode(input.id);
+			if (!node) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: `Node ${input.id} not found`,
+				});
+			}
 
-				const repository = localDb
-					.select()
-					.from(repositories)
-					.where(eq(repositories.id, node.repositoryId))
-					.get();
-				const worktree = node.worktreeId
-					? localDb
-							.select()
-							.from(worktrees)
-							.where(eq(worktrees.id, node.worktreeId))
-							.get()
-					: null;
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, node.repositoryId))
+				.get();
+			const worktree = node.worktreeId
+				? localDb.select().from(worktrees).where(eq(worktrees.id, node.worktreeId)).get()
+				: null;
 
-				// Detect and persist base branch for existing worktrees that don't have it
-				// We use undefined to mean "not yet attempted" and null to mean "attempted but not found"
-				let baseBranch = worktree?.baseBranch;
-				if (worktree && baseBranch === undefined && repository) {
-					// Only attempt detection if there's a remote origin
-					const hasRemote = await hasOriginRemote(repository.mainRepoPath);
-					if (hasRemote) {
-						try {
-							const defaultBranch = repository.defaultBranch || "main";
-							const detected = await detectBaseBranch(
-								worktree.path,
-								worktree.branch,
-								defaultBranch,
-							);
-							if (detected) {
-								baseBranch = detected;
-							}
-							// Persist the result (detected branch or null sentinel)
-							localDb
-								.update(worktrees)
-								.set({ baseBranch: detected ?? null })
-								.where(eq(worktrees.id, worktree.id))
-								.run();
-						} catch {
-							// Detection failed, persist null to avoid retrying
-							localDb
-								.update(worktrees)
-								.set({ baseBranch: null })
-								.where(eq(worktrees.id, worktree.id))
-								.run();
+			// Detect and persist base branch for existing worktrees that don't have it
+			// We use undefined to mean "not yet attempted" and null to mean "attempted but not found"
+			let baseBranch = worktree?.baseBranch;
+			if (worktree && baseBranch === undefined && repository) {
+				// Only attempt detection if there's a remote origin
+				const hasRemote = await hasOriginRemote(repository.mainRepoPath);
+				if (hasRemote) {
+					try {
+						const defaultBranch = repository.defaultBranch || "main";
+						const detected = await detectBaseBranch(worktree.path, worktree.branch, defaultBranch);
+						if (detected) {
+							baseBranch = detected;
 						}
-					} else {
-						// No remote - persist null to avoid retrying
+						// Persist the result (detected branch or null sentinel)
+						localDb
+							.update(worktrees)
+							.set({ baseBranch: detected ?? null })
+							.where(eq(worktrees.id, worktree.id))
+							.run();
+					} catch {
+						// Detection failed, persist null to avoid retrying
 						localDb
 							.update(worktrees)
 							.set({ baseBranch: null })
 							.where(eq(worktrees.id, worktree.id))
 							.run();
 					}
+				} else {
+					// No remote - persist null to avoid retrying
+					localDb
+						.update(worktrees)
+						.set({ baseBranch: null })
+						.where(eq(worktrees.id, worktree.id))
+						.run();
 				}
+			}
 
-				return {
-					...node,
-					type: node.type as "worktree" | "branch",
-					worktreePath: getNodePath(node) ?? "",
-					repository: repository
-						? {
-								id: repository.id,
-								name: repository.name,
-								mainRepoPath: repository.mainRepoPath,
-							}
-						: null,
-					worktree: worktree
-						? {
-								branch: worktree.branch,
-								baseBranch,
-								// Normalize to null to ensure consistent "incomplete init" detection in UI
-								gitStatus: worktree.gitStatus ?? null,
-							}
-						: null,
-				};
-			}),
+			return {
+				...node,
+				type: node.type as "worktree" | "branch",
+				worktreePath: getNodePath(node) ?? "",
+				repository: repository
+					? {
+							id: repository.id,
+							name: repository.name,
+							mainRepoPath: repository.mainRepoPath,
+						}
+					: null,
+				worktree: worktree
+					? {
+							branch: worktree.branch,
+							baseBranch,
+							// Normalize to null to ensure consistent "incomplete init" detection in UI
+							gitStatus: worktree.gitStatus ?? null,
+						}
+					: null,
+			};
+		}),
 
 		getAll: publicProcedure.query(() => {
 			return localDb
@@ -145,9 +131,7 @@ export const createQueryProcedures = () => {
 
 			// Preload all worktrees once to avoid N+1 queries in the loop below
 			const allWorktrees = localDb.select().from(worktrees).all();
-			const worktreePathMap: WorktreePathMap = new Map(
-				allWorktrees.map((wt) => [wt.id, wt.path]),
-			);
+			const worktreePathMap: WorktreePathMap = new Map(allWorktrees.map((wt) => [wt.id, wt.path]));
 
 			const groupsMap = new Map<
 				string,
@@ -184,7 +168,6 @@ export const createQueryProcedures = () => {
 						id: repository.id,
 						name: repository.name,
 						color: repository.color,
-						// biome-ignore lint/style/noNonNullAssertion: filter guarantees tabOrder is not null
 						tabOrder: repository.tabOrder!,
 						githubOwner: repository.githubOwner ?? null,
 						mainRepoPath: repository.mainRepoPath,
@@ -226,36 +209,26 @@ export const createQueryProcedures = () => {
 			);
 		}),
 
-		getPreviousNode: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.query(({ input }) => {
-				const orderedNodeIds = getNodesInVisualOrder();
-				if (orderedNodeIds.length === 0) return null;
+		getPreviousNode: publicProcedure.input(z.object({ id: z.string() })).query(({ input }) => {
+			const orderedNodeIds = getNodesInVisualOrder();
+			if (orderedNodeIds.length === 0) return null;
 
-				const currentIndex = orderedNodeIds.indexOf(input.id);
-				if (currentIndex === -1) return null;
+			const currentIndex = orderedNodeIds.indexOf(input.id);
+			if (currentIndex === -1) return null;
 
-				const prevIndex =
-					currentIndex === 0
-						? orderedNodeIds.length - 1
-						: currentIndex - 1;
-				return orderedNodeIds[prevIndex];
-			}),
+			const prevIndex = currentIndex === 0 ? orderedNodeIds.length - 1 : currentIndex - 1;
+			return orderedNodeIds[prevIndex];
+		}),
 
-		getNextNode: publicProcedure
-			.input(z.object({ id: z.string() }))
-			.query(({ input }) => {
-				const orderedNodeIds = getNodesInVisualOrder();
-				if (orderedNodeIds.length === 0) return null;
+		getNextNode: publicProcedure.input(z.object({ id: z.string() })).query(({ input }) => {
+			const orderedNodeIds = getNodesInVisualOrder();
+			if (orderedNodeIds.length === 0) return null;
 
-				const currentIndex = orderedNodeIds.indexOf(input.id);
-				if (currentIndex === -1) return null;
+			const currentIndex = orderedNodeIds.indexOf(input.id);
+			if (currentIndex === -1) return null;
 
-				const nextIndex =
-					currentIndex === orderedNodeIds.length - 1
-						? 0
-						: currentIndex + 1;
-				return orderedNodeIds[nextIndex];
-			}),
+			const nextIndex = currentIndex === orderedNodeIds.length - 1 ? 0 : currentIndex + 1;
+			return orderedNodeIds[nextIndex];
+		}),
 	});
 };

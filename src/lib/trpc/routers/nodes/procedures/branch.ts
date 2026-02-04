@@ -1,15 +1,10 @@
-import { repositories, nodes } from "lib/local-db";
 import { and, eq, isNull } from "drizzle-orm";
+import { nodes, repositories } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { getNodeRuntimeRegistry } from "main/lib/node-runtime";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import {
-	getBranchNode,
-	getNode,
-	setLastActiveNode,
-	touchNode,
-} from "../utils/db-helpers";
+import { getBranchNode, getNode, setLastActiveNode, touchNode } from "../utils/db-helpers";
 import { listBranches, safeCheckoutBranch } from "../utils/git";
 
 export const createBranchProcedures = () => {
@@ -39,12 +34,7 @@ export const createBranchProcedures = () => {
 				const repositoryNodes = localDb
 					.select()
 					.from(nodes)
-					.where(
-						and(
-							eq(nodes.repositoryId, input.repositoryId),
-							isNull(nodes.deletingAt),
-						),
-					)
+					.where(and(eq(nodes.repositoryId, input.repositoryId), isNull(nodes.deletingAt)))
 					.all();
 				const worktreeBranchMap: Record<string, string> = {};
 				for (const n of repositoryNodes) {
@@ -87,9 +77,7 @@ export const createBranchProcedures = () => {
 				await safeCheckoutBranch(repository.mainRepoPath, input.branch);
 
 				// Send newline to terminals so their prompts refresh with new branch
-				getNodeRuntimeRegistry()
-					.getForNodeId(node.id)
-					.terminal.refreshPromptsForWorkspace(node.id);
+				getNodeRuntimeRegistry().getForNodeId(node.id).terminal.refreshPromptsForWorkspace(node.id);
 
 				// Update the node - name is always the branch for branch nodes
 				touchNode(node.id, {

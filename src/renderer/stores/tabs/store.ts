@@ -42,9 +42,7 @@ const findNextTab = (state: TabsState, tabIdToClose: string): string | null => {
 	if (!tabToClose) return null;
 
 	const nodeId = tabToClose.nodeId;
-	const nodeTabs = state.tabs.filter(
-		(t) => t.nodeId === nodeId && t.id !== tabIdToClose,
-	);
+	const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId && t.id !== tabIdToClose);
 
 	if (nodeTabs.length === 0) return null;
 
@@ -58,19 +56,14 @@ const findNextTab = (state: TabsState, tabIdToClose: string): string | null => {
 	}
 
 	// Try position-based (next, then previous)
-	const allNodeTabs = state.tabs.filter(
-		(t) => t.nodeId === nodeId,
-	);
+	const allNodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
 	const currentIndex = allNodeTabs.findIndex((t) => t.id === tabIdToClose);
 
 	if (currentIndex !== -1) {
 		const nextIndex = currentIndex + 1;
 		const prevIndex = currentIndex - 1;
 
-		if (
-			nextIndex < allNodeTabs.length &&
-			allNodeTabs[nextIndex].id !== tabIdToClose
-		) {
+		if (nextIndex < allNodeTabs.length && allNodeTabs[nextIndex].id !== tabIdToClose) {
 			return allNodeTabs[nextIndex].id;
 		}
 		if (prevIndex >= 0 && allNodeTabs[prevIndex].id !== tabIdToClose) {
@@ -96,19 +89,12 @@ export const useTabsStore = create<TabsStore>()(
 				addTab: (nodeId, options?: CreatePaneOptions) => {
 					const state = get();
 
-					const { tab, pane } = createTabWithPane(
-						nodeId,
-						state.tabs,
-						options,
-					);
+					const { tab, pane } = createTabWithPane(nodeId, state.tabs, options);
 
 					const currentActiveId = state.activeTabIds[nodeId];
 					const historyStack = state.tabHistoryStacks[nodeId] || [];
 					const newHistoryStack = currentActiveId
-						? [
-								currentActiveId,
-								...historyStack.filter((id) => id !== currentActiveId),
-							]
+						? [currentActiveId, ...historyStack.filter((id) => id !== currentActiveId)]
 						: historyStack;
 
 					set({
@@ -131,25 +117,19 @@ export const useTabsStore = create<TabsStore>()(
 					return { tabId: tab.id, paneId: pane.id };
 				},
 
-				addTabWithMultiplePanes: (
-					nodeId: string,
-					options: AddTabWithMultiplePanesOptions,
-				) => {
+				addTabWithMultiplePanes: (nodeId: string, options: AddTabWithMultiplePanesOptions) => {
 					const state = get();
 					const tabId = generateId("tab");
-					const panes: ReturnType<typeof createPane>[] = options.commands.map(
-						(command) =>
-							createPane(tabId, "terminal", {
-								initialCommands: [command],
-								initialCwd: options.initialCwd,
-							}),
+					const panes: ReturnType<typeof createPane>[] = options.commands.map((command) =>
+						createPane(tabId, "terminal", {
+							initialCommands: [command],
+							initialCwd: options.initialCwd,
+						}),
 					);
 
 					const paneIds = panes.map((p) => p.id);
 					const layout = buildMultiPaneLayout(paneIds);
-					const nodeTabs = state.tabs.filter(
-						(t) => t.nodeId === nodeId,
-					);
+					const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
 
 					const tab = {
 						id: tabId,
@@ -167,10 +147,7 @@ export const useTabsStore = create<TabsStore>()(
 					const currentActiveId = state.activeTabIds[nodeId];
 					const historyStack = state.tabHistoryStacks[nodeId] || [];
 					const newHistoryStack = currentActiveId
-						? [
-								currentActiveId,
-								...historyStack.filter((id) => id !== currentActiveId),
-							]
+						? [currentActiveId, ...historyStack.filter((id) => id !== currentActiveId)]
 						: historyStack;
 
 					set({
@@ -216,9 +193,9 @@ export const useTabsStore = create<TabsStore>()(
 
 					const nodeId = tabToRemove.nodeId;
 					const newActiveTabIds = { ...state.activeTabIds };
-					const newHistoryStack = (
-						state.tabHistoryStacks[nodeId] || []
-					).filter((id) => id !== tabId);
+					const newHistoryStack = (state.tabHistoryStacks[nodeId] || []).filter(
+						(id) => id !== tabId,
+					);
 
 					if (state.activeTabIds[nodeId] === tabId) {
 						newActiveTabIds[nodeId] = findNextTab(state, tabId);
@@ -241,9 +218,7 @@ export const useTabsStore = create<TabsStore>()(
 
 				renameTab: (tabId, newName) => {
 					set((state) => ({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, userTitle: newName } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, userTitle: newName } : t)),
 					}));
 				},
 
@@ -252,9 +227,7 @@ export const useTabsStore = create<TabsStore>()(
 						const tab = state.tabs.find((t) => t.id === tabId);
 						if (!tab || tab.name === title) return state;
 						return {
-							tabs: state.tabs.map((t) =>
-								t.id === tabId ? { ...t, name: title } : t,
-							),
+							tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, name: title } : t)),
 						};
 					});
 				},
@@ -310,27 +283,16 @@ export const useTabsStore = create<TabsStore>()(
 
 				reorderTabs: (nodeId, startIndex, endIndex) => {
 					const state = get();
-					const nodeTabs = state.tabs.filter(
-						(t) => t.nodeId === nodeId,
-					);
-					const otherTabs = state.tabs.filter(
-						(t) => t.nodeId !== nodeId,
-					);
+					const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
+					const otherTabs = state.tabs.filter((t) => t.nodeId !== nodeId);
 
 					// Prevent corrupting state by splicing undefined elements
-					if (
-						startIndex < 0 ||
-						startIndex >= nodeTabs.length ||
-						!Number.isInteger(startIndex)
-					) {
+					if (startIndex < 0 || startIndex >= nodeTabs.length || !Number.isInteger(startIndex)) {
 						return;
 					}
 
 					// Prevent out-of-bounds writes that would insert undefined elements
-					const clampedEndIndex = Math.max(
-						0,
-						Math.min(endIndex, nodeTabs.length),
-					);
+					const clampedEndIndex = Math.max(0, Math.min(endIndex, nodeTabs.length));
 
 					// Avoid mutating original state array to prevent side effects elsewhere
 					const reorderedTabs = [...nodeTabs];
@@ -346,12 +308,8 @@ export const useTabsStore = create<TabsStore>()(
 					if (!tabToMove) return;
 
 					const nodeId = tabToMove.nodeId;
-					const nodeTabs = state.tabs.filter(
-						(t) => t.nodeId === nodeId,
-					);
-					const otherTabs = state.tabs.filter(
-						(t) => t.nodeId !== nodeId,
-					);
+					const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
+					const otherTabs = state.tabs.filter((t) => t.nodeId !== nodeId);
 
 					const currentIndex = nodeTabs.findIndex((t) => t.id === tabId);
 					if (currentIndex === -1) return;
@@ -379,9 +337,7 @@ export const useTabsStore = create<TabsStore>()(
 					const newPaneIds = new Set(extractPaneIdsFromLayout(layout));
 					const oldPaneIds = new Set(extractPaneIdsFromLayout(tab.layout));
 
-					const removedPaneIds = Array.from(oldPaneIds).filter(
-						(id) => !newPaneIds.has(id),
-					);
+					const removedPaneIds = Array.from(oldPaneIds).filter((id) => !newPaneIds.has(id));
 
 					const newPanes = { ...state.panes };
 					for (const paneId of removedPaneIds) {
@@ -400,10 +356,7 @@ export const useTabsStore = create<TabsStore>()(
 					// Update focused pane if it was removed
 					let newFocusedPaneIds = state.focusedPaneIds;
 					const currentFocusedPaneId = state.focusedPaneIds[tabId];
-					if (
-						currentFocusedPaneId &&
-						removedPaneIds.includes(currentFocusedPaneId)
-					) {
+					if (currentFocusedPaneId && removedPaneIds.includes(currentFocusedPaneId)) {
 						newFocusedPaneIds = {
 							...state.focusedPaneIds,
 							[tabId]: getFirstPaneId(layout),
@@ -411,9 +364,7 @@ export const useTabsStore = create<TabsStore>()(
 					}
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, layout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, layout } : t)),
 						panes: newPanes,
 						focusedPaneIds: newFocusedPaneIds,
 					});
@@ -435,9 +386,7 @@ export const useTabsStore = create<TabsStore>()(
 					};
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, layout: newLayout } : t)),
 						panes: { ...state.panes, [newPane.id]: newPane },
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -448,20 +397,16 @@ export const useTabsStore = create<TabsStore>()(
 					return newPane.id;
 				},
 
-				addPanesToTab: (
-					tabId: string,
-					options: AddTabWithMultiplePanesOptions,
-				) => {
+				addPanesToTab: (tabId: string, options: AddTabWithMultiplePanesOptions) => {
 					const state = get();
 					const tab = state.tabs.find((t) => t.id === tabId);
 					if (!tab) return [];
 
-					const panes: ReturnType<typeof createPane>[] = options.commands.map(
-						(command) =>
-							createPane(tabId, "terminal", {
-								initialCommands: [command],
-								initialCwd: options.initialCwd,
-							}),
+					const panes: ReturnType<typeof createPane>[] = options.commands.map((command) =>
+						createPane(tabId, "terminal", {
+							initialCommands: [command],
+							initialCwd: options.initialCwd,
+						}),
 					);
 
 					const paneIds = panes.map((p) => p.id);
@@ -477,9 +422,7 @@ export const useTabsStore = create<TabsStore>()(
 					}
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, layout: newLayout } : t)),
 						panes: panesRecord,
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -490,10 +433,7 @@ export const useTabsStore = create<TabsStore>()(
 					return paneIds;
 				},
 
-				addFileViewerPane: (
-					nodeId: string,
-					options: AddFileViewerPaneOptions,
-				) => {
+				addFileViewerPane: (nodeId: string, options: AddFileViewerPaneOptions) => {
 					const state = get();
 
 					// If forceNewTab is true, always create a new tab
@@ -503,12 +443,9 @@ export const useTabsStore = create<TabsStore>()(
 							...options,
 							isPinned: true, // Files opened in new tabs should be pinned
 						});
-						const fileName =
-							options.filePath.split("/").pop() || options.filePath;
+						const fileName = options.filePath.split("/").pop() || options.filePath;
 						set((s) => ({
-							tabs: s.tabs.map((t) =>
-								t.id === tabId ? { ...t, name: fileName } : t,
-							),
+							tabs: s.tabs.map((t) => (t.id === tabId ? { ...t, name: fileName } : t)),
 							panes: {
 								...s.panes,
 								[paneId]: {
@@ -575,12 +512,7 @@ export const useTabsStore = create<TabsStore>()(
 					// Look for an existing unpinned (preview) file-viewer pane in the active tab
 					const fileViewerPanes = tabPaneIds
 						.map((id) => state.panes[id])
-						.filter(
-							(p) =>
-								p?.type === "file-viewer" &&
-								p.fileViewer &&
-								!p.fileViewer.isPinned,
-						);
+						.filter((p) => p?.type === "file-viewer" && p.fileViewer && !p.fileViewer.isPinned);
 
 					// If we found an unpinned (preview) file-viewer pane, reuse it
 					if (fileViewerPanes.length > 0) {
@@ -598,10 +530,7 @@ export const useTabsStore = create<TabsStore>()(
 							existingFileViewer.commitHash === options.commitHash;
 
 						if (isSameFile) {
-							if (
-								options.viewMode &&
-								existingFileViewer.viewMode !== options.viewMode
-							) {
+							if (options.viewMode && existingFileViewer.viewMode !== options.viewMode) {
 								set({
 									panes: {
 										...state.panes,
@@ -630,8 +559,7 @@ export const useTabsStore = create<TabsStore>()(
 						}
 
 						// Different file - replace the preview pane content
-						const fileName =
-							options.filePath.split("/").pop() || options.filePath;
+						const fileName = options.filePath.split("/").pop() || options.filePath;
 
 						const viewMode = resolveFileViewerMode({
 							filePath: options.filePath,
@@ -678,9 +606,7 @@ export const useTabsStore = create<TabsStore>()(
 					};
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === activeTab.id ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === activeTab.id ? { ...t, layout: newLayout } : t)),
 						panes: { ...state.panes, [newPane.id]: newPane },
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -732,9 +658,7 @@ export const useTabsStore = create<TabsStore>()(
 					}
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tab.id ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tab.id ? { ...t, layout: newLayout } : t)),
 						panes: newPanes,
 						focusedPaneIds: newFocusedPaneIds,
 					});
@@ -807,12 +731,8 @@ export const useTabsStore = create<TabsStore>()(
 
 				clearNodeAttentionStatus: (nodeId) => {
 					const state = get();
-					const nodeTabs = state.tabs.filter(
-						(t) => t.nodeId === nodeId,
-					);
-					const nodePaneIds = nodeTabs.flatMap((t) =>
-						extractPaneIdsFromLayout(t.layout),
-					);
+					const nodeTabs = state.tabs.filter((t) => t.nodeId === nodeId);
+					const nodePaneIds = nodeTabs.flatMap((t) => extractPaneIdsFromLayout(t.layout));
 
 					if (nodePaneIds.length === 0) {
 						return;
@@ -863,10 +783,7 @@ export const useTabsStore = create<TabsStore>()(
 					set((state) => {
 						const pane = state.panes[paneId];
 						if (!pane) return state;
-						if (
-							pane.initialCommands === undefined &&
-							pane.initialCwd === undefined
-						) {
+						if (pane.initialCommands === undefined && pane.initialCwd === undefined) {
 							return state;
 						}
 						return {
@@ -941,9 +858,7 @@ export const useTabsStore = create<TabsStore>()(
 					}
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, layout: newLayout } : t)),
 						panes: { ...state.panes, [newPane.id]: newPane },
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -990,9 +905,7 @@ export const useTabsStore = create<TabsStore>()(
 					}
 
 					set({
-						tabs: state.tabs.map((t) =>
-							t.id === tabId ? { ...t, layout: newLayout } : t,
-						),
+						tabs: state.tabs.map((t) => (t.id === tabId ? { ...t, layout: newLayout } : t)),
 						panes: { ...state.panes, [newPane.id]: newPane },
 						focusedPaneIds: {
 							...state.focusedPaneIds,
@@ -1065,14 +978,10 @@ export const useTabsStore = create<TabsStore>()(
 					const state = get();
 
 					// Check if kanban tab already exists for this node
-					const existingKanbanPane = Object.values(state.panes).find(
-						(p) => p.type === "kanban",
-					);
+					const existingKanbanPane = Object.values(state.panes).find((p) => p.type === "kanban");
 
 					if (existingKanbanPane) {
-						const existingTab = state.tabs.find(
-							(t) => t.id === existingKanbanPane.tabId,
-						);
+						const existingTab = state.tabs.find((t) => t.id === existingKanbanPane.tabId);
 						if (existingTab && existingTab.nodeId === nodeId) {
 							// Activate existing tab
 							set({
@@ -1100,10 +1009,7 @@ export const useTabsStore = create<TabsStore>()(
 					const currentActiveId = state.activeTabIds[nodeId];
 					const historyStack = state.tabHistoryStacks[nodeId] || [];
 					const newHistoryStack = currentActiveId
-						? [
-								currentActiveId,
-								...historyStack.filter((id) => id !== currentActiveId),
-							]
+						? [currentActiveId, ...historyStack.filter((id) => id !== currentActiveId)]
 						: historyStack;
 
 					set({
@@ -1208,9 +1114,7 @@ export const useTabsStore = create<TabsStore>()(
 						const nodeTabIds = nodeTabIdSets.get(nodeId);
 						const history = nextHistoryStacks[nodeId] ?? [];
 						if (nodeTabIds && Array.isArray(history)) {
-							nextHistoryStacks[nodeId] = history.filter((id) =>
-								nodeTabIds.has(id),
-							);
+							nextHistoryStacks[nodeId] = history.filter((id) => nodeTabIds.has(id));
 						}
 					}
 

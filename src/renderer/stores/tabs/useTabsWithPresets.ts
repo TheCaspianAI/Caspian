@@ -14,9 +14,7 @@ export function useTabsWithPresets() {
 	const { defaultPreset } = usePresets();
 
 	const storeAddTab = useTabsStore((s) => s.addTab);
-	const storeAddTabWithMultiplePanes = useTabsStore(
-		(s) => s.addTabWithMultiplePanes,
-	);
+	const storeAddTabWithMultiplePanes = useTabsStore((s) => s.addTabWithMultiplePanes);
 	const storeAddPane = useTabsStore((s) => s.addPane);
 	const storeSplitPaneVertical = useTabsStore((s) => s.splitPaneVertical);
 	const storeSplitPaneHorizontal = useTabsStore((s) => s.splitPaneHorizontal);
@@ -32,10 +30,7 @@ export function useTabsWithPresets() {
 	}, [defaultPreset]);
 
 	const shouldUseParallelMode = useMemo(() => {
-		return (
-			defaultPreset?.executionMode === "parallel" &&
-			defaultPreset.commands.length > 1
-		);
+		return defaultPreset?.executionMode === "parallel" && defaultPreset.commands.length > 1;
 	}, [defaultPreset]);
 
 	const addTab = useCallback(
@@ -84,37 +79,17 @@ export function useTabsWithPresets() {
 	);
 
 	const splitPaneVertical = useCallback(
-		(
-			tabId: string,
-			sourcePaneId: string,
-			path?: MosaicBranch[],
-			options?: AddTabOptions,
-		) => {
+		(tabId: string, sourcePaneId: string, path?: MosaicBranch[], options?: AddTabOptions) => {
 			const effectiveOptions = options ?? defaultPresetOptions;
-			return storeSplitPaneVertical(
-				tabId,
-				sourcePaneId,
-				path,
-				effectiveOptions,
-			);
+			return storeSplitPaneVertical(tabId, sourcePaneId, path, effectiveOptions);
 		},
 		[storeSplitPaneVertical, defaultPresetOptions],
 	);
 
 	const splitPaneHorizontal = useCallback(
-		(
-			tabId: string,
-			sourcePaneId: string,
-			path?: MosaicBranch[],
-			options?: AddTabOptions,
-		) => {
+		(tabId: string, sourcePaneId: string, path?: MosaicBranch[], options?: AddTabOptions) => {
 			const effectiveOptions = options ?? defaultPresetOptions;
-			return storeSplitPaneHorizontal(
-				tabId,
-				sourcePaneId,
-				path,
-				effectiveOptions,
-			);
+			return storeSplitPaneHorizontal(tabId, sourcePaneId, path, effectiveOptions);
 		},
 		[storeSplitPaneHorizontal, defaultPresetOptions],
 	);
@@ -128,21 +103,14 @@ export function useTabsWithPresets() {
 			options?: AddTabOptions,
 		) => {
 			const effectiveOptions = options ?? defaultPresetOptions;
-			return storeSplitPaneAuto(
-				tabId,
-				sourcePaneId,
-				dimensions,
-				path,
-				effectiveOptions,
-			);
+			return storeSplitPaneAuto(tabId, sourcePaneId, dimensions, path, effectiveOptions);
 		},
 		[storeSplitPaneAuto, defaultPresetOptions],
 	);
 
 	const openPreset = useCallback(
 		(workspaceId: string, preset: TerminalPreset) => {
-			const isParallel =
-				preset.executionMode === "parallel" && preset.commands.length > 1;
+			const isParallel = preset.executionMode === "parallel" && preset.commands.length > 1;
 
 			const { tabId } = isParallel
 				? storeAddTabWithMultiplePanes(workspaceId, {

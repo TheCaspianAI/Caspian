@@ -1,8 +1,8 @@
-import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useCallback, useState } from "react";
 import { HiChevronRight, HiFolder, HiFolderOpen } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
+import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 interface DirectoryNavigatorProps {
 	paneId: string;
@@ -10,11 +10,7 @@ interface DirectoryNavigatorProps {
 	cwdConfirmed?: boolean;
 }
 
-export function DirectoryNavigator({
-	paneId,
-	currentCwd,
-	cwdConfirmed,
-}: DirectoryNavigatorProps) {
+export function DirectoryNavigator({ paneId, currentCwd, cwdConfirmed }: DirectoryNavigatorProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [browsePath, setBrowsePath] = useState<string | null>(null);
 
@@ -25,11 +21,10 @@ export function DirectoryNavigator({
 	const hasCwd = !!currentCwd;
 	const displayPath = browsePath || currentCwd;
 
-	const { data: directoryData, isLoading } =
-		electronTrpc.terminal.listDirectory.useQuery(
-			{ dirPath: displayPath || "/" },
-			{ enabled: isOpen && hasCwd && !!displayPath },
-		);
+	const { data: directoryData, isLoading } = electronTrpc.terminal.listDirectory.useQuery(
+		{ dirPath: displayPath || "/" },
+		{ enabled: isOpen && hasCwd && !!displayPath },
+	);
 
 	const handleOpen = useCallback(
 		(open: boolean) => {
@@ -74,15 +69,12 @@ export function DirectoryNavigator({
 		const normalizedHomeDir = homeDir?.replace(/\/$/, "");
 		// Path is in home only if it equals homeDir or starts with homeDir + "/"
 		const isInHome =
-			normalizedHomeDir &&
-			(path === normalizedHomeDir || path.startsWith(`${normalizedHomeDir}/`));
+			normalizedHomeDir && (path === normalizedHomeDir || path.startsWith(`${normalizedHomeDir}/`));
 
 		if (isInHome && normalizedHomeDir) {
 			// If path equals homeDir, relativePath is empty; otherwise slice after the "/"
 			const relativePath =
-				path === normalizedHomeDir
-					? ""
-					: path.slice(normalizedHomeDir.length + 1);
+				path === normalizedHomeDir ? "" : path.slice(normalizedHomeDir.length + 1);
 			const segments = relativePath.split("/").filter(Boolean);
 			return [
 				{ name: "~", path: normalizedHomeDir },
@@ -104,8 +96,7 @@ export function DirectoryNavigator({
 	};
 
 	// Show directory name only if confirmed by OSC-7, otherwise show "Terminal"
-	const buttonLabel =
-		cwdConfirmed && currentCwd ? getBasename(currentCwd) : "Terminal";
+	const buttonLabel = cwdConfirmed && currentCwd ? getBasename(currentCwd) : "Terminal";
 
 	// When no cwd at all, show non-interactive display
 	if (!hasCwd) {
@@ -118,8 +109,7 @@ export function DirectoryNavigator({
 	}
 
 	const pathSegments = displayPath ? getPathSegments(displayPath) : [];
-	const directories =
-		directoryData?.items?.filter((item) => item.isDirectory) || [];
+	const directories = directoryData?.items?.filter((item) => item.isDirectory) || [];
 
 	return (
 		<Popover open={isOpen} onOpenChange={handleOpen}>
@@ -129,9 +119,7 @@ export function DirectoryNavigator({
 					className="flex min-w-0 items-center gap-1.5 rounded px-1 -ml-1 hover:bg-accent/50 transition-colors"
 				>
 					<HiFolder className="size-3.5 shrink-0 text-muted-foreground/70" />
-					<span
-						className={`truncate text-sm ${!cwdConfirmed ? "text-muted-foreground" : ""}`}
-					>
+					<span className={`truncate text-sm ${!cwdConfirmed ? "text-muted-foreground" : ""}`}>
 						{buttonLabel}
 					</span>
 				</button>
@@ -145,9 +133,7 @@ export function DirectoryNavigator({
 				<div className="flex items-center gap-0.5 border-b border-border px-2 py-1.5 overflow-x-auto hide-scrollbar">
 					{pathSegments.map((segment, idx) => (
 						<div key={segment.path} className="flex items-center shrink-0">
-							{idx > 0 && (
-								<HiChevronRight className="size-3 text-muted-foreground/50 mx-0.5" />
-							)}
+							{idx > 0 && <HiChevronRight className="size-3 text-muted-foreground/50 mx-0.5" />}
 							<button
 								type="button"
 								onClick={() => handleBrowseDir(segment.path)}
@@ -174,9 +160,7 @@ export function DirectoryNavigator({
 					)}
 
 					{isLoading ? (
-						<div className="px-2 py-3 text-sm text-muted-foreground text-center">
-							Loading...
-						</div>
+						<div className="px-2 py-3 text-sm text-muted-foreground text-center">Loading...</div>
 					) : directories.length === 0 ? (
 						<div className="px-2 py-3 text-sm text-muted-foreground text-center">
 							No subdirectories

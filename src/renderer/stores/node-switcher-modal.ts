@@ -8,33 +8,30 @@ interface NodeSwitcherModalState {
 	toggleModal: () => void;
 }
 
-export const useNodeSwitcherModalStore =
-	create<NodeSwitcherModalState>()(
-		devtools(
-			(set) => ({
-				isOpen: false,
+export const useNodeSwitcherModalStore = create<NodeSwitcherModalState>()(
+	devtools(
+		(set) => ({
+			isOpen: false,
 
-				openModal: () => {
-					set({ isOpen: true });
-				},
+			openModal: () => {
+				set({ isOpen: true });
+			},
 
-				closeModal: () => {
-					set({ isOpen: false });
-				},
+			closeModal: () => {
+				set({ isOpen: false });
+			},
 
-				toggleModal: () => {
-					set((state) => ({ isOpen: !state.isOpen }));
-				},
-			}),
-			{ name: "NodeSwitcherModalStore" },
-		),
-	);
+			toggleModal: () => {
+				set((state) => ({ isOpen: !state.isOpen }));
+			},
+		}),
+		{ name: "NodeSwitcherModalStore" },
+	),
+);
 
 // Convenience hooks
-export const useNodeSwitcherModalOpen = () =>
-	useNodeSwitcherModalStore((state) => state.isOpen);
-export const useOpenNodeSwitcherModal = () =>
-	useNodeSwitcherModalStore((state) => state.openModal);
+export const useNodeSwitcherModalOpen = () => useNodeSwitcherModalStore((state) => state.isOpen);
+export const useOpenNodeSwitcherModal = () => useNodeSwitcherModalStore((state) => state.openModal);
 export const useCloseNodeSwitcherModal = () =>
 	useNodeSwitcherModalStore((state) => state.closeModal);
 export const useToggleNodeSwitcherModal = () =>

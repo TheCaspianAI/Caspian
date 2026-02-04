@@ -1,11 +1,7 @@
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "ui/components/ui/collapsible";
-import { cn } from "ui/lib/utils";
 import type { ReactNode } from "react";
 import { HiChevronRight } from "react-icons/hi2";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
+import { cn } from "ui/lib/utils";
 
 interface CategorySectionProps {
 	title: string;
@@ -29,11 +25,7 @@ export function CategorySection({
 	}
 
 	return (
-		<Collapsible
-			open={isExpanded}
-			onOpenChange={onToggle}
-			className="min-w-0 overflow-hidden"
-		>
+		<Collapsible open={isExpanded} onOpenChange={onToggle} className="min-w-0 overflow-hidden">
 			<div className="group flex items-center min-w-0">
 				<CollapsibleTrigger
 					className={cn(
@@ -48,9 +40,7 @@ export function CategorySection({
 						)}
 					/>
 					<span className="text-label font-medium truncate">{title}</span>
-					<span className="text-caption text-muted-foreground shrink-0">
-						{count}
-					</span>
+					<span className="text-caption text-muted-foreground shrink-0">{count}</span>
 				</CollapsibleTrigger>
 				{actions && <div className="pr-1.5 shrink-0">{actions}</div>}
 			</div>

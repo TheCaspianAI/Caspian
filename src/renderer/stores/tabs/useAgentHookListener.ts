@@ -69,9 +69,7 @@ export function useAgentHookListener() {
 				} else if (eventType === "Stop") {
 					const activeTabId = state.activeTabIds[nodeId];
 					const pane = state.panes[paneId];
-					const isInActiveTab =
-						currentNodeIdRef.current === nodeId &&
-						pane?.tabId === activeTabId;
+					const isInActiveTab = currentNodeIdRef.current === nodeId && pane?.tabId === activeTabId;
 
 					debugLog("agent-hooks", "Stop event:", {
 						isInActiveTab,
@@ -87,10 +85,7 @@ export function useAgentHookListener() {
 				// Clear transient status for unmounted panes (mounted panes handle this via stream subscription)
 				if (!paneId) return;
 				const currentPane = state.panes[paneId];
-				if (
-					currentPane?.status === "working" ||
-					currentPane?.status === "permission"
-				) {
+				if (currentPane?.status === "working" || currentPane?.status === "permission") {
 					state.setPaneStatus(paneId, "idle");
 				}
 			} else if (event.type === NOTIFICATION_EVENTS.FOCUS_TAB) {

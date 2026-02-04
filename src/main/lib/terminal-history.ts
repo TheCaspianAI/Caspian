@@ -30,10 +30,7 @@ function isUtf8ContinuationByte(value: number): boolean {
 	return (value & 0b1100_0000) === 0b1000_0000;
 }
 
-export function truncateUtf8ToLastBytes(
-	input: string,
-	maxBytes: number,
-): string {
+export function truncateUtf8ToLastBytes(input: string, maxBytes: number): string {
 	if (maxBytes <= 0) return "";
 
 	const buffer = Buffer.from(input, "utf8");
@@ -75,9 +72,7 @@ function assertSafeIdSegment(label: string, value: string): void {
 		throw new Error(`[terminal-history] ${label} must be non-empty`);
 	}
 	if (value.includes("/") || value.includes("\\") || value.includes("..")) {
-		throw new Error(
-			`[terminal-history] ${label} contains invalid path characters`,
-		);
+		throw new Error(`[terminal-history] ${label} contains invalid path characters`);
 	}
 }
 
@@ -167,10 +162,7 @@ export class HistoryWriter {
 			// Ensure initial scrollback doesn't exceed our per-session cap.
 			const initialBytes = Buffer.byteLength(initialScrollback, "utf8");
 			if (initialBytes > MAX_HISTORY_BYTES) {
-				const truncated = truncateUtf8ToLastBytes(
-					initialScrollback,
-					MAX_HISTORY_BYTES,
-				);
+				const truncated = truncateUtf8ToLastBytes(initialScrollback, MAX_HISTORY_BYTES);
 				await fs.writeFile(this.scrollbackPath, truncated, {
 					encoding: "utf8",
 					mode: HISTORY_FILE_MODE,
@@ -200,10 +192,7 @@ export class HistoryWriter {
 			mode: HISTORY_FILE_MODE,
 		});
 		this.stream.on("error", (error) => {
-			console.error(
-				`[HistoryWriter] Stream error for ${this.paneId}:`,
-				error.message,
-			);
+			console.error(`[HistoryWriter] Stream error for ${this.paneId}:`, error.message);
 			this.streamErrored = true;
 			this.stream = null;
 			this.pendingWrites = [];
@@ -338,23 +327,15 @@ export class HistoryWriter {
 		this.closed = true;
 
 		// Best-effort: flush any pending backlog before closing.
-		while (
-			!this.streamErrored &&
-			this.stream &&
-			this.pendingWrites.length > 0
-		) {
+		while (!this.streamErrored && this.stream && this.pendingWrites.length > 0) {
 			this.flushPendingWrites();
 			if (this.isBackpressured) {
 				const stream = this.stream;
 				if (!stream) break;
 
 				const drained = await Promise.race([
-					new Promise<boolean>((resolve) =>
-						stream.once("drain", () => resolve(true)),
-					),
-					new Promise<boolean>((resolve) =>
-						setTimeout(() => resolve(false), DRAIN_TIMEOUT_MS),
-					),
+					new Promise<boolean>((resolve) => stream.once("drain", () => resolve(true))),
+					new Promise<boolean>((resolve) => setTimeout(() => resolve(false), DRAIN_TIMEOUT_MS)),
 				]);
 
 				if (!drained) {
@@ -437,22 +418,15 @@ export class HistoryWriter {
 
 		// Delete the directory
 		await fs.rm(this.dir, { recursive: true, force: true }).catch((error) => {
-			console.warn(
-				`[HistoryWriter] Failed to delete history for ${this.paneId}:`,
-				error.message,
-			);
+			console.warn(`[HistoryWriter] Failed to delete history for ${this.paneId}:`, error.message);
 		});
 	}
 
 	private async writeMetadata(): Promise<void> {
 		try {
-			await fs.writeFile(
-				this.metaPath,
-				JSON.stringify(this.metadata, null, 2),
-				{
-					mode: HISTORY_FILE_MODE,
-				},
-			);
+			await fs.writeFile(this.metaPath, JSON.stringify(this.metadata, null, 2), {
+				mode: HISTORY_FILE_MODE,
+			});
 			await fs.chmod(this.metaPath, HISTORY_FILE_MODE).catch(() => {});
 		} catch (error) {
 			console.warn(

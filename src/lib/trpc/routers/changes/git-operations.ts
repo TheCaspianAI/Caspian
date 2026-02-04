@@ -7,9 +7,7 @@ import { assertRegisteredWorktree } from "./security";
 
 export { isUpstreamMissingError };
 
-async function hasUpstreamBranch(
-	git: ReturnType<typeof simpleGit>,
-): Promise<boolean> {
+async function hasUpstreamBranch(git: ReturnType<typeof simpleGit>): Promise<boolean> {
 	try {
 		await git.raw(["rev-parse", "--abbrev-ref", "@{upstream}"]);
 		return true;
@@ -18,9 +16,7 @@ async function hasUpstreamBranch(
 	}
 }
 
-async function fetchCurrentBranch(
-	git: ReturnType<typeof simpleGit>,
-): Promise<void> {
+async function fetchCurrentBranch(git: ReturnType<typeof simpleGit>): Promise<void> {
 	const branch = (await git.revparse(["--abbrev-ref", "HEAD"])).trim();
 	await git.fetch(["origin", branch]);
 }
@@ -37,15 +33,13 @@ export const createGitOperationsRouter = () => {
 					message: z.string(),
 				}),
 			)
-			.mutation(
-				async ({ input }): Promise<{ success: boolean; hash: string }> => {
-					assertRegisteredWorktree(input.worktreePath);
+			.mutation(async ({ input }): Promise<{ success: boolean; hash: string }> => {
+				assertRegisteredWorktree(input.worktreePath);
 
-					const git = simpleGit(input.worktreePath);
-					const result = await git.commit(input.message);
-					return { success: true, hash: result.commit };
-				},
-			),
+				const git = simpleGit(input.worktreePath);
+				const result = await git.commit(input.message);
+				return { success: true, hash: result.commit };
+			}),
 
 		push: publicProcedure
 			.input(
@@ -83,8 +77,7 @@ export const createGitOperationsRouter = () => {
 				try {
 					await git.pull(["--rebase"]);
 				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : String(error);
+					const message = error instanceof Error ? error.message : String(error);
 					if (isUpstreamMissingError(message)) {
 						throw new Error(
 							"No upstream branch to pull from. The remote branch may have been deleted.",
@@ -108,8 +101,7 @@ export const createGitOperationsRouter = () => {
 				try {
 					await git.pull(["--rebase"]);
 				} catch (error) {
-					const message =
-						error instanceof Error ? error.message : String(error);
+					const message = error instanceof Error ? error.message : String(error);
 					if (isUpstreamMissingError(message)) {
 						const branch = await git.revparse(["--abbrev-ref", "HEAD"]);
 						await git.push(["--set-upstream", "origin", branch.trim()]);
@@ -138,40 +130,36 @@ export const createGitOperationsRouter = () => {
 					worktreePath: z.string(),
 				}),
 			)
-			.mutation(
-				async ({ input }): Promise<{ success: boolean; url: string }> => {
-					assertRegisteredWorktree(input.worktreePath);
+			.mutation(async ({ input }): Promise<{ success: boolean; url: string }> => {
+				assertRegisteredWorktree(input.worktreePath);
 
-					const git = simpleGit(input.worktreePath);
-					const branch = (await git.revparse(["--abbrev-ref", "HEAD"])).trim();
-					const hasUpstream = await hasUpstreamBranch(git);
+				const git = simpleGit(input.worktreePath);
+				const branch = (await git.revparse(["--abbrev-ref", "HEAD"])).trim();
+				const hasUpstream = await hasUpstreamBranch(git);
 
-					// Ensure branch is pushed first
-					if (!hasUpstream) {
-						await git.push(["--set-upstream", "origin", branch]);
-					} else {
-						// Push any unpushed commits
-						await git.push();
-					}
+				// Ensure branch is pushed first
+				if (!hasUpstream) {
+					await git.push(["--set-upstream", "origin", branch]);
+				} else {
+					// Push any unpushed commits
+					await git.push();
+				}
 
-					// Get the remote URL to construct the GitHub compare URL
-					const remoteUrl = (await git.remote(["get-url", "origin"])) || "";
-					const repoMatch = remoteUrl
-						.trim()
-						.match(/github\.com[:/](.+?)(?:\.git)?$/);
+				// Get the remote URL to construct the GitHub compare URL
+				const remoteUrl = (await git.remote(["get-url", "origin"])) || "";
+				const repoMatch = remoteUrl.trim().match(/github\.com[:/](.+?)(?:\.git)?$/);
 
-					if (!repoMatch) {
-						throw new Error("Could not determine GitHub repository URL");
-					}
+				if (!repoMatch) {
+					throw new Error("Could not determine GitHub repository URL");
+				}
 
-					const repo = repoMatch[1].replace(/\.git$/, "");
-					const url = `https://github.com/${repo}/compare/${branch}?expand=1`;
+				const repo = repoMatch[1].replace(/\.git$/, "");
+				const url = `https://github.com/${repo}/compare/${branch}?expand=1`;
 
-					await shell.openExternal(url);
-					await fetchCurrentBranch(git);
+				await shell.openExternal(url);
+				await fetchCurrentBranch(git);
 
-					return { success: true, url };
-				},
-			),
+				return { success: true, url };
+			}),
 	});
 };

@@ -17,23 +17,18 @@ export interface UseTerminalConnectionOptions {
  * NOTE: Stream subscription is intentionally NOT included here because it needs
  * direct access to xterm refs for event handling. Keep that in the component.
  */
-export function useTerminalConnection({
-	nodeId,
-}: UseTerminalConnectionOptions) {
+export function useTerminalConnection({ nodeId }: UseTerminalConnectionOptions) {
 	const [connectionError, setConnectionError] = useState<string | null>(null);
 
 	// tRPC mutations
-	const createOrAttachMutation =
-		electronTrpc.terminal.createOrAttach.useMutation();
+	const createOrAttachMutation = electronTrpc.terminal.createOrAttach.useMutation();
 	const writeMutation = electronTrpc.terminal.write.useMutation();
 	const resizeMutation = electronTrpc.terminal.resize.useMutation();
 	const detachMutation = electronTrpc.terminal.detach.useMutation();
-	const clearScrollbackMutation =
-		electronTrpc.terminal.clearScrollback.useMutation();
+	const clearScrollbackMutation = electronTrpc.terminal.clearScrollback.useMutation();
 
 	// Query for node cwd
-	const { data: nodeCwd } =
-		electronTrpc.terminal.getNodeCwd.useQuery(nodeId);
+	const { data: nodeCwd } = electronTrpc.terminal.getNodeCwd.useQuery(nodeId);
 
 	// Stable refs to mutation functions - these don't change identity on re-render
 	const createOrAttachRef = useRef(createOrAttachMutation.mutate);

@@ -1,16 +1,12 @@
-import { repositories, type SelectNode, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
+import { repositories, type SelectNode, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 
 /**
  * Gets the worktree path for a node by worktreeId
  */
 export function getWorktreePath(worktreeId: string): string | undefined {
-	const worktree = localDb
-		.select()
-		.from(worktrees)
-		.where(eq(worktrees.id, worktreeId))
-		.get();
+	const worktree = localDb.select().from(worktrees).where(eq(worktrees.id, worktreeId)).get();
 	return worktree?.path;
 }
 

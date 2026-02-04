@@ -94,8 +94,7 @@
 	font-style: italic;
 	margin: 1.5rem 0;
 	padding-left: 1.5rem;
-	border-left: 3px solid
-		color-mix(in oklch, var(--muted-foreground), transparent 70%);
+	border-left: 3px solid color-mix(in oklch, var(--muted-foreground), transparent 70%);
 }
 
 /* Lists */
@@ -122,11 +121,7 @@
 .tufte-markdown a {
 	color: var(--foreground);
 	text-decoration: underline;
-	text-decoration-color: color-mix(
-		in oklch,
-		var(--muted-foreground),
-		transparent 50%
-	);
+	text-decoration-color: color-mix(in oklch, var(--muted-foreground), transparent 50%);
 	text-underline-offset: 3px;
 	transition: text-decoration-color 0.15s ease;
 }
@@ -154,15 +149,13 @@
 .tufte-markdown th {
 	text-align: left;
 	padding: 0.5rem 1rem;
-	border-bottom: 2px solid
-		color-mix(in oklch, var(--muted-foreground), transparent 70%);
+	border-bottom: 2px solid color-mix(in oklch, var(--muted-foreground), transparent 70%);
 	font-weight: 600;
 }
 
 .tufte-markdown td {
 	padding: 0.5rem 1rem;
-	border-bottom: 1px solid
-		color-mix(in oklch, var(--muted-foreground), transparent 85%);
+	border-bottom: 1px solid color-mix(in oklch, var(--muted-foreground), transparent 85%);
 }
 
 /* Code */

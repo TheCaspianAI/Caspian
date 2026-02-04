@@ -7,19 +7,8 @@ import {
 	createOpenCodeWrapper,
 } from "./agent-wrappers";
 import { createNotifyScript } from "./notify-hook";
-import {
-	BASH_DIR,
-	BIN_DIR,
-	HOOKS_DIR,
-	OPENCODE_PLUGIN_DIR,
-	ZSH_DIR,
-} from "./paths";
-import {
-	createBashWrapper,
-	createZshWrapper,
-	getShellArgs,
-	getShellEnv,
-} from "./shell-wrappers";
+import { BASH_DIR, BIN_DIR, HOOKS_DIR, OPENCODE_PLUGIN_DIR, ZSH_DIR } from "./paths";
+import { createBashWrapper, createZshWrapper, getShellArgs, getShellEnv } from "./shell-wrappers";
 
 /**
  * Sets up the ~/.caspian directory structure and agent wrappers

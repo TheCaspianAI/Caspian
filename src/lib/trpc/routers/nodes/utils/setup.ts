@@ -8,10 +8,7 @@ import type { SetupConfig } from "shared/types";
  * This handles the case where .caspian is gitignored - worktrees won't have it since git only
  * includes tracked files. By copying it, setup scripts like "./.caspian/setup.sh" will work.
  */
-export function copyCaspianConfigToWorktree(
-	mainRepoPath: string,
-	worktreePath: string,
-): void {
+export function copyCaspianConfigToWorktree(mainRepoPath: string, worktreePath: string): void {
 	const mainCaspianDir = join(mainRepoPath, REPOSITORY_CASPIAN_DIR_NAME);
 	const worktreeCaspianDir = join(worktreePath, REPOSITORY_CASPIAN_DIR_NAME);
 
@@ -28,11 +25,7 @@ export function copyCaspianConfigToWorktree(
 }
 
 export function loadSetupConfig(mainRepoPath: string): SetupConfig | null {
-	const configPath = join(
-		mainRepoPath,
-		REPOSITORY_CASPIAN_DIR_NAME,
-		CONFIG_FILE_NAME,
-	);
+	const configPath = join(mainRepoPath, REPOSITORY_CASPIAN_DIR_NAME, CONFIG_FILE_NAME);
 
 	if (!existsSync(configPath)) {
 		return null;

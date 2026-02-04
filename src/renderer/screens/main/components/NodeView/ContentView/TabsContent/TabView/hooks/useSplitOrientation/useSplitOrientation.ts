@@ -5,8 +5,7 @@ export type SplitOrientation = "vertical" | "horizontal";
 export function useSplitOrientation(
 	containerRef: RefObject<HTMLDivElement | null>,
 ): SplitOrientation {
-	const [splitOrientation, setSplitOrientation] =
-		useState<SplitOrientation>("vertical");
+	const [splitOrientation, setSplitOrientation] = useState<SplitOrientation>("vertical");
 
 	useEffect(() => {
 		const container = containerRef.current;

@@ -3,20 +3,10 @@
  */
 
 /** File status from git, matching short format codes */
-export type FileStatus =
-	| "added"
-	| "modified"
-	| "deleted"
-	| "renamed"
-	| "copied"
-	| "untracked";
+export type FileStatus = "added" | "modified" | "deleted" | "renamed" | "copied" | "untracked";
 
 /** Change categories for organizing the sidebar */
-export type ChangeCategory =
-	| "against-base"
-	| "committed"
-	| "staged"
-	| "unstaged";
+export type ChangeCategory = "against-base" | "committed" | "staged" | "unstaged";
 
 /** A changed file entry */
 export interface ChangedFile {

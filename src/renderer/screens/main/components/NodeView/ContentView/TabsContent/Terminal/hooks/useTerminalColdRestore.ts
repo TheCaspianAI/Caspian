@@ -3,11 +3,7 @@ import type { Terminal as XTerm } from "@xterm/xterm";
 import { useCallback, useRef, useState } from "react";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { coldRestoreState } from "../state";
-import type {
-	CreateOrAttachMutate,
-	CreateOrAttachResult,
-	TerminalStreamEvent,
-} from "../types";
+import type { CreateOrAttachMutate, CreateOrAttachResult, TerminalStreamEvent } from "../types";
 import { scrollToBottom } from "../utils";
 
 export interface UseTerminalColdRestoreOptions {
@@ -102,8 +98,7 @@ export function useTerminalColdRestore({
 					setConnectionError(null);
 
 					if (result.isColdRestore) {
-						const scrollback =
-							result.snapshot?.snapshotAnsi ?? result.scrollback;
+						const scrollback = result.snapshot?.snapshotAnsi ?? result.scrollback;
 						coldRestoreState.set(paneId, {
 							isRestored: true,
 							cwd: result.previousCwd || null,

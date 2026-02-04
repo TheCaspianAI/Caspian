@@ -72,10 +72,7 @@ export function VirtualizedFileList({
 
 	return (
 		<div ref={listRef}>
-			<div
-				className="relative w-full"
-				style={{ height: virtualizer.getTotalSize() }}
-			>
+			<div className="relative w-full" style={{ height: virtualizer.getTotalSize() }}>
 				{items.map((virtualRow) => {
 					const file = files[virtualRow.index];
 					const fileKey = commitHash

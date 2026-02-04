@@ -1,14 +1,14 @@
-import { Button } from "ui/components/ui/button";
-import { Input } from "ui/components/ui/input";
-import { toast } from "ui/components/ui/sonner";
-import { cn } from "ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { LuSearch, LuX } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
-import type { FilterMode, RepositoryGroup, NodeItem } from "./types";
+import { Button } from "ui/components/ui/button";
+import { Input } from "ui/components/ui/input";
+import { toast } from "ui/components/ui/sonner";
+import { cn } from "ui/lib/utils";
 import { NodeRow } from "./NodeRow";
+import type { FilterMode, NodeItem, RepositoryGroup } from "./types";
 
 const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
 	{ value: "all", label: "All" },
@@ -23,10 +23,8 @@ export function NodesListView() {
 	const utils = electronTrpc.useUtils();
 
 	// Fetch all data
-	const { data: groups = [] } =
-		electronTrpc.nodes.getAllGrouped.useQuery();
-	const { data: allRepositories = [] } =
-		electronTrpc.repositories.getRecents.useQuery();
+	const { data: groups = [] } = electronTrpc.nodes.getAllGrouped.useQuery();
+	const { data: allRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
 
 	// Fetch worktrees for all repositories
 	const worktreeQueries = electronTrpc.useQueries((t) =>
@@ -243,9 +241,7 @@ export function NodesListView() {
 							<span className="text-label font-medium text-foreground/70">
 								{group.repositoryName}
 							</span>
-							<span className="text-caption text-foreground/40 ml-2">
-								{group.nodes.length}
-							</span>
+							<span className="text-caption text-foreground/40 ml-2">{group.nodes.length}</span>
 						</div>
 
 						{/* Nodes in this repository */}
@@ -256,8 +252,7 @@ export function NodesListView() {
 								onSwitch={() => handleSwitch(ws)}
 								onReopen={() => handleReopen(ws)}
 								isOpening={
-									openWorktree.isPending &&
-									openWorktree.variables?.worktreeId === ws.worktreeId
+									openWorktree.isPending && openWorktree.variables?.worktreeId === ws.worktreeId
 								}
 							/>
 						))}

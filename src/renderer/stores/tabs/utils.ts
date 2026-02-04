@@ -1,10 +1,6 @@
 import type { MosaicBranch, MosaicNode } from "react-mosaic-component";
 import type { ChangeCategory } from "shared/changes-types";
-import type {
-	DiffLayout,
-	FileViewerMode,
-	FileViewerState,
-} from "shared/tabs-types";
+import type { DiffLayout, FileViewerMode, FileViewerState } from "shared/tabs-types";
 import type { Pane, PaneType, Tab } from "./types";
 
 const MARKDOWN_EXTENSIONS = [".md", ".markdown", ".mdx"] as const;
@@ -69,9 +65,7 @@ export function resolveActiveTabIdForNode({
 		}
 	}
 
-	const isNodeTabId = (
-		tabId: string | null | undefined,
-	): tabId is string => {
+	const isNodeTabId = (tabId: string | null | undefined): tabId is string => {
 		return typeof tabId === "string" && nodeTabIds.has(tabId);
 	};
 
@@ -111,17 +105,12 @@ export function resolveActiveTabIdForNode({
  * ```
  * If the top row is `first` in a column split, order would be: [A, B, C, D]
  */
-export const extractPaneIdsFromLayout = (
-	layout: MosaicNode<string>,
-): string[] => {
+export const extractPaneIdsFromLayout = (layout: MosaicNode<string>): string[] => {
 	if (typeof layout === "string") {
 		return [layout];
 	}
 
-	return [
-		...extractPaneIdsFromLayout(layout.first),
-		...extractPaneIdsFromLayout(layout.second),
-	];
+	return [...extractPaneIdsFromLayout(layout.first), ...extractPaneIdsFromLayout(layout.second)];
 };
 
 /** Alias for extractPaneIdsFromLayout emphasizing the visual ordering contract */
@@ -177,10 +166,7 @@ export interface CreateFileViewerPaneOptions {
 /**
  * Creates a new file-viewer pane with the given properties
  */
-export const createFileViewerPane = (
-	tabId: string,
-	options: CreateFileViewerPaneOptions,
-): Pane => {
+export const createFileViewerPane = (tabId: string, options: CreateFileViewerPaneOptions): Pane => {
 	const id = generateId("pane");
 
 	const resolvedViewMode = resolveFileViewerMode({
@@ -261,9 +247,7 @@ export const createTabWithPane = (
 	const pane = createPane(tabId, "terminal", options);
 
 	// Filter to same node for tab naming
-	const nodeTabs = existingTabs.filter(
-		(t) => t.nodeId === nodeId,
-	);
+	const nodeTabs = existingTabs.filter((t) => t.nodeId === nodeId);
 
 	const tab: Tab = {
 		id: tabId,
@@ -279,10 +263,7 @@ export const createTabWithPane = (
 /**
  * Gets all pane IDs that belong to a specific tab
  */
-export const getPaneIdsForTab = (
-	panes: Record<string, Pane>,
-	tabId: string,
-): string[] => {
+export const getPaneIdsForTab = (panes: Record<string, Pane>, tabId: string): string[] => {
 	return Object.values(panes)
 		.filter((pane) => pane.tabId === tabId)
 		.map((pane) => pane.id);
@@ -291,10 +272,7 @@ export const getPaneIdsForTab = (
 /**
  * Checks if a tab has only one pane remaining
  */
-export const isLastPaneInTab = (
-	panes: Record<string, Pane>,
-	tabId: string,
-): boolean => {
+export const isLastPaneInTab = (panes: Record<string, Pane>, tabId: string): boolean => {
 	return getPaneIdsForTab(panes, tabId).length === 1;
 };
 
@@ -373,10 +351,7 @@ export const getFirstPaneId = (layout: MosaicNode<string>): string => {
  * Gets the next pane ID in visual order (left-to-right, top-to-bottom),
  * wrapping around to the first if at the end.
  */
-export const getNextPaneId = (
-	layout: MosaicNode<string>,
-	currentPaneId: string,
-): string | null => {
+export const getNextPaneId = (layout: MosaicNode<string>, currentPaneId: string): string | null => {
 	const paneIds = getPaneIdsInVisualOrder(layout);
 	if (paneIds.length <= 1) return null;
 
@@ -439,16 +414,10 @@ export const findPanePath = (
 		return layout === paneId ? currentPath : null;
 	}
 
-	const firstPath = findPanePath(layout.first, paneId, [
-		...currentPath,
-		"first",
-	]);
+	const firstPath = findPanePath(layout.first, paneId, [...currentPath, "first"]);
 	if (firstPath) return firstPath;
 
-	const secondPath = findPanePath(layout.second, paneId, [
-		...currentPath,
-		"second",
-	]);
+	const secondPath = findPanePath(layout.second, paneId, [...currentPath, "second"]);
 	if (secondPath) return secondPath;
 
 	return null;
@@ -516,10 +485,7 @@ export const updateHistoryStack = (
 	let newStack = historyStack.filter((id) => id !== newActiveId);
 
 	if (currentActiveId && currentActiveId !== newActiveId) {
-		newStack = [
-			currentActiveId,
-			...newStack.filter((id) => id !== currentActiveId),
-		];
+		newStack = [currentActiveId, ...newStack.filter((id) => id !== currentActiveId)];
 	}
 
 	if (tabIdToRemove) {

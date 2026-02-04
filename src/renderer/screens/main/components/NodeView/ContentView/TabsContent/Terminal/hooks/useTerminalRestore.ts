@@ -2,11 +2,7 @@ import type { FitAddon } from "@xterm/addon-fit";
 import type { Terminal as XTerm } from "@xterm/xterm";
 import { useCallback, useRef } from "react";
 import { DEBUG_TERMINAL } from "../config";
-import type {
-	CreateOrAttachResult,
-	TerminalExitReason,
-	TerminalStreamEvent,
-} from "../types";
+import type { CreateOrAttachResult, TerminalExitReason, TerminalStreamEvent } from "../types";
 import { scrollToBottom } from "../utils";
 
 export interface UseTerminalRestoreOptions {
@@ -19,15 +15,8 @@ export interface UseTerminalRestoreOptions {
 	modeScanBufferRef: React.MutableRefObject<string>;
 	updateCwdFromData: (data: string) => void;
 	updateModesFromData: (data: string) => void;
-	onExitEvent: (
-		exitCode: number,
-		xterm: XTerm,
-		reason?: TerminalExitReason,
-	) => void;
-	onErrorEvent: (
-		event: Extract<TerminalStreamEvent, { type: "error" }>,
-		xterm: XTerm,
-	) => void;
+	onExitEvent: (exitCode: number, xterm: XTerm, reason?: TerminalExitReason) => void;
+	onErrorEvent: (event: Extract<TerminalStreamEvent, { type: "error" }>, xterm: XTerm) => void;
 	onDisconnectEvent: (reason: string | undefined) => void;
 }
 
@@ -87,10 +76,7 @@ export function useTerminalRestore({
 		if (!xterm) return;
 		if (pendingEventsRef.current.length === 0) return;
 
-		const events = pendingEventsRef.current.splice(
-			0,
-			pendingEventsRef.current.length,
-		);
+		const events = pendingEventsRef.current.splice(0, pendingEventsRef.current.length);
 		for (const event of events) {
 			if (event.type === "data") {
 				updateModesRef.current(event.data);
@@ -154,13 +140,11 @@ export function useTerminalRestore({
 				const bracketEnableIndex = initialAnsi.lastIndexOf("\x1b[?2004h");
 				const bracketDisableIndex = initialAnsi.lastIndexOf("\x1b[?2004l");
 				if (bracketEnableIndex !== -1 || bracketDisableIndex !== -1) {
-					isBracketedPasteRef.current =
-						bracketEnableIndex > bracketDisableIndex;
+					isBracketedPasteRef.current = bracketEnableIndex > bracketDisableIndex;
 				}
 			}
 
-			const isAltScreenReattach =
-				!result.isNew && result.snapshot?.modes.alternateScreen;
+			const isAltScreenReattach = !result.isNew && result.snapshot?.modes.alternateScreen;
 
 			// For alt-screen (TUI) sessions, enter alt-screen and trigger SIGWINCH
 			if (isAltScreenReattach) {

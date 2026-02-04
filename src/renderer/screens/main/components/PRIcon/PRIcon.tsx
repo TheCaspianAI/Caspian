@@ -1,5 +1,5 @@
-import { cn } from "ui/lib/utils";
 import { LuCircleDot, LuGitMerge, LuGitPullRequest } from "react-icons/lu";
+import { cn } from "ui/lib/utils";
 
 export type PRState = "open" | "merged" | "closed" | "draft";
 

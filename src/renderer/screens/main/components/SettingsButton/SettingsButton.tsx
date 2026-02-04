@@ -1,8 +1,8 @@
-import { Button } from "ui/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { CiSettings } from "react-icons/ci";
 import { HotkeyTooltipContent } from "renderer/components/HotkeyTooltipContent";
 import { useOpenSettings } from "renderer/stores/settings-state";
+import { Button } from "ui/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 export function SettingsButton() {
 	const openSettings = useOpenSettings();

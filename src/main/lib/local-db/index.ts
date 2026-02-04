@@ -1,15 +1,14 @@
 import { chmodSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import * as schema from "lib/local-db";
-
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { migrate } from "drizzle-orm/better-sqlite3/migrator";
 import { app } from "electron";
+import * as schema from "lib/local-db";
 import {
-	ensureCaspianHomeDirExists,
 	CASPIAN_HOME_DIR,
 	CASPIAN_SENSITIVE_FILE_MODE,
+	ensureCaspianHomeDirExists,
 } from "../app-environment";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -29,14 +28,11 @@ ensureCaspianHomeDirExists();
  */
 function getMigrationsDirectory(): string {
 	// Check if running in Electron (app.getAppPath exists)
-	const isElectron =
-		typeof app?.getAppPath === "function" &&
-		typeof app?.isPackaged === "boolean";
+	const isElectron = typeof app?.getAppPath === "function" && typeof app?.isPackaged === "boolean";
 
 	if (isElectron && app.isPackaged) {
 		return join(process.resourcesPath, "resources/migrations");
 	}
-
 
 	if (isElectron && isDev) {
 		// Development: source files in local resources
@@ -50,10 +46,7 @@ function getMigrationsDirectory(): string {
 	}
 
 	// Fallback: try local resources path (for tests or dev without Electron)
-	const localResourcesPath = join(
-		__dirname,
-		"../../../../resources/migrations",
-	);
+	const localResourcesPath = join(__dirname, "../../../../resources/migrations");
 	if (existsSync(localResourcesPath)) {
 		return localResourcesPath;
 	}

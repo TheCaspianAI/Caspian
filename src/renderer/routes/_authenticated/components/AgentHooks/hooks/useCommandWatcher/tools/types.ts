@@ -1,4 +1,4 @@
-import type { SelectRepository, SelectNode } from "lib/local-db";
+import type { SelectNode, SelectRepository } from "lib/local-db";
 import type { electronTrpc } from "renderer/lib/electron-trpc";
 import type { z } from "zod";
 
@@ -44,12 +44,8 @@ export interface ToolContext {
 	// Mutations
 	createWorktree: ReturnType<typeof electronTrpc.nodes.create.useMutation>;
 	setActive: ReturnType<typeof electronTrpc.nodes.setActive.useMutation>;
-	deleteNode: ReturnType<
-		typeof electronTrpc.nodes.delete.useMutation
-	>;
-	updateNode: ReturnType<
-		typeof electronTrpc.nodes.update.useMutation
-	>;
+	deleteNode: ReturnType<typeof electronTrpc.nodes.delete.useMutation>;
+	updateNode: ReturnType<typeof electronTrpc.nodes.update.useMutation>;
 	// Query helpers
 	refetchNodes: () => Promise<unknown>;
 	getNodes: () => SelectNode[] | undefined;

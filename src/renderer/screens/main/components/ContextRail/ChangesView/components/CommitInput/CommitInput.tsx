@@ -1,3 +1,14 @@
+import { useState } from "react";
+import {
+	HiArrowDown,
+	HiArrowPath,
+	HiArrowsUpDown,
+	HiArrowTopRightOnSquare,
+	HiArrowUp,
+	HiCheck,
+	HiChevronDown,
+} from "react-icons/hi2";
+import { electronTrpc } from "renderer/lib/electron-trpc";
 import { Button } from "ui/components/ui/button";
 import { ButtonGroup } from "ui/components/ui/button-group";
 import {
@@ -10,17 +21,6 @@ import {
 import { toast } from "ui/components/ui/sonner";
 import { Textarea } from "ui/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { useState } from "react";
-import {
-	HiArrowDown,
-	HiArrowPath,
-	HiArrowsUpDown,
-	HiArrowTopRightOnSquare,
-	HiArrowUp,
-	HiCheck,
-	HiChevronDown,
-} from "react-icons/hi2";
-import { electronTrpc } from "renderer/lib/electron-trpc";
 
 interface CommitInputProps {
 	worktreePath: string;
@@ -149,10 +149,7 @@ export function CommitInput({
 			{ worktreePath, message: commitMessage.trim() },
 			{
 				onSuccess: () => {
-					pushMutation.mutate(
-						{ worktreePath, setUpstream: true },
-						{ onSuccess: handleCreatePR },
-					);
+					pushMutation.mutate({ worktreePath, setUpstream: true }, { onSuccess: handleCreatePR });
 				},
 			},
 		);
@@ -253,30 +250,19 @@ export function CommitInput({
 						>
 							{primary.icon}
 							<span>{primary.label}</span>
-							{countBadge && (
-								<span className="text-caption opacity-70">{countBadge}</span>
-							)}
+							{countBadge && <span className="text-caption opacity-70">{countBadge}</span>}
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent side="bottom">{primary.tooltip}</TooltipContent>
 				</Tooltip>
 				<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
 					<DropdownMenuTrigger asChild>
-						<Button
-							variant="secondary"
-							size="sm"
-							disabled={isPending}
-							className="h-7 px-1.5"
-						>
+						<Button variant="secondary" size="sm" disabled={isPending} className="h-7 px-1.5">
 							<HiChevronDown className="size-3.5" />
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-48 text-xs">
-						<DropdownMenuItem
-							onClick={handleCommit}
-							disabled={!canCommit}
-							className="text-xs"
-						>
+						<DropdownMenuItem onClick={handleCommit} disabled={!canCommit} className="text-xs">
 							<HiCheck className="size-3.5" />
 							Commit
 						</DropdownMenuItem>
@@ -307,26 +293,16 @@ export function CommitInput({
 							className="text-xs"
 						>
 							<HiArrowUp className="size-3.5" />
-							<span className="flex-1">
-								{hasUpstream ? "Push" : "Publish Branch"}
-							</span>
+							<span className="flex-1">{hasUpstream ? "Push" : "Publish Branch"}</span>
 							{pushCount > 0 && (
-								<span className="text-caption text-muted-foreground">
-									{pushCount}
-								</span>
+								<span className="text-caption text-muted-foreground">{pushCount}</span>
 							)}
 						</DropdownMenuItem>
-						<DropdownMenuItem
-							onClick={handlePull}
-							disabled={pullCount === 0}
-							className="text-xs"
-						>
+						<DropdownMenuItem onClick={handlePull} disabled={pullCount === 0} className="text-xs">
 							<HiArrowDown className="size-3.5" />
 							<span className="flex-1">Pull</span>
 							{pullCount > 0 && (
-								<span className="text-caption text-muted-foreground">
-									{pullCount}
-								</span>
+								<span className="text-caption text-muted-foreground">{pullCount}</span>
 							)}
 						</DropdownMenuItem>
 						<DropdownMenuItem

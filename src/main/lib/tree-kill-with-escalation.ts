@@ -47,10 +47,7 @@ export function treeKillWithEscalation({
 					doResolve({ success: true });
 					return;
 				}
-				console.error(
-					`[treeKillWithEscalation] Failed to ${signal} pid ${pid}:`,
-					err,
-				);
+				console.error(`[treeKillWithEscalation] Failed to ${signal} pid ${pid}:`, err);
 			}
 
 			if (!isProcessAlive(pid)) {
@@ -87,10 +84,7 @@ export function treeKillWithEscalation({
 						doResolve({ success: true });
 						return;
 					}
-					console.error(
-						`[treeKillWithEscalation] Failed to SIGKILL pid ${pid}:`,
-						err,
-					);
+					console.error(`[treeKillWithEscalation] Failed to SIGKILL pid ${pid}:`, err);
 					doResolve({ success: false, error: err.message });
 				} else {
 					doResolve({ success: true });

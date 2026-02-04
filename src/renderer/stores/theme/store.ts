@@ -53,10 +53,7 @@ interface ThemeState {
  * Find a theme by ID from built-in and custom themes
  */
 function findTheme(themeId: string, customThemes: Theme[]): Theme | undefined {
-	return (
-		builtInThemes.find((t) => t.id === themeId) ||
-		customThemes.find((t) => t.id === themeId)
-	);
+	return builtInThemes.find((t) => t.id === themeId) || customThemes.find((t) => t.id === themeId);
 }
 
 /**
@@ -68,10 +65,7 @@ function syncThemeToLocalStorage(theme: Theme): void {
 	try {
 		localStorage.setItem("theme-type", theme.type);
 		localStorage.setItem("theme-id", theme.id);
-		localStorage.setItem(
-			"theme-terminal",
-			JSON.stringify(getTerminalColors(theme)),
-		);
+		localStorage.setItem("theme-terminal", JSON.stringify(getTerminalColors(theme)));
 	} catch {
 		// localStorage may not be available
 	}
@@ -197,8 +191,7 @@ export const useThemeStore = create<ThemeState>()(
 
 // Convenience hooks
 export const useTheme = () => useThemeStore((state) => state.activeTheme);
-export const useTerminalTheme = () =>
-	useThemeStore((state) => state.terminalTheme);
+export const useTerminalTheme = () => useThemeStore((state) => state.terminalTheme);
 export const useMonacoTheme = () => useThemeStore((state) => state.monacoTheme);
 export const useSetTheme = () => useThemeStore((state) => state.setTheme);
 export const useThemeId = () => useThemeStore((state) => state.activeThemeId);

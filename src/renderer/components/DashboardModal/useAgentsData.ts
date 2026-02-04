@@ -13,7 +13,6 @@ function mapPaneStatusToAgentStatus(paneStatus: PaneStatus | undefined): AgentSt
 			return "waiting";
 		case "review":
 			return "completed";
-		case "idle":
 		default:
 			return "idle";
 	}
@@ -42,7 +41,13 @@ export function useAgentsData() {
 		if (!groupedData) return [];
 
 		// Build lookup maps for O(1) access
-		const nodeById = new Map<string, { node: typeof groupedData[0]["nodes"][0]; repository: typeof groupedData[0]["repository"] }>();
+		const nodeById = new Map<
+			string,
+			{
+				node: (typeof groupedData)[0]["nodes"][0];
+				repository: (typeof groupedData)[0]["repository"];
+			}
+		>();
 		for (const group of groupedData) {
 			for (const node of group.nodes) {
 				nodeById.set(node.id, { node, repository: group.repository });
@@ -68,9 +73,7 @@ export function useAgentsData() {
 
 			// Get agent name from pane name (if it's not the default "Terminal")
 			// Fall back to tab display name
-			const agentName = (pane.name && pane.name !== "Terminal")
-				? pane.name
-				: getTabDisplayName(tab);
+			const agentName = pane.name && pane.name !== "Terminal" ? pane.name : getTabDisplayName(tab);
 
 			result.push({
 				agentName,
@@ -83,10 +86,7 @@ export function useAgentsData() {
 				repositoryName: repository.name,
 				repositoryColor: repository.color,
 				status: mapPaneStatusToAgentStatus(pane.status),
-				duration:
-					pane.status === "working"
-						? formatDuration(tab.createdAt)
-						: undefined,
+				duration: pane.status === "working" ? formatDuration(tab.createdAt) : undefined,
 			});
 		}
 
@@ -97,9 +97,7 @@ export function useAgentsData() {
 		const running = agents.filter((a) => a.status === "running");
 		const waiting = agents.filter((a) => a.status === "waiting");
 		const completed = agents.filter((a) => a.status === "completed");
-		const idle = agents.filter(
-			(a) => a.status === "idle" || a.status === "error"
-		);
+		const idle = agents.filter((a) => a.status === "idle" || a.status === "error");
 
 		return {
 			running,

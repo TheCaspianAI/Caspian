@@ -1,21 +1,15 @@
-import { nodes } from "lib/local-db";
 import { observable } from "@trpc/server/observable";
 import { eq } from "drizzle-orm";
+import { nodes } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
-import {
-	hasStaticPortsConfig,
-	loadStaticPorts,
-	staticPortsWatcher,
-} from "main/lib/static-ports";
+import { hasStaticPortsConfig, loadStaticPorts, staticPortsWatcher } from "main/lib/static-ports";
 import { portManager } from "main/lib/terminal/port-manager";
 import type { DetectedPort, StaticPort } from "shared/types";
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import { getNodePath } from "../nodes/utils/worktree";
 
-type PortEvent =
-	| { type: "add"; port: DetectedPort }
-	| { type: "remove"; port: DetectedPort };
+type PortEvent = { type: "add"; port: DetectedPort } | { type: "remove"; port: DetectedPort };
 
 export const createPortsRouter = () => {
 	return router({
@@ -50,20 +44,14 @@ export const createPortsRouter = () => {
 					port: z.number().int().positive(),
 				}),
 			)
-			.mutation(
-				async ({ input }): Promise<{ success: boolean; error?: string }> => {
-					return portManager.killPort(input);
-				},
-			),
+			.mutation(async ({ input }): Promise<{ success: boolean; error?: string }> => {
+				return portManager.killPort(input);
+			}),
 
 		hasStaticConfig: publicProcedure
 			.input(z.object({ nodeId: z.string() }))
 			.query(({ input }): { hasStatic: boolean } => {
-				const node = localDb
-					.select()
-					.from(nodes)
-					.where(eq(nodes.id, input.nodeId))
-					.get();
+				const node = localDb.select().from(nodes).where(eq(nodes.id, input.nodeId)).get();
 
 				if (!node) {
 					return { hasStatic: false };
@@ -79,42 +67,36 @@ export const createPortsRouter = () => {
 
 		getStatic: publicProcedure
 			.input(z.object({ nodeId: z.string() }))
-			.query(
-				({ input }): { ports: StaticPort[] | null; error: string | null } => {
-					const node = localDb
-						.select()
-						.from(nodes)
-						.where(eq(nodes.id, input.nodeId))
-						.get();
+			.query(({ input }): { ports: StaticPort[] | null; error: string | null } => {
+				const node = localDb.select().from(nodes).where(eq(nodes.id, input.nodeId)).get();
 
-					if (!node) {
-						return { ports: null, error: "Node not found" };
-					}
+				if (!node) {
+					return { ports: null, error: "Node not found" };
+				}
 
-					const nodePath = getNodePath(node);
-					if (!nodePath) {
-						return { ports: null, error: "Node path not found" };
-					}
+				const nodePath = getNodePath(node);
+				if (!nodePath) {
+					return { ports: null, error: "Node path not found" };
+				}
 
-					const result = loadStaticPorts(nodePath);
+				const result = loadStaticPorts(nodePath);
 
-					if (!result.exists) {
-						return { ports: null, error: null };
-					}
+				if (!result.exists) {
+					return { ports: null, error: null };
+				}
 
-					if (result.error) {
-						return { ports: null, error: result.error };
-					}
+				if (result.error) {
+					return { ports: null, error: result.error };
+				}
 
-					const portsWithNode: StaticPort[] =
-						result.ports?.map((p) => ({
-							...p,
-							nodeId: input.nodeId,
-						})) ?? [];
+				const portsWithNode: StaticPort[] =
+					result.ports?.map((p) => ({
+						...p,
+						nodeId: input.nodeId,
+					})) ?? [];
 
-					return { ports: portsWithNode, error: null };
-				},
-			),
+				return { ports: portsWithNode, error: null };
+			}),
 
 		getAllStatic: publicProcedure.query(
 			(): {
@@ -155,11 +137,7 @@ export const createPortsRouter = () => {
 			.input(z.object({ nodeId: z.string() }))
 			.subscription(({ input }) => {
 				return observable<{ type: "change" }>((emit) => {
-					const node = localDb
-						.select()
-						.from(nodes)
-						.where(eq(nodes.id, input.nodeId))
-						.get();
+					const node = localDb.select().from(nodes).where(eq(nodes.id, input.nodeId)).get();
 
 					if (!node) {
 						return () => {};

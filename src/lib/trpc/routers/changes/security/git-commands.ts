@@ -1,8 +1,5 @@
 import simpleGit from "simple-git";
-import {
-	assertRegisteredWorktree,
-	assertValidGitPath,
-} from "./path-validation";
+import { assertRegisteredWorktree, assertValidGitPath } from "./path-validation";
 
 /**
  * Git command helpers with semantic naming.
@@ -24,10 +21,7 @@ import {
  *
  * Note: `git checkout -- <branch>` is WRONG - that's file checkout syntax.
  */
-export async function gitSwitchBranch(
-	worktreePath: string,
-	branch: string,
-): Promise<void> {
+export async function gitSwitchBranch(worktreePath: string, branch: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 
 	// Validate: reject anything that looks like a flag
@@ -65,10 +59,7 @@ export async function gitSwitchBranch(
  * Uses `git checkout -- <path>` - the `--` is REQUIRED here
  * to indicate path mode (not branch mode).
  */
-export async function gitCheckoutFile(
-	worktreePath: string,
-	filePath: string,
-): Promise<void> {
+export async function gitCheckoutFile(worktreePath: string, filePath: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 	assertValidGitPath(filePath);
 
@@ -83,10 +74,7 @@ export async function gitCheckoutFile(
  * Uses `git add -- <path>` - the `--` prevents paths starting
  * with `-` from being interpreted as flags.
  */
-export async function gitStageFile(
-	worktreePath: string,
-	filePath: string,
-): Promise<void> {
+export async function gitStageFile(worktreePath: string, filePath: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 	assertValidGitPath(filePath);
 
@@ -112,10 +100,7 @@ export async function gitStageAll(worktreePath: string): Promise<void> {
  * Uses `git reset HEAD -- <path>` to unstage without
  * discarding changes.
  */
-export async function gitUnstageFile(
-	worktreePath: string,
-	filePath: string,
-): Promise<void> {
+export async function gitUnstageFile(worktreePath: string, filePath: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 	assertValidGitPath(filePath);
 
@@ -142,9 +127,7 @@ export async function gitUnstageAll(worktreePath: string): Promise<void> {
  * Uses `git checkout -- .` to restore all tracked files to HEAD state.
  * Does NOT affect untracked files.
  */
-export async function gitDiscardAllUnstaged(
-	worktreePath: string,
-): Promise<void> {
+export async function gitDiscardAllUnstaged(worktreePath: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 
 	const git = simpleGit(worktreePath);
@@ -182,9 +165,7 @@ export async function gitStash(worktreePath: string): Promise<void> {
  *
  * Uses `git stash push --include-untracked`.
  */
-export async function gitStashIncludeUntracked(
-	worktreePath: string,
-): Promise<void> {
+export async function gitStashIncludeUntracked(worktreePath: string): Promise<void> {
 	assertRegisteredWorktree(worktreePath);
 
 	const git = simpleGit(worktreePath);

@@ -1,3 +1,6 @@
+import type { MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
+import { useState } from "react";
+import { LuCopy } from "react-icons/lu";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -6,13 +9,6 @@ import {
 	ContextMenuShortcut,
 	ContextMenuTrigger,
 } from "ui/components/ui/context-menu";
-import type {
-	MouseEvent as ReactMouseEvent,
-	ReactNode,
-	RefObject,
-} from "react";
-import { useState } from "react";
-import { LuCopy } from "react-icons/lu";
 
 function getModifierKeyLabel() {
 	const isMac = navigator.platform.toLowerCase().includes("mac");
@@ -128,10 +124,7 @@ export function SelectionContextMenu<T extends HTMLElement>({
 
 	return (
 		<ContextMenu onOpenChange={handleOpenChange}>
-			<ContextMenuTrigger
-				asChild
-				onContextMenuCapture={handleContextMenuCapture}
-			>
+			<ContextMenuTrigger asChild onContextMenuCapture={handleContextMenuCapture}>
 				{children}
 			</ContextMenuTrigger>
 			<ContextMenuContent>
@@ -141,9 +134,7 @@ export function SelectionContextMenu<T extends HTMLElement>({
 					<ContextMenuShortcut>{`${modifierKeyLabel}C`}</ContextMenuShortcut>
 				</ContextMenuItem>
 				{linkHref && (
-					<ContextMenuItem onSelect={handleCopyLinkAddress}>
-						Copy Link Address
-					</ContextMenuItem>
+					<ContextMenuItem onSelect={handleCopyLinkAddress}>Copy Link Address</ContextMenuItem>
 				)}
 				<ContextMenuSeparator />
 				<ContextMenuItem onSelect={handleSelectAll}>

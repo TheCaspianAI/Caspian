@@ -30,9 +30,7 @@ export class DaemonTerminalManager extends EventEmitter {
 	private sessions = new Map<string, SessionInfo>();
 	private pendingSessions = new Map<string, Promise<SessionResult>>();
 	private killedSessionTombstones = new Map<string, number>();
-	private createOrAttachLimiter = new PrioritySemaphore(
-		CREATE_OR_ATTACH_CONCURRENCY,
-	);
+	private createOrAttachLimiter = new PrioritySemaphore(CREATE_OR_ATTACH_CONCURRENCY);
 	private daemonAliveSessionIds = new Set<string>();
 	private daemonSessionIdsHydrated = false;
 
@@ -112,34 +110,22 @@ export class DaemonTerminalManager extends EventEmitter {
 			// existing sessions without touching disk (cold restore check only
 			// applies when the daemon does not have a session).
 			const preservedSessions = response.sessions.filter(
-				(session) =>
-					validNodeIds.has(session.workspaceId) && session.isAlive,
+				(session) => validNodeIds.has(session.workspaceId) && session.isAlive,
 			);
-			this.daemonAliveSessionIds = new Set(
-				preservedSessions.map((session) => session.sessionId),
-			);
+			this.daemonAliveSessionIds = new Set(preservedSessions.map((session) => session.sessionId));
 			this.daemonSessionIdsHydrated = true;
 
 			// Enable port scanning before user opens terminal tabs
 			for (const session of preservedSessions) {
-				portManager.upsertDaemonSession(
-					session.paneId,
-					session.workspaceId,
-					session.pid,
-				);
+				portManager.upsertDaemonSession(session.paneId, session.workspaceId, session.pid);
 			}
 
 			const preservedCount = response.sessions.length - orphanedCount;
 			if (preservedCount > 0) {
-				console.log(
-					`[DaemonTerminalManager] Preserving ${preservedCount} sessions for reattach`,
-				);
+				console.log(`[DaemonTerminalManager] Preserving ${preservedCount} sessions for reattach`);
 			}
 		} catch (error) {
-			console.warn(
-				"[DaemonTerminalManager] Failed to reconcile sessions:",
-				error,
-			);
+			console.warn("[DaemonTerminalManager] Failed to reconcile sessions:", error);
 		}
 	}
 
@@ -153,10 +139,7 @@ export class DaemonTerminalManager extends EventEmitter {
 			);
 			this.daemonSessionIdsHydrated = true;
 		} catch (error) {
-			console.warn(
-				"[DaemonTerminalManager] Failed to list daemon sessions:",
-				error,
-			);
+			console.warn("[DaemonTerminalManager] Failed to list daemon sessions:", error);
 		}
 	}
 
@@ -176,49 +159,40 @@ export class DaemonTerminalManager extends EventEmitter {
 			}
 
 			portManager.checkOutputForHint(data, paneId);
-			this.historyManager.writeToHistory(paneId, data, () =>
-				this.sessions.get(paneId),
-			);
+			this.historyManager.writeToHistory(paneId, data, () => this.sessions.get(paneId));
 			this.emit(`data:${paneId}`, data);
 		});
 
-		this.client.on(
-			"exit",
-			(sessionId: string, exitCode: number, signal?: number) => {
-				const paneId = sessionId;
-				this.daemonAliveSessionIds.delete(paneId);
+		this.client.on("exit", (sessionId: string, exitCode: number, signal?: number) => {
+			const paneId = sessionId;
+			this.daemonAliveSessionIds.delete(paneId);
 
-				const session = this.sessions.get(paneId);
-				if (session) {
-					session.isAlive = false;
-					session.pid = null;
-				}
+			const session = this.sessions.get(paneId);
+			if (session) {
+				session.isAlive = false;
+				session.pid = null;
+			}
 
-				portManager.unregisterDaemonSession(paneId);
-				this.historyManager.closeHistoryWriter(paneId, exitCode);
-				const reason =
-					session?.exitReason ??
-					(this.isSessionKilled(paneId) ? "killed" : "exited");
-				if (session) {
-					session.exitReason = reason;
-				}
-				this.emit(`exit:${paneId}`, exitCode, signal, reason);
-				this.emit("terminalExit", { paneId, exitCode, signal, reason });
+			portManager.unregisterDaemonSession(paneId);
+			this.historyManager.closeHistoryWriter(paneId, exitCode);
+			const reason = session?.exitReason ?? (this.isSessionKilled(paneId) ? "killed" : "exited");
+			if (session) {
+				session.exitReason = reason;
+			}
+			this.emit(`exit:${paneId}`, exitCode, signal, reason);
+			this.emit("terminalExit", { paneId, exitCode, signal, reason });
 
-				const timeoutId = setTimeout(() => {
-					this.sessions.delete(paneId);
-					this.cleanupTimeouts.delete(paneId);
-				}, SESSION_CLEANUP_DELAY_MS);
-				timeoutId.unref();
-				this.cleanupTimeouts.set(paneId, timeoutId);
-			},
-		);
+			const timeoutId = setTimeout(() => {
+				this.sessions.delete(paneId);
+				this.cleanupTimeouts.delete(paneId);
+			}, SESSION_CLEANUP_DELAY_MS);
+			timeoutId.unref();
+			this.cleanupTimeouts.set(paneId, timeoutId);
+		});
 
 		this.client.on("disconnected", () => {
 			console.warn("[DaemonTerminalManager] Disconnected from daemon");
-			const activeSessionCount = Array.from(this.sessions.values()).filter(
-				(s) => s.isAlive,
-			).length;
+			const activeSessionCount = Array.from(this.sessions.values()).filter((s) => s.isAlive).length;
 			track("terminal_daemon_disconnected", {
 				active_session_count: activeSessionCount,
 			});
@@ -226,10 +200,7 @@ export class DaemonTerminalManager extends EventEmitter {
 			this.daemonSessionIdsHydrated = false;
 			for (const [paneId, session] of this.sessions.entries()) {
 				if (session.isAlive) {
-					this.emit(
-						`disconnect:${paneId}`,
-						"Connection to terminal daemon lost",
-					);
+					this.emit(`disconnect:${paneId}`, "Connection to terminal daemon lost");
 				}
 			}
 		});
@@ -245,28 +216,25 @@ export class DaemonTerminalManager extends EventEmitter {
 			}
 		});
 
-		this.client.on(
-			"terminalError",
-			(sessionId: string, error: string, code?: string) => {
-				const paneId = sessionId;
-				console.error(
-					`[DaemonTerminalManager] Terminal error for ${paneId}: ${code ?? "UNKNOWN"}: ${error}`,
-				);
+		this.client.on("terminalError", (sessionId: string, error: string, code?: string) => {
+			const paneId = sessionId;
+			console.error(
+				`[DaemonTerminalManager] Terminal error for ${paneId}: ${code ?? "UNKNOWN"}: ${error}`,
+			);
 
-				if (error.includes("Session not found")) {
-					this.daemonAliveSessionIds.delete(paneId);
-					const session = this.sessions.get(paneId);
-					if (session) {
-						session.isAlive = false;
-					}
-					console.log(
-						`[DaemonTerminalManager] Session ${paneId} lost - will trigger cold restore on next attach`,
-					);
+			if (error.includes("Session not found")) {
+				this.daemonAliveSessionIds.delete(paneId);
+				const session = this.sessions.get(paneId);
+				if (session) {
+					session.isAlive = false;
 				}
+				console.log(
+					`[DaemonTerminalManager] Session ${paneId} lost - will trigger cold restore on next attach`,
+				);
+			}
 
-				this.emit(`error:${paneId}`, { error, code });
-			},
-		);
+			this.emit(`error:${paneId}`, { error, code });
+		});
 	}
 
 	async createOrAttach(params: CreateSessionParams): Promise<SessionResult> {
@@ -304,9 +272,7 @@ export class DaemonTerminalManager extends EventEmitter {
 		return response;
 	}
 
-	private async doCreateOrAttach(
-		params: CreateSessionParams,
-	): Promise<SessionResult> {
+	private async doCreateOrAttach(params: CreateSessionParams): Promise<SessionResult> {
 		const releaseCreateOrAttach = await this.createOrAttachLimiter.acquire(
 			this.getCreateOrAttachPriority(params),
 		);
@@ -446,10 +412,7 @@ export class DaemonTerminalManager extends EventEmitter {
 						initialScrollback,
 					})
 					.catch((error) => {
-						console.error(
-							`[DaemonTerminalManager] Failed to init history for ${paneId}:`,
-							error,
-						);
+						console.error(`[DaemonTerminalManager] Failed to init history for ${paneId}:`, error);
 					});
 			} else {
 				console.warn(
@@ -559,11 +522,9 @@ export class DaemonTerminalManager extends EventEmitter {
 		try {
 			const tabsState = appState.data?.tabsState;
 			const activeTabId = tabsState?.activeTabIds?.[params.workspaceId];
-			const focusedPaneId =
-				activeTabId && tabsState?.focusedPaneIds?.[activeTabId];
+			const focusedPaneId = activeTabId && tabsState?.focusedPaneIds?.[activeTabId];
 
-			const isActiveFocusedPane =
-				activeTabId === params.tabId && focusedPaneId === params.paneId;
+			const isActiveFocusedPane = activeTabId === params.tabId && focusedPaneId === params.paneId;
 
 			return isActiveFocusedPane ? 0 : 1;
 		} catch {
@@ -589,12 +550,7 @@ export class DaemonTerminalManager extends EventEmitter {
 	resize(params: { paneId: string; cols: number; rows: number }): void {
 		const { paneId, cols, rows } = params;
 
-		if (
-			!Number.isInteger(cols) ||
-			!Number.isInteger(rows) ||
-			cols <= 0 ||
-			rows <= 0
-		) {
+		if (!Number.isInteger(cols) || !Number.isInteger(rows) || cols <= 0 || rows <= 0) {
 			console.warn(
 				`[DaemonTerminalManager] Invalid resize geometry for ${paneId}: cols=${cols}, rows=${rows}`,
 			);
@@ -604,10 +560,7 @@ export class DaemonTerminalManager extends EventEmitter {
 		this.client.resize({ sessionId: paneId, cols, rows }).catch((error) => {
 			const errorMsg = error instanceof Error ? error.message : String(error);
 			if (!errorMsg.includes("not found")) {
-				console.error(
-					`[DaemonTerminalManager] Resize failed for ${paneId}:`,
-					error,
-				);
+				console.error(`[DaemonTerminalManager] Resize failed for ${paneId}:`, error);
 			}
 		});
 
@@ -624,24 +577,16 @@ export class DaemonTerminalManager extends EventEmitter {
 		const session = this.sessions.get(paneId);
 
 		if (!session || !session.isAlive) {
-			console.warn(
-				`Cannot signal terminal ${paneId}: session not found or not alive`,
-			);
+			console.warn(`Cannot signal terminal ${paneId}: session not found or not alive`);
 			return;
 		}
 
 		this.client.signal({ sessionId: paneId, signal }).catch((error) => {
-			console.warn(
-				`[DaemonTerminalManager] Failed to send signal ${signal} to ${paneId}:`,
-				error,
-			);
+			console.warn(`[DaemonTerminalManager] Failed to send signal ${signal} to ${paneId}:`, error);
 		});
 	}
 
-	async kill(params: {
-		paneId: string;
-		deleteHistory?: boolean;
-	}): Promise<void> {
+	async kill(params: { paneId: string; deleteHistory?: boolean }): Promise<void> {
 		const { paneId, deleteHistory = false } = params;
 		this.daemonAliveSessionIds.delete(paneId);
 		this.recordKilledSession(paneId);
@@ -669,10 +614,7 @@ export class DaemonTerminalManager extends EventEmitter {
 		const session = this.sessions.get(paneId);
 
 		this.client.detach({ sessionId: paneId }).catch((error) => {
-			console.error(
-				`[DaemonTerminalManager] Detach failed for ${paneId}:`,
-				error,
-			);
+			console.error(`[DaemonTerminalManager] Detach failed for ${paneId}:`, error);
 		});
 
 		if (session) {
@@ -720,9 +662,7 @@ export class DaemonTerminalManager extends EventEmitter {
 		await this.historyManager.resetAll(this.sessions);
 	}
 
-	getSession(
-		paneId: string,
-	): { isAlive: boolean; cwd: string; lastActive: number } | null {
+	getSession(paneId: string): { isAlive: boolean; cwd: string; lastActive: number } | null {
 		const session = this.sessions.get(paneId);
 		if (!session) {
 			return null;
@@ -735,9 +675,7 @@ export class DaemonTerminalManager extends EventEmitter {
 		};
 	}
 
-	async killByWorkspaceId(
-		workspaceId: string,
-	): Promise<{ killed: number; failed: number }> {
+	async killByWorkspaceId(workspaceId: string): Promise<{ killed: number; failed: number }> {
 		const paneIdsToKill = new Set<string>();
 
 		try {
@@ -748,10 +686,7 @@ export class DaemonTerminalManager extends EventEmitter {
 				}
 			}
 		} catch (error) {
-			console.warn(
-				"[DaemonTerminalManager] Failed to query daemon for sessions:",
-				error,
-			);
+			console.warn("[DaemonTerminalManager] Failed to query daemon for sessions:", error);
 			for (const [paneId, session] of this.sessions.entries()) {
 				if (session.workspaceId === workspaceId) {
 					paneIdsToKill.add(paneId);
@@ -786,18 +721,13 @@ export class DaemonTerminalManager extends EventEmitter {
 				await this.client.kill({ sessionId: paneId, deleteHistory: true });
 				killed++;
 			} catch (error) {
-				console.error(
-					`[DaemonTerminalManager] Failed to kill session ${paneId}:`,
-					error,
-				);
+				console.error(`[DaemonTerminalManager] Failed to kill session ${paneId}:`, error);
 				failed++;
 			}
 		}
 
 		if (failed > 0) {
-			console.warn(
-				`[DaemonTerminalManager] killByWorkspaceId: killed=${killed}, failed=${failed}`,
-			);
+			console.warn(`[DaemonTerminalManager] killByWorkspaceId: killed=${killed}, failed=${failed}`);
 		}
 
 		return { killed, failed };
@@ -806,14 +736,9 @@ export class DaemonTerminalManager extends EventEmitter {
 	async getSessionCountByWorkspaceId(workspaceId: string): Promise<number> {
 		try {
 			const response = await this.client.listSessions();
-			return response.sessions.filter(
-				(s) => s.workspaceId === workspaceId && s.isAlive,
-			).length;
+			return response.sessions.filter((s) => s.workspaceId === workspaceId && s.isAlive).length;
 		} catch (error) {
-			console.warn(
-				"[DaemonTerminalManager] Failed to query daemon for session count:",
-				error,
-			);
+			console.warn("[DaemonTerminalManager] Failed to query daemon for session count:", error);
 			return Array.from(this.sessions.values()).filter(
 				(session) => session.workspaceId === workspaceId && session.isAlive,
 			).length;

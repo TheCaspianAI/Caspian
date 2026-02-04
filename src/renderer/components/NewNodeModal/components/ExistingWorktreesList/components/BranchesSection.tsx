@@ -1,3 +1,6 @@
+import { GoGitBranch } from "react-icons/go";
+import { HiChevronUpDown } from "react-icons/hi2";
+import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
 import { Button } from "ui/components/ui/button";
 import {
 	Command,
@@ -7,9 +10,6 @@ import {
 	CommandList,
 } from "ui/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
-import { GoGitBranch } from "react-icons/go";
-import { HiChevronUpDown } from "react-icons/hi2";
-import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
 
 interface Branch {
 	name: string;
@@ -55,9 +55,7 @@ export function BranchesSection({
 					>
 						<span className="flex items-center gap-2 truncate">
 							<GoGitBranch className="size-3.5 shrink-0 text-muted-foreground" />
-							<span className="truncate text-sm text-muted-foreground">
-								Select branch...
-							</span>
+							<span className="truncate text-sm text-muted-foreground">Select branch...</span>
 						</span>
 						<HiChevronUpDown className="size-4 shrink-0 text-muted-foreground" />
 					</Button>

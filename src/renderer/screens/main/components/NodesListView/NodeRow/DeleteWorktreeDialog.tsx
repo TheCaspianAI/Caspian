@@ -1,3 +1,5 @@
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useDeleteWorktree } from "renderer/react-query/nodes/useDeleteWorktree";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -9,8 +11,6 @@ import {
 import { Button } from "ui/components/ui/button";
 import { toast } from "ui/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useDeleteWorktree } from "renderer/react-query/nodes/useDeleteWorktree";
 
 interface DeleteWorktreeDialogProps {
 	worktreeId: string;
@@ -27,14 +27,13 @@ export function DeleteWorktreeDialog({
 }: DeleteWorktreeDialogProps) {
 	const deleteWorktree = useDeleteWorktree();
 
-	const { data: canDeleteData, isLoading } =
-		electronTrpc.nodes.canDeleteWorktree.useQuery(
-			{ worktreeId },
-			{
-				enabled: open,
-				staleTime: Number.POSITIVE_INFINITY,
-			},
-		);
+	const { data: canDeleteData, isLoading } = electronTrpc.nodes.canDeleteWorktree.useQuery(
+		{ worktreeId },
+		{
+			enabled: open,
+			staleTime: Number.POSITIVE_INFINITY,
+		},
+	);
 
 	const handleDelete = () => {
 		onOpenChange(false);
@@ -42,8 +41,7 @@ export function DeleteWorktreeDialog({
 		toast.promise(deleteWorktree.mutateAsync({ worktreeId }), {
 			loading: `Deleting "${worktreeName}"...`,
 			success: `Deleted "${worktreeName}"`,
-			error: (error) =>
-				error instanceof Error ? error.message : "Failed to delete",
+			error: (error) => (error instanceof Error ? error.message : "Failed to delete"),
 		});
 	};
 
@@ -68,8 +66,7 @@ export function DeleteWorktreeDialog({
 								<span className="text-destructive">{reason}</span>
 							) : (
 								<span className="block">
-									This will permanently delete the worktree and its files from
-									disk.
+									This will permanently delete the worktree and its files from disk.
 								</span>
 							)}
 						</div>

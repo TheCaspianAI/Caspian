@@ -66,12 +66,7 @@ const TRAILING_PUNCTUATION = /[.,;:!?]+$/;
  * A path typically contains forward slashes, or starts with ., ~, or /
  */
 function looksLikePath(str: string): boolean {
-	return (
-		str.includes("/") ||
-		str.startsWith(".") ||
-		str.startsWith("~") ||
-		str.startsWith("/")
-	);
+	return str.includes("/") || str.startsWith(".") || str.startsWith("~") || str.startsWith("/");
 }
 
 /**
@@ -212,9 +207,7 @@ export function resolvePath(filePath: string, cwd?: string): string {
 	}
 
 	if (!nodePath.isAbsolute(resolved)) {
-		resolved = cwd
-			? nodePath.resolve(cwd, resolved)
-			: nodePath.resolve(resolved);
+		resolved = cwd ? nodePath.resolve(cwd, resolved) : nodePath.resolve(resolved);
 	}
 
 	return resolved;
@@ -249,9 +242,7 @@ export function spawnAsync(command: string, args: string[]): Promise<void> {
 				resolve();
 			} else {
 				const stderrMessage = stderr.trim();
-				reject(
-					new Error(stderrMessage || `'${command}' exited with code ${code}`),
-				);
+				reject(new Error(stderrMessage || `'${command}' exited with code ${code}`));
 			}
 		});
 	});

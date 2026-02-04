@@ -1,16 +1,13 @@
-import { toast } from "ui/components/ui/sonner";
 import { useCallback } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
+import { toast } from "ui/components/ui/sonner";
 
 interface UseFileTreeActionsProps {
 	worktreePath: string | undefined;
 	onRefresh: (parentPath: string) => void | Promise<void>;
 }
 
-export function useFileTreeActions({
-	worktreePath,
-	onRefresh,
-}: UseFileTreeActionsProps) {
+export function useFileTreeActions({ worktreePath, onRefresh }: UseFileTreeActionsProps) {
 	const createFileMutation = electronTrpc.filesystem.createFile.useMutation({
 		onSuccess: (data, variables) => {
 			toast.success(`Created ${data.path.split("/").pop()}`);
@@ -21,16 +18,15 @@ export function useFileTreeActions({
 		},
 	});
 
-	const createDirectoryMutation =
-		electronTrpc.filesystem.createDirectory.useMutation({
-			onSuccess: (data, variables) => {
-				toast.success(`Created ${data.path.split("/").pop()}`);
-				onRefresh(variables.parentPath);
-			},
-			onError: (error) => {
-				toast.error(`Failed to create folder: ${error.message}`);
-			},
-		});
+	const createDirectoryMutation = electronTrpc.filesystem.createDirectory.useMutation({
+		onSuccess: (data, variables) => {
+			toast.success(`Created ${data.path.split("/").pop()}`);
+			onRefresh(variables.parentPath);
+		},
+		onError: (error) => {
+			toast.error(`Failed to create folder: ${error.message}`);
+		},
+	});
 
 	const renameMutation = electronTrpc.filesystem.rename.useMutation({
 		onSuccess: (data, variables) => {

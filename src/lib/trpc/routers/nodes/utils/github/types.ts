@@ -34,9 +34,7 @@ export const GHPRResponseSchema = z.object({
 	mergedAt: z.string().nullable(),
 	additions: z.number(),
 	deletions: z.number(),
-	reviewDecision: z
-		.enum(["APPROVED", "CHANGES_REQUESTED", "REVIEW_REQUIRED", ""])
-		.nullable(),
+	reviewDecision: z.enum(["APPROVED", "CHANGES_REQUESTED", "REVIEW_REQUIRED", ""]).nullable(),
 	// statusCheckRollup is an array directly, not { contexts: [...] }
 	statusCheckRollup: z.array(GHCheckContextSchema).nullable(),
 });

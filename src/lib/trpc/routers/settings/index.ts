@@ -1,3 +1,5 @@
+import { TRPCError } from "@trpc/server";
+import { app } from "electron";
 import {
 	BRANCH_PREFIX_MODES,
 	EXECUTION_MODES,
@@ -5,8 +7,6 @@ import {
 	TERMINAL_LINK_BEHAVIORS,
 	type TerminalPreset,
 } from "lib/local-db";
-import { TRPCError } from "@trpc/server";
-import { app } from "electron";
 import { quitWithoutConfirmation } from "main/index";
 import { localDb } from "main/lib/local-db";
 import {
@@ -94,11 +94,9 @@ export const createSettingsRouter = () => {
 				}
 
 				if (input.patch.name !== undefined) preset.name = input.patch.name;
-				if (input.patch.description !== undefined)
-					preset.description = input.patch.description;
+				if (input.patch.description !== undefined) preset.description = input.patch.description;
 				if (input.patch.cwd !== undefined) preset.cwd = input.patch.cwd;
-				if (input.patch.commands !== undefined)
-					preset.commands = input.patch.commands;
+				if (input.patch.commands !== undefined) preset.commands = input.patch.commands;
 				if (input.patch.executionMode !== undefined)
 					preset.executionMode = input.patch.executionMode;
 

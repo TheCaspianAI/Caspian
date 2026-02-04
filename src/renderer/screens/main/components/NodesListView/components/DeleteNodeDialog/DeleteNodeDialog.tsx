@@ -1,3 +1,5 @@
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useCloseNode, useDeleteNode } from "renderer/react-query/nodes";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -9,11 +11,6 @@ import {
 import { Button } from "ui/components/ui/button";
 import { toast } from "ui/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import {
-	useCloseNode,
-	useDeleteNode,
-} from "renderer/react-query/nodes";
 
 interface DeleteNodeDialogProps {
 	nodeId: string;
@@ -43,21 +40,19 @@ export function DeleteNodeDialog({
 			},
 		);
 
-	const { data: terminalCountData } =
-		electronTrpc.nodes.canDelete.useQuery(
-			{ id: nodeId, skipGitChecks: true },
-			{
-				enabled: open,
-				refetchInterval: open ? 2000 : false,
-			},
-		);
+	const { data: terminalCountData } = electronTrpc.nodes.canDelete.useQuery(
+		{ id: nodeId, skipGitChecks: true },
+		{
+			enabled: open,
+			refetchInterval: open ? 2000 : false,
+		},
+	);
 
 	const canDeleteData = gitStatusData
 		? {
 				...gitStatusData,
 				activeTerminalCount:
-					terminalCountData?.activeTerminalCount ??
-					gitStatusData.activeTerminalCount,
+					terminalCountData?.activeTerminalCount ?? gitStatusData.activeTerminalCount,
 			}
 		: terminalCountData;
 	const isLoading = isLoadingGitStatus;
@@ -77,8 +72,7 @@ export function DeleteNodeDialog({
 				}
 				return "Node hidden";
 			},
-			error: (error) =>
-				error instanceof Error ? error.message : "Failed to hide",
+			error: (error) => (error instanceof Error ? error.message : "Failed to hide"),
 		});
 	};
 
@@ -97,8 +91,7 @@ export function DeleteNodeDialog({
 				}
 				return `Deleted "${nodeName}"`;
 			},
-			error: (error) =>
-				error instanceof Error ? error.message : "Failed to delete",
+			error: (error) => (error instanceof Error ? error.message : "Failed to delete"),
 		});
 	};
 
@@ -114,14 +107,12 @@ export function DeleteNodeDialog({
 			<AlertDialog open={open} onOpenChange={onOpenChange}>
 				<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">
-							Close node "{nodeName}"?
-						</AlertDialogTitle>
+						<AlertDialogTitle className="font-medium">Close node "{nodeName}"?</AlertDialogTitle>
 						<AlertDialogDescription asChild>
 							<div className="text-muted-foreground space-y-1.5">
 								<span className="block">
-									This will close the node and kill any active terminals.
-									Your branch and commits will remain in the repository.
+									This will close the node and kill any active terminals. Your branch and commits
+									will remain in the repository.
 								</span>
 							</div>
 						</AlertDialogDescription>
@@ -154,9 +145,7 @@ export function DeleteNodeDialog({
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 				<AlertDialogHeader className="px-4 pt-4 pb-2">
-					<AlertDialogTitle className="font-medium">
-						Remove node "{nodeName}"?
-					</AlertDialogTitle>
+					<AlertDialogTitle className="font-medium">Remove node "{nodeName}"?</AlertDialogTitle>
 					<AlertDialogDescription asChild>
 						<div className="text-muted-foreground space-y-1.5">
 							{isLoading ? (
@@ -165,8 +154,8 @@ export function DeleteNodeDialog({
 								<span className="text-destructive">{reason}</span>
 							) : (
 								<span className="block">
-									Deleting will permanently remove the worktree. You can hide
-									instead to keep files on disk.
+									Deleting will permanently remove the worktree. You can hide instead to keep files
+									on disk.
 								</span>
 							)}
 						</div>

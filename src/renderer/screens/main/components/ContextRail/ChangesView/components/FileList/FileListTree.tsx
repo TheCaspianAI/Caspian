@@ -77,9 +77,7 @@ function buildFileTree(files: ChangedFile[]): FileTreeNode[] {
 		}
 	}
 
-	function convertToArray(
-		nodes: Record<string, TreeNodeInternal>,
-	): FileTreeNode[] {
+	function convertToArray(nodes: Record<string, TreeNodeInternal>): FileTreeNode[] {
 		return Object.values(nodes)
 			.map((node) => ({
 				...node,

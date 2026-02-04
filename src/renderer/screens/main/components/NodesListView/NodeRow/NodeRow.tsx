@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { LuArrowRight, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -6,17 +10,8 @@ import {
 } from "ui/components/ui/context-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import { useState } from "react";
-import {
-	LuArrowRight,
-	LuFolder,
-	LuFolderGit2,
-	LuRotateCw,
-} from "react-icons/lu";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
-import { STROKE_WIDTH } from "../constants";
 import { DeleteNodeDialog } from "../components/DeleteNodeDialog/DeleteNodeDialog";
+import { STROKE_WIDTH } from "../constants";
 import type { NodeItem } from "../types";
 import { getRelativeTime } from "../utils";
 import { DeleteWorktreeDialog } from "./DeleteWorktreeDialog";
@@ -30,29 +25,19 @@ interface NodeRowProps {
 	isOpening?: boolean;
 }
 
-export function NodeRow({
-	node,
-	onSwitch,
-	onReopen,
-	isOpening,
-}: NodeRowProps) {
+export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 	const isBranch = node.type === "branch";
 	const [hasHovered, setHasHovered] = useState(false);
-	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } =
-		useNodeDeleteHandler();
+	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
 
 	// Lazy-load GitHub status on hover to avoid N+1 queries
-	const { data: githubStatus } =
-		electronTrpc.nodes.getGitHubStatus.useQuery(
-			{ nodeId: node.nodeId ?? "" },
-			{
-				enabled:
-					hasHovered &&
-					node.type === "worktree" &&
-					!!node.nodeId,
-				staleTime: GITHUB_STATUS_STALE_TIME,
-			},
-		);
+	const { data: githubStatus } = electronTrpc.nodes.getGitHubStatus.useQuery(
+		{ nodeId: node.nodeId ?? "" },
+		{
+			enabled: hasHovered && node.type === "worktree" && !!node.nodeId,
+			staleTime: GITHUB_STATUS_STALE_TIME,
+		},
+	);
 
 	const pr = githubStatus?.pr;
 	const showDiffStats = pr && (pr.additions > 0 || pr.deletions > 0);
@@ -91,15 +76,9 @@ export function NodeRow({
 						)}
 					>
 						{isBranch ? (
-							<LuFolder
-								className="size-4 text-muted-foreground"
-								strokeWidth={STROKE_WIDTH}
-							/>
+							<LuFolder className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						) : (
-							<LuFolderGit2
-								className="size-4 text-muted-foreground"
-								strokeWidth={STROKE_WIDTH}
-							/>
+							<LuFolderGit2 className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						)}
 					</div>
 				</TooltipTrigger>
@@ -124,10 +103,7 @@ export function NodeRow({
 
 			{/* Node/branch name */}
 			<span
-				className={cn(
-					"text-sm truncate text-foreground/80",
-					!node.isOpen && "text-foreground/50",
-				)}
+				className={cn("text-sm truncate text-foreground/80", !node.isOpen && "text-foreground/50")}
 			>
 				{node.name}
 			</span>

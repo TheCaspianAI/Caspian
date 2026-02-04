@@ -1,3 +1,4 @@
+import type { DirectoryEntry } from "shared/file-tree-types";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -7,7 +8,6 @@ import {
 	AlertDialogTitle,
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
-import type { DirectoryEntry } from "shared/file-tree-types";
 
 interface DeleteConfirmDialogProps {
 	entry: DirectoryEntry | null;

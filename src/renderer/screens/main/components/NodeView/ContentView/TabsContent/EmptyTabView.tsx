@@ -1,6 +1,6 @@
-import { Kbd, KbdGroup } from "ui/components/ui/kbd";
 import { HiMiniCommandLine } from "react-icons/hi2";
 import { useHotkeyDisplay } from "renderer/stores/hotkeys";
+import { Kbd, KbdGroup } from "ui/components/ui/kbd";
 
 export function EmptyTabView() {
 	const newGroupDisplay = useHotkeyDisplay("NEW_GROUP");

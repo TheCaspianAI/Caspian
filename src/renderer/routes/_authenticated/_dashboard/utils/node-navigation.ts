@@ -1,7 +1,4 @@
-import type {
-	NavigateOptions,
-	UseNavigateResult,
-} from "@tanstack/react-router";
+import type { NavigateOptions, UseNavigateResult } from "@tanstack/react-router";
 
 /**
  * Navigate to a node and update localStorage to remember it as the last viewed node.

@@ -1,12 +1,8 @@
+import { LuArrowDown, LuArrowUp } from "react-icons/lu";
+import { TbFold, TbLayoutSidebarRightFilled, TbListDetails } from "react-icons/tb";
+import type { DiffViewMode } from "shared/changes-types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import { LuArrowDown, LuArrowUp } from "react-icons/lu";
-import {
-	TbFold,
-	TbLayoutSidebarRightFilled,
-	TbListDetails,
-} from "react-icons/tb";
-import type { DiffViewMode } from "shared/changes-types";
 
 interface DiffToolbarProps {
 	viewedCount: number;
@@ -44,14 +40,10 @@ export function DiffToolbar({
 				<span className="flex items-center gap-1 font-mono">
 					{totalFiles} files
 					{totalAdditions > 0 && (
-						<span className="text-green-600 dark:text-green-500">
-							+{totalAdditions}
-						</span>
+						<span className="text-green-600 dark:text-green-500">+{totalAdditions}</span>
 					)}
 					{totalDeletions > 0 && (
-						<span className="text-red-600 dark:text-red-400">
-							-{totalDeletions}
-						</span>
+						<span className="text-red-600 dark:text-red-400">-{totalDeletions}</span>
 					)}
 				</span>
 				{hasUpstream && (pushCount > 0 || pullCount > 0) && (
@@ -78,9 +70,7 @@ export function DiffToolbar({
 						<button
 							type="button"
 							onClick={() =>
-								onDiffViewModeChange(
-									diffViewMode === "side-by-side" ? "inline" : "side-by-side",
-								)
+								onDiffViewModeChange(diffViewMode === "side-by-side" ? "inline" : "side-by-side")
 							}
 							className="rounded p-1 text-muted-foreground/60 transition-colors hover:text-muted-foreground hover:bg-accent"
 							aria-label={
@@ -113,11 +103,7 @@ export function DiffToolbar({
 									? "text-foreground"
 									: "text-muted-foreground/60 hover:text-muted-foreground",
 							)}
-							aria-label={
-								hideUnchangedRegions
-									? "Show all lines"
-									: "Hide unchanged regions"
-							}
+							aria-label={hideUnchangedRegions ? "Show all lines" : "Hide unchanged regions"}
 							aria-pressed={hideUnchangedRegions}
 						>
 							<TbFold className="size-4" />

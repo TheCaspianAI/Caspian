@@ -30,11 +30,7 @@ export const useDashboardModalStore = create<DashboardModalState>()(
 );
 
 // Convenience hooks
-export const useDashboardModalOpen = () =>
-	useDashboardModalStore((state) => state.isOpen);
-export const useOpenDashboardModal = () =>
-	useDashboardModalStore((state) => state.openModal);
-export const useCloseDashboardModal = () =>
-	useDashboardModalStore((state) => state.closeModal);
-export const useToggleDashboardModal = () =>
-	useDashboardModalStore((state) => state.toggleModal);
+export const useDashboardModalOpen = () => useDashboardModalStore((state) => state.isOpen);
+export const useOpenDashboardModal = () => useDashboardModalStore((state) => state.openModal);
+export const useCloseDashboardModal = () => useDashboardModalStore((state) => state.closeModal);
+export const useToggleDashboardModal = () => useDashboardModalStore((state) => state.toggleModal);

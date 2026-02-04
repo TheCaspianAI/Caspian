@@ -1,8 +1,5 @@
 import { EventEmitter } from "node:events";
-import type {
-	NodeInitProgress,
-	NodeInitStep,
-} from "shared/types/node-init";
+import type { NodeInitProgress, NodeInitStep } from "shared/types/node-init";
 
 interface InitJob {
 	nodeId: string;
@@ -37,11 +34,7 @@ class NodeInitManager extends EventEmitter {
 	 */
 	isInitializing(nodeId: string): boolean {
 		const job = this.jobs.get(nodeId);
-		return (
-			job !== undefined &&
-			job.progress.step !== "ready" &&
-			job.progress.step !== "failed"
-		);
+		return job !== undefined && job.progress.step !== "ready" && job.progress.step !== "failed";
 	}
 
 	/**
@@ -71,9 +64,7 @@ class NodeInitManager extends EventEmitter {
 	 */
 	startJob(nodeId: string, repositoryId: string): void {
 		if (this.jobs.has(nodeId)) {
-			console.warn(
-				`[node-init] Job already exists for ${nodeId}, clearing old job`,
-			);
+			console.warn(`[node-init] Job already exists for ${nodeId}, clearing old job`);
 			this.jobs.delete(nodeId);
 		}
 
@@ -86,7 +77,6 @@ class NodeInitManager extends EventEmitter {
 			resolve = r;
 		});
 		this.donePromises.set(nodeId, promise);
-		// biome-ignore lint/style/noNonNullAssertion: resolve is assigned in Promise constructor
 		this.doneResolvers.set(nodeId, resolve!);
 
 		const progress: NodeInitProgress = {
@@ -110,12 +100,7 @@ class NodeInitManager extends EventEmitter {
 	/**
 	 * Update progress for an initialization job
 	 */
-	updateProgress(
-		nodeId: string,
-		step: NodeInitStep,
-		message: string,
-		error?: string,
-	): void {
+	updateProgress(nodeId: string, step: NodeInitStep, message: string, error?: string): void {
 		const job = this.jobs.get(nodeId);
 		if (!job) {
 			console.warn(`[node-init] No job found for ${nodeId}`);
@@ -240,17 +225,13 @@ class NodeInitManager extends EventEmitter {
 			return;
 		}
 
-		console.log(
-			`[node-init] Waiting for init to complete: ${nodeId}`,
-		);
+		console.log(`[node-init] Waiting for init to complete: ${nodeId}`);
 
 		await Promise.race([
 			promise,
 			new Promise<void>((resolve) => {
 				setTimeout(() => {
-					console.warn(
-						`[node-init] Wait timed out after ${timeoutMs}ms for ${nodeId}`,
-					);
+					console.warn(`[node-init] Wait timed out after ${timeoutMs}ms for ${nodeId}`);
 					resolve();
 				}, timeoutMs);
 			}),
@@ -275,7 +256,6 @@ class NodeInitManager extends EventEmitter {
 		});
 
 		this.repositoryLocks.set(repositoryId, promise);
-		// biome-ignore lint/style/noNonNullAssertion: resolve is assigned in Promise constructor
 		this.repositoryLockResolvers.set(repositoryId, resolve!);
 	}
 

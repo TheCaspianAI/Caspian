@@ -1,3 +1,14 @@
+import { useEffect, useState } from "react";
+import { HiExclamationTriangle } from "react-icons/hi2";
+import { LuCheck, LuCircle, LuGitBranch, LuLoader } from "react-icons/lu";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useHasNodeFailed, useNodeInitProgress } from "renderer/stores/node-init";
+import {
+	INIT_STEP_MESSAGES,
+	INIT_STEP_ORDER,
+	isStepComplete,
+	type NodeInitStep,
+} from "shared/types/node-init";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -8,20 +19,6 @@ import {
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
 import { cn } from "ui/lib/utils";
-import { useEffect, useState } from "react";
-import { HiExclamationTriangle } from "react-icons/hi2";
-import { LuCheck, LuCircle, LuGitBranch, LuLoader } from "react-icons/lu";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import {
-	useHasNodeFailed,
-	useNodeInitProgress,
-} from "renderer/stores/node-init";
-import {
-	INIT_STEP_MESSAGES,
-	INIT_STEP_ORDER,
-	isStepComplete,
-	type NodeInitStep,
-} from "shared/types/node-init";
 
 interface NodeInitializingViewProps {
 	nodeId: string;
@@ -98,9 +95,7 @@ export function NodeInitializingView({
 
 						{/* Title and description */}
 						<div className="space-y-2">
-							<h2 className="text-lg font-medium text-foreground">
-								Setup incomplete
-							</h2>
+							<h2 className="text-lg font-medium text-foreground">Setup incomplete</h2>
 							<p className="text-sm text-muted-foreground">{nodeName}</p>
 							<p className="text-xs text-muted-foreground/80 mt-2">
 								Node setup didn't finish. You can retry or remove it.
@@ -117,11 +112,7 @@ export function NodeInitializingView({
 							>
 								{deleteMutation.isPending ? "Deleting..." : "Delete Node"}
 							</Button>
-							<Button
-								size="sm"
-								onClick={handleRetry}
-								disabled={retryMutation.isPending}
-							>
+							<Button size="sm" onClick={handleRetry} disabled={retryMutation.isPending}>
 								{retryMutation.isPending ? (
 									<>
 										<LuLoader className="mr-2 size-4 animate-spin" />
@@ -136,19 +127,14 @@ export function NodeInitializingView({
 				</div>
 
 				{/* Delete confirmation dialog */}
-				<AlertDialog
-					open={showDeleteConfirm}
-					onOpenChange={setShowDeleteConfirm}
-				>
+				<AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
 					<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 						<AlertDialogHeader className="px-4 pt-4 pb-2">
-							<AlertDialogTitle className="font-medium">
-								Delete node "{nodeName}"?
-							</AlertDialogTitle>
+							<AlertDialogTitle className="font-medium">Delete node "{nodeName}"?</AlertDialogTitle>
 							<AlertDialogDescription asChild>
 								<div className="text-muted-foreground">
-									This node was not fully set up. Deleting will clean up
-									any partial files that were created.
+									This node was not fully set up. Deleting will clean up any partial files that were
+									created.
 								</div>
 							</AlertDialogDescription>
 						</AlertDialogHeader>
@@ -189,9 +175,7 @@ export function NodeInitializingView({
 
 						{/* Title and description */}
 						<div className="space-y-2">
-							<h2 className="text-lg font-medium text-foreground">
-								Node setup failed
-							</h2>
+							<h2 className="text-lg font-medium text-foreground">Node setup failed</h2>
 							<p className="text-sm text-muted-foreground">{nodeName}</p>
 							{progress?.error && (
 								<p className="text-xs text-destructive/80 mt-2 bg-destructive/5 rounded-md px-3 py-2 select-text cursor-text break-words">
@@ -210,11 +194,7 @@ export function NodeInitializingView({
 							>
 								{deleteMutation.isPending ? "Deleting..." : "Delete Node"}
 							</Button>
-							<Button
-								size="sm"
-								onClick={handleRetry}
-								disabled={retryMutation.isPending}
-							>
+							<Button size="sm" onClick={handleRetry} disabled={retryMutation.isPending}>
 								{retryMutation.isPending ? (
 									<>
 										<LuLoader className="mr-2 size-4 animate-spin" />
@@ -229,19 +209,14 @@ export function NodeInitializingView({
 				</div>
 
 				{/* Delete confirmation dialog */}
-				<AlertDialog
-					open={showDeleteConfirm}
-					onOpenChange={setShowDeleteConfirm}
-				>
+				<AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
 					<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 						<AlertDialogHeader className="px-4 pt-4 pb-2">
-							<AlertDialogTitle className="font-medium">
-								Delete node "{nodeName}"?
-							</AlertDialogTitle>
+							<AlertDialogTitle className="font-medium">Delete node "{nodeName}"?</AlertDialogTitle>
 							<AlertDialogDescription asChild>
 								<div className="text-muted-foreground">
-									This node failed to initialize. Deleting will clean up
-									any partial files that were created.
+									This node failed to initialize. Deleting will clean up any partial files that were
+									created.
 								</div>
 							</AlertDialogDescription>
 						</AlertDialogHeader>
@@ -283,9 +258,7 @@ export function NodeInitializingView({
 
 				{/* Title and description */}
 				<div className="space-y-2">
-					<h2 className="text-lg font-medium text-foreground">
-						Setting up node
-					</h2>
+					<h2 className="text-lg font-medium text-foreground">Setting up node</h2>
 					<p className="text-sm text-muted-foreground">{nodeName}</p>
 				</div>
 

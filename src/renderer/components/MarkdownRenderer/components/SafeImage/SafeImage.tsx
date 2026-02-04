@@ -61,11 +61,5 @@ export function SafeImage({ src, alt, className }: SafeImageProps) {
 	}
 
 	// Safe to render - embedded data: URL
-	return (
-		<img
-			src={src}
-			alt={alt}
-			className={className ?? "max-w-full h-auto rounded-md my-4"}
-		/>
-	);
+	return <img src={src} alt={alt} className={className ?? "max-w-full h-auto rounded-md my-4"} />;
 }

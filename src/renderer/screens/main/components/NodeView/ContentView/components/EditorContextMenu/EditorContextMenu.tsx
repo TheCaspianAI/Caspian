@@ -1,14 +1,3 @@
-import {
-	ContextMenu,
-	ContextMenuContent,
-	ContextMenuItem,
-	ContextMenuSeparator,
-	ContextMenuShortcut,
-	ContextMenuSub,
-	ContextMenuSubContent,
-	ContextMenuSubTrigger,
-	ContextMenuTrigger,
-} from "ui/components/ui/context-menu";
 import type { ReactNode } from "react";
 import {
 	LuClipboard,
@@ -27,6 +16,17 @@ import {
 } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import type { Tab } from "renderer/stores/tabs/types";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuShortcut,
+	ContextMenuSub,
+	ContextMenuSubContent,
+	ContextMenuSubTrigger,
+	ContextMenuTrigger,
+} from "ui/components/ui/context-menu";
 
 export interface EditorActions {
 	onCut?: () => void;
@@ -60,9 +60,7 @@ export function EditorContextMenu({
 	editorActions,
 	paneActions,
 }: EditorContextMenuProps) {
-	const targetTabs = paneActions.availableTabs.filter(
-		(t) => t.id !== paneActions.currentTabId,
-	);
+	const targetTabs = paneActions.availableTabs.filter((t) => t.id !== paneActions.currentTabId);
 
 	const { data: platform } = electronTrpc.window.getPlatform.useQuery();
 	const isMac = platform === "darwin";
@@ -162,10 +160,7 @@ export function EditorContextMenu({
 					</ContextMenuSubTrigger>
 					<ContextMenuSubContent>
 						{targetTabs.map((tab) => (
-							<ContextMenuItem
-								key={tab.id}
-								onSelect={() => paneActions.onMoveToTab(tab.id)}
-							>
+							<ContextMenuItem key={tab.id} onSelect={() => paneActions.onMoveToTab(tab.id)}>
 								{tab.name}
 							</ContextMenuItem>
 						))}
@@ -177,10 +172,7 @@ export function EditorContextMenu({
 					</ContextMenuSubContent>
 				</ContextMenuSub>
 				<ContextMenuSeparator />
-				<ContextMenuItem
-					variant="destructive"
-					onSelect={paneActions.onClosePane}
-				>
+				<ContextMenuItem variant="destructive" onSelect={paneActions.onClosePane}>
 					<LuX className="size-4" />
 					Close File
 				</ContextMenuItem>

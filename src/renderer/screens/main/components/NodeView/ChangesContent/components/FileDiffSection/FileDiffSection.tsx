@@ -1,14 +1,11 @@
-import { Button } from "ui/components/ui/button";
-import { Collapsible, CollapsibleContent } from "ui/components/ui/collapsible";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LuFileCode, LuLoader } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useChangesStore } from "renderer/stores/changes";
 import type { ChangeCategory, ChangedFile } from "shared/changes-types";
-import {
-	getStatusColor,
-	getStatusIndicator,
-} from "../../../../ContextRail/ChangesView/utils";
+import { Button } from "ui/components/ui/button";
+import { Collapsible, CollapsibleContent } from "ui/components/ui/collapsible";
+import { getStatusColor, getStatusIndicator } from "../../../../ContextRail/ChangesView/utils";
 import { createFileKey, useScrollContextRequired } from "../../context";
 import { DiffViewer } from "../DiffViewer";
 import { FileDiffHeader } from "./components/FileDiffHeader";
@@ -71,13 +68,8 @@ export function FileDiffSection({
 }: FileDiffSectionProps) {
 	const sectionRef = useRef<HTMLDivElement>(null);
 	const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const {
-		registerFileRef,
-		viewedFiles,
-		setFileViewed,
-		setActiveFileKey,
-		containerRef,
-	} = useScrollContextRequired();
+	const { registerFileRef, viewedFiles, setFileViewed, setActiveFileKey, containerRef } =
+		useScrollContextRequired();
 	const { viewMode: diffViewMode, hideUnchangedRegions } = useChangesStore();
 	const [isCopied, setIsCopied] = useState(false);
 	const [hasBeenVisible, setHasBeenVisible] = useState(false);
@@ -91,8 +83,7 @@ export function FileDiffSection({
 	const fileKey = createFileKey(file, category, commitHash);
 	const isViewed = viewedFiles.has(fileKey);
 
-	const openInEditorMutation =
-		electronTrpc.external.openFileInEditor.useMutation();
+	const openInEditorMutation = electronTrpc.external.openFileInEditor.useMutation();
 
 	const handleOpenInEditor = useCallback(
 		(e: React.MouseEvent) => {
@@ -198,10 +189,7 @@ export function FileDiffSection({
 				defaultBranch: category === "against-base" ? baseBranch : undefined,
 			},
 			{
-				enabled:
-					isExpanded &&
-					(!isHiddenByDefault || loadHiddenDiff) &&
-					!!worktreePath,
+				enabled: isExpanded && (!isHiddenByDefault || loadHiddenDiff) && !!worktreePath,
 			},
 		);
 
@@ -212,10 +200,7 @@ export function FileDiffSection({
 	const shouldRenderEditor = hasBeenVisible && diffData;
 
 	return (
-		<div
-			ref={sectionRef}
-			className="mx-2 my-2 border border-border rounded-lg overflow-hidden"
-		>
+		<div ref={sectionRef} className="mx-2 my-2 border border-border rounded-lg overflow-hidden">
 			<Collapsible open={isExpanded} onOpenChange={onToggleExpanded}>
 				<FileDiffHeader
 					file={file}
@@ -245,11 +230,7 @@ export function FileDiffSection({
 									? "Generated file hidden"
 									: `Large diff hidden — ${totalChanges.toLocaleString()} lines changed`}
 							</p>
-							<Button
-								variant="outline"
-								size="sm"
-								onClick={() => setLoadHiddenDiff(true)}
-							>
+							<Button variant="outline" size="sm" onClick={() => setLoadHiddenDiff(true)}>
 								Load diff
 							</Button>
 						</div>

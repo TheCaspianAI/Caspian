@@ -2,20 +2,13 @@ import "react-mosaic-component/react-mosaic-component.css";
 import "./mosaic-theme.css";
 
 import { useCallback, useEffect, useMemo } from "react";
-import {
-	Mosaic,
-	type MosaicBranch,
-	type MosaicNode,
-} from "react-mosaic-component";
+import { Mosaic, type MosaicBranch, type MosaicNode } from "react-mosaic-component";
 import { dragDropManager } from "renderer/lib/dnd";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useTabsStore } from "renderer/stores/tabs/store";
 import type { Tab } from "renderer/stores/tabs/types";
 import { useTabsWithPresets } from "renderer/stores/tabs/useTabsWithPresets";
-import {
-	cleanLayout,
-	extractPaneIdsFromLayout,
-} from "renderer/stores/tabs/utils";
+import { cleanLayout, extractPaneIdsFromLayout } from "renderer/stores/tabs/utils";
 import { FileViewerPane } from "./FileViewerPane";
 import { TabPane } from "./TabPane";
 
@@ -27,8 +20,7 @@ export function TabView({ tab }: TabViewProps) {
 	const updateTabLayout = useTabsStore((s) => s.updateTabLayout);
 	const removePane = useTabsStore((s) => s.removePane);
 	const removeTab = useTabsStore((s) => s.removeTab);
-	const { splitPaneAuto, splitPaneHorizontal, splitPaneVertical } =
-		useTabsWithPresets();
+	const { splitPaneAuto, splitPaneHorizontal, splitPaneVertical } = useTabsWithPresets();
 	const setFocusedPane = useTabsStore((s) => s.setFocusedPane);
 	const focusedPaneId = useTabsStore((s) => s.focusedPaneIds[tab.id]);
 	const movePaneToTab = useTabsStore((s) => s.movePaneToTab);
@@ -44,15 +36,10 @@ export function TabView({ tab }: TabViewProps) {
 	const worktreePath = workspace?.worktreePath ?? "";
 
 	// Get tabs in the same node for move targets
-	const nodeTabs = allTabs.filter(
-		(t) => t.nodeId === tab.nodeId,
-	);
+	const nodeTabs = allTabs.filter((t) => t.nodeId === tab.nodeId);
 
 	// Extract pane IDs from layout
-	const layoutPaneIds = useMemo(
-		() => extractPaneIdsFromLayout(tab.layout),
-		[tab.layout],
-	);
+	const layoutPaneIds = useMemo(() => extractPaneIdsFromLayout(tab.layout), [tab.layout]);
 
 	// Memoize the filtered panes to avoid creating new objects on every render
 	const tabPanes = useMemo(() => {
@@ -91,15 +78,11 @@ export function TabView({ tab }: TabViewProps) {
 			const freshPanes = state.panes;
 
 			// Use fresh tab layout to determine what panes were removed
-			const oldPaneIds = extractPaneIdsFromLayout(
-				freshTab?.layout ?? newLayout,
-			);
+			const oldPaneIds = extractPaneIdsFromLayout(freshTab?.layout ?? newLayout);
 			const newPaneIds = extractPaneIdsFromLayout(newLayout);
 
 			// Find removed panes (e.g., from Mosaic close button)
-			const removedPaneIds = oldPaneIds.filter(
-				(id) => !newPaneIds.includes(id),
-			);
+			const removedPaneIds = oldPaneIds.filter((id) => !newPaneIds.includes(id));
 
 			// Remove panes that were removed via Mosaic UI
 			// But skip panes that were moved to another tab (their tabId changed)

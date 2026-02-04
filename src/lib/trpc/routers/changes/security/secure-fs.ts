@@ -1,13 +1,5 @@
 import type { Stats } from "node:fs";
-import {
-	lstat,
-	readFile,
-	readlink,
-	realpath,
-	rm,
-	stat,
-	writeFile,
-} from "node:fs/promises";
+import { lstat, readFile, readlink, realpath, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import {
 	assertRegisteredWorktree,
@@ -31,10 +23,7 @@ import {
  * Check if a resolved path is within the worktree boundary using path.relative().
  * This is safer than string prefix matching which can have boundary bugs.
  */
-function isPathWithinWorktree(
-	worktreeReal: string,
-	targetReal: string,
-): boolean {
+function isPathWithinWorktree(worktreeReal: string, targetReal: string): boolean {
 	if (targetReal === worktreeReal) {
 		return true;
 	}
@@ -46,9 +35,7 @@ function isPathWithinWorktree(
 	// Note: Don't use startsWith("..") as it incorrectly catches "..config" directories
 	// Note: Empty relativePath ("") case is already handled by the equality check above
 	const escapesWorktree =
-		relativePath === ".." ||
-		relativePath.startsWith(`..${sep}`) ||
-		isAbsolute(relativePath);
+		relativePath === ".." || relativePath.startsWith(`..${sep}`) || isAbsolute(relativePath);
 
 	return !escapesWorktree;
 }
@@ -63,10 +50,7 @@ function isPathWithinWorktree(
  *
  * @throws PathValidationError if any ancestor escapes the worktree
  */
-async function assertParentInWorktree(
-	worktreePath: string,
-	fullPath: string,
-): Promise<void> {
+async function assertParentInWorktree(worktreePath: string, fullPath: string): Promise<void> {
 	const worktreeReal = await realpath(worktreePath);
 	let currentPath = dirname(fullPath);
 
@@ -97,11 +81,7 @@ async function assertParentInWorktree(
 				} catch (error) {
 					// Target doesn't exist - check if the resolved target path
 					// would be within worktree if it existed
-					if (
-						error instanceof Error &&
-						"code" in error &&
-						error.code === "ENOENT"
-					) {
+					if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 						// For dangling symlinks, validate the target path itself
 						// We need to check if the target, when resolved, would be in worktree
 						// This is conservative: if we can't determine, fail closed
@@ -124,10 +104,7 @@ async function assertParentInWorktree(
 						throw error;
 					}
 					// Other errors - fail closed for security
-					throw new PathValidationError(
-						"Cannot validate symlink target",
-						"SYMLINK_ESCAPE",
-					);
+					throw new PathValidationError("Cannot validate symlink target", "SYMLINK_ESCAPE");
 				}
 				return; // Symlink validated successfully
 			}
@@ -145,20 +122,13 @@ async function assertParentInWorktree(
 			if (error instanceof PathValidationError) {
 				throw error;
 			}
-			if (
-				error instanceof Error &&
-				"code" in error &&
-				error.code === "ENOENT"
-			) {
+			if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 				// This ancestor doesn't exist either, keep walking up
 				currentPath = dirname(currentPath);
 				continue;
 			}
 			// Other errors (EACCES, ENOTDIR, etc.) - fail closed for security
-			throw new PathValidationError(
-				"Cannot validate path ancestry",
-				"SYMLINK_ESCAPE",
-			);
+			throw new PathValidationError("Cannot validate path ancestry", "SYMLINK_ESCAPE");
 		}
 	}
 
@@ -175,10 +145,7 @@ async function assertParentInWorktree(
  *
  * @throws PathValidationError if realpath escapes worktree
  */
-async function assertRealpathInWorktree(
-	worktreePath: string,
-	fullPath: string,
-): Promise<void> {
+async function assertRealpathInWorktree(worktreePath: string, fullPath: string): Promise<void> {
 	try {
 		const real = await realpath(fullPath);
 		const worktreeReal = await realpath(worktreePath);
@@ -202,10 +169,7 @@ async function assertRealpathInWorktree(
 			throw error;
 		}
 		// Other errors (permission denied, etc.) - fail closed for security
-		throw new PathValidationError(
-			"Cannot validate file path",
-			"SYMLINK_ESCAPE",
-		);
+		throw new PathValidationError("Cannot validate file path", "SYMLINK_ESCAPE");
 	}
 }
 
@@ -221,10 +185,7 @@ async function assertRealpathInWorktree(
  *
  * @throws PathValidationError if symlink escapes worktree
  */
-async function assertDanglingSymlinkSafe(
-	worktreePath: string,
-	fullPath: string,
-): Promise<void> {
+async function assertDanglingSymlinkSafe(worktreePath: string, fullPath: string): Promise<void> {
 	const worktreeReal = await realpath(worktreePath);
 
 	try {
@@ -302,10 +263,7 @@ export const secureFs = {
 	 *
 	 * @throws PathValidationError with code "SYMLINK_ESCAPE" if file escapes worktree
 	 */
-	async readFileBuffer(
-		worktreePath: string,
-		filePath: string,
-	): Promise<Buffer> {
+	async readFileBuffer(worktreePath: string, filePath: string): Promise<Buffer> {
 		assertRegisteredWorktree(worktreePath);
 		const fullPath = resolvePathInWorktree(worktreePath, filePath);
 
@@ -324,11 +282,7 @@ export const secureFs = {
 	 *
 	 * @throws PathValidationError with code "SYMLINK_ESCAPE" if target escapes worktree
 	 */
-	async writeFile(
-		worktreePath: string,
-		filePath: string,
-		content: string,
-	): Promise<void> {
+	async writeFile(worktreePath: string, filePath: string, content: string): Promise<void> {
 		assertRegisteredWorktree(worktreePath);
 		const fullPath = resolvePathInWorktree(worktreePath, filePath);
 
@@ -361,11 +315,7 @@ export const secureFs = {
 			stats = await lstat(fullPath);
 		} catch (error) {
 			// File doesn't exist - idempotent delete, nothing to do
-			if (
-				error instanceof Error &&
-				"code" in error &&
-				error.code === "ENOENT"
-			) {
+			if (error instanceof Error && "code" in error && error.code === "ENOENT") {
 				return;
 			}
 			throw error;
@@ -441,10 +391,7 @@ export const secureFs = {
 	 * @returns true if the file is definitely a symlink escaping the worktree,
 	 *          false if not escaping OR if we can't determine (errors)
 	 */
-	async isSymlinkEscaping(
-		worktreePath: string,
-		filePath: string,
-	): Promise<boolean> {
+	async isSymlinkEscaping(worktreePath: string, filePath: string): Promise<boolean> {
 		try {
 			assertRegisteredWorktree(worktreePath);
 			const fullPath = resolvePathInWorktree(worktreePath, filePath);

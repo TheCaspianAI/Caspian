@@ -24,16 +24,8 @@ interface FileViewerPaneProps {
 		dimensions: { width: number; height: number },
 		path?: MosaicBranch[],
 	) => void;
-	splitPaneHorizontal: (
-		tabId: string,
-		sourcePaneId: string,
-		path?: MosaicBranch[],
-	) => void;
-	splitPaneVertical: (
-		tabId: string,
-		sourcePaneId: string,
-		path?: MosaicBranch[],
-	) => void;
+	splitPaneHorizontal: (tabId: string, sourcePaneId: string, path?: MosaicBranch[]) => void;
+	splitPaneVertical: (tabId: string, sourcePaneId: string, path?: MosaicBranch[]) => void;
 	removePane: (paneId: string) => void;
 	setFocusedPane: (tabId: string, paneId: string) => void;
 	availableTabs: Tab[];
@@ -97,19 +89,17 @@ export function FileViewerPane({
 		setIsDirty,
 	});
 
-	const { rawFileData, isLoadingRaw, diffData, isLoadingDiff } = useFileContent(
-		{
-			worktreePath,
-			filePath,
-			viewMode,
-			diffCategory,
-			commitHash,
-			oldPath,
-			isDirty,
-			originalContentRef,
-			originalDiffContentRef,
-		},
-	);
+	const { rawFileData, isLoadingRaw, diffData, isLoadingDiff } = useFileContent({
+		worktreePath,
+		filePath,
+		viewMode,
+		diffCategory,
+		commitHash,
+		oldPath,
+		isDirty,
+		originalContentRef,
+		originalDiffContentRef,
+	});
 
 	const handleEditorChange = useCallback((value: string | undefined) => {
 		if (value === undefined) return;
@@ -210,10 +200,7 @@ export function FileViewerPane({
 				await handleSaveRaw();
 				originalContentRef.current = savedContent;
 				originalDiffContentRef.current = "";
-			} else if (
-				viewMode === "diff" &&
-				currentDiffContentRef.current !== undefined
-			) {
+			} else if (viewMode === "diff" && currentDiffContentRef.current !== undefined) {
 				const savedContent = currentDiffContentRef.current;
 				await handleSaveDiff(savedContent);
 				originalDiffContentRef.current = savedContent;
@@ -251,13 +238,10 @@ export function FileViewerPane({
 
 	const fileName = filePath.split("/").pop() || filePath;
 	const isMarkdown =
-		filePath.endsWith(".md") ||
-		filePath.endsWith(".markdown") ||
-		filePath.endsWith(".mdx");
+		filePath.endsWith(".md") || filePath.endsWith(".markdown") || filePath.endsWith(".mdx");
 	const hasDiff = !!diffCategory;
 	const hasDraft = draftContentRef.current !== null;
-	const isDiffEditable =
-		(diffCategory === "staged" || diffCategory === "unstaged") && !hasDraft;
+	const isDiffEditable = (diffCategory === "staged" || diffCategory === "unstaged") && !hasDraft;
 
 	return (
 		<>

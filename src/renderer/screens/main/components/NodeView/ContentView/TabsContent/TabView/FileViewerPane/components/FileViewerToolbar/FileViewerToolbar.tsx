@@ -1,14 +1,9 @@
+import { TbFold, TbLayoutSidebarRightFilled, TbListDetails, TbPinFilled } from "react-icons/tb";
+import type { DiffViewMode } from "shared/changes-types";
+import type { FileViewerMode } from "shared/tabs-types";
 import { ToggleGroup, ToggleGroupItem } from "ui/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import {
-	TbFold,
-	TbLayoutSidebarRightFilled,
-	TbListDetails,
-	TbPinFilled,
-} from "react-icons/tb";
-import type { DiffViewMode } from "shared/changes-types";
-import type { FileViewerMode } from "shared/tabs-types";
 import { PaneToolbarActions } from "../../../components";
 import type { SplitOrientation } from "../../../hooks";
 
@@ -52,21 +47,14 @@ export function FileViewerToolbar({
 	return (
 		<div className="flex h-full w-full items-center justify-between px-3">
 			<div className="flex min-w-0 items-center gap-2">
-				<span
-					className={cn(
-						"truncate text-xs text-muted-foreground",
-						!isPinned && "italic",
-					)}
-				>
+				<span className={cn("truncate text-xs text-muted-foreground", !isPinned && "italic")}>
 					{isDirty && <span className="text-amber-500 mr-1">●</span>}
 					{fileName}
 				</span>
 				{!isPinned && (
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span className="text-caption text-muted-foreground/50 cursor-default">
-								preview
-							</span>
+							<span className="text-caption text-muted-foreground/50 cursor-default">preview</span>
 						</TooltipTrigger>
 						<TooltipContent side="bottom" showArrow={false}>
 							Click again or double-click to pin
@@ -113,9 +101,7 @@ export function FileViewerToolbar({
 									type="button"
 									onClick={() =>
 										onDiffViewModeChange(
-											diffViewMode === "side-by-side"
-												? "inline"
-												: "side-by-side",
+											diffViewMode === "side-by-side" ? "inline" : "side-by-side",
 										)
 									}
 									className="rounded p-0.5 text-muted-foreground/60 transition-colors hover:text-muted-foreground"
@@ -140,18 +126,14 @@ export function FileViewerToolbar({
 									onClick={onToggleHideUnchangedRegions}
 									className={cn(
 										"rounded p-0.5 transition-colors hover:text-muted-foreground",
-										hideUnchangedRegions
-											? "text-foreground"
-											: "text-muted-foreground/60",
+										hideUnchangedRegions ? "text-foreground" : "text-muted-foreground/60",
 									)}
 								>
 									<TbFold className="size-3.5" />
 								</button>
 							</TooltipTrigger>
 							<TooltipContent side="bottom" showArrow={false}>
-								{hideUnchangedRegions
-									? "Show all lines"
-									: "Hide unchanged regions"}
+								{hideUnchangedRegions ? "Show all lines" : "Hide unchanged regions"}
 							</TooltipContent>
 						</Tooltip>
 					</>

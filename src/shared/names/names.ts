@@ -11,15 +11,11 @@
  * getInitials(undefined, "john@example.com") // "J"
  * getInitials() // ""
  */
-export function getInitials(
-	name?: string | null,
-	email?: string | null,
-): string {
+export function getInitials(name?: string | null, email?: string | null): string {
 	if (name) {
 		const parts = name.trim().split(/\s+/);
 		const firstInitial = parts[0]?.[0] ?? "";
-		const lastInitial =
-			parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
+		const lastInitial = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
 		return `${firstInitial}${lastInitial}`.toUpperCase();
 	}
 

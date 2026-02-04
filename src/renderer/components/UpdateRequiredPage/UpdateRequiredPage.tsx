@@ -1,11 +1,11 @@
-import { COMPANY } from "shared/shared-constants";
-import { Button } from "ui/components/ui/button";
 import { useState } from "react";
 import { HiArrowPath, HiExclamationTriangle } from "react-icons/hi2";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { AppFrame } from "renderer/screens/main/components/AppFrame";
 import { Background } from "renderer/screens/main/components/Background";
 import { AUTO_UPDATE_STATUS, type AutoUpdateStatus } from "shared/auto-update";
+import { COMPANY } from "shared/shared-constants";
+import { Button } from "ui/components/ui/button";
 
 interface UpdateRequiredPageProps {
 	currentVersion: string;
@@ -83,13 +83,8 @@ export function UpdateRequiredPage({
 
 					<div className="flex items-center gap-3">
 						{isReady ? (
-							<Button
-								onClick={handleInstall}
-								disabled={installMutation.isPending}
-							>
-								{installMutation.isPending
-									? "Installing..."
-									: "Install & Restart"}
+							<Button onClick={handleInstall} disabled={installMutation.isPending}>
+								{installMutation.isPending ? "Installing..." : "Install & Restart"}
 							</Button>
 						) : (
 							<Button
@@ -97,14 +92,8 @@ export function UpdateRequiredPage({
 								disabled={isLoading || checkMutation.isPending}
 								className="gap-2"
 							>
-								<HiArrowPath
-									className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
-								/>
-								{isChecking
-									? "Checking..."
-									: isDownloading
-										? "Downloading..."
-										: "Check for Update"}
+								<HiArrowPath className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+								{isChecking ? "Checking..." : isDownloading ? "Downloading..." : "Check for Update"}
 							</Button>
 						)}
 

@@ -1,19 +1,19 @@
-import { Input } from "ui/components/ui/input";
-import { toast } from "ui/components/ui/sonner";
-import { cn } from "ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LuCheck, LuPlus, LuSearch } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
-import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
-import { useCloseNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
 import type {
 	FilterMode,
 	NodeItem,
 	RepositoryGroup,
 } from "renderer/screens/main/components/NodesListView/types";
 import { getRelativeTime } from "renderer/screens/main/components/NodesListView/utils";
+import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
+import { useCloseNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
+import { Input } from "ui/components/ui/input";
+import { toast } from "ui/components/ui/sonner";
+import { cn } from "ui/lib/utils";
 
 const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
 	{ value: "all", label: "All" },
@@ -46,8 +46,7 @@ export function NodeSwitcherContent() {
 
 	// Fetch all data
 	const { data: groups = [] } = electronTrpc.nodes.getAllGrouped.useQuery();
-	const { data: allRepositories = [] } =
-		electronTrpc.repositories.getRecents.useQuery();
+	const { data: allRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
 
 	// Fetch worktrees for all repositories
 	const worktreeQueries = electronTrpc.useQueries((t) =>
@@ -204,6 +203,7 @@ export function NodeSwitcherContent() {
 	}, [repositoryGroups]);
 
 	// Reset selection when filtered items change
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Reset on any filter/search change, not just length
 	useEffect(() => {
 		setSelectedIndex(0);
 	}, [filteredItems.length, searchQuery, filterMode]);
@@ -239,13 +239,14 @@ export function NodeSwitcherContent() {
 					e.preventDefault();
 					setSelectedIndex((prev) => findNextIndex(prev, "up"));
 					break;
-				case "Enter":
+				case "Enter": {
 					e.preventDefault();
 					const selectedItem = flatItems[selectedIndex];
 					if (selectedItem && selectedItem.nodeId !== currentNodeId) {
 						handleSelect(selectedItem);
 					}
 					break;
+				}
 			}
 		},
 		[flatItems, selectedIndex, currentNodeId, handleSelect, findNextIndex],
@@ -337,8 +338,7 @@ export function NodeSwitcherContent() {
 							const isCurrentNode = item.nodeId === currentNodeId;
 							const isSelected = itemIndex === selectedIndex && !isCurrentNode;
 							const isOpening =
-								openWorktree.isPending &&
-								openWorktree.variables?.worktreeId === item.worktreeId;
+								openWorktree.isPending && openWorktree.variables?.worktreeId === item.worktreeId;
 
 							return (
 								<button
@@ -375,9 +375,7 @@ export function NodeSwitcherContent() {
 										<span className="text-[10px] text-muted-foreground/40">
 											{getRelativeTime(item.lastOpenedAt)}
 										</span>
-										{isCurrentNode && (
-											<LuCheck className="size-3 text-muted-foreground/50" />
-										)}
+										{isCurrentNode && <LuCheck className="size-3 text-muted-foreground/50" />}
 									</div>
 								</button>
 							);

@@ -1,11 +1,7 @@
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "ui/components/ui/collapsible";
-import { cn } from "ui/lib/utils";
 import type { ReactNode } from "react";
 import { HiChevronRight } from "react-icons/hi2";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
+import { cn } from "ui/lib/utils";
 
 interface CollapsibleRowProps {
 	isExpanded: boolean;
@@ -29,11 +25,7 @@ export function CollapsibleRow({
 	contentClassName,
 }: CollapsibleRowProps) {
 	return (
-		<Collapsible
-			open={isExpanded}
-			onOpenChange={onToggle}
-			className={cn("min-w-0", className)}
-		>
+		<Collapsible open={isExpanded} onOpenChange={onToggle} className={cn("min-w-0", className)}>
 			<CollapsibleTrigger
 				className={cn(
 					"w-full flex items-center gap-1.5 px-1.5 py-1 text-left rounded-sm",

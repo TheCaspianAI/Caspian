@@ -1,7 +1,4 @@
-import {
-	type ExecFileOptionsWithStringEncoding,
-	execFile,
-} from "node:child_process";
+import { type ExecFileOptionsWithStringEncoding, execFile } from "node:child_process";
 import os from "node:os";
 import { promisify } from "node:util";
 
@@ -36,9 +33,7 @@ export async function getShellEnvironment(): Promise<Record<string, string>> {
 		return { ...cachedEnv };
 	}
 
-	const shell =
-		process.env.SHELL ||
-		(process.platform === "darwin" ? "/bin/zsh" : "/bin/bash");
+	const shell = process.env.SHELL || (process.platform === "darwin" ? "/bin/zsh" : "/bin/bash");
 
 	try {
 		// Use -lc flags (not -ilc):
@@ -89,9 +84,7 @@ export async function getShellEnvironment(): Promise<Record<string, string>> {
 /**
  * Checks if git-lfs is available in the given environment.
  */
-export async function checkGitLfsAvailable(
-	env: Record<string, string>,
-): Promise<boolean> {
+export async function checkGitLfsAvailable(env: Record<string, string>): Promise<boolean> {
 	try {
 		await execFileAsync("git", ["lfs", "version"], {
 			timeout: 5_000,

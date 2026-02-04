@@ -1,4 +1,10 @@
 import type { ExternalApp } from "lib/local-db";
+import { memo, useCallback, useMemo } from "react";
+import { HiChevronDown } from "react-icons/hi2";
+import { LuCopy } from "react-icons/lu";
+import { APP_OPTIONS, getAppOption } from "renderer/components/OpenInButton";
+import { electronTrpc } from "renderer/lib/electron-trpc";
+import { useHotkeyText } from "renderer/stores/hotkeys";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,12 +16,6 @@ import {
 import { toast } from "ui/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { cn } from "ui/lib/utils";
-import { memo, useCallback, useMemo } from "react";
-import { HiChevronDown } from "react-icons/hi2";
-import { LuCopy } from "react-icons/lu";
-import { APP_OPTIONS, getAppOption } from "renderer/components/OpenInButton";
-import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useHotkeyText } from "renderer/stores/hotkeys";
 
 interface OpenInMenuButtonProps {
 	worktreePath: string;
@@ -27,10 +27,12 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 	branch,
 }: OpenInMenuButtonProps) {
 	const utils = electronTrpc.useUtils();
-	const { data: lastUsedApp = "cursor" } =
-		electronTrpc.settings.getLastUsedApp.useQuery(undefined, {
+	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery(
+		undefined,
+		{
 			staleTime: 30000,
-		});
+		},
+	);
 	const openInApp = electronTrpc.external.openInApp.useMutation({
 		onSuccess: () => utils.settings.getLastUsedApp.invalidate(),
 		onError: (error) => toast.error(`Failed to open: ${error.message}`),
@@ -83,11 +85,7 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 							isLoading && "opacity-50 pointer-events-none",
 						)}
 					>
-						<img
-							src={currentApp.icon}
-							alt=""
-							className="size-3.5 object-contain shrink-0"
-						/>
+						<img src={currentApp.icon} alt="" className="size-3.5 object-contain shrink-0" />
 						{branch && (
 							<span className="text-muted-foreground truncate max-w-[140px] tabular-nums leading-none">
 								/{branch}
@@ -106,11 +104,7 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 								</kbd>
 							)}
 						</span>
-						{branch && (
-							<span className="text-xs text-muted-foreground font-mono">
-								/{branch}
-							</span>
-						)}
+						{branch && <span className="text-xs text-muted-foreground font-mono">/{branch}</span>}
 					</div>
 				</TooltipContent>
 			</Tooltip>
@@ -136,15 +130,8 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 
 				<DropdownMenuContent align="end" className="w-48">
 					{APP_OPTIONS.map((app) => (
-						<DropdownMenuItem
-							key={app.id}
-							onClick={() => handleOpenInOtherApp(app.id)}
-						>
-							<img
-								src={app.icon}
-								alt=""
-								className="size-4 object-contain mr-2"
-							/>
+						<DropdownMenuItem key={app.id} onClick={() => handleOpenInOtherApp(app.id)}>
+							<img src={app.icon} alt="" className="size-4 object-contain mr-2" />
 							{app.label}
 							{app.id === lastUsedApp && showOpenInShortcut && (
 								<DropdownMenuShortcut>{openInShortcut}</DropdownMenuShortcut>

@@ -73,8 +73,7 @@ export function sortFilesGroupedOrder(files: ChangedFile[]): ChangedFile[] {
 
 	for (const file of files) {
 		const pathParts = file.path.split("/");
-		const folderPath =
-			pathParts.length > 1 ? pathParts.slice(0, -1).join("/") : "";
+		const folderPath = pathParts.length > 1 ? pathParts.slice(0, -1).join("/") : "";
 
 		if (!folderMap.has(folderPath)) {
 			folderMap.set(folderPath, []);
@@ -83,9 +82,7 @@ export function sortFilesGroupedOrder(files: ChangedFile[]): ChangedFile[] {
 		if (folderFiles) folderFiles.push(file);
 	}
 
-	const sortedFolders = Array.from(folderMap.keys()).sort((a, b) =>
-		a.localeCompare(b),
-	);
+	const sortedFolders = Array.from(folderMap.keys()).sort((a, b) => a.localeCompare(b));
 
 	const result: ChangedFile[] = [];
 	for (const folder of sortedFolders) {
@@ -104,11 +101,6 @@ export function sortFilesGroupedOrder(files: ChangedFile[]): ChangedFile[] {
 
 export type FileListViewMode = "tree" | "grouped";
 
-export function sortFiles(
-	files: ChangedFile[],
-	viewMode: FileListViewMode,
-): ChangedFile[] {
-	return viewMode === "tree"
-		? sortFilesTreeOrder(files)
-		: sortFilesGroupedOrder(files);
+export function sortFiles(files: ChangedFile[], viewMode: FileListViewMode): ChangedFile[] {
+	return viewMode === "tree" ? sortFilesTreeOrder(files) : sortFilesGroupedOrder(files);
 }

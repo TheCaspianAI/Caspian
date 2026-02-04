@@ -21,9 +21,7 @@ type CloseContext = {
  * then performs actual close in background.
  * Automatically navigates away if the closed node is currently being viewed.
  */
-export function useCloseNode(
-	options?: Parameters<typeof electronTrpc.nodes.close.useMutation>[0],
-) {
+export function useCloseNode(options?: Parameters<typeof electronTrpc.nodes.close.useMutation>[0]) {
 	const utils = electronTrpc.useUtils();
 	const navigate = useNavigate();
 	const params = useParams({ strict: false });
@@ -32,10 +30,7 @@ export function useCloseNode(
 		...options,
 		onMutate: async ({ id }) => {
 			// Cancel outgoing refetches to avoid overwriting optimistic update
-			await Promise.all([
-				utils.nodes.getAll.cancel(),
-				utils.nodes.getAllGrouped.cancel(),
-			]);
+			await Promise.all([utils.nodes.getAll.cancel(), utils.nodes.getAllGrouped.cancel()]);
 
 			// Snapshot previous values for rollback
 			const previousGrouped = utils.nodes.getAllGrouped.getData();
@@ -68,10 +63,7 @@ export function useCloseNode(
 		onError: (_err, _variables, context) => {
 			// Rollback to previous state on error
 			if (context?.previousGrouped !== undefined) {
-				utils.nodes.getAllGrouped.setData(
-					undefined,
-					context.previousGrouped,
-				);
+				utils.nodes.getAllGrouped.setData(undefined, context.previousGrouped);
 			}
 			if (context?.previousAll !== undefined) {
 				utils.nodes.getAll.setData(undefined, context.previousAll);
@@ -86,10 +78,9 @@ export function useCloseNode(
 			// If the closed node is currently being viewed, navigate away
 			if (params.nodeId === variables.id) {
 				// Try to navigate to previous node first, then next
-				const prevNodeId =
-					await utils.nodes.getPreviousNode.fetch({
-						id: variables.id,
-					});
+				const prevNodeId = await utils.nodes.getPreviousNode.fetch({
+					id: variables.id,
+				});
 				const nextNodeId = await utils.nodes.getNextNode.fetch({
 					id: variables.id,
 				});

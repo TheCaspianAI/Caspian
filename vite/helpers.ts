@@ -19,10 +19,7 @@ function copyDir({ src, dest }: { src: string; dest: string }): void {
 	cpSync(src, dest, { recursive: true });
 }
 
-export function defineEnv(
-	value: string | undefined,
-	fallback?: string,
-): string {
+export function defineEnv(value: string | undefined, fallback?: string): string {
 	return JSON.stringify(value ?? fallback);
 }
 

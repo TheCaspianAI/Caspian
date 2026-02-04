@@ -1,4 +1,3 @@
-import { toast } from "ui/components/ui/sonner";
 import { ClipboardAddon } from "@xterm/addon-clipboard";
 import { FitAddon } from "@xterm/addon-fit";
 import { ImageAddon } from "@xterm/addon-image";
@@ -11,11 +10,8 @@ import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { getHotkeyKeys, isAppHotkeyEvent } from "renderer/stores/hotkeys";
 import { toXtermTheme } from "renderer/stores/theme/utils";
 import { isTerminalReservedEvent, matchesHotkeyEvent } from "shared/hotkeys";
-import {
-	builtInThemes,
-	DEFAULT_THEME_ID,
-	getTerminalColors,
-} from "shared/themes";
+import { builtInThemes, DEFAULT_THEME_ID, getTerminalColors } from "shared/themes";
+import { toast } from "ui/components/ui/sonner";
 import { RESIZE_DEBOUNCE_MS, TERMINAL_OPTIONS } from "./config";
 import { FilePathLinkProvider, UrlLinkProvider } from "./link-providers";
 import { suppressQueryResponses } from "./suppressQueryResponses";
@@ -114,9 +110,7 @@ function loadRenderer(xterm: XTerm): TerminalRenderer {
 		webglAddon = new WebglAddon();
 
 		webglAddon.onContextLoss(() => {
-			console.warn(
-				"[Terminal] WebGL context lost, falling back to DOM renderer",
-			);
+			console.warn("[Terminal] WebGL context lost, falling back to DOM renderer");
 			webglAddon?.dispose();
 			webglAddon = null;
 			kind = "dom";
@@ -127,10 +121,7 @@ function loadRenderer(xterm: XTerm): TerminalRenderer {
 		xterm.loadAddon(webglAddon);
 		kind = "webgl";
 	} catch (e) {
-		console.warn(
-			"[Terminal] WebGL could not be loaded, falling back to DOM renderer",
-			e,
-		);
+		console.warn("[Terminal] WebGL could not be loaded, falling back to DOM renderer", e);
 		suggestedRendererType = "dom";
 		webglAddon = null;
 		kind = "dom";
@@ -238,39 +229,29 @@ export function createTerminalInstance(
 		trpcClient.external.openUrl.mutate(uri).catch((error) => {
 			console.error("[Terminal] Failed to open URL:", uri, error);
 			toast.error("Failed to open URL", {
-				description:
-					error instanceof Error
-						? error.message
-						: "Could not open URL in browser",
+				description: error instanceof Error ? error.message : "Could not open URL in browser",
 			});
 		});
 	});
 	xterm.registerLinkProvider(urlLinkProvider);
 
-	const filePathLinkProvider = new FilePathLinkProvider(
-		xterm,
-		(_event, path, line, column) => {
-			if (onFileLinkClick) {
-				onFileLinkClick(path, line, column);
-			} else {
-				// Fallback to default behavior (external editor)
-				trpcClient.external.openFileInEditor
-					.mutate({
-						path,
-						line,
-						column,
-						cwd,
-					})
-					.catch((error) => {
-						console.error(
-							"[Terminal] Failed to open file in editor:",
-							path,
-							error,
-						);
-					});
-			}
-		},
-	);
+	const filePathLinkProvider = new FilePathLinkProvider(xterm, (_event, path, line, column) => {
+		if (onFileLinkClick) {
+			onFileLinkClick(path, line, column);
+		} else {
+			// Fallback to default behavior (external editor)
+			trpcClient.external.openFileInEditor
+				.mutate({
+					path,
+					line,
+					column,
+					cwd,
+				})
+				.catch((error) => {
+					console.error("[Terminal] Failed to open file in editor:", path, error);
+				});
+		}
+	});
 	xterm.registerLinkProvider(filePathLinkProvider);
 
 	xterm.unicode.activeVersion = "11";
@@ -357,10 +338,7 @@ export function setupCopyHandler(xterm: XTerm): () => void {
  *
  * Returns a cleanup function to remove the handler.
  */
-export function setupPasteHandler(
-	xterm: XTerm,
-	options: PasteHandlerOptions = {},
-): () => void {
+export function setupPasteHandler(xterm: XTerm, options: PasteHandlerOptions = {}): () => void {
 	const textarea = xterm.textarea;
 	if (!textarea) return () => {};
 
@@ -425,9 +403,7 @@ export function setupPasteHandler(
 
 		// For small/medium pastes, preserve the fast path and avoid timers.
 		if (preparedText.length <= MAX_SYNC_PASTE_CHARS) {
-			options.onWrite(
-				shouldBracket ? `\x1b[200~${preparedText}\x1b[201~` : preparedText,
-			);
+			options.onWrite(shouldBracket ? `\x1b[200~${preparedText}\x1b[201~` : preparedText);
 			return;
 		}
 
@@ -486,11 +462,7 @@ export function setupKeyboardHandler(
 ): () => void {
 	const handler = (event: KeyboardEvent): boolean => {
 		const isShiftEnter =
-			event.key === "Enter" &&
-			event.shiftKey &&
-			!event.metaKey &&
-			!event.ctrlKey &&
-			!event.altKey;
+			event.key === "Enter" && event.shiftKey && !event.metaKey && !event.ctrlKey && !event.altKey;
 
 		if (isShiftEnter) {
 			if (event.type === "keydown" && options.onShiftEnter) {
@@ -546,8 +518,7 @@ export function setupKeyboardHandler(
 		if (isTerminalReservedEvent(event)) return true;
 
 		const clearKeys = getHotkeyKeys("CLEAR_TERMINAL");
-		const isClearShortcut =
-			clearKeys !== null && matchesHotkeyEvent(event, clearKeys);
+		const isClearShortcut = clearKeys !== null && matchesHotkeyEvent(event, clearKeys);
 
 		if (isClearShortcut) {
 			if (event.type === "keydown" && options.onClear) {
@@ -575,10 +546,7 @@ export function setupKeyboardHandler(
 	};
 }
 
-export function setupFocusListener(
-	xterm: XTerm,
-	onFocus: () => void,
-): (() => void) | null {
+export function setupFocusListener(xterm: XTerm, onFocus: () => void): (() => void) | null {
 	const textarea = xterm.textarea;
 	if (!textarea) return null;
 
@@ -676,16 +644,12 @@ function getTerminalCoordsFromEvent(
  *
  * Returns a cleanup function to remove the handler.
  */
-export function setupClickToMoveCursor(
-	xterm: XTerm,
-	options: ClickToMoveOptions,
-): () => void {
+export function setupClickToMoveCursor(xterm: XTerm, options: ClickToMoveOptions): () => void {
 	const handleClick = (event: MouseEvent) => {
 		// Don't interfere with full-screen apps (vim, less, etc. use alternate buffer)
 		if (xterm.buffer.active !== xterm.buffer.normal) return;
 		if (event.button !== 0) return;
-		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey)
-			return;
+		if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
 		if (xterm.hasSelection()) return;
 
 		const coords = getTerminalCoordsFromEvent(xterm, event);

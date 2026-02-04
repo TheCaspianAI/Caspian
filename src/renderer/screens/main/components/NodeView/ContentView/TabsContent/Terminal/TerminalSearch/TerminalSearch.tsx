@@ -1,8 +1,8 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import type { ISearchOptions, SearchAddon } from "@xterm/addon-search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HiChevronDown, HiChevronUp, HiMiniXMark } from "react-icons/hi2";
 import { PiTextAa } from "react-icons/pi";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 interface TerminalSearchProps {
 	searchAddon: SearchAddon | null;
@@ -19,11 +19,7 @@ const SEARCH_DECORATIONS: ISearchOptions["decorations"] = {
 	activeMatchColorOverviewRuler: "#ffd33d",
 };
 
-export function TerminalSearch({
-	searchAddon,
-	isOpen,
-	onClose,
-}: TerminalSearchProps) {
+export function TerminalSearch({ searchAddon, isOpen, onClose }: TerminalSearchProps) {
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [query, setQuery] = useState("");
 	const [matchCount, setMatchCount] = useState<number | null>(null);
@@ -128,9 +124,7 @@ export function TerminalSearch({
 				className="h-6 min-w-0 w-28 flex-shrink bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
 			/>
 			{matchCount === 0 && query && (
-				<span className="text-xs text-muted-foreground whitespace-nowrap px-1">
-					No results
-				</span>
+				<span className="text-xs text-muted-foreground whitespace-nowrap px-1">No results</span>
 			)}
 			<div className="flex items-center shrink-0">
 				<Tooltip>

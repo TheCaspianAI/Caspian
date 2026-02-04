@@ -1,7 +1,7 @@
-import { Button } from "ui/components/ui/button";
-import { Input } from "ui/components/ui/input";
 import { GoGitPullRequest } from "react-icons/go";
 import { LuLoader } from "react-icons/lu";
+import { Button } from "ui/components/ui/button";
+import { Input } from "ui/components/ui/input";
 
 interface PrUrlSectionProps {
 	prUrl: string;
@@ -10,12 +10,7 @@ interface PrUrlSectionProps {
 	isPending: boolean;
 }
 
-export function PrUrlSection({
-	prUrl,
-	onPrUrlChange,
-	onSubmit,
-	isPending,
-}: PrUrlSectionProps) {
+export function PrUrlSection({ prUrl, onPrUrlChange, onSubmit, isPending }: PrUrlSectionProps) {
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" && !isPending) {
 			e.preventDefault();

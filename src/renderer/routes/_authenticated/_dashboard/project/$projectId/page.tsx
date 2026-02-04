@@ -1,16 +1,3 @@
-import { Button } from "ui/components/ui/button";
-import { Collapsible, CollapsibleTrigger } from "ui/components/ui/collapsible";
-import {
-	Command,
-	CommandEmpty,
-	CommandInput,
-	CommandItem,
-	CommandList,
-} from "ui/components/ui/command";
-import { Input } from "ui/components/ui/input";
-import { Textarea } from "ui/components/ui/textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
-import { toast } from "ui/components/ui/sonner";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -21,17 +8,25 @@ import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
 import { electronTrpcClient as trpcClient } from "renderer/lib/trpc-client";
 import { useCreateNode } from "renderer/react-query/nodes";
 import { NotFound } from "renderer/routes/not-found";
+import { Button } from "ui/components/ui/button";
+import { Collapsible, CollapsibleTrigger } from "ui/components/ui/collapsible";
+import {
+	Command,
+	CommandEmpty,
+	CommandInput,
+	CommandItem,
+	CommandList,
+} from "ui/components/ui/command";
+import { Input } from "ui/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
+import { toast } from "ui/components/ui/sonner";
+import { Textarea } from "ui/components/ui/textarea";
 
-export const Route = createFileRoute(
-	"/_authenticated/_dashboard/project/$projectId/",
-)({
+export const Route = createFileRoute("/_authenticated/_dashboard/project/$projectId/")({
 	component: ProjectPage,
 	notFoundComponent: NotFound,
 	loader: async ({ params, context }) => {
-		const queryKey = [
-			["repositories", "get"],
-			{ input: { id: params.projectId }, type: "query" },
-		];
+		const queryKey = [["repositories", "get"], { input: { id: params.projectId }, type: "query" }];
 
 		try {
 			await context.queryClient.ensureQueryData({
@@ -108,9 +103,7 @@ function ProjectPage() {
 		if (!branchData?.branches) return [];
 		if (!branchSearch) return branchData.branches;
 		const searchLower = branchSearch.toLowerCase();
-		return branchData.branches.filter((b) =>
-			b.name.toLowerCase().includes(searchLower),
-		);
+		return branchData.branches.filter((b) => b.name.toLowerCase().includes(searchLower));
 	}, [branchData?.branches, branchSearch]);
 
 	const effectiveBaseBranch = baseBranch ?? branchData?.defaultBranch ?? null;
@@ -148,9 +141,7 @@ function ProjectPage() {
 				description: "Setting up in the background...",
 			});
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Failed to create node",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to create node");
 		}
 	};
 
@@ -164,15 +155,10 @@ function ProjectPage() {
 				{/* Main content */}
 				<div className="flex-1 flex items-center justify-center py-12">
 					{/* biome-ignore lint/a11y/noStaticElementInteractions: Form container handles Enter key for submission */}
-					<div
-						className="w-full max-w-xl text-center"
-						onKeyDown={handleKeyDown}
-					>
+					<div className="w-full max-w-xl text-center" onKeyDown={handleKeyDown}>
 						{/* Project context */}
 						<div className="flex items-center justify-center gap-2 mb-8">
-							<span className="text-sm text-muted-foreground/80">
-								{project.name}
-							</span>
+							<span className="text-sm text-muted-foreground/80">{project.name}</span>
 							<span className="text-muted-foreground/30">·</span>
 							<span className="text-sm text-muted-foreground/60 font-mono">
 								{branchData?.defaultBranch ?? "main"}
@@ -194,10 +180,7 @@ function ProjectPage() {
 						{/* Form */}
 						<div className="space-y-5 max-w-md mx-auto">
 							<div className="space-y-2">
-								<label
-									htmlFor="task-title"
-									className="block text-sm text-muted-foreground/70"
-								>
+								<label htmlFor="task-title" className="block text-sm text-muted-foreground/70">
 									Name your task
 								</label>
 								<Input
@@ -215,12 +198,9 @@ function ProjectPage() {
 							>
 								<GoGitBranch className="size-3.5" />
 								<span className="font-mono">
-									{generateBranchFromTitle({ title, authorPrefix }) ||
-										"branch-name"}
+									{generateBranchFromTitle({ title, authorPrefix }) || "branch-name"}
 								</span>
-								<span className="text-muted-foreground/40">
-									from {effectiveBaseBranch}
-								</span>
+								<span className="text-muted-foreground/40">from {effectiveBaseBranch}</span>
 							</p>
 
 							<Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -247,93 +227,86 @@ function ProjectPage() {
 													<span className="text-sm text-muted-foreground/70">
 														Change base branch
 													</span>
-												{isBranchesError ? (
-													<div className="flex items-center gap-2 h-10 px-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
-														Failed to load branches
-													</div>
-												) : (
-													<Popover
-														open={baseBranchOpen}
-														onOpenChange={setBaseBranchOpen}
-														modal={false}
-													>
-														<PopoverTrigger asChild>
-															<Button
-																variant="outline"
-																className="w-full h-10 justify-between font-normal"
-																disabled={isBranchesLoading}
-															>
-																<span className="flex items-center gap-2 truncate">
-																	<GoGitBranch className="size-4 shrink-0 text-muted-foreground" />
-																	<span className="truncate font-mono">
-																		{effectiveBaseBranch || "Select branch..."}
-																	</span>
-																	{effectiveBaseBranch ===
-																		branchData?.defaultBranch && (
-																		<span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-																			default
-																		</span>
-																	)}
-																</span>
-																<HiChevronUpDown className="size-4 shrink-0 text-muted-foreground" />
-															</Button>
-														</PopoverTrigger>
-														<PopoverContent
-															className="w-[--radix-popover-trigger-width] p-0"
-															align="start"
-															onWheel={(e) => e.stopPropagation()}
+													{isBranchesError ? (
+														<div className="flex items-center gap-2 h-10 px-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+															Failed to load branches
+														</div>
+													) : (
+														<Popover
+															open={baseBranchOpen}
+															onOpenChange={setBaseBranchOpen}
+															modal={false}
 														>
-															<Command shouldFilter={false}>
-																<CommandInput
-																	placeholder="Search branches..."
-																	value={branchSearch}
-																	onValueChange={setBranchSearch}
-																/>
-																<CommandList className="max-h-[200px]">
-																	<CommandEmpty>No branches found</CommandEmpty>
-																	{filteredBranches.map((branch) => (
-																		<CommandItem
-																			key={branch.name}
-																			value={branch.name}
-																			onSelect={() => {
-																				setBaseBranch(branch.name);
-																				setBaseBranchOpen(false);
-																				setBranchSearch("");
-																			}}
-																			className="flex items-center justify-between"
-																		>
-																			<span className="flex items-center gap-2 truncate">
-																				<GoGitBranch className="size-3.5 shrink-0 text-muted-foreground" />
-																				<span className="truncate">
-																					{branch.name}
+															<PopoverTrigger asChild>
+																<Button
+																	variant="outline"
+																	className="w-full h-10 justify-between font-normal"
+																	disabled={isBranchesLoading}
+																>
+																	<span className="flex items-center gap-2 truncate">
+																		<GoGitBranch className="size-4 shrink-0 text-muted-foreground" />
+																		<span className="truncate font-mono">
+																			{effectiveBaseBranch || "Select branch..."}
+																		</span>
+																		{effectiveBaseBranch === branchData?.defaultBranch && (
+																			<span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+																				default
+																			</span>
+																		)}
+																	</span>
+																	<HiChevronUpDown className="size-4 shrink-0 text-muted-foreground" />
+																</Button>
+															</PopoverTrigger>
+															<PopoverContent
+																className="w-[--radix-popover-trigger-width] p-0"
+																align="start"
+																onWheel={(e) => e.stopPropagation()}
+															>
+																<Command shouldFilter={false}>
+																	<CommandInput
+																		placeholder="Search branches..."
+																		value={branchSearch}
+																		onValueChange={setBranchSearch}
+																	/>
+																	<CommandList className="max-h-[200px]">
+																		<CommandEmpty>No branches found</CommandEmpty>
+																		{filteredBranches.map((branch) => (
+																			<CommandItem
+																				key={branch.name}
+																				value={branch.name}
+																				onSelect={() => {
+																					setBaseBranch(branch.name);
+																					setBaseBranchOpen(false);
+																					setBranchSearch("");
+																				}}
+																				className="flex items-center justify-between"
+																			>
+																				<span className="flex items-center gap-2 truncate">
+																					<GoGitBranch className="size-3.5 shrink-0 text-muted-foreground" />
+																					<span className="truncate">{branch.name}</span>
+																					{branch.name === branchData?.defaultBranch && (
+																						<span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+																							default
+																						</span>
+																					)}
 																				</span>
-																				{branch.name ===
-																					branchData?.defaultBranch && (
-																					<span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-																						default
-																					</span>
-																				)}
-																			</span>
-																			<span className="flex items-center gap-2 shrink-0">
-																				{branch.lastCommitDate > 0 && (
-																					<span className="text-xs text-muted-foreground">
-																						{formatRelativeTime(
-																							branch.lastCommitDate,
-																						)}
-																					</span>
-																				)}
-																				{effectiveBaseBranch ===
-																					branch.name && (
-																					<HiCheck className="size-4 text-primary" />
-																				)}
-																			</span>
-																		</CommandItem>
-																	))}
-																</CommandList>
-															</Command>
-														</PopoverContent>
-													</Popover>
-												)}
+																				<span className="flex items-center gap-2 shrink-0">
+																					{branch.lastCommitDate > 0 && (
+																						<span className="text-xs text-muted-foreground">
+																							{formatRelativeTime(branch.lastCommitDate)}
+																						</span>
+																					)}
+																					{effectiveBaseBranch === branch.name && (
+																						<HiCheck className="size-4 text-primary" />
+																					)}
+																				</span>
+																			</CommandItem>
+																		))}
+																	</CommandList>
+																</Command>
+															</PopoverContent>
+														</Popover>
+													)}
 												</div>
 
 												<div className="space-y-2">

@@ -33,10 +33,7 @@ const KILL_TIMEOUT_MS = 5000;
 const MAX_CONCURRENT_SPAWNS = 3;
 const SPAWN_READY_TIMEOUT_MS = 5000;
 
-function promiseWithTimeout<T>(
-	promise: Promise<T>,
-	timeoutMs: number,
-): Promise<T> {
+function promiseWithTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 	return new Promise<T>((resolve, reject) => {
 		const timeoutId = setTimeout(() => {
 			reject(new Error(`Timeout after ${timeoutMs}ms`));
@@ -67,11 +64,7 @@ export class TerminalHost {
 	constructor({
 		onUnattachedExit,
 	}: {
-		onUnattachedExit?: (event: {
-			sessionId: string;
-			exitCode: number;
-			signal?: number;
-		}) => void;
+		onUnattachedExit?: (event: { sessionId: string; exitCode: number; signal?: number }) => void;
 	} = {}) {
 		this.onUnattachedExit = onUnattachedExit;
 	}
@@ -120,14 +113,9 @@ export class TerminalHost {
 				});
 
 				try {
-					await promiseWithTimeout(
-						session.waitForReady(),
-						SPAWN_READY_TIMEOUT_MS,
-					);
+					await promiseWithTimeout(session.waitForReady(), SPAWN_READY_TIMEOUT_MS);
 				} catch {
-					console.warn(
-						`[TerminalHost] Timeout waiting for PTY ready for session ${sessionId}`,
-					);
+					console.warn(`[TerminalHost] Timeout waiting for PTY ready for session ${sessionId}`);
 				} finally {
 					releaseSpawn();
 				}
@@ -147,10 +135,7 @@ export class TerminalHost {
 						const cmdString = `${request.initialCommands.join(" && ")}\n`;
 						session.write(cmdString);
 					} catch (error) {
-						console.error(
-							`[TerminalHost] Failed to run initial commands for ${sessionId}:`,
-							error,
-						);
+						console.error(`[TerminalHost] Failed to run initial commands for ${sessionId}:`, error);
 					}
 				}
 			}
@@ -355,11 +340,7 @@ export class TerminalHost {
 	/**
 	 * Handle session exit
 	 */
-	private handleSessionExit(
-		sessionId: string,
-		exitCode: number,
-		signal?: number,
-	): void {
+	private handleSessionExit(sessionId: string, exitCode: number, signal?: number): void {
 		this.clearKillTimer(sessionId);
 
 		const session = this.sessions.get(sessionId);

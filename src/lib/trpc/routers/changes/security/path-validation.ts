@@ -1,6 +1,6 @@
 import { isAbsolute, normalize, resolve, sep } from "node:path";
-import { repositories, worktrees } from "lib/local-db";
 import { eq } from "drizzle-orm";
+import { repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 
 /**
@@ -95,20 +95,11 @@ export function assertRegisteredWorktree(workspacePath: string): void {
  *
  * @throws PathValidationError if worktree is not registered
  */
-export function getRegisteredWorktree(
-	worktreePath: string,
-): typeof worktrees.$inferSelect {
-	const worktree = localDb
-		.select()
-		.from(worktrees)
-		.where(eq(worktrees.path, worktreePath))
-		.get();
+export function getRegisteredWorktree(worktreePath: string): typeof worktrees.$inferSelect {
+	const worktree = localDb.select().from(worktrees).where(eq(worktrees.path, worktreePath)).get();
 
 	if (!worktree) {
-		throw new PathValidationError(
-			"Worktree not registered in database",
-			"UNREGISTERED_WORKTREE",
-		);
+		throw new PathValidationError("Worktree not registered in database", "UNREGISTERED_WORKTREE");
 	}
 
 	return worktree;
@@ -131,18 +122,12 @@ export interface ValidatePathOptions {
  *
  * @throws PathValidationError if path is invalid
  */
-export function validateRelativePath(
-	filePath: string,
-	options: ValidatePathOptions = {},
-): void {
+export function validateRelativePath(filePath: string, options: ValidatePathOptions = {}): void {
 	const { allowRoot = false } = options;
 
 	// Reject absolute paths
 	if (isAbsolute(filePath)) {
-		throw new PathValidationError(
-			"Absolute paths are not allowed",
-			"ABSOLUTE_PATH",
-		);
+		throw new PathValidationError("Absolute paths are not allowed", "ABSOLUTE_PATH");
 	}
 
 	const normalized = normalize(filePath);
@@ -150,18 +135,12 @@ export function validateRelativePath(
 
 	// Reject ".." as a path segment (allows "..foo" directories)
 	if (segments.includes("..")) {
-		throw new PathValidationError(
-			"Path traversal not allowed",
-			"PATH_TRAVERSAL",
-		);
+		throw new PathValidationError("Path traversal not allowed", "PATH_TRAVERSAL");
 	}
 
 	// Reject root path unless explicitly allowed
 	if (!allowRoot && (normalized === "" || normalized === ".")) {
-		throw new PathValidationError(
-			"Cannot target worktree root",
-			"INVALID_TARGET",
-		);
+		throw new PathValidationError("Cannot target worktree root", "INVALID_TARGET");
 	}
 }
 

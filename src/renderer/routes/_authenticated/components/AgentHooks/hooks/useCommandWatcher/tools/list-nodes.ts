@@ -3,10 +3,7 @@ import type { CommandResult, ToolContext, ToolDefinition } from "./types";
 
 const schema = z.object({});
 
-async function execute(
-	_params: z.infer<typeof schema>,
-	ctx: ToolContext,
-): Promise<CommandResult> {
+async function execute(_params: z.infer<typeof schema>, ctx: ToolContext): Promise<CommandResult> {
 	const nodes = ctx.getNodes();
 
 	if (!nodes) {

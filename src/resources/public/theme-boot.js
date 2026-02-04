@@ -4,9 +4,7 @@
 	let themeType;
 	try {
 		themeType = localStorage.getItem("theme-type");
-		document.documentElement.classList.add(
-			themeType === "light" ? "light" : "dark",
-		);
+		document.documentElement.classList.add(themeType === "light" ? "light" : "dark");
 	} catch (_e) {
 		document.documentElement.classList.add("dark");
 	}

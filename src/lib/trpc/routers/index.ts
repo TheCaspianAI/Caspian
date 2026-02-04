@@ -9,6 +9,7 @@ import { createExternalRouter } from "./external";
 import { createFilesystemRouter } from "./filesystem";
 import { createHotkeysRouter } from "./hotkeys";
 import { createMenuRouter } from "./menu";
+import { createNodesRouter } from "./nodes";
 import { createNotificationsRouter } from "./notifications";
 import { createPortsRouter } from "./ports";
 import { createRepositoriesRouter } from "./repositories";
@@ -16,7 +17,6 @@ import { createSettingsRouter } from "./settings";
 import { createTerminalRouter } from "./terminal";
 import { createUiStateRouter } from "./ui-state";
 import { createWindowRouter } from "./window";
-import { createNodesRouter } from "./nodes";
 
 export const createAppRouter = (getWindow: () => BrowserWindow | null) => {
 	return router({

@@ -1,6 +1,6 @@
-import { cn } from "ui/lib/utils";
 import { HiCheck } from "react-icons/hi2";
 import { getTerminalColors, type Theme } from "shared/themes";
+import { cn } from "ui/lib/utils";
 
 interface ThemeCardProps {
 	theme: Theme;
@@ -33,33 +33,21 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
 			)}
 		>
 			{/* Theme Preview */}
-			<div
-				className="h-28 p-3 flex flex-col justify-between"
-				style={{ backgroundColor: bgColor }}
-			>
+			<div className="h-28 p-3 flex flex-col justify-between" style={{ backgroundColor: bgColor }}>
 				{/* Fake terminal content */}
 				<div className="space-y-1">
 					<div className="flex items-center gap-1">
-						<span
-							className="text-[11px] font-mono"
-							style={{ color: terminal.green }}
-						>
+						<span className="text-[11px] font-mono" style={{ color: terminal.green }}>
 							$
 						</span>
 						<span className="text-[11px] font-mono" style={{ color: fgColor }}>
 							npm run dev
 						</span>
 					</div>
-					<div
-						className="text-[11px] font-mono"
-						style={{ color: terminal.cyan }}
-					>
+					<div className="text-[11px] font-mono" style={{ color: terminal.cyan }}>
 						Starting development server...
 					</div>
-					<div
-						className="text-[11px] font-mono"
-						style={{ color: terminal.yellow }}
-					>
+					<div className="text-[11px] font-mono" style={{ color: terminal.yellow }}>
 						Ready on http://localhost:3000
 					</div>
 				</div>
@@ -67,11 +55,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
 				{/* Color palette strip */}
 				<div className="flex gap-1 mt-2">
 					{accentColors.map((color, index) => (
-						<div
-							key={index}
-							className="h-2 w-5 rounded-sm"
-							style={{ backgroundColor: color }}
-						/>
+						<div key={index} className="h-2 w-5 rounded-sm" style={{ backgroundColor: color }} />
 					))}
 				</div>
 			</div>
@@ -80,9 +64,7 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
 			<div className="p-3 bg-card border-t flex items-center justify-between">
 				<div>
 					<div className="text-sm font-medium">{theme.name}</div>
-					{theme.author && (
-						<div className="text-xs text-muted-foreground">{theme.author}</div>
-					)}
+					{theme.author && <div className="text-xs text-muted-foreground">{theme.author}</div>}
 				</div>
 				{isSelected && (
 					<div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">

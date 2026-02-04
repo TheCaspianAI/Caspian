@@ -6,7 +6,7 @@ import { prerelease } from "semver";
 import { AUTO_UPDATE_STATUS, type AutoUpdateStatus } from "shared/auto-update";
 import { PLATFORM } from "shared/constants";
 
-const isDev = process.isDev;
+const isDev = !app.isPackaged;
 
 const UPDATE_CHECK_INTERVAL_MS = 1000 * 60 * 60 * 4; // 4 hours
 
@@ -62,11 +62,7 @@ let currentStatus: AutoUpdateStatus = AUTO_UPDATE_STATUS.IDLE;
 let currentVersion: string | undefined;
 let isDismissed = false;
 
-function emitStatus(
-	status: AutoUpdateStatus,
-	version?: string,
-	error?: string,
-): void {
+function emitStatus(status: AutoUpdateStatus, version?: string, error?: string): void {
 	currentStatus = status;
 	currentVersion = version;
 
@@ -141,10 +137,7 @@ export function checkForUpdatesInteractive(): void {
 	autoUpdater
 		.checkForUpdates()
 		.then((result) => {
-			if (
-				!result?.updateInfo ||
-				result.updateInfo.version === app.getVersion()
-			) {
+			if (!result?.updateInfo || result.updateInfo.version === app.getVersion()) {
 				emitStatus(AUTO_UPDATE_STATUS.IDLE);
 				dialog.showMessageBox({
 					type: "info",
@@ -161,8 +154,7 @@ export function checkForUpdatesInteractive(): void {
 				dialog.showMessageBox({
 					type: "info",
 					title: "No Internet Connection",
-					message:
-						"Unable to check for updates. Please check your internet connection.",
+					message: "Unable to check for updates. Please check your internet connection.",
 				});
 				return;
 			}
@@ -177,25 +169,21 @@ export function checkForUpdatesInteractive(): void {
 }
 
 export function simulateUpdateReady(): void {
-	if (env.NODE_ENV !== "development") return;
+	if (process.env.NODE_ENV !== "development") return;
 	isDismissed = false;
 	emitStatus(AUTO_UPDATE_STATUS.READY, "99.0.0-test");
 }
 
 export function simulateDownloading(): void {
-	if (env.NODE_ENV !== "development") return;
+	if (process.env.NODE_ENV !== "development") return;
 	isDismissed = false;
 	emitStatus(AUTO_UPDATE_STATUS.DOWNLOADING, "99.0.0-test");
 }
 
 export function simulateError(): void {
-	if (env.NODE_ENV !== "development") return;
+	if (process.env.NODE_ENV !== "development") return;
 	isDismissed = false;
-	emitStatus(
-		AUTO_UPDATE_STATUS.ERROR,
-		undefined,
-		"Simulated error for testing",
-	);
+	emitStatus(AUTO_UPDATE_STATUS.ERROR, undefined, "Simulated error for testing");
 }
 
 export function setupAutoUpdater(): void {
@@ -232,9 +220,7 @@ export function setupAutoUpdater(): void {
 	});
 
 	autoUpdater.on("update-available", (info) => {
-		console.info(
-			`[auto-updater] Update available: ${info.version}. Downloading...`,
-		);
+		console.info(`[auto-updater] Update available: ${info.version}. Downloading...`);
 		emitStatus(AUTO_UPDATE_STATUS.DOWNLOADING, info.version);
 	});
 
@@ -244,15 +230,11 @@ export function setupAutoUpdater(): void {
 	});
 
 	autoUpdater.on("download-progress", (progress) => {
-		console.info(
-			`[auto-updater] Download progress: ${progress.percent.toFixed(1)}%`,
-		);
+		console.info(`[auto-updater] Download progress: ${progress.percent.toFixed(1)}%`);
 	});
 
 	autoUpdater.on("update-downloaded", (info) => {
-		console.info(
-			`[auto-updater] Update downloaded (${info.version}). Ready to install.`,
-		);
+		console.info(`[auto-updater] Update downloaded (${info.version}). Ready to install.`);
 		emitStatus(AUTO_UPDATE_STATUS.READY, info.version);
 	});
 

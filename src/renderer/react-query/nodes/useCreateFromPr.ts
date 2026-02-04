@@ -4,16 +4,12 @@ import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/
 import { useNodeInitStore } from "renderer/stores/node-init";
 import type { NodeInitProgress } from "shared/types/node-init";
 
-type MutationOptions = Parameters<
-	typeof electronTrpc.nodes.createFromPr.useMutation
->[0];
+type MutationOptions = Parameters<typeof electronTrpc.nodes.createFromPr.useMutation>[0];
 
 export function useCreateFromPr(options?: MutationOptions) {
 	const navigate = useNavigate();
 	const utils = electronTrpc.useUtils();
-	const addPendingTerminalSetup = useNodeInitStore(
-		(s) => s.addPendingTerminalSetup,
-	);
+	const addPendingTerminalSetup = useNodeInitStore((s) => s.addPendingTerminalSetup);
 	const updateProgress = useNodeInitStore((s) => s.updateProgress);
 
 	return electronTrpc.nodes.createFromPr.useMutation({

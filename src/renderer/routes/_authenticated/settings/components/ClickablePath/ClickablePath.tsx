@@ -1,4 +1,8 @@
 import type { ExternalApp } from "lib/local-db";
+import { useState } from "react";
+import { LuCopy, LuExternalLink } from "react-icons/lu";
+import { APP_OPTIONS } from "renderer/components/OpenInButton";
+import { electronTrpc } from "renderer/lib/electron-trpc";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,10 +12,6 @@ import {
 } from "ui/components/ui/dropdown-menu";
 import { toast } from "ui/components/ui/sonner";
 import { cn } from "ui/lib/utils";
-import { useState } from "react";
-import { LuCopy, LuExternalLink } from "react-icons/lu";
-import { APP_OPTIONS } from "renderer/components/OpenInButton";
-import { electronTrpc } from "renderer/lib/electron-trpc";
 
 interface ClickablePathProps {
 	path: string;
@@ -22,10 +22,12 @@ export function ClickablePath({ path, className }: ClickablePathProps) {
 	const [isOpen, setIsOpen] = useState(false);
 	const utils = electronTrpc.useUtils();
 
-	const { data: lastUsedApp = "cursor" } =
-		electronTrpc.settings.getLastUsedApp.useQuery(undefined, {
+	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery(
+		undefined,
+		{
 			staleTime: 30000,
-		});
+		},
+	);
 
 	const openInApp = electronTrpc.external.openInApp.useMutation({
 		onSuccess: () => utils.settings.getLastUsedApp.invalidate(),
@@ -73,17 +75,12 @@ export function ClickablePath({ path, className }: ClickablePathProps) {
 						<img src={app.icon} alt="" className="size-4 object-contain" />
 						<span>{app.label}</span>
 						{app.id === lastUsedApp && (
-							<span className="ml-auto text-xs text-muted-foreground">
-								Default
-							</span>
+							<span className="ml-auto text-xs text-muted-foreground">Default</span>
 						)}
 					</DropdownMenuItem>
 				))}
 				<DropdownMenuSeparator />
-				<DropdownMenuItem
-					onClick={handleCopyPath}
-					className="flex items-center gap-2"
-				>
+				<DropdownMenuItem onClick={handleCopyPath} className="flex items-center gap-2">
 					<LuCopy className="size-4" />
 					<span>Copy path</span>
 				</DropdownMenuItem>

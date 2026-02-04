@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { repositories, settings, nodes, worktrees } from "lib/local-db";
 import { and, eq, isNull, not } from "drizzle-orm";
+import { nodes, repositories, settings, worktrees } from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
 import { nodeInitManager } from "main/lib/node-init-manager";
@@ -34,8 +34,8 @@ import {
 	sanitizeBranchName,
 	worktreeExists,
 } from "../utils/git";
-import { loadSetupConfig } from "../utils/setup";
 import { initializeNodeWorktree } from "../utils/node-init";
+import { loadSetupConfig } from "../utils/setup";
 
 interface CreateNodeFromWorktreeParams {
 	repositoryId: string;
@@ -104,12 +104,7 @@ function handleExistingWorktree({
 	const existingNode = localDb
 		.select()
 		.from(nodes)
-		.where(
-			and(
-				eq(nodes.worktreeId, existingWorktree.id),
-				isNull(nodes.deletingAt),
-			),
-		)
+		.where(and(eq(nodes.worktreeId, existingWorktree.id), isNull(nodes.deletingAt)))
 		.get();
 
 	if (existingNode) {
@@ -286,9 +281,7 @@ export const createCreateProcedures = () => {
 				if (input.useExistingBranch) {
 					existingBranchName = input.branchName?.trim();
 					if (!existingBranchName) {
-						throw new Error(
-							"Branch name is required when using an existing branch",
-						);
+						throw new Error("Branch name is required when using an existing branch");
 					}
 
 					const existingWorktreePath = await getBranchWorktreePath({
@@ -321,13 +314,9 @@ export const createCreateProcedures = () => {
 						mode: prefixMode,
 						customPrefix,
 					});
-					const sanitizedPrefix = rawPrefix
-						? sanitizeAuthorPrefix(rawPrefix)
-						: undefined;
+					const sanitizedPrefix = rawPrefix ? sanitizeAuthorPrefix(rawPrefix) : undefined;
 
-					const existingSet = new Set(
-						existingBranches.map((b) => b.toLowerCase()),
-					);
+					const existingSet = new Set(existingBranches.map((b) => b.toLowerCase()));
 					const prefixWouldCollide =
 						sanitizedPrefix && existingSet.has(sanitizedPrefix.toLowerCase());
 					branchPrefix = prefixWouldCollide ? undefined : sanitizedPrefix;
@@ -450,18 +439,14 @@ export const createCreateProcedures = () => {
 					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
 
-				const branch =
-					input.branch || (await getCurrentBranch(repository.mainRepoPath));
+				const branch = input.branch || (await getCurrentBranch(repository.mainRepoPath));
 				if (!branch) {
 					throw new Error("Could not determine current branch");
 				}
 
 				if (input.branch) {
 					const existingBranchNode = getBranchNode(input.repositoryId);
-					if (
-						existingBranchNode &&
-						existingBranchNode.branch !== branch
-					) {
+					if (existingBranchNode && existingBranchNode.branch !== branch) {
 						throw new Error(
 							`A main node already exists on branch "${existingBranchNode.branch}". ` +
 								`Use the branch switcher to change branches.`,
@@ -521,8 +506,7 @@ export const createCreateProcedures = () => {
 					}
 				}
 
-				const node =
-					insertResult[0] ?? getBranchNode(input.repositoryId);
+				const node = insertResult[0] ?? getBranchNode(input.repositoryId);
 
 				if (!node) {
 					throw new Error("Failed to create or find branch node");
@@ -565,12 +549,7 @@ export const createCreateProcedures = () => {
 				const existingNode = localDb
 					.select()
 					.from(nodes)
-					.where(
-						and(
-							eq(nodes.worktreeId, input.worktreeId),
-							isNull(nodes.deletingAt),
-						),
-					)
+					.where(and(eq(nodes.worktreeId, input.worktreeId), isNull(nodes.deletingAt)))
 					.get();
 				if (existingNode) {
 					throw new Error("Worktree already has an active node");
@@ -581,10 +560,7 @@ export const createCreateProcedures = () => {
 					throw new Error(`Repository ${worktree.repositoryId} not found`);
 				}
 
-				const exists = await worktreeExists(
-					repository.mainRepoPath,
-					worktree.path,
-				);
+				const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 				if (!exists) {
 					throw new Error("Worktree no longer exists on disk");
 				}

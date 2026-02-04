@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import {
-	useNodeSwitcherModalOpen,
 	useCloseNodeSwitcherModal,
+	useNodeSwitcherModalOpen,
 } from "renderer/stores/node-switcher-modal";
 import { NodeSwitcherContent } from "./NodeSwitcherContent";
 
@@ -32,6 +32,10 @@ export function NodeSwitcherModal() {
 			<div
 				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
 				onClick={closeModal}
+				onKeyDown={(e) => e.key === "Escape" && closeModal()}
+				role="button"
+				tabIndex={0}
+				aria-label="Close modal"
 			/>
 			{/* Modal content */}
 			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-[540px] max-h-[70vh] overflow-hidden rounded-xl elevation-2 bg-background">
