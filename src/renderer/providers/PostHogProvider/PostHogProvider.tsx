@@ -12,13 +12,21 @@ export function PostHogProvider({ children }: PostHogProviderProps) {
 
 	useEffect(() => {
 		initPostHog();
-		posthog.capture("desktop_opened");
+		// Only capture if posthog is enabled
+		if (posthog) {
+			posthog.capture("desktop_opened");
+		}
 		setIsInitialized(true);
 	}, []);
 
-	// Don't render children until PostHog is initialized
+	// Don't render children until initialized
 	if (!isInitialized) {
 		return null;
+	}
+
+	// If PostHog is disabled (null), just render children without the provider
+	if (!posthog) {
+		return <>{children}</>;
 	}
 
 	return <PHProvider client={posthog}>{children}</PHProvider>;

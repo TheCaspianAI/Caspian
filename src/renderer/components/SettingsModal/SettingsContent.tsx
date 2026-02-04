@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { X, Search } from "lucide-react";
 import { Button } from "ui/components/ui/button";
 import { Input } from "ui/components/ui/input";
@@ -35,11 +35,23 @@ interface SettingsContentProps {
 export function SettingsContent({ onClose }: SettingsContentProps) {
 	const searchQuery = useSettingsStore((s) => s.searchQuery);
 	const setSearchQuery = useSettingsStore((s) => s.setSearchQuery);
+	const storeActiveSection = useSettingsStore((s) => s.activeSection);
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const { activeSection, registerSection, scrollToSection } = useScrollSync({
 		containerRef,
 	});
+
+	// Scroll to the requested section from store on mount
+	useEffect(() => {
+		if (storeActiveSection !== "appearance") {
+			// Delay to ensure sections are registered after render
+			const timer = setTimeout(() => {
+				scrollToSection(storeActiveSection);
+			}, 0);
+			return () => clearTimeout(timer);
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	// Compute which sections have matches
 	const matchingItems = useMemo(

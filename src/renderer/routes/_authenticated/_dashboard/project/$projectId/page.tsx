@@ -8,6 +8,7 @@ import {
 	CommandList,
 } from "ui/components/ui/command";
 import { Input } from "ui/components/ui/input";
+import { Textarea } from "ui/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popover";
 import { toast } from "ui/components/ui/sonner";
 import { createFileRoute, notFound } from "@tanstack/react-router";
@@ -99,6 +100,8 @@ function ProjectPage() {
 	const [baseBranchOpen, setBaseBranchOpen] = useState(false);
 	const [branchSearch, setBranchSearch] = useState("");
 	const [showAdvanced, setShowAdvanced] = useState(false);
+	const [setupScript, setSetupScript] = useState("");
+	const [teardownScript, setTeardownScript] = useState("");
 	const titleInputRef = useRef<HTMLInputElement>(null);
 
 	const filteredBranches = useMemo(() => {
@@ -183,7 +186,7 @@ function ProjectPage() {
 
 						{/* Subtext */}
 						<p className="text-base text-muted-foreground/80 mb-16">
-							Each workspace is an isolated copy of your codebase.
+							Each node is an isolated copy of your codebase.
 							<br />
 							Work on multiple tasks without conflicts.
 						</p>
@@ -239,10 +242,11 @@ function ProjectPage() {
 											}}
 											className="overflow-hidden"
 										>
-											<div className="pt-4 space-y-2 text-left">
-												<span className="text-sm text-muted-foreground/70">
-													Change base branch
-												</span>
+											<div className="pt-4 space-y-4 text-left">
+												<div className="space-y-2">
+													<span className="text-sm text-muted-foreground/70">
+														Change base branch
+													</span>
 												{isBranchesError ? (
 													<div className="flex items-center gap-2 h-10 px-3 rounded-md border border-destructive/50 bg-destructive/10 text-destructive text-sm">
 														Failed to load branches
@@ -330,6 +334,39 @@ function ProjectPage() {
 														</PopoverContent>
 													</Popover>
 												)}
+												</div>
+
+												<div className="space-y-2">
+													<label
+														htmlFor="setup-script"
+														className="block text-sm text-muted-foreground/70"
+													>
+														Setup script
+													</label>
+													<Textarea
+														id="setup-script"
+														className="font-mono text-sm min-h-[80px] resize-none"
+														placeholder={`# Runs when node is created\ncp ../.env .env\nnpm install`}
+														value={setupScript}
+														onChange={(e) => setSetupScript(e.target.value)}
+													/>
+												</div>
+
+												<div className="space-y-2">
+													<label
+														htmlFor="teardown-script"
+														className="block text-sm text-muted-foreground/70"
+													>
+														Teardown script
+													</label>
+													<Textarea
+														id="teardown-script"
+														className="font-mono text-sm min-h-[80px] resize-none"
+														placeholder={`# Runs when node is deleted\nrm -rf node_modules\nrm .env`}
+														value={teardownScript}
+														onChange={(e) => setTeardownScript(e.target.value)}
+													/>
+												</div>
 											</div>
 										</motion.div>
 									)}

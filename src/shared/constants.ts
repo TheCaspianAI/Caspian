@@ -1,4 +1,4 @@
-import { env } from "./env.shared";
+const isDev = process.env.NODE_ENV === "development";
 
 export const PLATFORM = {
 	IS_MAC: process.platform === "darwin",
@@ -8,10 +8,10 @@ export const PLATFORM = {
 
 // Ports - different for dev vs prod to allow running both simultaneously
 export const PORTS = {
-	VITE_DEV_SERVER: env.NODE_ENV === "development" ? 5927 : 4927,
-	NOTIFICATIONS: env.NODE_ENV === "development" ? 31416 : 31415,
+	VITE_DEV_SERVER: isDev ? 5927 : 4927,
+	NOTIFICATIONS: isDev ? 31416 : 31415,
 	// Electric SQL proxy port (local-first sync)
-	ELECTRIC: env.NODE_ENV === "development" ? 31418 : 31417,
+	ELECTRIC: isDev ? 31418 : 31417,
 };
 
 // Note: For environment-aware paths, use main/lib/app-environment.ts instead.
@@ -20,14 +20,12 @@ export const CASPIAN_DIR_NAMES = {
 	DEV: ".caspian-dev",
 	PROD: ".caspian",
 } as const;
-export const CASPIAN_DIR_NAME =
-	env.NODE_ENV === "development"
-		? CASPIAN_DIR_NAMES.DEV
-		: CASPIAN_DIR_NAMES.PROD;
+export const CASPIAN_DIR_NAME = isDev
+	? CASPIAN_DIR_NAMES.DEV
+	: CASPIAN_DIR_NAMES.PROD;
 
 // Deep link protocol scheme (environment-aware)
-export const PROTOCOL_SCHEME =
-	env.NODE_ENV === "development" ? "caspian-dev" : "caspian";
+export const PROTOCOL_SCHEME = isDev ? "caspian-dev" : "caspian";
 // Repository-level directory name (always .caspian, not conditional)
 export const REPOSITORY_CASPIAN_DIR_NAME = ".caspian";
 export const WORKTREES_DIR_NAME = "worktrees";
@@ -55,5 +53,5 @@ export const DEFAULT_AUTO_APPLY_DEFAULT_PRESET = true;
 
 // External links (documentation, help resources, etc.)
 export const EXTERNAL_LINKS = {
-	SETUP_TEARDOWN_SCRIPTS: `${process.env.NEXT_PUBLIC_DOCS_URL}/setup-teardown-scripts`,
+	SETUP_TEARDOWN_SCRIPTS: "https://docs.trycaspianai.com/setup-teardown-scripts",
 } as const;

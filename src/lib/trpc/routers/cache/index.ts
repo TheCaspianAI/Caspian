@@ -1,6 +1,7 @@
 import { session } from "electron";
-import { env } from "main/env.main";
 import { publicProcedure, router } from "../..";
+
+const API_URL = "https://api.trycaspianai.com";
 
 export const createCacheRouter = () => {
 	return router({
@@ -9,13 +10,10 @@ export const createCacheRouter = () => {
 				// Clear all storage (including HTTP cache) for the API origin only
 				// This targets Electric shape responses without clearing app assets
 				await session.defaultSession.clearStorageData({
-					origin: env.NEXT_PUBLIC_API_URL,
+					origin: API_URL,
 				});
 
-				console.log(
-					"[cache] Cleared Electric cache for origin:",
-					env.NEXT_PUBLIC_API_URL,
-				);
+				console.log("[cache] Cleared Electric cache for origin:", API_URL);
 
 				return { success: true };
 			} catch (error) {

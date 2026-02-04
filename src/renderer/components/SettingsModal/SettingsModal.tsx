@@ -27,7 +27,7 @@ export function SettingsModal() {
 		<div className="fixed inset-0 z-50">
 			{/* Backdrop with blur */}
 			<div
-				className="absolute inset-0 bg-black/40 modal-backdrop-blur"
+				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
 				onClick={closeSettings}
 			/>
 			{/* Modal content */}

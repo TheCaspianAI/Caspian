@@ -1,7 +1,6 @@
 import { EventEmitter } from "node:events";
 import express from "express";
 import { NOTIFICATION_EVENTS } from "shared/constants";
-import { env } from "shared/env.shared";
 import type { AgentLifecycleEvent } from "shared/notification-types";
 import { appState } from "../app-state";
 import { HOOK_PROTOCOL_VERSION } from "../terminal/env";
@@ -17,7 +16,7 @@ export type {
  * Used to validate incoming hook requests and detect cross-environment issues.
  */
 const SERVER_ENV =
-	env.NODE_ENV === "development" ? "development" : "production";
+	process.env.NODE_ENV === "development" ? "development" : "production";
 
 export const notificationsEmitter = new EventEmitter();
 

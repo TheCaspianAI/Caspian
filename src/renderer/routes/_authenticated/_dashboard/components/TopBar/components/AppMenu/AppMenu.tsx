@@ -57,7 +57,7 @@ export function AppMenu() {
 
         {/* Help & Support */}
         <DropdownMenuItem
-          onClick={() => openSettings()}
+          onClick={() => openSettings("preferences")}
         >
           <LuKeyboard className="h-4 w-4" />
           Keyboard Shortcuts

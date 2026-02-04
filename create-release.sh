@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Desktop App Release Script
-# Based on apps/caspian/RELEASE.md
+# Caspian Desktop Release Script
 #
 # Usage:
 #   ./create-release.sh [version] [--publish] [--merge]
@@ -17,22 +16,21 @@
 # 3. Delete existing release/tag if republishing same version
 # 4. Update package.json version
 # 5. Push changes and create a PR if not on main branch
-# 6. Create and push a git tag to trigger the release workflow
-# 7. Monitor the GitHub Actions workflow in real-time
-# 8. Leave release as draft (default) or auto-publish with --publish flag
-# 9. With --merge flag: merge the PR and delete the branch after publishing
+# 6. Create and push a git tag
+# 7. Create a GitHub release (draft by default, or published with --publish)
+# 8. With --merge flag: merge the PR and delete the branch after publishing
 #
 # Features:
 # - Interactive version selection with patch/minor/major options
 # - Supports republishing: Running with same version will clean up and rebuild
 # - Draft by default for review before publishing
-# - Use --publish flag to auto-publish when build completes
+# - Use --publish flag to auto-publish the release
 # - Use --merge flag to merge the PR and delete the branch after publishing
 #
 # Requirements:
 # - GitHub CLI (gh) installed and authenticated
 # - Clean working directory
-# - Running from monorepo root
+# - Running from project root
 
 set -e  # Exit on error
 
@@ -111,21 +109,20 @@ done
 
 # If no version provided, prompt user to select
 if [ -z "$VERSION" ]; then
-    # Check if we're in the monorepo root first
-    if [ ! -f "package.json" ] || [ ! -d "apps/caspian" ]; then
-        error "Please run this script from the monorepo root directory"
+    # Check if we're in the project root
+    if [ ! -f "package.json" ]; then
+        error "Please run this script from the project root directory"
     fi
 
-    # Fetch the latest desktop release version from GitHub
-    # Desktop releases use tags like "desktop-v0.0.1"
-    LATEST_TAG=$(gh release list --json tagName --jq '[.[] | select(.tagName | startswith("desktop-v"))] | .[0].tagName' 2>/dev/null || echo "")
+    # Fetch the latest release version from GitHub
+    LATEST_TAG=$(gh release list --json tagName --jq '[.[] | select(.tagName | startswith("v"))] | .[0].tagName' 2>/dev/null || echo "")
     if [ -n "$LATEST_TAG" ]; then
-        # Extract version from tag (e.g., "desktop-v0.0.1" -> "0.0.1")
-        CURRENT_VERSION="${LATEST_TAG#desktop-v}"
+        # Extract version from tag (e.g., "v0.0.1" -> "0.0.1")
+        CURRENT_VERSION="${LATEST_TAG#v}"
     else
         # Fallback to local package.json if no releases exist yet
-        warn "No existing desktop releases found. Using local package.json version."
-        CURRENT_VERSION=$(node -p "require('./apps/caspian/package.json').version")
+        warn "No existing releases found. Using local package.json version."
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
     fi
     PATCH_VERSION=$(increment_patch "$CURRENT_VERSION")
     MINOR_VERSION=$(increment_minor "$CURRENT_VERSION")
@@ -171,8 +168,7 @@ if [ -z "$VERSION" ]; then
     info "Selected version: ${VERSION}"
 fi
 
-TAG_NAME="desktop-v${VERSION}"
-DESKTOP_DIR="apps/caspian"
+TAG_NAME="v${VERSION}"
 
 # Check if gh CLI is installed
 if ! command -v gh &> /dev/null; then
@@ -187,13 +183,10 @@ fi
 info "Starting release process for version ${VERSION}"
 echo ""
 
-# Check if we're in the monorepo root
-if [ ! -f "package.json" ] || [ ! -d "apps/caspian" ]; then
-    error "Please run this script from the monorepo root directory"
+# Check if we're in the project root
+if [ ! -f "package.json" ]; then
+    error "Please run this script from the project root directory"
 fi
-
-# Navigate to desktop app directory
-cd "${DESKTOP_DIR}"
 
 # 1. Check for uncommitted changes
 info "Checking for uncommitted changes..."
@@ -261,16 +254,14 @@ CURRENT_VERSION=$(node -p "require('./package.json').version")
 if [ "${CURRENT_VERSION}" == "${VERSION}" ]; then
     warn "package.json already has version ${VERSION}"
 else
-    # Update the version using jq to handle workspace dependencies
+    # Update the version using jq
     TMP_FILE=$(mktemp)
     jq ".version = \"${VERSION}\"" package.json > "${TMP_FILE}" && mv "${TMP_FILE}" package.json
-    # Format package.json to match project conventions (jq reformats the JSON)
-    bunx biome format --write package.json
     success "Updated package.json from ${CURRENT_VERSION} to ${VERSION}"
 
     # Commit the version change
     git add package.json
-    git commit -m "chore(desktop): bump version to ${VERSION}"
+    git commit -m "chore: bump version to ${VERSION}"
     success "Committed version change"
 fi
 
@@ -295,14 +286,13 @@ if [ "${CURRENT_BRANCH}" != "${MAIN_BRANCH}" ]; then
         COMMITS_AHEAD=$(git rev-list --count "${MAIN_BRANCH}..HEAD" 2>/dev/null || echo "0")
         if [ "$COMMITS_AHEAD" = "0" ]; then
             warn "No commits ahead of ${MAIN_BRANCH}. Skipping PR creation."
-            warn "The tag will still be created and trigger the release workflow."
         else
             info "Creating pull request..."
             # Disable set -e temporarily to capture exit code
             set +e
             PR_URL=$(gh pr create \
-                --title "chore(desktop): bump version to ${VERSION}" \
-                --body "Bumps desktop app version to ${VERSION}.
+                --title "chore: release v${VERSION}" \
+                --body "Release version ${VERSION}.
 
 This PR was automatically created by the release script." \
                 --base "${MAIN_BRANCH}" \
@@ -326,132 +316,64 @@ info "Creating tag ${TAG_NAME}..."
 git tag "${TAG_NAME}"
 success "Tag ${TAG_NAME} created"
 
-info "Pushing tag to trigger release workflow..."
+info "Pushing tag to remote..."
 git push origin "${TAG_NAME}"
 success "Tag pushed to remote"
 
-echo ""
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}🎉 Release process initiated successfully!${NC}"
-echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo ""
-
 # Get repository information
-REPO=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/')
+REPO=$(git remote get-url origin | sed 's/.*github.com[:/]\(.*\)\.git/\1/' | sed 's/\.git$//')
 
-# 6. Monitor the workflow
-info "Monitoring GitHub Actions workflow..."
-echo "  Waiting for workflow to start (this may take a few seconds)..."
+# 6. Create GitHub release
+info "Creating GitHub release..."
 
-# Wait and retry to find the workflow run
-MAX_RETRIES=6
-RETRY_COUNT=0
-WORKFLOW_RUN=""
+RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG_NAME}"
+LATEST_URL="https://github.com/${REPO}/releases/latest"
 
-while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ -z "$WORKFLOW_RUN" ]; do
-    sleep 5
-    WORKFLOW_RUN=$(gh run list --workflow=release-desktop.yml --json databaseId,headBranch,status --jq ".[] | select(.headBranch == \"${TAG_NAME}\") | .databaseId" | head -1)
-    RETRY_COUNT=$((RETRY_COUNT + 1))
+# Generate release notes from recent commits
+RELEASE_NOTES=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 2>/dev/null || echo "HEAD~10")..HEAD 2>/dev/null || git log --pretty=format:"- %s" -10)
 
-    if [ -z "$WORKFLOW_RUN" ] && [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-        echo "  Still waiting... (attempt $RETRY_COUNT/$MAX_RETRIES)"
-    fi
-done
+if [ "$AUTO_PUBLISH" = true ]; then
+    # Create and publish the release
+    gh release create "${TAG_NAME}" \
+        --title "Caspian ${TAG_NAME}" \
+        --notes "${RELEASE_NOTES}" \
+        --latest
+    success "Release created and published!"
 
-if [ -z "$WORKFLOW_RUN" ]; then
-    warn "Could not find workflow run automatically"
-    echo "  Manual monitoring URL:"
-    echo "  https://github.com/${REPO}/actions"
-    echo ""
-    warn "The workflow may still be starting. Check the URL above in a few moments."
-else
-    success "Found workflow run: ${WORKFLOW_RUN}"
-    echo ""
-    info "Watching workflow progress..."
-    echo "  View in browser: https://github.com/${REPO}/actions/runs/${WORKFLOW_RUN}"
-    echo ""
-
-    # Watch the workflow (this will stream the status)
-    gh run watch "${WORKFLOW_RUN}" || warn "Workflow monitoring interrupted"
-
-    # Check final status
-    WORKFLOW_STATUS=$(gh run view "${WORKFLOW_RUN}" --json conclusion --jq .conclusion)
-
-    if [ "$WORKFLOW_STATUS" == "success" ]; then
-        success "Workflow completed successfully!"
-    elif [ "$WORKFLOW_STATUS" == "failure" ]; then
-        error "Workflow failed. Please check the logs at: https://github.com/${REPO}/actions/runs/${WORKFLOW_RUN}"
-    else
-        warn "Workflow ended with status: ${WORKFLOW_STATUS}"
-    fi
-fi
-
-echo ""
-
-# 7. Wait for release and publish it
-info "Waiting for draft release to be created..."
-
-# Retry logic for draft release (it may take time to be created)
-MAX_RELEASE_RETRIES=10
-RELEASE_RETRY_COUNT=0
-RELEASE_FOUND=""
-
-while [ $RELEASE_RETRY_COUNT -lt $MAX_RELEASE_RETRIES ] && [ -z "$RELEASE_FOUND" ]; do
-    sleep 3
-    RELEASE_FOUND=$(gh release list --json tagName,isDraft --jq ".[] | select(.tagName == \"${TAG_NAME}\") | .tagName")
-    RELEASE_RETRY_COUNT=$((RELEASE_RETRY_COUNT + 1))
-
-    if [ -z "$RELEASE_FOUND" ] && [ $RELEASE_RETRY_COUNT -lt $MAX_RELEASE_RETRIES ]; then
-        echo "  Waiting for release to be created... (attempt $RELEASE_RETRY_COUNT/$MAX_RELEASE_RETRIES)"
-    fi
-done
-
-if [ -z "$RELEASE_FOUND" ]; then
-    warn "Release not found yet. It may still be processing."
-    echo "  Check releases at: https://github.com/${REPO}/releases"
-else
-    RELEASE_URL="https://github.com/${REPO}/releases/tag/${TAG_NAME}"
-    LATEST_URL="https://github.com/${REPO}/releases/latest"
-
-    if [ "$AUTO_PUBLISH" = true ]; then
-        # Publish the release
-        info "Publishing release..."
-        gh release edit "${TAG_NAME}" --draft=false
-        success "Release published!"
-
-        # Merge the PR if one exists and --merge flag was provided
-        if [ "$AUTO_MERGE" = true ] && [ -n "$PR_NUMBER" ]; then
-            info "Merging PR #${PR_NUMBER}..."
-            if gh pr merge "${PR_NUMBER}" --squash --delete-branch; then
-                success "PR #${PR_NUMBER} merged and branch deleted"
-            else
-                warn "Could not merge PR #${PR_NUMBER}. You may need to merge it manually."
-            fi
+    # Merge the PR if one exists and --merge flag was provided
+    if [ "$AUTO_MERGE" = true ] && [ -n "$PR_NUMBER" ]; then
+        info "Merging PR #${PR_NUMBER}..."
+        if gh pr merge "${PR_NUMBER}" --squash --delete-branch; then
+            success "PR #${PR_NUMBER} merged and branch deleted"
+        else
+            warn "Could not merge PR #${PR_NUMBER}. You may need to merge it manually."
         fi
-
-        echo ""
-        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${GREEN}🎉 Release Published!${NC}"
-        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo ""
-        echo -e "${BLUE}Release URL:${NC} ${RELEASE_URL}"
-        echo -e "${BLUE}Latest URL:${NC}  ${LATEST_URL}"
-        echo ""
-        echo -e "${BLUE}Direct download:${NC}"
-        echo "  • ${LATEST_URL}/download/Caspian-arm64.dmg"
-        echo ""
-    else
-        success "Draft release created!"
-
-        echo ""
-        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo -e "${GREEN}📝 Draft Release Ready for Review${NC}"
-        echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-        echo ""
-        echo -e "${BLUE}Review URL:${NC} ${RELEASE_URL}"
-        echo ""
-        echo "To publish:"
-        echo "  gh release edit ${TAG_NAME} --draft=false"
-        echo ""
     fi
+
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}🎉 Release Published!${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${BLUE}Release URL:${NC} ${RELEASE_URL}"
+    echo -e "${BLUE}Latest URL:${NC}  ${LATEST_URL}"
+    echo ""
+else
+    # Create a draft release
+    gh release create "${TAG_NAME}" \
+        --title "Caspian ${TAG_NAME}" \
+        --notes "${RELEASE_NOTES}" \
+        --draft
+    success "Draft release created!"
+
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}📝 Draft Release Ready for Review${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo -e "${BLUE}Review URL:${NC} ${RELEASE_URL}"
+    echo ""
+    echo "To publish:"
+    echo "  gh release edit ${TAG_NAME} --draft=false"
+    echo ""
 fi

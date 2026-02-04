@@ -2,7 +2,6 @@ import { execSync } from "node:child_process";
 import os from "node:os";
 import defaultShell from "default-shell";
 import { PORTS } from "shared/constants";
-import { env } from "shared/env.shared";
 import { getShellEnv } from "../agent-setup/shell-wrappers";
 
 /**
@@ -367,7 +366,8 @@ export function buildTerminalEnv(params: {
 		CASPIAN_ROOT_PATH: rootPath || "",
 		CASPIAN_PORT: String(PORTS.NOTIFICATIONS),
 		// Environment identifier for dev/prod separation
-		CASPIAN_ENV: env.NODE_ENV === "development" ? "development" : "production",
+		CASPIAN_ENV:
+			process.env.NODE_ENV === "development" ? "development" : "production",
 		// Hook protocol version for forward compatibility
 		CASPIAN_HOOK_VERSION: HOOK_PROTOCOL_VERSION,
 	};

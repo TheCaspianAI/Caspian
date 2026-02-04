@@ -1,46 +1,51 @@
-import { app } from "electron";
-import { env } from "main/env.main";
-import { PostHog } from "posthog-node";
+// import { app } from "electron";
+// import { PostHog } from "posthog-node";
 
-export let posthog: PostHog | null = null;
-let userId: string | null = null;
+// PostHog analytics - currently disabled
+// To enable, uncomment the code below and set POSTHOG_KEY
 
-function getClient(): PostHog | null {
-	if (!env.NEXT_PUBLIC_POSTHOG_KEY) {
-		return null;
-	}
+// const POSTHOG_KEY = "";
+// const POSTHOG_HOST = "https://us.i.posthog.com";
 
-	if (!posthog) {
-		posthog = new PostHog(env.NEXT_PUBLIC_POSTHOG_KEY, {
-			host: env.NEXT_PUBLIC_POSTHOG_HOST,
-			flushAt: 1,
-			flushInterval: 0,
-		});
-	}
-	return posthog;
-}
+// export let posthog: PostHog | null = null;
+// let userId: string | null = null;
 
-export function setUserId(id: string | null): void {
-	userId = id;
+// function getClient(): PostHog | null {
+// 	if (!POSTHOG_KEY) {
+// 		return null;
+// 	}
+
+// 	if (!posthog) {
+// 		posthog = new PostHog(POSTHOG_KEY, {
+// 			host: POSTHOG_HOST,
+// 			flushAt: 1,
+// 			flushInterval: 0,
+// 		});
+// 	}
+// 	return posthog;
+// }
+
+export function setUserId(_id: string | null): void {
+	// userId = id;
 }
 
 export function track(
-	event: string,
-	properties?: Record<string, unknown>,
+	_event: string,
+	_properties?: Record<string, unknown>,
 ): void {
-	if (!userId) return;
+	// if (!userId) return;
 
-	const client = getClient();
-	if (!client) return;
+	// const client = getClient();
+	// if (!client) return;
 
-	client.capture({
-		distinctId: userId,
-		event,
-		properties: {
-			...properties,
-			app_name: "desktop",
-			platform: process.platform,
-			desktop_version: app.getVersion(),
-		},
-	});
+	// client.capture({
+	// 	distinctId: userId,
+	// 	event,
+	// 	properties: {
+	// 		...properties,
+	// 		app_name: "desktop",
+	// 		platform: process.platform,
+	// 		desktop_version: app.getVersion(),
+	// 	},
+	// });
 }

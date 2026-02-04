@@ -4,10 +4,11 @@ import {
 	installExtension,
 	REACT_DEVELOPER_TOOLS,
 } from "electron-extension-installer";
-import { env } from "main/env.main";
 import { PLATFORM } from "shared/constants";
 import { makeAppId } from "shared/utils";
 import { ignoreConsoleWarnings } from "../../utils/ignore-console-warnings";
+
+const isDev = process.env.NODE_ENV === "development";
 
 ignoreConsoleWarnings(["Manifest version 2 is deprecated"]);
 
@@ -15,7 +16,7 @@ export async function makeAppSetup(
 	createWindow: () => Promise<BrowserWindow>,
 	restoreWindows?: () => Promise<void>,
 ) {
-	if (env.NODE_ENV === "development") {
+	if (isDev) {
 		try {
 			await installExtension([REACT_DEVELOPER_TOOLS], {
 				loadExtensionOptions: {
@@ -72,8 +73,12 @@ export async function makeAppSetup(
 PLATFORM.IS_LINUX && app.disableHardwareAcceleration();
 
 PLATFORM.IS_WINDOWS &&
-	app.setAppUserModelId(
-		env.NODE_ENV === "development" ? process.execPath : makeAppId(),
-	);
+	app.setAppUserModelId(isDev ? process.execPath : makeAppId());
 
 app.commandLine.appendSwitch("force-color-profile", "srgb");
+
+// Enable CSS backdrop-filter and GPU features for production builds
+app.commandLine.appendSwitch("enable-features", "BackdropFilter,UseOzonePlatform");
+app.commandLine.appendSwitch("enable-gpu-rasterization");
+app.commandLine.appendSwitch("enable-zero-copy");
+app.commandLine.appendSwitch("ignore-gpu-blocklist");

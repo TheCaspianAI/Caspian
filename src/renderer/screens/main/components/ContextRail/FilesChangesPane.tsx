@@ -72,14 +72,7 @@ export function FilesChangesPane() {
 		setMode,
 	} = useSidebarStore();
 	const isExpanded = currentMode === SidebarMode.Changes;
-	const hasChanges = status
-		? (status.againstBase?.length ?? 0) > 0 ||
-			(status.commits?.length ?? 0) > 0 ||
-			(status.staged?.length ?? 0) > 0 ||
-			(status.unstaged?.length ?? 0) > 0 ||
-			(status.untracked?.length ?? 0) > 0
-		: true;
-	const showChangesTab = !!worktreePath && hasChanges;
+	const showChangesTab = !!worktreePath;
 
 	useEffect(() => {
 		if (!showChangesTab && rightSidebarTab === RightSidebarTab.Changes) {

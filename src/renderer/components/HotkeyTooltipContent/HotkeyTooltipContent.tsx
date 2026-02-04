@@ -1,4 +1,4 @@
-import { Kbd, KbdGroup } from "ui/components/ui/kbd";
+import { Kbd } from "ui/components/ui/kbd";
 import type { ReactNode } from "react";
 import {
 	useEffectiveHotkeysMap,
@@ -45,13 +45,8 @@ export function HotkeyTooltipContent({
 			return showUnassigned ? unassignedPlaceholder : null;
 		}
 
-		return (
-			<KbdGroup>
-				{display.map((key) => (
-					<Kbd key={key}>{key}</Kbd>
-				))}
-			</KbdGroup>
-		);
+		// Render all keys as a single element (e.g., "⌘P" instead of "⌘" "P")
+		return <Kbd>{display.join("")}</Kbd>;
 	};
 
 	if (items?.length) {

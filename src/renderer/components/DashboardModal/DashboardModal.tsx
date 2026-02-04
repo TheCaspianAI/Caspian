@@ -14,7 +14,7 @@ export function DashboardModal() {
 		<div className="fixed inset-0 z-50">
 			{/* Backdrop with blur */}
 			<div
-				className="absolute inset-0 bg-black/40 modal-backdrop-blur animate-in fade-in duration-150"
+				className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
 				onClick={closeModal}
 			/>
 			{/* Modal content */}

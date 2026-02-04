@@ -26,11 +26,13 @@ const router = createRouter({
 	},
 });
 
-// Track pageviews on navigation
+// Track pageviews on navigation (only if PostHog is enabled)
 const unsubscribe = router.subscribe("onResolved", (event) => {
-	posthog.capture("$pageview", {
-		$current_url: event.toLocation.pathname,
-	});
+	if (posthog) {
+		posthog.capture("$pageview", {
+			$current_url: event.toLocation.pathname,
+		});
+	}
 });
 
 // Handle deep link navigation from main process

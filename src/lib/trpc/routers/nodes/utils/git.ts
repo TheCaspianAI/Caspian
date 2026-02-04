@@ -1081,6 +1081,65 @@ export async function branchExistsOnRemote(
 }
 
 /**
+ * Check if the remote has any branches at all.
+ * Returns true if the remote is empty (no branches), false otherwise.
+ * Returns null if we cannot determine (network error, etc.)
+ */
+export async function isRemoteEmpty(
+	mainRepoPath: string,
+): Promise<boolean | null> {
+	const env = await getGitEnv();
+
+	try {
+		const { stdout } = await execFileAsync(
+			"git",
+			["-C", mainRepoPath, "ls-remote", "--heads", "origin"],
+			{ env, timeout: 30_000 },
+		);
+		// If output is empty, the remote has no branches
+		return stdout.trim() === "";
+	} catch {
+		// Network error or other issue - return null to indicate uncertainty
+		return null;
+	}
+}
+
+/**
+ * Initialize an empty repository with a first commit and push to origin.
+ * Creates a README.md and pushes to the specified branch.
+ */
+export async function initializeEmptyRepo(
+	mainRepoPath: string,
+	branchName: string,
+): Promise<void> {
+	const git = simpleGit(mainRepoPath);
+	const readmePath = `${mainRepoPath}/README.md`;
+
+	// Create a minimal README
+	const fs = await import("node:fs/promises");
+	await fs.writeFile(
+		readmePath,
+		"# Project\n\nInitialized by Caspian.\n",
+		"utf-8",
+	);
+
+	// For empty repos, we need to checkout the branch first (creates orphan branch)
+	// This handles the case where git config might default to 'master' but we want 'main'
+	try {
+		await git.raw(["checkout", "-B", branchName]);
+	} catch {
+		// If checkout fails, we might already be on a branch - continue anyway
+	}
+
+	// Stage and commit
+	await git.add("README.md");
+	await git.commit("Initial commit");
+
+	// Push to origin
+	await git.push(["-u", "origin", branchName]);
+}
+
+/**
  * Detect which branch a worktree was likely based off of.
  * Uses merge-base to find the closest common ancestor with candidate base branches.
  */

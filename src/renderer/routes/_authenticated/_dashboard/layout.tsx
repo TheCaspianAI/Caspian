@@ -63,7 +63,7 @@ function DashboardLayout() {
 
 	useAppHotkey(
 		"SHOW_HOTKEYS",
-		() => openSettings(),
+		() => openSettings("preferences"),
 		undefined,
 		[openSettings],
 	);

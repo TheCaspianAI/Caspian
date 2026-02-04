@@ -9,6 +9,8 @@ import {
 	createWorktreeFromExistingBranch,
 	fetchDefaultBranch,
 	hasOriginRemote,
+	initializeEmptyRepo,
+	isRemoteEmpty,
 	refExistsLocally,
 	refreshDefaultBranch,
 	removeWorktree,
@@ -304,13 +306,85 @@ export async function initializeNodeWorktree({
 				}
 				startPoint = localResult.ref;
 			} else if (branchCheck.status === "not_found") {
-				manager.updateProgress(
-					nodeId,
-					"failed",
-					"Branch does not exist on remote",
-					`Branch "${effectiveBaseBranch}" does not exist on origin. Please delete this node and try again with a different base branch.`,
+				// Branch doesn't exist on remote - check if this is an empty repo or try fallbacks
+				console.log(
+					`[node-init] Branch "${effectiveBaseBranch}" not found on remote. Checking for alternatives...`,
 				);
-				return;
+
+				// Check if the remote is completely empty (no branches at all)
+				const remoteEmpty = await isRemoteEmpty(mainRepoPath);
+
+				if (remoteEmpty === true) {
+					// Empty repo - create initial commit and push
+					console.log(
+						`[node-init] Remote is empty. Initializing with first commit on "${effectiveBaseBranch}"...`,
+					);
+					manager.updateProgress(
+						nodeId,
+						"verifying",
+						"Initializing empty repository...",
+						`Remote has no branches. Creating initial commit on "${effectiveBaseBranch}".`,
+					);
+
+					try {
+						await initializeEmptyRepo(mainRepoPath, effectiveBaseBranch);
+						console.log(
+							`[node-init] Successfully initialized empty repo with branch "${effectiveBaseBranch}"`,
+						);
+						startPoint = `origin/${effectiveBaseBranch}`;
+					} catch (initError) {
+						const errorMsg =
+							initError instanceof Error
+								? initError.message
+								: String(initError);
+						console.error(
+							`[node-init] Failed to initialize empty repo: ${errorMsg}`,
+						);
+						manager.updateProgress(
+							nodeId,
+							"failed",
+							"Failed to initialize repository",
+							`Could not create initial commit: ${errorMsg}`,
+						);
+						return;
+					}
+				} else if (!baseBranchWasExplicit) {
+					// Remote has branches but not the one we want - try fallbacks
+					const localResult = await resolveLocalStartPoint(
+						"Branch not found on remote",
+						true,
+					);
+
+					if (localResult) {
+						if (localResult.fallbackBranch) {
+							applyFallbackBranch(localResult.fallbackBranch);
+							manager.updateProgress(
+								nodeId,
+								"verifying",
+								`Using "${localResult.fallbackBranch}" branch`,
+								`Branch "${baseBranch}" not found on remote. Using "${localResult.fallbackBranch}" instead.`,
+							);
+						}
+						startPoint = localResult.ref;
+					} else {
+						manager.updateProgress(
+							nodeId,
+							"failed",
+							"Branch does not exist",
+							`Branch "${effectiveBaseBranch}" does not exist on origin and no fallback branches found.`,
+						);
+						return;
+					}
+				} else {
+					// User explicitly specified a branch that doesn't exist
+					manager.updateProgress(
+						nodeId,
+						"failed",
+						"Branch does not exist on remote",
+						`Branch "${effectiveBaseBranch}" does not exist on origin. Please delete this node and try again with a different base branch.`,
+					);
+					return;
+				}
 			} else {
 				startPoint = `origin/${effectiveBaseBranch}`;
 			}

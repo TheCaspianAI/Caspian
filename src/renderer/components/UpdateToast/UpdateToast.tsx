@@ -59,7 +59,7 @@ export function UpdateToast({
 							Update failed
 						</span>
 						<span className="text-sm text-muted-foreground">
-							{error || "Please try again later"}
+							Please try again later
 						</span>
 					</>
 				) : isDownloading ? (

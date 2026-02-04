@@ -4,16 +4,12 @@ export const COMPANY = {
 	DOMAIN: "trycaspianai.com",
 	EMAIL_DOMAIN: "@trycaspianai.com",
 	GITHUB_URL: "https://github.com/TheCaspianAI/Caspian",
-	DOCS_URL: process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.trycaspianai.com",
-	MARKETING_URL: process.env.NEXT_PUBLIC_MARKETING_URL || "https://trycaspianai.com",
-	TERMS_URL: `${process.env.NEXT_PUBLIC_MARKETING_URL || "https://trycaspianai.com"}/terms`,
-	PRIVACY_URL:
-		(process.env.NEXT_PUBLIC_MARKETING_URL || "https://trycaspianai.com") +
-		"/privacy",
-	CHANGELOG_URL:
-		(process.env.NEXT_PUBLIC_MARKETING_URL || "https://trycaspianai.com") +
-		"/changelog",
-	X_URL: "https://x.com/trycaspianai",
+	DOCS_URL: "https://docs.trycaspianai.com",
+	MARKETING_URL: "https://trycaspianai.com",
+	TERMS_URL: "https://trycaspianai.com/terms",
+	PRIVACY_URL: "https://trycaspianai.com/privacy",
+	CHANGELOG_URL: "https://trycaspianai.com/changelog",
+	X_URL: "https://x.com/alchemishty",
 	MAIL_TO: "mailto:adarsh.bhardwaj2020@gmail.com",
 	REPORT_ISSUE_URL: "https://github.com/TheCaspianAI/Caspian/issues/new",
 	DISCORD_URL: "https://discord.gg/cZeD9WYcV7",

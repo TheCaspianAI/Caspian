@@ -2,6 +2,7 @@ import { Button } from "ui/components/ui/button";
 import { motion } from "framer-motion";
 import { LuGitBranch, LuBot, LuZap } from "react-icons/lu";
 import { AnimatedTerminal, TERMINAL_SCRIPTS } from "./AnimatedTerminal";
+import caspianLogo from "renderer/assets/caspian-logo.jpeg";
 
 interface OnboardingScreenProps {
 	onContinue: () => void;
@@ -17,7 +18,19 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 				transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
 				className="max-w-2xl w-full text-center"
 			>
-				{/* Welcome */}
+				{/* Logo and Welcome */}
+				<motion.div
+					initial={{ opacity: 0, scale: 0.9 }}
+					animate={{ opacity: 1, scale: 1 }}
+					transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+					className="mb-6"
+				>
+					<img
+						src={caspianLogo}
+						alt="Caspian"
+						className="w-28 h-28 object-contain mx-auto rounded-2xl"
+					/>
+				</motion.div>
 				<motion.h1
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
@@ -120,7 +133,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 						onClick={onContinue}
 						className="px-8 py-6 text-base"
 					>
-						Create your first node
+						Get Started
 					</Button>
 				</motion.div>
 			</motion.div>

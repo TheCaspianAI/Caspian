@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { env } from "renderer/env.renderer";
 import { lt } from "semver";
+
+const API_URL = "https://api.trycaspianai.com";
 
 interface VersionRequirements {
 	minimumVersion: string;
@@ -32,9 +33,7 @@ export function useVersionCheck(): UseVersionCheckResult {
 		}
 
 		try {
-			const response = await fetch(
-				`${env.NEXT_PUBLIC_API_URL}/api/desktop/version`,
-			);
+			const response = await fetch(`${API_URL}/api/desktop/version`);
 
 			if (!response.ok) {
 				// Fail open - if API is down, don't block users

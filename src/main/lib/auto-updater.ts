@@ -1,11 +1,12 @@
 import { EventEmitter } from "node:events";
 import { app, dialog } from "electron";
 import { autoUpdater } from "electron-updater";
-import { env } from "main/env.main";
 import { setSkipQuitConfirmation } from "main/index";
 import { prerelease } from "semver";
 import { AUTO_UPDATE_STATUS, type AutoUpdateStatus } from "shared/auto-update";
 import { PLATFORM } from "shared/constants";
+
+const isDev = process.isDev;
 
 const UPDATE_CHECK_INTERVAL_MS = 1000 * 60 * 60 * 4; // 4 hours
 
@@ -84,7 +85,7 @@ export function getUpdateStatus(): AutoUpdateStatusEvent {
 }
 
 export function installUpdate(): void {
-	if (env.NODE_ENV === "development") {
+	if (isDev) {
 		console.info("[auto-updater] Install skipped in dev mode");
 		emitStatus(AUTO_UPDATE_STATUS.IDLE);
 		return;
@@ -100,7 +101,7 @@ export function dismissUpdate(): void {
 }
 
 export function checkForUpdates(): void {
-	if (env.NODE_ENV === "development" || !PLATFORM.IS_MAC) {
+	if (isDev || !PLATFORM.IS_MAC) {
 		return;
 	}
 	isDismissed = false;
@@ -117,7 +118,7 @@ export function checkForUpdates(): void {
 }
 
 export function checkForUpdatesInteractive(): void {
-	if (env.NODE_ENV === "development") {
+	if (isDev) {
 		dialog.showMessageBox({
 			type: "info",
 			title: "Updates",
@@ -198,7 +199,7 @@ export function simulateError(): void {
 }
 
 export function setupAutoUpdater(): void {
-	if (env.NODE_ENV === "development" || !PLATFORM.IS_MAC) {
+	if (isDev || !PLATFORM.IS_MAC) {
 		return;
 	}
 

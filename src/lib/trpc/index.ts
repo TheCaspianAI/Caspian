@@ -13,38 +13,40 @@ const t = initTRPC.create({
 });
 
 /**
- * Middleware that captures errors with Sentry
+ * Middleware that captures errors with Sentry - currently disabled
+ * To enable, uncomment the code below and use sentryMiddleware in publicProcedure
  */
-const sentryMiddleware = t.middleware(async ({ next, path, type }) => {
-	const result = await next();
+// const sentryMiddleware = t.middleware(async ({ next, path, type }) => {
+// 	const result = await next();
 
-	if (!result.ok) {
-		try {
-			const Sentry = await import("@sentry/electron/main");
-			const error = result.error;
+// 	if (!result.ok) {
+// 		try {
+// 			const Sentry = await import("@sentry/electron/main");
+// 			const error = result.error;
 
-			// Get the original error if it's wrapped in a TRPCError
-			const originalError = error.cause instanceof Error ? error.cause : error;
+// 			// Get the original error if it's wrapped in a TRPCError
+// 			const originalError = error.cause instanceof Error ? error.cause : error;
 
-			Sentry.captureException(originalError, {
-				tags: {
-					trpc_path: path,
-					trpc_type: type,
-					trpc_code: error.code,
-				},
-				extra: {
-					trpc_message: error.message,
-				},
-			});
-		} catch {
-			// Sentry not available
-		}
-	}
+// 			Sentry.captureException(originalError, {
+// 				tags: {
+// 					trpc_path: path,
+// 					trpc_type: type,
+// 					trpc_code: error.code,
+// 				},
+// 				extra: {
+// 					trpc_message: error.message,
+// 				},
+// 			});
+// 		} catch {
+// 			// Sentry not available
+// 		}
+// 	}
 
-	return result;
-});
+// 	return result;
+// });
 
 export const router = t.router;
 export const mergeRouters = t.mergeRouters;
-export const publicProcedure = t.procedure.use(sentryMiddleware);
+// To enable Sentry, change to: export const publicProcedure = t.procedure.use(sentryMiddleware);
+export const publicProcedure = t.procedure;
 export const trpc = createTRPCReact<AppRouter>();
