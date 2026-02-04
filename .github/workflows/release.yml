@@ -75,9 +75,9 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           if [ -n "$CSC_LINK" ]; then
-            bun run package --publish always --arch ${{ matrix.arch }}
+            bun run package --publish always --${{ matrix.arch }}
           else
-            CSC_IDENTITY_AUTO_DISCOVERY=false bun run package --publish always --arch ${{ matrix.arch }}
+            CSC_IDENTITY_AUTO_DISCOVERY=false bun run package --publish always --${{ matrix.arch }}
           fi
 
       # Build and publish - Linux
@@ -85,11 +85,11 @@ jobs:
         if: matrix.platform == 'linux'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun run package --publish always --arch ${{ matrix.arch }}
+        run: bun run package --publish always --${{ matrix.arch }}
 
       # Build and publish - Windows
       - name: Build & Release (Windows)
         if: matrix.platform == 'win'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: bun run package --publish always --arch ${{ matrix.arch }}
+        run: bun run package --publish always --${{ matrix.arch }}
