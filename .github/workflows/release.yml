@@ -20,8 +20,8 @@ jobs:
           - os: macos-latest
             platform: mac
             arch: arm64
-          # macOS Intel
-          - os: macos-13
+          # macOS Intel (macos-13 retired, using macos-15-large)
+          - os: macos-15-large
             platform: mac
             arch: x64
           # Linux
