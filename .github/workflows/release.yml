@@ -20,10 +20,11 @@ jobs:
           - os: macos-latest
             platform: mac
             arch: arm64
-          # macOS Intel (macos-13 retired, using macos-15-large)
-          - os: macos-15-large
-            platform: mac
-            arch: x64
+          # macOS Intel - disabled (requires paid runner, macos-13 retired)
+          # To re-enable: fix GitHub billing or use macos-15-large
+          # - os: macos-15-large
+          #   platform: mac
+          #   arch: x64
           # Linux
           - os: ubuntu-22.04
             platform: linux
