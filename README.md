@@ -1,68 +1,53 @@
 # Caspian
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: macOS](https://img.shields.io/badge/Platform-macOS-lightgrey.svg)]()
-[![Built with Electron](https://img.shields.io/badge/Built%20with-Electron-47848F.svg)]()
+[![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=white)](#)
+[![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](#)
+[![Windows](https://img.shields.io/badge/Windows-0078D6?logo=windows&logoColor=white)](#)
 
 **The control plane for AI coding agents.**
 
 Run multiple agents in parallel. Each in its own workspace. All from one screen.
 
-<!-- TODO: Add demo video -->
-<!-- https://github.com/user-attachments/assets/... -->
+<!-- TODO: Add demo GIF/video -->
 
 ---
 
-## The Problem
+## Why Caspian?
 
-Running multiple Claude Code agents? It gets messy fast.
+Running multiple Claude Code agents gets messy fast:
 
-**Here's what happens:**
-- 5 terminals, 5 agents, and you've already forgotten what the third one was doing
-- No bird's-eye view — just endless cmd+tab until your brain gives up
-- All agents stomping around the same directory, overwriting each other's work
-- Close a terminal, poof — context gone forever
+- **No visibility** — 5 terminals, 5 agents, endless cmd+tab
+- **No isolation** — agents stepping on each other's changes
+- **No persistence** — close a terminal, lose the context
 
-**The real problem?** You can't scale. Your brain becomes the bottleneck. More agents = more chaos.
+**The result?** Your brain becomes the bottleneck. More agents = more chaos.
 
-**The tradeoff nobody asked for:** Run a few agents with focused tasks, or run many with vague ones. Pick one.
-
-There's no control plane. No dashboard. No structure. Until now.
-
----
-
-## Caspian
-
-One screen. All your agents. Each in its own isolated workspace.
-
-Run 10 agents on 10 focused tasks. See everything. Control everything.
-
-**Granularity *and* scale.**
+Caspian fixes this. One screen. All your agents. Each in its own isolated workspace.
 
 ---
 
 ## Features
 
-| What | Why it matters |
-|------|----------------|
-| **Isolated Workspaces** | Each agent gets its own worktree. No more stepping on each other's toes. |
+| Feature | Description |
+|---------|-------------|
+| **Isolated Workspaces** | Each agent gets its own git worktree. No conflicts. |
 | **Parallel Execution** | Run as many agents as you want, simultaneously. |
-| **Single Dashboard** | All agents, one screen. Your brain can relax. |
-| **Live Monitoring** | Watch every agent in real-time. See what they see. |
-| **Persistent Context** | Close the app, grab coffee, come back. Everything's still there. |
-| **PR Integration** | Done? Ship it as a pull request. |
+| **Unified Dashboard** | All agents on one screen. See everything at a glance. |
+| **Live Monitoring** | Watch every agent in real-time. |
+| **Persistent Sessions** | Close the app, come back later. Everything's still there. |
+| **PR Integration** | Ship changes as pull requests when you're done. |
 
 ---
 
 ## Quick Start
 
-> **Note:** Caspian currently supports macOS only.
-
 ### Prerequisites
-- [Bun](https://bun.sh/) 1.0+
-- Claude Code CLI
 
-### Get running
+- [Bun](https://bun.sh/) 1.0+
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
+
+### Install & Run
 
 ```bash
 git clone https://github.com/TheCaspianAI/Caspian.git
@@ -71,9 +56,19 @@ bun install
 bun dev
 ```
 
-### Build for production
+### Build
 
 ```bash
+# macOS
+bun run build:mac
+
+# Linux
+bun run build:linux
+
+# Windows
+bun run build:win
+
+# All platforms
 bun run build
 ```
 
@@ -83,12 +78,46 @@ bun run build
 
 ```
 1. Add repo     →  Point Caspian at your project
-2. Create node  →  Spin up an isolated workspace
+2. Create node  →  Spin up an isolated workspace (git worktree)
 3. Run agent    →  Launch Claude Code in that workspace
-4. Watch        →  See everything in real-time
-5. Review       →  Check the changes
+4. Monitor      →  Watch progress in real-time
+5. Review       →  Check the diff
 6. Ship         →  Create a PR
 ```
+
+---
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│              Caspian Desktop App                │
+├─────────────────────────────────────────────────┤
+│  Renderer (React)                               │
+│  • Real-time agent streaming                    │
+│  • Multi-workspace dashboard                    │
+│  • Diff viewer & review mode                    │
+├─────────────────────────────────────────────────┤
+│  Main Process (Electron + Node.js)              │
+│  • Git worktree orchestration                   │
+│  • Terminal daemon management                   │
+│  • File system operations                       │
+│  • SQLite persistence                           │
+└─────────────────────────────────────────────────┘
+```
+
+---
+
+## Tech Stack
+
+![Electron](https://img.shields.io/badge/Electron-47848F?logo=electron&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-06B6D4?logo=tailwindcss&logoColor=white)
+![Bun](https://img.shields.io/badge/Bun-000000?logo=bun&logoColor=white)
+![tRPC](https://img.shields.io/badge/tRPC-2596BE?logo=trpc&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![Drizzle](https://img.shields.io/badge/Drizzle-C5F74F?logo=drizzle&logoColor=black)
 
 ---
 
@@ -96,68 +125,49 @@ bun run build
 
 **Coming soon: Custom Workflows**
 
-Finding the best way to work with AI agents is hard. Beads? Gastown? GSD? Something else entirely?
-
-We're building workflow templates that capture best practices — so you can plug in what works for your team instead of figuring it out from scratch.
-
----
-
-## Architecture
-
-```
-┌────────────────────────────────────────────────┐
-│              Caspian Desktop App               │
-├────────────────────────────────────────────────┤
-│  Frontend (React + TypeScript)                 │
-│  • Real-time agent streaming                   │
-│  • Multi-agent grid view                       │
-│  • Diff viewer & review mode                   │
-├────────────────────────────────────────────────┤
-│  Backend (Electron Main Process)               │
-│  • Git worktree orchestration                  │
-│  • Terminal daemon management                  │
-│  • File system operations                      │
-│  • SQLite persistence                          │
-└────────────────────────────────────────────────┘
-```
-
----
-
-## Tech
-
-**Frontend:** React, TypeScript, Tailwind CSS v4, Zustand, TanStack Router
-
-**Backend:** Electron, Bun, tRPC, Drizzle ORM, SQLite
+Finding the best way to work with AI agents is hard. We're building workflow templates that capture best practices — so you can plug in what works instead of starting from scratch.
 
 ---
 
 ## Contributing
 
-PRs welcome.
+We welcome contributions! Here's how to get started:
 
-```bash
-bun install       # install deps
-bun dev           # dev server
-bun run lint      # check your work
-bun run typecheck # type check
-```
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run checks: `bun run lint && bun run typecheck && bun test`
+5. Commit your changes
+6. Push to your fork and open a Pull Request
+
+For detailed guidelines, see **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+
+Please read our **[Code of Conduct](CODE_OF_CONDUCT.md)** before contributing.
+
+---
+
+## Community
+
+- [Report a bug](https://github.com/TheCaspianAI/Caspian/issues/new?template=bug_report.md)
+- [Request a feature](https://github.com/TheCaspianAI/Caspian/issues/new?template=feature_request.md)
+- [Start a discussion](https://github.com/TheCaspianAI/Caspian/discussions)
 
 ---
 
 ## License
 
-MIT
+[MIT](LICENSE)
 
 ---
 
-## Links
+<p align="center">
+  <a href="https://trycaspianai.com">Website</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/TheCaspianAI/Caspian/issues">Issues</a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/TheCaspianAI/Caspian/discussions">Discussions</a>
+</p>
 
-[Website](https://trycaspianai.com)
-
----
-
-If you find Caspian useful, give it a star!
-
----
-
-Built by [Caspian](https://trycaspianai.com) and Claude Code
+<p align="center">
+  If you find Caspian useful, consider giving it a ⭐
+</p>
