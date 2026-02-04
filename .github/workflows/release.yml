@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+# Required for uploading release assets
+permissions:
+  contents: write
+
 # Prevent concurrent releases
 concurrency:
   group: release-${{ github.ref }}
