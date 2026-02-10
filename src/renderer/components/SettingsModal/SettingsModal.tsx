@@ -26,11 +26,11 @@ export function SettingsModal() {
 	return (
 		<div className="fixed inset-0 z-50">
 			{/* Backdrop with blur */}
-			<div
+			<button
+				type="button"
 				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
 				onClick={closeSettings}
 				onKeyDown={(e) => e.key === "Escape" && closeSettings()}
-				role="button"
 				tabIndex={0}
 				aria-label="Close settings"
 			/>

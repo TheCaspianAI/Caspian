@@ -158,11 +158,11 @@ class LocalTerminalRuntime implements TerminalRuntime {
 	}
 
 	listeners(event: string | symbol): ((...args: unknown[]) => void)[] {
-		return this.backend.listeners(event);
+		return this.backend.listeners(event) as ((...args: unknown[]) => void)[];
 	}
 
 	rawListeners(event: string | symbol): ((...args: unknown[]) => void)[] {
-		return this.backend.rawListeners(event);
+		return this.backend.rawListeners(event) as ((...args: unknown[]) => void)[];
 	}
 
 	listenerCount(event: string | symbol, listener?: (...args: unknown[]) => void): number {

@@ -10,11 +10,11 @@ export function DashboardModal() {
 	return (
 		<div className="fixed inset-0 z-50">
 			{/* Backdrop with blur */}
-			<div
+			<button
+				type="button"
 				className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-150"
 				onClick={closeModal}
 				onKeyDown={(e) => e.key === "Escape" && closeModal()}
-				role="button"
 				tabIndex={0}
 				aria-label="Close modal"
 			/>

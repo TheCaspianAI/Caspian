@@ -170,8 +170,8 @@ export function ContextHeader() {
 										)}
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<span
-													role="button"
+												<button
+													type="button"
 													tabIndex={0}
 													onClick={handleNewNode}
 													onKeyDown={(e) =>
@@ -180,7 +180,7 @@ export function ContextHeader() {
 													className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground focus:opacity-100 focus:outline-none"
 												>
 													<LuPlus className="size-3.5" />
-												</span>
+												</button>
 											</TooltipTrigger>
 											<TooltipContent side="right">
 												<HotkeyTooltipContent label="New node" hotkeyId="NEW_NODE" />

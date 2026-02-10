@@ -273,7 +273,7 @@ export function NodeSwitcherContent() {
 	let currentFlatIndex = -1;
 
 	return (
-		<div className="flex flex-col h-full" onKeyDown={handleKeyDown}>
+		<div className="flex flex-col h-full" role="listbox" onKeyDown={handleKeyDown}>
 			{/* Header */}
 			<div className="px-4 pt-4 pb-3 space-y-3">
 				<h2 className="text-sm font-medium text-foreground">Switch node</h2>
