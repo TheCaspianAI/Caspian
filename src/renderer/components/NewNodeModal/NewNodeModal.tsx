@@ -1,11 +1,13 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { GoGitBranch } from "react-icons/go";
 import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
 import { LuFolderOpen } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
-import { useCreateNode } from "renderer/react-query/nodes";
+import { useCreateNode, useOpenWorktree } from "renderer/react-query/nodes";
 import { useOpenNew } from "renderer/react-query/repositories";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import {
 	useCloseNewNodeModal,
 	useNewNodeModalOpen,
@@ -34,6 +36,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "ui/components/ui/popove
 import { toast } from "ui/components/ui/sonner";
 import { Textarea } from "ui/components/ui/textarea";
 import { ExistingWorktreesList } from "./components/ExistingWorktreesList";
+import { useBranchStatus } from "./hooks/useBranchStatus";
 
 function generateSlugFromTitle(title: string): string {
 	return sanitizeSegment(title);
@@ -82,6 +85,12 @@ export function NewNodeModal() {
 	const { data: gitInfo } = electronTrpc.settings.getGitInfo.useQuery();
 	const createNode = useCreateNode();
 	const openNew = useOpenNew();
+	const openWorktree = useOpenWorktree();
+	const navigate = useNavigate();
+	const { data: worktreesData = [] } = electronTrpc.nodes.getWorktreesByRepository.useQuery(
+		{ repositoryId: selectedRepositoryId ?? "" },
+		{ enabled: !!selectedRepositoryId },
+	);
 
 	const resolvedPrefix = useMemo(() => {
 		const repositoryOverrides = repository?.branchPrefixMode != null;
@@ -126,6 +135,13 @@ export function NewNodeModal() {
 	const branchPreview =
 		branchSlug && applyPrefix && resolvedPrefix ? `${resolvedPrefix}/${branchSlug}` : branchSlug;
 
+	const branchStatus = useBranchStatus({
+		branchPreview,
+		repositoryId: selectedRepositoryId,
+		branches: branchData?.branches,
+		worktrees: worktreesData,
+	});
+
 	const resetForm = () => {
 		setSelectedRepositoryId(null);
 		setTitle("");
@@ -152,10 +168,17 @@ export function NewNodeModal() {
 			!e.shiftKey &&
 			mode === "new" &&
 			selectedRepositoryId &&
-			!createNode.isPending
+			!createNode.isPending &&
+			!openWorktree.isPending
 		) {
 			e.preventDefault();
-			handleCreateNode();
+			if (branchStatus.status === "has-active-node") {
+				handleGoToNode();
+			} else if (branchStatus.status === "has-orphaned-worktree") {
+				handleReopenWorktree();
+			} else {
+				handleCreateNode();
+			}
 		}
 	};
 
@@ -198,8 +221,49 @@ export function NewNodeModal() {
 
 	const selectedRepository = recentRepositories.find((r) => r.id === selectedRepositoryId);
 
+	const handleGoToNode = () => {
+		if (branchStatus.status === "has-active-node" && branchStatus.nodeId) {
+			navigateToNode(branchStatus.nodeId, navigate);
+			handleClose();
+		}
+	};
+
+	const handleReopenWorktree = async () => {
+		if (branchStatus.status !== "has-orphaned-worktree" || !branchStatus.worktreeId) return;
+		try {
+			await openWorktree.mutateAsync({ worktreeId: branchStatus.worktreeId });
+			handleClose();
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Failed to open node");
+		}
+	};
+
 	const handleCreateNode = async () => {
 		if (!selectedRepositoryId) return;
+
+		if (branchStatus.status === "exists-no-worktree" && branchStatus.branchName) {
+			try {
+				const result = await createNode.mutateAsync({
+					repositoryId: selectedRepositoryId,
+					name: title.trim() || branchStatus.branchName,
+					branchName: branchStatus.branchName,
+					baseBranch: effectiveBaseBranch || undefined,
+					useExistingBranch: true,
+					setupScript: setupScript.trim() || undefined,
+					teardownScript: teardownScript.trim() || undefined,
+				});
+				handleClose();
+				if (result.isInitializing) {
+					toast.success("Node created", { description: "Setting up in the background..." });
+				} else {
+					toast.success("Node created");
+				}
+				return;
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Failed to create node");
+				return;
+			}
+		}
 
 		const nodeName = title.trim() || undefined;
 
@@ -227,6 +291,8 @@ export function NewNodeModal() {
 			toast.error(err instanceof Error ? err.message : "Failed to create node");
 		}
 	};
+
+	const isPending = createNode.isPending || openWorktree.isPending;
 
 	return (
 		<Dialog modal open={isOpen} onOpenChange={(open) => !open && handleClose()}>
@@ -324,11 +390,24 @@ export function NewNodeModal() {
 									/>
 
 									{(title || branchNameEdited) && (
-										<p className="text-xs text-muted-foreground flex items-center gap-1.5">
-											<GoGitBranch className="size-3" />
-											<span className="font-mono">{branchPreview || "branch-name"}</span>
-											<span className="text-muted-foreground/60">from {effectiveBaseBranch}</span>
-										</p>
+										<>
+											<p className="text-xs text-muted-foreground flex items-center gap-1.5">
+												<GoGitBranch className="size-3" />
+												<span className="font-mono">{branchPreview || "branch-name"}</span>
+												<span className="text-muted-foreground/60">from {effectiveBaseBranch}</span>
+											</p>
+											{branchStatus.status === "has-active-node" && (
+												<p className="text-xs text-amber-500">This branch has an open node</p>
+											)}
+											{branchStatus.status === "has-orphaned-worktree" && (
+												<p className="text-xs text-amber-500">
+													This branch has an existing worktree
+												</p>
+											)}
+											{branchStatus.status === "exists-no-worktree" && (
+												<p className="text-xs text-amber-500">This branch already exists</p>
+											)}
+										</>
 									)}
 
 									<Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -466,13 +545,41 @@ export function NewNodeModal() {
 										</CollapsibleContent>
 									</Collapsible>
 
-									<Button
-										className="w-full h-8 text-sm"
-										onClick={handleCreateNode}
-										disabled={createNode.isPending || isBranchesError}
-									>
-										Create Node
-									</Button>
+									{branchStatus.status === "has-active-node" && (
+										<Button
+											className="w-full h-8 text-sm"
+											onClick={handleGoToNode}
+										>
+											Go to Node
+										</Button>
+									)}
+									{branchStatus.status === "has-orphaned-worktree" && (
+										<Button
+											className="w-full h-8 text-sm"
+											onClick={handleReopenWorktree}
+											disabled={openWorktree.isPending}
+										>
+											Go to Node
+										</Button>
+									)}
+									{branchStatus.status === "exists-no-worktree" && (
+										<Button
+											className="w-full h-8 text-sm"
+											onClick={handleCreateNode}
+											disabled={isPending || isBranchesError}
+										>
+											Use Existing Branch
+										</Button>
+									)}
+									{branchStatus.status === "available" && (
+										<Button
+											className="w-full h-8 text-sm"
+											onClick={handleCreateNode}
+											disabled={isPending || isBranchesError}
+										>
+											Create Node
+										</Button>
+									)}
 								</div>
 							)}
 							{mode === "existing" && (
