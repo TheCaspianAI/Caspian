@@ -292,6 +292,15 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					// If we can't get remotes, assume no origin
 				}
 
+				// Fetch latest remote refs so newly created branches appear
+				if (hasOrigin) {
+					try {
+						await git.fetch(["--prune"]);
+					} catch {
+						// Ignore fetch errors (e.g., offline)
+					}
+				}
+
 				const branchSummary = await git.branch(["-a"]);
 
 				const localBranchSet = new Set<string>();
