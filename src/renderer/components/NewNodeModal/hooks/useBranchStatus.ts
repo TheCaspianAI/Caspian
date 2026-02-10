@@ -22,6 +22,11 @@ interface UseBranchStatusParams {
 	}>;
 }
 
+/**
+ * Determine the status of a branch preview against the repository's branches and worktrees, debouncing the preview input to avoid rapid updates.
+ *
+ * @returns The resolved `BranchStatus`: `AVAILABLE` when the preview does not match any branch or required inputs are missing; `{ status: "exists-no-worktree", branchName }` when a matching branch exists with no worktree; `{ status: "has-orphaned-worktree", worktreeId }` when a matching worktree exists but has no active node; or `{ status: "has-active-node", nodeId }` when a matching worktree is attached to an active node.
+ */
 export function useBranchStatus({
 	branchPreview,
 	repositoryId,

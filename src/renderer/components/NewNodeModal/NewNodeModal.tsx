@@ -38,6 +38,12 @@ import { Textarea } from "ui/components/ui/textarea";
 import { ExistingWorktreesList } from "./components/ExistingWorktreesList";
 import { useBranchStatus } from "./hooks/useBranchStatus";
 
+/**
+ * Generates a branch-name-safe slug from a title.
+ *
+ * @param title - The human-readable title
+ * @returns A sanitized slug suitable for use as a branch name
+ */
 function generateSlugFromTitle(title: string): string {
 	return sanitizeSegment(title);
 }
