@@ -546,10 +546,7 @@ export function NewNodeModal() {
 									</Collapsible>
 
 									{branchStatus.status === "has-active-node" && (
-										<Button
-											className="w-full h-8 text-sm"
-											onClick={handleGoToNode}
-										>
+										<Button className="w-full h-8 text-sm" onClick={handleGoToNode}>
 											Go to Node
 										</Button>
 									)}
