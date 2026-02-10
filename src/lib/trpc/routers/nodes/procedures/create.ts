@@ -342,6 +342,17 @@ export const createCreateProcedures = () => {
 					});
 				}
 
+				if (!input.useExistingBranch) {
+					const branchAlreadyExists = existingBranches.some(
+						(b) => b.toLowerCase() === branch.toLowerCase(),
+					);
+					if (branchAlreadyExists) {
+						throw new Error(
+							`Branch "${branch}" already exists. Use "Use existing branch" to create a worktree from it, or choose a different branch name.`,
+						);
+					}
+				}
+
 				const worktreePath = join(
 					homedir(),
 					CASPIAN_DIR_NAME,

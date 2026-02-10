@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { GoGitBranch } from "react-icons/go";
 import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
 import { LuFolderOpen } from "react-icons/lu";
@@ -11,6 +12,7 @@ import {
 	useNewNodeModalOpen,
 	usePreSelectedRepositoryId,
 } from "renderer/stores/new-node-modal";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { resolveBranchPrefix, sanitizeBranchName, sanitizeSegment } from "shared/utils/branch";
 import { Button } from "ui/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
@@ -82,6 +84,7 @@ export function NewNodeModal() {
 	const { data: gitInfo } = electronTrpc.settings.getGitInfo.useQuery();
 	const createNode = useCreateNode();
 	const openNew = useOpenNew();
+	const navigate = useNavigate();
 
 	const resolvedPrefix = useMemo(() => {
 		const repositoryOverrides = repository?.branchPrefixMode != null;
@@ -125,6 +128,28 @@ export function NewNodeModal() {
 
 	const branchPreview =
 		branchSlug && applyPrefix && resolvedPrefix ? `${resolvedPrefix}/${branchSlug}` : branchSlug;
+
+	const branchCollision = useMemo(() => {
+		if (!branchData?.branches || !branchPreview) return null;
+
+		const matchingBranch = branchData.branches.find((b) => b.name === branchPreview);
+		if (!matchingBranch) return null;
+
+		const existingNode = branchData.branchNodes?.[branchPreview];
+		if (existingNode) {
+			return {
+				type: "has-node" as const,
+				branchName: branchPreview,
+				nodeId: existingNode.nodeId,
+				nodeName: existingNode.nodeName,
+			};
+		}
+
+		return {
+			type: "branch-exists" as const,
+			branchName: branchPreview,
+		};
+	}, [branchPreview, branchData]);
 
 	const resetForm = () => {
 		setSelectedRepositoryId(null);
@@ -198,18 +223,20 @@ export function NewNodeModal() {
 
 	const selectedRepository = recentRepositories.find((r) => r.id === selectedRepositoryId);
 
-	const handleCreateNode = async () => {
+	const handleCreateNode = async (options?: { useExistingBranch?: boolean }) => {
 		if (!selectedRepositoryId) return;
 
 		const nodeName = title.trim() || undefined;
+		const useExisting = options?.useExistingBranch ?? false;
 
 		try {
 			const result = await createNode.mutateAsync({
 				repositoryId: selectedRepositoryId,
 				name: nodeName,
-				branchName: branchSlug || undefined,
+				branchName: useExisting ? branchPreview : (branchSlug || undefined),
 				baseBranch: effectiveBaseBranch || undefined,
-				applyPrefix,
+				applyPrefix: useExisting ? false : applyPrefix,
+				useExistingBranch: useExisting,
 				setupScript: setupScript.trim() || undefined,
 				teardownScript: teardownScript.trim() || undefined,
 			});
@@ -329,6 +356,49 @@ export function NewNodeModal() {
 											<span className="font-mono">{branchPreview || "branch-name"}</span>
 											<span className="text-muted-foreground/60">from {effectiveBaseBranch}</span>
 										</p>
+									)}
+
+									{branchCollision && (
+										<div className="flex items-center gap-2 px-3 py-2 rounded-md border border-amber-500/30 bg-amber-500/10 text-xs">
+											{branchCollision.type === "has-node" ? (
+												<>
+													<span className="text-amber-700 dark:text-amber-300 flex-1">
+														Branch{" "}
+														<span className="font-mono font-medium">
+															{branchCollision.branchName}
+														</span>{" "}
+														is already open as &ldquo;{branchCollision.nodeName}&rdquo;
+													</span>
+													<button
+														type="button"
+														className="shrink-0 text-amber-700 dark:text-amber-300 underline hover:no-underline"
+														onClick={() => {
+															navigateToNode(branchCollision.nodeId, navigate);
+															handleClose();
+														}}
+													>
+														Go to node
+													</button>
+												</>
+											) : (
+												<>
+													<span className="text-amber-700 dark:text-amber-300 flex-1">
+														Branch{" "}
+														<span className="font-mono font-medium">
+															{branchCollision.branchName}
+														</span>{" "}
+														already exists
+													</span>
+													<button
+														type="button"
+														className="shrink-0 text-amber-700 dark:text-amber-300 underline hover:no-underline"
+														onClick={() => handleCreateNode({ useExistingBranch: true })}
+													>
+														Use existing branch
+													</button>
+												</>
+											)}
+										</div>
 									)}
 
 									<Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
@@ -468,8 +538,12 @@ export function NewNodeModal() {
 
 									<Button
 										className="w-full h-8 text-sm"
-										onClick={handleCreateNode}
-										disabled={createNode.isPending || isBranchesError}
+										onClick={() => handleCreateNode()}
+										disabled={
+											createNode.isPending ||
+											isBranchesError ||
+											branchCollision?.type === "has-node"
+										}
 									>
 										Create Node
 									</Button>

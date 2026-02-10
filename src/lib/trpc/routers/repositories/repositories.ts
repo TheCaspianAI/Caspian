@@ -271,6 +271,7 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					isRemote: boolean;
 				}>;
 				defaultBranch: string;
+				branchNodes: Record<string, { nodeId: string; nodeName: string; type: string }>;
 			}> => {
 				const repository = localDb
 					.select()
@@ -427,7 +428,18 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					return b.lastCommitDate - a.lastCommitDate;
 				});
 
-				return { branches, defaultBranch };
+				const activeNodes = localDb
+					.select({ id: nodes.id, branch: nodes.branch, name: nodes.name, type: nodes.type })
+					.from(nodes)
+					.where(and(eq(nodes.repositoryId, input.repositoryId), isNull(nodes.deletingAt)))
+					.all();
+
+				const branchNodes: Record<string, { nodeId: string; nodeName: string; type: string }> = {};
+				for (const node of activeNodes) {
+					branchNodes[node.branch] = { nodeId: node.id, nodeName: node.name, type: node.type };
+				}
+
+				return { branches, defaultBranch, branchNodes };
 			},
 		),
 
