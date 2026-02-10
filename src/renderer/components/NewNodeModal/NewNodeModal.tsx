@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GoGitBranch } from "react-icons/go";
 import { HiCheck, HiChevronDown, HiChevronUpDown } from "react-icons/hi2";
 import { LuFolderOpen } from "react-icons/lu";
@@ -7,12 +7,12 @@ import { electronTrpc } from "renderer/lib/electron-trpc";
 import { formatRelativeTime } from "renderer/lib/formatRelativeTime";
 import { useCreateNode } from "renderer/react-query/nodes";
 import { useOpenNew } from "renderer/react-query/repositories";
+import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import {
 	useCloseNewNodeModal,
 	useNewNodeModalOpen,
 	usePreSelectedRepositoryId,
 } from "renderer/stores/new-node-modal";
-import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
 import { resolveBranchPrefix, sanitizeBranchName, sanitizeSegment } from "shared/utils/branch";
 import { Button } from "ui/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "ui/components/ui/collapsible";
@@ -74,7 +74,7 @@ export function NewNodeModal() {
 		isError: isBranchesError,
 	} = electronTrpc.repositories.getBranches.useQuery(
 		{ repositoryId: selectedRepositoryId ?? "" },
-		{ enabled: !!selectedRepositoryId },
+		{ enabled: !!selectedRepositoryId, staleTime: 0 },
 	);
 	const { data: gitAuthor } = electronTrpc.repositories.getGitAuthor.useQuery(
 		{ id: selectedRepositoryId ?? "" },
@@ -132,14 +132,21 @@ export function NewNodeModal() {
 	const branchCollision = useMemo(() => {
 		if (!branchData?.branches || !branchPreview) return null;
 
-		const matchingBranch = branchData.branches.find((b) => b.name === branchPreview);
+		// Case-insensitive comparison is required: on macOS (case-insensitive FS),
+		// git may store branch names with different case than requested (e.g.
+		// "Alchemishty/foo" when "alchemishty/foo" was created, due to a
+		// pre-existing directory). The preview is always lowercased by sanitizeSegment.
+		const previewLower = branchPreview.toLowerCase();
+		const matchingBranch = branchData.branches.find((b) => b.name.toLowerCase() === previewLower);
 		if (!matchingBranch) return null;
 
-		const existingNode = branchData.branchNodes?.[branchPreview];
+		const existingNode = Object.entries(branchData.branchNodes ?? {}).find(
+			([key]) => key.toLowerCase() === previewLower,
+		)?.[1];
 		if (existingNode) {
 			return {
 				type: "has-node" as const,
-				branchName: branchPreview,
+				branchName: matchingBranch.name,
 				nodeId: existingNode.nodeId,
 				nodeName: existingNode.nodeName,
 			};
@@ -147,7 +154,7 @@ export function NewNodeModal() {
 
 		return {
 			type: "branch-exists" as const,
-			branchName: branchPreview,
+			branchName: matchingBranch.name,
 		};
 	}, [branchPreview, branchData]);
 
@@ -233,7 +240,7 @@ export function NewNodeModal() {
 			const result = await createNode.mutateAsync({
 				repositoryId: selectedRepositoryId,
 				name: nodeName,
-				branchName: useExisting ? branchPreview : (branchSlug || undefined),
+				branchName: useExisting ? branchPreview : branchSlug || undefined,
 				baseBranch: effectiveBaseBranch || undefined,
 				applyPrefix: useExisting ? false : applyPrefix,
 				useExistingBranch: useExisting,

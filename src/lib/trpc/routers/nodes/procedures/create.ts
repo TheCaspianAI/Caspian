@@ -1,5 +1,6 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not } from "drizzle-orm";
 import { nodes, repositories, settings, worktrees } from "lib/local-db";
 import { track } from "main/lib/analytics";
@@ -170,9 +171,10 @@ async function handleNewWorktree({
 		branch: localBranchName,
 	});
 	if (existingWorktreePath) {
-		throw new Error(
-			`This PR's branch is already checked out in a worktree at: ${existingWorktreePath}`,
-		);
+		throw new TRPCError({
+			code: "CONFLICT",
+			message: `This PR's branch is already checked out in a worktree at: ${existingWorktreePath}`,
+		});
 	}
 
 	await fetchPrBranch({
@@ -274,14 +276,20 @@ export const createCreateProcedures = () => {
 					.where(eq(repositories.id, input.repositoryId))
 					.get();
 				if (!repository) {
-					throw new Error(`Repository ${input.repositoryId} not found`);
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: `Repository ${input.repositoryId} not found`,
+					});
 				}
 
 				let existingBranchName: string | undefined;
 				if (input.useExistingBranch) {
 					existingBranchName = input.branchName?.trim();
 					if (!existingBranchName) {
-						throw new Error("Branch name is required when using an existing branch");
+						throw new TRPCError({
+							code: "BAD_REQUEST",
+							message: "Branch name is required when using an existing branch",
+						});
 					}
 
 					const existingWorktreePath = await getBranchWorktreePath({
@@ -289,9 +297,10 @@ export const createCreateProcedures = () => {
 						branch: existingBranchName,
 					});
 					if (existingWorktreePath) {
-						throw new Error(
-							`Branch "${existingBranchName}" is already checked out in another worktree at: ${existingWorktreePath}`,
-						);
+						throw new TRPCError({
+							code: "CONFLICT",
+							message: `Branch "${existingBranchName}" is already checked out in another worktree at: ${existingWorktreePath}`,
+						});
 					}
 				}
 
@@ -328,9 +337,10 @@ export const createCreateProcedures = () => {
 				let branch: string;
 				if (existingBranchName) {
 					if (!existingBranches.includes(existingBranchName)) {
-						throw new Error(
-							`Branch "${existingBranchName}" does not exist. Please select an existing branch.`,
-						);
+						throw new TRPCError({
+							code: "NOT_FOUND",
+							message: `Branch "${existingBranchName}" does not exist. Please select an existing branch.`,
+						});
 					}
 					branch = existingBranchName;
 				} else if (input.branchName?.trim()) {
@@ -347,9 +357,10 @@ export const createCreateProcedures = () => {
 						(b) => b.toLowerCase() === branch.toLowerCase(),
 					);
 					if (branchAlreadyExists) {
-						throw new Error(
-							`Branch "${branch}" already exists. Use "Use existing branch" to create a worktree from it, or choose a different branch name.`,
-						);
+						throw new TRPCError({
+							code: "CONFLICT",
+							message: `Branch "${branch}" already exists. Use "Use existing branch" to create a worktree from it, or choose a different branch name.`,
+						});
 					}
 				}
 
@@ -447,21 +458,27 @@ export const createCreateProcedures = () => {
 					.where(eq(repositories.id, input.repositoryId))
 					.get();
 				if (!repository) {
-					throw new Error(`Repository ${input.repositoryId} not found`);
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: `Repository ${input.repositoryId} not found`,
+					});
 				}
 
 				const branch = input.branch || (await getCurrentBranch(repository.mainRepoPath));
 				if (!branch) {
-					throw new Error("Could not determine current branch");
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: "Could not determine current branch",
+					});
 				}
 
 				if (input.branch) {
 					const existingBranchNode = getBranchNode(input.repositoryId);
 					if (existingBranchNode && existingBranchNode.branch !== branch) {
-						throw new Error(
-							`A main node already exists on branch "${existingBranchNode.branch}". ` +
-								`Use the branch switcher to change branches.`,
-						);
+						throw new TRPCError({
+							code: "CONFLICT",
+							message: `A main node already exists on branch "${existingBranchNode.branch}". Use the branch switcher to change branches.`,
+						});
 					}
 					await safeCheckoutBranch(repository.mainRepoPath, input.branch);
 				}
@@ -520,7 +537,10 @@ export const createCreateProcedures = () => {
 				const node = insertResult[0] ?? getBranchNode(input.repositoryId);
 
 				if (!node) {
-					throw new Error("Failed to create or find branch node");
+					throw new TRPCError({
+						code: "INTERNAL_SERVER_ERROR",
+						message: "Failed to create or find branch node",
+					});
 				}
 
 				setLastActiveNode(node.id);
@@ -554,7 +574,10 @@ export const createCreateProcedures = () => {
 			.mutation(async ({ input }) => {
 				const worktree = getWorktree(input.worktreeId);
 				if (!worktree) {
-					throw new Error(`Worktree ${input.worktreeId} not found`);
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: `Worktree ${input.worktreeId} not found`,
+					});
 				}
 
 				const existingNode = localDb
@@ -563,17 +586,20 @@ export const createCreateProcedures = () => {
 					.where(and(eq(nodes.worktreeId, input.worktreeId), isNull(nodes.deletingAt)))
 					.get();
 				if (existingNode) {
-					throw new Error("Worktree already has an active node");
+					throw new TRPCError({ code: "CONFLICT", message: "Worktree already has an active node" });
 				}
 
 				const repository = getRepository(worktree.repositoryId);
 				if (!repository) {
-					throw new Error(`Repository ${worktree.repositoryId} not found`);
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: `Repository ${worktree.repositoryId} not found`,
+					});
 				}
 
 				const exists = await worktreeExists(repository.mainRepoPath, worktree.path);
 				if (!exists) {
-					throw new Error("Worktree no longer exists on disk");
+					throw new TRPCError({ code: "NOT_FOUND", message: "Worktree no longer exists on disk" });
 				}
 
 				const maxTabOrder = getMaxNodeTabOrder(worktree.repositoryId);
@@ -620,14 +646,18 @@ export const createCreateProcedures = () => {
 			.mutation(async ({ input }) => {
 				const repository = getRepository(input.repositoryId);
 				if (!repository) {
-					throw new Error(`Repository ${input.repositoryId} not found`);
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: `Repository ${input.repositoryId} not found`,
+					});
 				}
 
 				const parsed = parsePrUrl(input.prUrl);
 				if (!parsed) {
-					throw new Error(
-						"Invalid PR URL. Expected format: https://github.com/owner/repo/pull/123",
-					);
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: "Invalid PR URL. Expected format: https://github.com/owner/repo/pull/123",
+					});
 				}
 
 				const prInfo = await getPrInfo({
