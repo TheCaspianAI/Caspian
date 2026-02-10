@@ -180,7 +180,10 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 			toast.success("Branch restored on remote");
 			handleRefresh();
 		},
-		onError: (error) => toast.error(`Failed to restore branch: ${error.message}`),
+		onError: (error) => {
+			console.error("Failed to restore branch:", error);
+			toast.error(`Failed to restore branch: ${error.message}`);
+		},
 	});
 
 	const [showDiscardUnstagedDialog, setShowDiscardUnstagedDialog] = useState(false);
