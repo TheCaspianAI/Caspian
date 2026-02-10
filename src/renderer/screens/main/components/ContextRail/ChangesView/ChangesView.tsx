@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
 import { LuUndo2 } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
+import { DeleteNodeDialog } from "renderer/screens/main/components/NodesListView/components/DeleteNodeDialog";
+import { PRIcon } from "renderer/screens/main/components/PRIcon";
 import { useChangesStore } from "renderer/stores/changes";
 import type { ChangeCategory, ChangedFile } from "shared/changes-types";
 import {
@@ -175,6 +177,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 
 	const [showDiscardUnstagedDialog, setShowDiscardUnstagedDialog] = useState(false);
 	const [showDiscardStagedDialog, setShowDiscardStagedDialog] = useState(false);
+	const [showMergedDeleteDialog, setShowMergedDeleteDialog] = useState(false);
 
 	const handleDiscard = (file: ChangedFile) => {
 		if (!worktreePath) return;
@@ -303,6 +306,9 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const hasStagedChanges = status.staged.length > 0;
 	const hasExistingPR = !!githubStatus?.pr;
 	const prUrl = githubStatus?.pr?.url;
+	const isMerged = githubStatus?.pr?.state === "merged";
+	const mergedPrNumber = githubStatus?.pr?.number;
+	const mergedPrUrl = githubStatus?.pr?.url;
 
 	return (
 		<div className="flex flex-col h-full">
@@ -321,6 +327,31 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 					stashPopMutation.isPending
 				}
 			/>
+
+			{isMerged && (
+				<div className="flex items-center gap-2 px-3 py-2 bg-violet-500/10 border-b border-border">
+					<PRIcon state="merged" className="size-4 shrink-0" />
+					<span className="text-xs text-foreground/80 flex-1">PR #{mergedPrNumber} was merged</span>
+					{mergedPrUrl && (
+						<a
+							href={mergedPrUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+						>
+							View
+						</a>
+					)}
+					<Button
+						variant="secondary"
+						size="sm"
+						className="h-6 px-2 text-xs"
+						onClick={() => setShowMergedDeleteDialog(true)}
+					>
+						Delete Node
+					</Button>
+				</div>
+			)}
 
 			<CommitInput
 				worktreePath={worktreePath}
@@ -579,6 +610,16 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{workspaceId && (
+				<DeleteNodeDialog
+					nodeId={workspaceId}
+					nodeName={workspace?.name ?? ""}
+					nodeType="worktree"
+					open={showMergedDeleteDialog}
+					onOpenChange={setShowMergedDeleteDialog}
+				/>
+			)}
 		</div>
 	);
 }

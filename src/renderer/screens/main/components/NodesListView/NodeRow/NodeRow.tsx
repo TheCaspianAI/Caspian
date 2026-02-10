@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LuArrowRight, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
+import { PRIcon } from "renderer/screens/main/components/PRIcon";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -107,6 +108,9 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 			>
 				{node.name}
 			</span>
+
+			{/* PR merged indicator */}
+			{pr?.state === "merged" && <PRIcon state="merged" className="size-3.5 shrink-0" />}
 
 			{/* Unread indicator */}
 			{node.isUnread && (
