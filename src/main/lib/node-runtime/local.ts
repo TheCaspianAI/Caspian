@@ -157,13 +157,11 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		return this.backend.getMaxListeners();
 	}
 
-	// biome-ignore lint/complexity/noBannedTypes: EventEmitter interface requires Function[]
-	listeners(event: string | symbol): Function[] {
+	listeners(event: string | symbol): ((...args: unknown[]) => void)[] {
 		return this.backend.listeners(event);
 	}
 
-	// biome-ignore lint/complexity/noBannedTypes: EventEmitter interface requires Function[]
-	rawListeners(event: string | symbol): Function[] {
+	rawListeners(event: string | symbol): ((...args: unknown[]) => void)[] {
 		return this.backend.rawListeners(event);
 	}
 
