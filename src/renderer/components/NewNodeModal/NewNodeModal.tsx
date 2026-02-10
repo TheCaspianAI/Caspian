@@ -38,6 +38,7 @@ import { Textarea } from "ui/components/ui/textarea";
 import { ExistingWorktreesList } from "./components/ExistingWorktreesList";
 import { useBranchStatus } from "./hooks/useBranchStatus";
 
+/** Converts a user-typed feature title into a URL-safe branch slug. */
 function generateSlugFromTitle(title: string): string {
 	return sanitizeSegment(title);
 }
@@ -221,6 +222,7 @@ export function NewNodeModal() {
 
 	const selectedRepository = recentRepositories.find((r) => r.id === selectedRepositoryId);
 
+	/** Navigate to an existing active node that owns this branch. */
 	const handleGoToNode = () => {
 		if (branchStatus.status === "has-active-node" && branchStatus.nodeId) {
 			navigateToNode(branchStatus.nodeId, navigate);
@@ -228,16 +230,27 @@ export function NewNodeModal() {
 		}
 	};
 
+	/** Reopen an orphaned worktree (worktree exists on disk but has no active node). */
 	const handleReopenWorktree = async () => {
 		if (branchStatus.status !== "has-orphaned-worktree" || !branchStatus.worktreeId) return;
 		try {
 			await openWorktree.mutateAsync({ worktreeId: branchStatus.worktreeId });
 			handleClose();
 		} catch (err) {
+			console.error("[NewNodeModal/reopenWorktree] Failed:", {
+				worktreeId: branchStatus.worktreeId,
+				repositoryId: selectedRepositoryId,
+				error: err,
+			});
 			toast.error(err instanceof Error ? err.message : "Failed to open node");
 		}
 	};
 
+	/**
+	 * Create a new node. If the branch already exists without a worktree,
+	 * creates a worktree from the existing branch via useExistingBranch.
+	 * Otherwise creates a new branch and worktree from scratch.
+	 */
 	const handleCreateNode = async () => {
 		if (!selectedRepositoryId) return;
 
@@ -260,6 +273,11 @@ export function NewNodeModal() {
 				}
 				return;
 			} catch (err) {
+				console.error("[NewNodeModal/createFromExisting] Failed:", {
+					branch: branchStatus.branchName,
+					repositoryId: selectedRepositoryId,
+					error: err,
+				});
 				toast.error(err instanceof Error ? err.message : "Failed to create node");
 				return;
 			}
@@ -288,6 +306,11 @@ export function NewNodeModal() {
 				toast.success("Node created");
 			}
 		} catch (err) {
+			console.error("[NewNodeModal/create] Failed:", {
+				branch: branchSlug,
+				repositoryId: selectedRepositoryId,
+				error: err,
+			});
 			toast.error(err instanceof Error ? err.message : "Failed to create node");
 		}
 	};
