@@ -38,7 +38,6 @@ import { Textarea } from "ui/components/ui/textarea";
 import { ExistingWorktreesList } from "./components/ExistingWorktreesList";
 import { useBranchStatus } from "./hooks/useBranchStatus";
 
-/** Converts a user-typed feature title into a URL-safe branch slug. */
 function generateSlugFromTitle(title: string): string {
 	return sanitizeSegment(title);
 }
@@ -222,7 +221,6 @@ export function NewNodeModal() {
 
 	const selectedRepository = recentRepositories.find((r) => r.id === selectedRepositoryId);
 
-	/** Navigate to an existing active node that owns this branch. */
 	const handleGoToNode = () => {
 		if (branchStatus.status === "has-active-node" && branchStatus.nodeId) {
 			navigateToNode(branchStatus.nodeId, navigate);
@@ -230,7 +228,6 @@ export function NewNodeModal() {
 		}
 	};
 
-	/** Reopen an orphaned worktree (worktree exists on disk but has no active node). */
 	const handleReopenWorktree = async () => {
 		if (branchStatus.status !== "has-orphaned-worktree" || !branchStatus.worktreeId) return;
 		try {
@@ -246,11 +243,6 @@ export function NewNodeModal() {
 		}
 	};
 
-	/**
-	 * Create a new node. If the branch already exists without a worktree,
-	 * creates a worktree from the existing branch via useExistingBranch.
-	 * Otherwise creates a new branch and worktree from scratch.
-	 */
 	const handleCreateNode = async () => {
 		if (!selectedRepositoryId) return;
 

@@ -22,14 +22,7 @@ interface UseBranchStatusParams {
 	}>;
 }
 
-/**
- * Determines the status of a branch name as the user types in the NewNodeModal.
- *
- * Cross-references the debounced branch preview against existing branches and
- * Caspian worktrees to return one of four states: available, has-active-node,
- * has-orphaned-worktree, or exists-no-worktree. The lookup is debounced at 300ms
- * and runs entirely in-memory against data from existing tRPC queries.
- */
+/** Debounced check of whether a branch name conflicts with existing branches or worktrees. */
 export function useBranchStatus({
 	branchPreview,
 	repositoryId,
