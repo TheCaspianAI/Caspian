@@ -1,7 +1,7 @@
 import { useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { HiMiniMinus, HiMiniPlus } from "react-icons/hi2";
-import { LuUndo2 } from "react-icons/lu";
+import { LuCloudOff, LuUndo2 } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { DeleteNodeDialog } from "renderer/screens/main/components/NodesListView/components/DeleteNodeDialog";
 import { PRIcon } from "renderer/screens/main/components/PRIcon";
@@ -175,9 +175,18 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 		},
 	});
 
+	const restoreBranchMutation = electronTrpc.changes.push.useMutation({
+		onSuccess: () => {
+			toast.success("Branch restored on remote");
+			handleRefresh();
+		},
+		onError: (error) => toast.error(`Failed to restore branch: ${error.message}`),
+	});
+
 	const [showDiscardUnstagedDialog, setShowDiscardUnstagedDialog] = useState(false);
 	const [showDiscardStagedDialog, setShowDiscardStagedDialog] = useState(false);
 	const [showMergedDeleteDialog, setShowMergedDeleteDialog] = useState(false);
+	const [showDeletedBranchDeleteDialog, setShowDeletedBranchDeleteDialog] = useState(false);
 
 	const handleDiscard = (file: ChangedFile) => {
 		if (!worktreePath) return;
@@ -309,6 +318,8 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const isMerged = githubStatus?.pr?.state === "merged";
 	const mergedPrNumber = githubStatus?.pr?.number;
 	const mergedPrUrl = githubStatus?.pr?.url;
+	const isBranchDeletedOnRemote =
+		githubStatus != null && !githubStatus.branchExistsOnRemote && !isMerged;
 
 	return (
 		<div className="flex flex-col h-full">
@@ -347,6 +358,35 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 						size="sm"
 						className="h-6 px-2 text-xs"
 						onClick={() => setShowMergedDeleteDialog(true)}
+					>
+						Delete Node
+					</Button>
+				</div>
+			)}
+
+			{isBranchDeletedOnRemote && (
+				<div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 border-b border-border">
+					<LuCloudOff className="size-4 shrink-0 text-amber-500" />
+					<span className="text-xs text-foreground/80 flex-1">Branch deleted on remote</span>
+					<Button
+						variant="secondary"
+						size="sm"
+						className="h-6 px-2 text-xs"
+						onClick={() =>
+							restoreBranchMutation.mutate({
+								worktreePath: worktreePath || "",
+								setUpstream: true,
+							})
+						}
+						disabled={restoreBranchMutation.isPending}
+					>
+						Push to Restore
+					</Button>
+					<Button
+						variant="secondary"
+						size="sm"
+						className="h-6 px-2 text-xs"
+						onClick={() => setShowDeletedBranchDeleteDialog(true)}
 					>
 						Delete Node
 					</Button>
@@ -618,6 +658,16 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 					nodeType="worktree"
 					open={showMergedDeleteDialog}
 					onOpenChange={setShowMergedDeleteDialog}
+				/>
+			)}
+
+			{workspaceId && (
+				<DeleteNodeDialog
+					nodeId={workspaceId}
+					nodeName={workspace?.name ?? ""}
+					nodeType="worktree"
+					open={showDeletedBranchDeleteDialog}
+					onOpenChange={setShowDeletedBranchDeleteDialog}
 				/>
 			)}
 		</div>
