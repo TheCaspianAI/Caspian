@@ -42,6 +42,7 @@ export const gitHubStatusSchema = z.object({
 		.nullable(),
 	repoUrl: z.string(),
 	branchExistsOnRemote: z.boolean(),
+	branchHasBeenPushed: z.boolean().default(false),
 	lastRefreshed: z.number(),
 });
 

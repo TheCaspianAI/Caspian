@@ -43,7 +43,10 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 	const pr = githubStatus?.pr;
 	const showDiffStats = pr && (pr.additions > 0 || pr.deletions > 0);
 	const isBranchDeletedOnRemote =
-		githubStatus != null && !githubStatus.branchExistsOnRemote && pr?.state !== "merged";
+		githubStatus != null &&
+		!githubStatus.branchExistsOnRemote &&
+		githubStatus.branchHasBeenPushed &&
+		pr?.state !== "merged";
 
 	const timeText = node.isOpen
 		? `Opened ${getRelativeTime(node.lastOpenedAt)}`

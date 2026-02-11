@@ -931,6 +931,27 @@ function categorizeGitError(errorMessage: string): BranchExistsResult {
 	};
 }
 
+/**
+ * Checks whether a branch has ever been pushed by looking for local upstream tracking config.
+ * Returns true if `branch.<name>.remote` exists in git config (set by `git push --set-upstream`).
+ * This config persists even after the remote branch is deleted or `git fetch --prune` runs.
+ */
+export async function branchHasBeenPushed(
+	worktreePath: string,
+	branchName: string,
+): Promise<boolean> {
+	try {
+		const { stdout } = await execFileAsync(
+			"git",
+			["-C", worktreePath, "config", "--get", `branch.${branchName}.remote`],
+			{ timeout: 5_000 },
+		);
+		return stdout.trim().length > 0;
+	} catch {
+		return false;
+	}
+}
+
 export async function branchExistsOnRemote(
 	worktreePath: string,
 	branchName: string,
