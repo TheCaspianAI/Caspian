@@ -36,7 +36,6 @@ import {
 } from "../nodes/utils/git";
 import { getDefaultRepositoryColor } from "./utils/colors";
 import { fetchGitHubOwner, getGitHubAvatarUrl } from "./utils/github";
-import { invalidateRepositoryHealthCache } from "./utils/health-cache";
 
 type Repository = SelectRepository;
 
@@ -938,8 +937,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 				.where(eq(repositories.id, input.id))
 				.run();
 
-			invalidateRepositoryHealthCache();
-
 			track("repository_relocated", { repository_id: input.id });
 
 			return { success: true as const, canceled: false as const, newPath: gitRoot };
@@ -976,8 +973,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 
 			localDb.delete(worktrees).where(eq(worktrees.repositoryId, input.id)).run();
 			localDb.delete(repositories).where(eq(repositories.id, input.id)).run();
-
-			invalidateRepositoryHealthCache();
 
 			const currentSettings = localDb.select().from(settings).get();
 			if (

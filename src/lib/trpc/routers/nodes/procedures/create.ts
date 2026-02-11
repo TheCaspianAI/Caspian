@@ -9,10 +9,7 @@ import { nodeInitManager } from "main/lib/node-init-manager";
 import { CASPIAN_DIR_NAME, WORKTREES_DIR_NAME } from "shared/constants";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import {
-	getRepositoryHealth,
-	invalidateRepositoryHealthCache,
-} from "../../repositories/utils/health-cache";
+import { checkRepositoryHealth } from "../../repositories/utils/health";
 import {
 	activateRepository,
 	getBranchNode,
@@ -41,7 +38,6 @@ import {
 } from "../utils/git";
 import { initializeNodeWorktree } from "../utils/node-init";
 import { loadSetupConfig } from "../utils/setup";
-import { invalidateWorktreePathCache } from "../utils/worktree-path-cache";
 
 interface CreateNodeFromWorktreeParams {
 	repositoryId: string;
@@ -200,7 +196,6 @@ async function handleNewWorktree({
 		prInfo,
 		localBranchName,
 	});
-	invalidateWorktreePathCache();
 
 	const defaultBranch = repository.defaultBranch || "main";
 
@@ -284,9 +279,7 @@ export const createCreateProcedures = () => {
 					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
 
-				invalidateRepositoryHealthCache();
-
-				const health = getRepositoryHealth({ repositoryId: repository.id });
+				const health = checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath });
 				if (!health.healthy) {
 					throw new TRPCError({
 						code: "PRECONDITION_FAILED",
@@ -628,9 +621,7 @@ export const createCreateProcedures = () => {
 					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
 
-				invalidateRepositoryHealthCache();
-
-				const health = getRepositoryHealth({ repositoryId: repository.id });
+				const health = checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath });
 				if (!health.healthy) {
 					throw new TRPCError({
 						code: "PRECONDITION_FAILED",
