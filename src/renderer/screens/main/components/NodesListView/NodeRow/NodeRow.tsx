@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-	LuArrowRight,
-	LuCloudOff,
-	LuFolder,
-	LuFolderGit2,
-	LuRotateCw,
-	LuTriangleAlert,
-} from "react-icons/lu";
+import { LuArrowRight, LuCloudOff, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
 import { PRIcon } from "renderer/screens/main/components/PRIcon";
@@ -31,16 +24,9 @@ interface NodeRowProps {
 	onSwitch: () => void;
 	onReopen: () => void;
 	isOpening?: boolean;
-	isRepositoryMissing?: boolean;
 }
 
-export function NodeRow({
-	node,
-	onSwitch,
-	onReopen,
-	isOpening,
-	isRepositoryMissing,
-}: NodeRowProps) {
+export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 	const isBranch = node.type === "branch";
 	const [hasHovered, setHasHovered] = useState(false);
 	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
@@ -67,11 +53,6 @@ export function NodeRow({
 		: `Created ${getRelativeTime(node.createdAt)}`;
 
 	const handleClick = () => {
-		if (isRepositoryMissing) {
-			// Still allow navigating to the node to see the recovery UI
-			if (node.isOpen) onSwitch();
-			return;
-		}
 		if (node.isOpen) {
 			onSwitch();
 		} else {
@@ -89,7 +70,6 @@ export function NodeRow({
 				"flex items-center gap-3 w-full px-4 py-2.5 group text-left",
 				"hover:bg-background/50 transition-colors",
 				isOpening && "opacity-50 cursor-wait",
-				isRepositoryMissing && "opacity-50",
 			)}
 		>
 			<Tooltip delayDuration={500}>
@@ -135,19 +115,6 @@ export function NodeRow({
 			{pr?.state === "merged" && <PRIcon state="merged" className="size-3.5 shrink-0" />}
 
 			{isBranchDeletedOnRemote && <LuCloudOff className="size-3.5 shrink-0 text-amber-500" />}
-
-			{!node.worktreePathExists && node.type === "worktree" && (
-				<Tooltip delayDuration={300}>
-					<TooltipTrigger asChild>
-						<span>
-							<LuTriangleAlert className="size-3.5 shrink-0 text-destructive" />
-						</span>
-					</TooltipTrigger>
-					<TooltipContent side="top" sideOffset={4}>
-						<p className="text-xs">Worktree directory missing from disk</p>
-					</TooltipContent>
-				</Tooltip>
-			)}
 
 			{node.isUnread && (
 				<span className="relative flex size-2 shrink-0">

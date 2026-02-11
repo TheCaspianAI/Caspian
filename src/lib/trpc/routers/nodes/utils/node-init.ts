@@ -17,7 +17,6 @@ import {
 	sanitizeGitError,
 } from "./git";
 import { copyCaspianConfigToWorktree } from "./setup";
-import { invalidateWorktreePathCache } from "./worktree-path-cache";
 
 export interface NodeInitParams {
 	nodeId: string;
@@ -78,7 +77,6 @@ export async function initializeNodeWorktree({
 					branch,
 					worktreePath,
 				});
-				invalidateWorktreePathCache();
 				manager.markWorktreeCreated(nodeId);
 			}
 
@@ -435,7 +433,6 @@ export async function initializeNodeWorktree({
 
 		manager.updateProgress(nodeId, "creating_worktree", "Creating git worktree...");
 		await createWorktree(mainRepoPath, branch, worktreePath, startPoint);
-		invalidateWorktreePathCache();
 		manager.markWorktreeCreated(nodeId);
 
 		if (manager.isCancellationRequested(nodeId)) {

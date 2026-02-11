@@ -1,14 +1,14 @@
+import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
 import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import { getRepositoryHealth } from "../../repositories/utils/health-cache";
+import { checkRepositoryHealth } from "../../repositories/utils/health";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
-import { checkWorktreePathExists, refreshWorktreePathEntry } from "../utils/worktree-path-cache";
 
 type WorktreePathMap = Map<string, string>;
 
@@ -89,12 +89,13 @@ export const createQueryProcedures = () => {
 				}
 			}
 
-			const repoHealth = repository ? getRepositoryHealth({ repositoryId: repository.id }) : null;
+			const repoHealth = repository
+				? checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath })
+				: null;
 
 			const worktreePath = getNodePath(node) ?? "";
 			const worktreePathExists =
-				node.type === "branch" ||
-				(worktreePath !== "" && refreshWorktreePathEntry({ path: worktreePath }));
+				node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
 
 			return {
 				...node,
@@ -151,14 +152,12 @@ export const createQueryProcedures = () => {
 						githubOwner: string | null;
 						mainRepoPath: string;
 						defaultBranch: string;
-						pathMissing: boolean;
 					};
 					nodes: Array<{
 						id: string;
 						repositoryId: string;
 						worktreeId: string | null;
 						worktreePath: string;
-						worktreePathExists: boolean;
 						type: "worktree" | "branch";
 						branch: string;
 						name: string;
@@ -172,7 +171,6 @@ export const createQueryProcedures = () => {
 			>();
 
 			for (const repository of activeRepositories) {
-				const health = getRepositoryHealth({ repositoryId: repository.id });
 				groupsMap.set(repository.id, {
 					repository: {
 						id: repository.id,
@@ -182,7 +180,6 @@ export const createQueryProcedures = () => {
 						githubOwner: repository.githubOwner ?? null,
 						mainRepoPath: repository.mainRepoPath,
 						defaultBranch: repository.defaultBranch ?? "main",
-						pathMissing: !health.healthy,
 					},
 					nodes: [],
 				});
@@ -205,15 +202,10 @@ export const createQueryProcedures = () => {
 						worktreePath = group.repository.mainRepoPath;
 					}
 
-					const worktreePathExists =
-						node.type === "branch" ||
-						(worktreePath !== "" && checkWorktreePathExists({ path: worktreePath }));
-
 					group.nodes.push({
 						...node,
 						type: node.type as "worktree" | "branch",
 						worktreePath,
-						worktreePathExists,
 						isUnread: node.isUnread ?? false,
 					});
 				}
