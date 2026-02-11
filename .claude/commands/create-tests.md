@@ -30,7 +30,7 @@ Do not deviate from these patterns.
 Before writing new tests, read the most relevant existing test files to match their style:
 
 - Integration: `tests/integration/repository-health.test.ts`, `tests/integration/repository-relocate-remove.test.ts`
-- E2E: `tests/e2e/smoke.spec.ts`, `tests/e2e/repository-missing.spec.ts`
+- E2E: `tests/e2e/smoke.e2e.ts`, `tests/e2e/repository-missing.e2e.ts`
 - Unit: Any `*.test.ts` file in `src/` near the code you're testing
 
 ### 4. Classify each changed file
@@ -41,9 +41,9 @@ For each changed file, decide which test tier applies:
 |-----------------------|-----------|---------------|
 | `src/shared/`, pure utils | Unit | `src/` alongside the file |
 | `src/lib/trpc/routers/` | Integration | `tests/integration/<feature>.test.ts` |
-| `src/renderer/` (components, screens) | E2E | `tests/e2e/<feature>.spec.ts` |
+| `src/renderer/` (components, screens) | E2E | `tests/e2e/<feature>.e2e.ts` |
 | `src/main/lib/` (domain logic) | Integration | `tests/integration/<feature>.test.ts` |
-| `src/main/lib/` (side-effectful) | E2E | `tests/e2e/<feature>.spec.ts` |
+| `src/main/lib/` (side-effectful) | E2E | `tests/e2e/<feature>.e2e.ts` |
 | Schema/migrations | Integration | `tests/integration/<feature>.test.ts` |
 
 If a change spans multiple tiers, write tests for each.
@@ -79,7 +79,7 @@ Follow these rules strictly:
 After writing tests, run them to verify they pass:
 
 - Integration: `bun test --cwd tests/integration`
-- E2E: `npx playwright test tests/e2e/<your-file>.spec.ts`
+- E2E: `npx playwright test tests/e2e/<your-file>.e2e.ts`
 - Unit: `bun test src/<path-to-your-test>`
 
 If E2E tests fail because of main process changes that haven't been rebuilt:
@@ -109,12 +109,12 @@ Example before:
 
 Example after:
 ```
-- [x] Click "Locate Folder" — a native macOS file picker dialog opens — ✅ tests/e2e/repository-missing.spec.ts: "recovers after locating the moved repository"
+- [x] Click "Locate Folder" — a native macOS file picker dialog opens — ✅ tests/e2e/repository-missing.e2e.ts: "recovers after locating the moved repository"
 ```
 
 ### 9. Report
 
-**Important:** Integration tests (`tests/integration/*.test.ts`) and E2E tests (`tests/e2e/*.spec.ts`) are gitignored. Do not commit them. They are generated per-branch and ephemeral. Only unit tests in `src/` are committed to git.
+**Important:** Integration tests (`tests/integration/*.test.ts`) and E2E tests (`tests/e2e/*.e2e.ts`) are gitignored. Do not commit them. They are generated per-branch and ephemeral. Only unit tests in `src/` are committed to git.
 
 Print a summary of what was created:
 
@@ -125,7 +125,7 @@ Print a summary of what was created:
 - `tests/integration/<name>.test.ts` — N tests covering <what>
 
 ### E2E Tests
-- `tests/e2e/<name>.spec.ts` — N tests covering <what>
+- `tests/e2e/<name>.e2e.ts` — N tests covering <what>
 
 ### Unit Tests
 - `src/<path>/<name>.test.ts` — N tests covering <what>

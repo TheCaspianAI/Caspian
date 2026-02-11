@@ -26,7 +26,7 @@ The test infrastructure is modular: shared fixtures, helpers, config, and seed u
 | `tests/integration/*.test.ts` | **No** (gitignored) | Feature-specific integration tests — generated per branch |
 | `tests/e2e/fixtures/` | Yes | Playwright Electron fixture |
 | `playwright.config.ts` | Yes | Playwright configuration |
-| `tests/e2e/*.spec.ts` | **No** (gitignored) | Feature-specific E2E tests — generated per branch |
+| `tests/e2e/*.e2e.ts` | **No** (gitignored) | Feature-specific E2E tests — generated per branch |
 | `tests/e2e/screenshots/` | **No** (gitignored) | Local screenshot artifacts |
 | `test-results/` | **No** (gitignored) | Playwright test results |
 | `playwright-report/` | **No** (gitignored) | Playwright HTML reports |
@@ -166,7 +166,7 @@ bun run compile:app                    # Build the Electron app to dist/
 
 # Run E2E tests
 npx playwright test                    # All E2E tests
-npx playwright test tests/e2e/foo.spec.ts  # Single file
+npx playwright test tests/e2e/foo.e2e.ts   # Single file
 npx playwright test --grep "my test"   # Single test by name
 ```
 
