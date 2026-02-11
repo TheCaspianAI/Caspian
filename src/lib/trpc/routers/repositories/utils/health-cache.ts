@@ -35,7 +35,6 @@ export function getRepositoryHealth({
 	const cached = cache.get(repositoryId);
 	if (cached) return cached;
 
-	// Cache miss: new repo added since last sweep
 	const repo = localDb
 		.select({ mainRepoPath: repositories.mainRepoPath })
 		.from(repositories)

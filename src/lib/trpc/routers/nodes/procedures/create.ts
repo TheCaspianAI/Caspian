@@ -1,5 +1,6 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not } from "drizzle-orm";
 import { nodes, repositories, settings, worktrees } from "lib/local-db";
 import { track } from "main/lib/analytics";
@@ -8,7 +9,10 @@ import { nodeInitManager } from "main/lib/node-init-manager";
 import { CASPIAN_DIR_NAME, WORKTREES_DIR_NAME } from "shared/constants";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import { invalidateRepositoryHealthCache } from "../../repositories/utils/health-cache";
+import {
+	getRepositoryHealth,
+	invalidateRepositoryHealthCache,
+} from "../../repositories/utils/health-cache";
 import {
 	activateRepository,
 	getBranchNode,
@@ -279,6 +283,14 @@ export const createCreateProcedures = () => {
 				}
 
 				invalidateRepositoryHealthCache();
+
+				const health = getRepositoryHealth({ repositoryId: repository.id });
+				if (!health.healthy) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: "Repository directory not found on disk",
+					});
+				}
 
 				let existingBranchName: string | undefined;
 				if (input.useExistingBranch) {
@@ -616,6 +628,14 @@ export const createCreateProcedures = () => {
 				}
 
 				invalidateRepositoryHealthCache();
+
+				const health = getRepositoryHealth({ repositoryId: repository.id });
+				if (!health.healthy) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: "Repository directory not found on disk",
+					});
+				}
 
 				const parsed = parsePrUrl(input.prUrl);
 				if (!parsed) {
