@@ -11,7 +11,7 @@ bun run test:e2e                       # E2E tests only (requires compiled app)
 bun run test:all                       # Unit + integration + E2E (requires compiled app)
 ```
 
-CI runs unit tests, integration tests, lint, and typecheck on every push to `main` and on pull requests. E2E tests run locally before creating a PR.
+CI runs lint, typecheck, and unit tests on every push to `main` and on pull requests. Integration and E2E tests run locally before creating a PR.
 
 ## What Is Committed
 
