@@ -7,6 +7,7 @@ import { setupAgentHooks } from "./lib/agent-setup";
 import { initAppState } from "./lib/app-state";
 import { setupAutoUpdater } from "./lib/auto-updater";
 import { localDb } from "./lib/local-db";
+import { validateRepositoryPaths } from "./lib/repository-health";
 import { initSentry } from "./lib/sentry";
 import { reconcileDaemonSessions } from "./lib/terminal";
 import { disposeTray, initTray } from "./lib/tray";
@@ -130,8 +131,7 @@ export function quitWithoutConfirmation(): void {
 app.on("before-quit", async (event) => {
 	if (isQuitting) return;
 
-	const isDev = process.env.NODE_ENV === "development";
-	const shouldConfirm = !skipConfirmation && !isDev && getConfirmOnQuitSetting();
+	const shouldConfirm = !skipConfirmation && !isE2ETest && getConfirmOnQuitSetting();
 
 	if (shouldConfirm) {
 		event.preventDefault();
@@ -212,7 +212,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Single instance lock - required for second-instance event on Windows/Linux
-const gotTheLock = app.requestSingleInstanceLock();
+// Skip in E2E test mode to allow tests to launch alongside a dev instance.
+// Uses a custom env var because process.env.NODE_ENV is replaced at build time.
+const isE2ETest = process.env.CASPIAN_E2E_TEST === "1";
+const gotTheLock = isE2ETest || app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
 	// Another instance is already running, exit immediately without triggering before-quit
@@ -233,6 +236,8 @@ if (!gotTheLock) {
 		initSentry();
 
 		await initAppState();
+
+		validateRepositoryPaths();
 
 		// Clean up stale daemon sessions from previous app runs
 		// Must happen BEFORE renderer restore runs

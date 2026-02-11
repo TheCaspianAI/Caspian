@@ -11,6 +11,7 @@ import {
 	repositories,
 	type SelectRepository,
 	settings,
+	worktrees,
 } from "lib/local-db";
 import { track } from "main/lib/analytics";
 import { localDb } from "main/lib/local-db";
@@ -925,6 +926,110 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 			track("repository_closed", { repository_id: input.id });
 
 			return { success: true, terminalWarning };
+		}),
+
+		relocate: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, input.id))
+				.get();
+
+			if (!repository) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+			}
+
+			const window = getWindow();
+			if (!window) {
+				throw new TRPCError({
+					code: "INTERNAL_SERVER_ERROR",
+					message: "No window available",
+				});
+			}
+
+			const result = await dialog.showOpenDialog(window, {
+				title: `Locate "${repository.name}"`,
+				properties: ["openDirectory"],
+				message: `Select the new location of "${repository.name}"`,
+			});
+
+			if (result.canceled || result.filePaths.length === 0) {
+				return { success: false as const, canceled: true as const };
+			}
+
+			const selectedPath = result.filePaths[0];
+
+			let gitRoot: string;
+			try {
+				gitRoot = await getGitRoot(selectedPath);
+			} catch {
+				return {
+					success: false as const,
+					canceled: false as const,
+					error: "The selected folder is not a git repository.",
+				};
+			}
+
+			localDb
+				.update(repositories)
+				.set({ mainRepoPath: gitRoot, lastOpenedAt: Date.now() })
+				.where(eq(repositories.id, input.id))
+				.run();
+
+			track("repository_relocated", { repository_id: input.id });
+
+			return { success: true as const, canceled: false as const, newPath: gitRoot };
+		}),
+
+		remove: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+			const repository = localDb
+				.select()
+				.from(repositories)
+				.where(eq(repositories.id, input.id))
+				.get();
+
+			if (!repository) {
+				throw new TRPCError({ code: "NOT_FOUND", message: "Repository not found" });
+			}
+
+			const repositoryNodes = localDb
+				.select()
+				.from(nodes)
+				.where(eq(nodes.repositoryId, input.id))
+				.all();
+
+			const registry = getNodeRuntimeRegistry();
+			for (const node of repositoryNodes) {
+				const terminal = registry.getForNodeId(node.id).terminal;
+				await terminal.killByWorkspaceId(node.id);
+			}
+
+			const closedNodeIds = repositoryNodes.map((n) => n.id);
+
+			if (closedNodeIds.length > 0) {
+				localDb.delete(nodes).where(inArray(nodes.id, closedNodeIds)).run();
+			}
+
+			localDb.delete(worktrees).where(eq(worktrees.repositoryId, input.id)).run();
+			localDb.delete(repositories).where(eq(repositories.id, input.id)).run();
+
+			const currentSettings = localDb.select().from(settings).get();
+			if (
+				currentSettings?.lastActiveNodeId &&
+				closedNodeIds.includes(currentSettings.lastActiveNodeId)
+			) {
+				const remainingNodes = localDb.select().from(nodes).orderBy(desc(nodes.lastOpenedAt)).all();
+
+				localDb
+					.update(settings)
+					.set({ lastActiveNodeId: remainingNodes[0]?.id ?? null })
+					.where(eq(settings.id, 1))
+					.run();
+			}
+
+			track("repository_removed", { repository_id: input.id });
+
+			return { success: true };
 		}),
 
 		getGitHubAvatar: publicProcedure

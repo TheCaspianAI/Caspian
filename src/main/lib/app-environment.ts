@@ -3,7 +3,8 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { CASPIAN_DIR_NAME } from "shared/constants";
 
-export const CASPIAN_HOME_DIR = join(homedir(), CASPIAN_DIR_NAME);
+export const CASPIAN_HOME_DIR =
+	process.env.CASPIAN_HOME_OVERRIDE || join(homedir(), CASPIAN_DIR_NAME);
 
 export const CASPIAN_HOME_DIR_MODE = 0o700;
 export const CASPIAN_SENSITIVE_FILE_MODE = 0o600;

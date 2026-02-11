@@ -24,9 +24,16 @@ interface NodeRowProps {
 	onSwitch: () => void;
 	onReopen: () => void;
 	isOpening?: boolean;
+	isRepositoryMissing?: boolean;
 }
 
-export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
+export function NodeRow({
+	node,
+	onSwitch,
+	onReopen,
+	isOpening,
+	isRepositoryMissing,
+}: NodeRowProps) {
 	const isBranch = node.type === "branch";
 	const [hasHovered, setHasHovered] = useState(false);
 	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
@@ -50,6 +57,11 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 		: `Created ${getRelativeTime(node.createdAt)}`;
 
 	const handleClick = () => {
+		if (isRepositoryMissing) {
+			// Still allow navigating to the node to see the recovery UI
+			if (node.isOpen) onSwitch();
+			return;
+		}
 		if (node.isOpen) {
 			onSwitch();
 		} else {
@@ -67,6 +79,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				"flex items-center gap-3 w-full px-4 py-2.5 group text-left",
 				"hover:bg-background/50 transition-colors",
 				isOpening && "opacity-50 cursor-wait",
+				isRepositoryMissing && "opacity-50",
 			)}
 		>
 			{/* Icon */}

@@ -139,6 +139,7 @@ mock.module("electron", () => ({
 
 mock.module("main/lib/analytics", () => ({
 	track: mock(() => {}),
+	setUserId: mock(() => {}),
 	clearUserCache: mock(() => {}),
 	shutdown: mock(() => Promise.resolve()),
 }));
