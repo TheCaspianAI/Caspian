@@ -21,7 +21,6 @@ A good PR description answers:
 IMPORTANT:
 
 - When on `main`, ALWAYS create a branch first before committing. Never push directly to `main`.
-- If there is an ImplPlan, link it in the PR body and call out deltas (what shipped, what deferred).
 
 # Workflow (creating the PR)
 
@@ -79,15 +78,7 @@ Do NOT proceed with the PR. Instead, present findings to the user:
 - Never commit directly to `main`.
 - If starting from `main`: `git switch -c <feature-branch-name>`
 
-## 4. Move ImplPlan to done (if applicable)
-
-- If this PR completes an ImplPlan:
-  `git mv plans/<plan-name>.md plans/done/<plan-name>.md`
-- Fill in `Outcomes & Retrospective` first.
-- Update the PR body link to point at the `plans/done/` path.
-- Skip if there is no ImplPlan or it spans multiple PRs.
-
-## 5. Include QA checklist from local qa/ file
+## 4. Include QA checklist from local qa/ file
 
 Check if `qa/QA-<branch-name>.md` exists locally (it is gitignored). If it does:
 
@@ -98,16 +89,16 @@ Check if `qa/QA-<branch-name>.md` exists locally (it is gitignored). If it does:
 
 This gives reviewers a single view of what's tested and what still needs manual QA.
 
-## 6. Stage and commit changes
+## 5. Stage and commit changes
 
 - `git add <paths>`
 - Make commits that tell the story; avoid dumping unrelated changes in one commit.
 
-## 7. Push the branch
+## 6. Push the branch
 
 - First push: `git push -u origin <feature-branch-name>`
 
-## 8. Create the PR with `gh`
+## 7. Create the PR with `gh`
 
 - Use a HEREDOC so the body stays formatted:
 
@@ -177,7 +168,6 @@ Use **High-risk/Complex** when any of these are true:
 ## Standard PR template
 
     **Links (optional)**
-    - ImplPlan: `plans/<plan-name>.md` (or `plans/done/<plan-name>.md` if completed)
     - Issue: <link>
 
     ## Summary
@@ -225,7 +215,6 @@ Use **High-risk/Complex** when any of these are true:
 For PRs bundling multiple features, use Part headers to organize:
 
     **Links**
-    - ImplPlan: `plans/<plan-name>.md` (or `plans/done/<plan-name>.md` if completed)
     - Issue: <link>
 
     ## Summary
@@ -465,13 +454,9 @@ Use these as templates for the Manual QA Checklist section. Pick categories appr
 - **Keyboard shortcuts table** for changes that add shortcuts.
 - **Decision tables** for changes with multiple trade-offs.
 - **Files changed summary** for large PRs (helps reviewers navigate).
-- **ImplPlan deltas** when an ImplPlan exists (what shipped, what deferred, what deviated and why).
 - **"How to review" hints** for large diffs (suggested review order, key files to focus on).
 
 # Example (Standard - Feature)
-
-    **Links**
-    - ImplPlan: `plans/done/20260210-1030-node-navigation-sidebar.md`
 
     ## Summary
     - Add configurable node navigation sidebar as alternative to top bar tabs.

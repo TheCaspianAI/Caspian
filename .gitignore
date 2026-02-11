@@ -51,5 +51,6 @@ tests/e2e/screenshots/
 test-results/
 playwright-report/
 
-# QA checklists (local workflow only)
+# Local workflow artifacts
 qa/
+plans/
