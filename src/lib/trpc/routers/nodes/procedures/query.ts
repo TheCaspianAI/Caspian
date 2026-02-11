@@ -4,7 +4,7 @@ import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
-import { checkRepositoryHealth } from "../../repositories/utils/health";
+import { getRepositoryHealth } from "../../repositories/utils/health-cache";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
@@ -92,9 +92,7 @@ export const createQueryProcedures = () => {
 				}
 			}
 
-			const repoHealth = repository
-				? checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath })
-				: null;
+			const repoHealth = repository ? getRepositoryHealth({ repositoryId: repository.id }) : null;
 
 			return {
 				...node,
@@ -170,7 +168,7 @@ export const createQueryProcedures = () => {
 			>();
 
 			for (const repository of activeRepositories) {
-				const health = checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath });
+				const health = getRepositoryHealth({ repositoryId: repository.id });
 				groupsMap.set(repository.id, {
 					repository: {
 						id: repository.id,

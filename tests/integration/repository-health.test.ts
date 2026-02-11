@@ -1,10 +1,11 @@
 /**
  * Integration tests for repository health checking.
  *
- * Tests the checkRepositoryHealth utility and the getAllGrouped
- * tRPC procedure's pathMissing flag against a real SQLite database.
+ * Tests the checkRepositoryHealth utility, the getAllGrouped
+ * tRPC procedure's pathMissing flag, and the health cache
+ * invalidation flow against a real SQLite database.
  */
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, mock, test } from "bun:test";
 import { mkdirSync, renameSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -210,6 +211,58 @@ describe("getAllGrouped with pathMissing", () => {
 
 		// Verify sort order (by tabOrder)
 		expect(groups[0].repository.tabOrder).toBeLessThanOrEqual(groups[1].repository.tabOrder);
+
+		db.sqlite.close();
+	});
+});
+
+// =============================================================================
+// Health cache invalidation
+// =============================================================================
+
+describe("health cache invalidation", () => {
+	test("pathMissing flips from true to false after directory creation and invalidation", async () => {
+		const db = createTestDb();
+		const missingDir = join(TEST_DIR, "cache-invalidation-test");
+
+		// Seed a repo pointing to a path that does not exist yet
+		const repo = seedRepository(db, {
+			mainRepoPath: missingDir,
+			name: "cache-test-repo",
+			tabOrder: 0,
+		});
+		seedNode(db, {
+			repositoryId: repo.id,
+			type: "branch",
+			branch: "main",
+			name: "main",
+		});
+
+		// Set up mock and import modules
+		mock.module("main/lib/local-db", () => ({ localDb: db.db }));
+		const { invalidateRepositoryHealthCache } = await import(
+			"lib/trpc/routers/repositories/utils/health-cache"
+		);
+
+		const caller = await createTestCaller(db);
+
+		// First query: directory does not exist, expect pathMissing = true
+		const groupsBefore = await caller.nodes.getAllGrouped();
+		const groupBefore = groupsBefore.find((g) => g.repository.id === repo.id);
+		expect(groupBefore).toBeDefined();
+		expect(groupBefore!.repository.pathMissing).toBe(true);
+
+		// Create the directory on disk
+		mkdirSync(missingDir, { recursive: true });
+
+		// Invalidate cache so the next query picks up the change
+		invalidateRepositoryHealthCache();
+
+		// Second query: directory now exists, expect pathMissing = false
+		const groupsAfter = await caller.nodes.getAllGrouped();
+		const groupAfter = groupsAfter.find((g) => g.repository.id === repo.id);
+		expect(groupAfter).toBeDefined();
+		expect(groupAfter!.repository.pathMissing).toBe(false);
 
 		db.sqlite.close();
 	});

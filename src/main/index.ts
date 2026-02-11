@@ -2,12 +2,15 @@ import path from "node:path";
 import { app, BrowserWindow, dialog, nativeImage } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
 import { settings } from "lib/local-db";
+import {
+	disposeHealthCache,
+	initHealthCache,
+} from "lib/trpc/routers/repositories/utils/health-cache";
 import { DEFAULT_CONFIRM_ON_QUIT, PROTOCOL_SCHEME } from "shared/constants";
 import { setupAgentHooks } from "./lib/agent-setup";
 import { initAppState } from "./lib/app-state";
 import { setupAutoUpdater } from "./lib/auto-updater";
 import { localDb } from "./lib/local-db";
-import { validateRepositoryPaths } from "./lib/repository-health";
 import { initSentry } from "./lib/sentry";
 import { reconcileDaemonSessions } from "./lib/terminal";
 import { disposeTray, initTray } from "./lib/tray";
@@ -158,6 +161,7 @@ app.on("before-quit", async (event) => {
 	// Quit confirmed or no confirmation needed - exit immediately
 	// Let OS clean up child processes, tray, etc.
 	isQuitting = true;
+	disposeHealthCache();
 	disposeTray();
 	app.exit(0);
 });
@@ -237,7 +241,7 @@ if (!gotTheLock) {
 
 		await initAppState();
 
-		validateRepositoryPaths();
+		initHealthCache();
 
 		// Clean up stale daemon sessions from previous app runs
 		// Must happen BEFORE renderer restore runs
