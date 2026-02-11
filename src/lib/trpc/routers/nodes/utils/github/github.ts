@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { CheckItem, GitHubStatus } from "lib/local-db";
-import { branchExistsOnRemote } from "../git";
+import { branchExistsOnRemote, branchHasBeenPushed } from "../git";
 import { execWithShellEnv } from "../shell-env";
 import { type GHPRResponse, GHPRResponseSchema, GHRepoResponseSchema } from "./types";
 
@@ -38,10 +38,10 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 		);
 		const branchName = branchOutput.trim();
 
-		// Check if branch exists on remote and get PR info in parallel
-		const [branchCheck, prInfo] = await Promise.all([
-			branchExistsOnRemote(worktreePath, branchName),
+		const [branchCheck, prInfo, hasBeenPushed] = await Promise.all([
+			branchExistsOnRemote({ worktreePath, branchName }),
 			getPRForBranch(worktreePath, branchName),
+			branchHasBeenPushed({ worktreePath, branchName }),
 		]);
 
 		// Convert result to boolean - only "exists" is true
@@ -52,10 +52,10 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 			pr: prInfo,
 			repoUrl,
 			branchExistsOnRemote: existsOnRemote,
+			branchHasBeenPushed: hasBeenPushed,
 			lastRefreshed: Date.now(),
 		};
 
-		// Cache the result
 		cache.set(worktreePath, { data: result, timestamp: Date.now() });
 
 		return result;

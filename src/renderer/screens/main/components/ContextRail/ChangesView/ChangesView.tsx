@@ -31,6 +31,7 @@ interface ChangesViewProps {
 
 export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const { nodeId: workspaceId } = useParams({ strict: false });
+	const utils = electronTrpc.useUtils();
 	const { data: workspace } = electronTrpc.nodes.get.useQuery(
 		{ id: workspaceId ?? "" },
 		{ enabled: !!workspaceId },
@@ -178,6 +179,12 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const restoreBranchMutation = electronTrpc.changes.push.useMutation({
 		onSuccess: () => {
 			toast.success("Branch restored on remote");
+			if (githubStatus && workspaceId) {
+				utils.nodes.getGitHubStatus.setData(
+					{ nodeId: workspaceId },
+					{ ...githubStatus, branchExistsOnRemote: true },
+				);
+			}
 			handleRefresh();
 		},
 		onError: (error) => {
@@ -322,7 +329,10 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 	const mergedPrNumber = githubStatus?.pr?.number;
 	const mergedPrUrl = githubStatus?.pr?.url;
 	const isBranchDeletedOnRemote =
-		githubStatus != null && !githubStatus.branchExistsOnRemote && !isMerged;
+		githubStatus != null &&
+		!githubStatus.branchExistsOnRemote &&
+		githubStatus.branchHasBeenPushed &&
+		!isMerged;
 
 	return (
 		<div className="flex flex-col h-full">
