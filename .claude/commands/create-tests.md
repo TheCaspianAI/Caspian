@@ -27,10 +27,10 @@ Do not deviate from these patterns.
 
 ### 3. Read existing tests for patterns
 
-Before writing new tests, read the most relevant existing test files to match their style:
+Before writing new tests, read the committed infrastructure files to match their style:
 
-- Integration: `tests/integration/repository-health.test.ts`, `tests/integration/repository-relocate-remove.test.ts`
-- E2E: `tests/e2e/smoke.e2e.ts`, `tests/e2e/repository-missing.e2e.ts`
+- Integration: `tests/integration/helpers/` (seed, test-db, trpc-caller, setup) and any `*.test.ts` files in `tests/integration/` if they exist locally
+- E2E: `tests/e2e/fixtures/electron.ts` and any `*.e2e.ts` files in `tests/e2e/` if they exist locally
 - Unit: Any `*.test.ts` file in `src/` near the code you're testing
 
 ### 4. Classify each changed file
