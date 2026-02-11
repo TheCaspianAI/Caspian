@@ -1,5 +1,5 @@
 [test]
-preload = ["./test-setup.ts", "./tests/integration/helpers/setup.ts"]
+preload = ["./test-setup.ts"]
 
 [test.env]
 NODE_ENV = "test"
