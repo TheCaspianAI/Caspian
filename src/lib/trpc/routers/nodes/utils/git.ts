@@ -936,10 +936,13 @@ function categorizeGitError(errorMessage: string): BranchExistsResult {
  * Returns true if `branch.<name>.remote` exists in git config (set by `git push --set-upstream`).
  * This config persists even after the remote branch is deleted or `git fetch --prune` runs.
  */
-export async function branchHasBeenPushed(
-	worktreePath: string,
-	branchName: string,
-): Promise<boolean> {
+export async function branchHasBeenPushed({
+	worktreePath,
+	branchName,
+}: {
+	worktreePath: string;
+	branchName: string;
+}): Promise<boolean> {
 	try {
 		const { stdout } = await execFileAsync(
 			"git",
@@ -947,15 +950,23 @@ export async function branchHasBeenPushed(
 			{ timeout: 5_000 },
 		);
 		return stdout.trim().length > 0;
-	} catch {
+	} catch (error) {
+		// Exit code 1 = key not found, which is the expected case for unpushed branches
+		if (isExecFileException(error) && error.code === 1) {
+			return false;
+		}
+		console.error("[git/branchHasBeenPushed] Unexpected error:", error);
 		return false;
 	}
 }
 
-export async function branchExistsOnRemote(
-	worktreePath: string,
-	branchName: string,
-): Promise<BranchExistsResult> {
+export async function branchExistsOnRemote({
+	worktreePath,
+	branchName,
+}: {
+	worktreePath: string;
+	branchName: string;
+}): Promise<BranchExistsResult> {
 	const env = await getGitEnv();
 
 	try {

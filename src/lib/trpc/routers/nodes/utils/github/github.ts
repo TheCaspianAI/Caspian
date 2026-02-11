@@ -39,9 +39,9 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 		const branchName = branchOutput.trim();
 
 		const [branchCheck, prInfo, hasBeenPushed] = await Promise.all([
-			branchExistsOnRemote(worktreePath, branchName),
+			branchExistsOnRemote({ worktreePath, branchName }),
 			getPRForBranch(worktreePath, branchName),
-			branchHasBeenPushed(worktreePath, branchName),
+			branchHasBeenPushed({ worktreePath, branchName }),
 		]);
 
 		// Convert result to boolean - only "exists" is true
