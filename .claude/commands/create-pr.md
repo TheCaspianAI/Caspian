@@ -87,7 +87,18 @@ Do NOT proceed with the PR. Instead, present findings to the user:
 - Update the PR body link to point at the `plans/done/` path.
 - Skip if there is no ImplPlan or it spans multiple PRs.
 
-## 5. Stage and commit changes
+## 5. Include QA checklist from local qa/ file
+
+Check if `qa/QA-<branch-name>.md` exists locally (it is gitignored). If it does:
+
+1. Read the file.
+2. Copy the **Change-Specific QA** section and any relevant **General Categories** items into the PR body's **Manual QA Checklist** section.
+3. Items already marked `[x]` with a test reference (e.g., `— ✅ tests/...`) were verified by automated tests. Keep them checked in the PR body so reviewers can see what's already covered.
+4. Items still marked `[ ]` need manual verification by the reviewer.
+
+This gives reviewers a single view of what's tested and what still needs manual QA.
+
+## 6. Stage and commit changes
 
 - `git add <paths>`
 - Make commits that tell the story; avoid dumping unrelated changes in one commit.
