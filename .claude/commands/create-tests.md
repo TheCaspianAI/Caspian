@@ -114,6 +114,8 @@ Example after:
 
 ### 9. Report
 
+**Important:** Integration tests (`tests/integration/*.test.ts`) and E2E tests (`tests/e2e/*.spec.ts`) are gitignored. Do not commit them. They are generated per-branch and ephemeral. Only unit tests in `src/` are committed to git.
+
 Print a summary of what was created:
 
 ```
