@@ -422,7 +422,6 @@ export const createCreateProcedures = () => {
 
 				const setupConfig = loadSetupConfig(repository.mainRepoPath);
 
-				// Use custom setup script if provided, otherwise fall back to repository config
 				const initialCommands = input.setupScript?.trim()
 					? [input.setupScript.trim()]
 					: setupConfig?.setup || null;

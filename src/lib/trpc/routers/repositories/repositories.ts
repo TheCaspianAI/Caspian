@@ -40,7 +40,6 @@ import { invalidateRepositoryHealthCache } from "./utils/health-cache";
 
 type Repository = SelectRepository;
 
-// Return types for openNew procedure
 type OpenNewCanceled = { canceled: true };
 type OpenNewSuccess = { canceled: false; repository: Repository };
 type OpenNewNeedsGitInit = {
@@ -96,14 +95,12 @@ function upsertRepository(mainRepoPath: string, defaultBranch: string): Reposito
 async function ensureMainNode(repository: Repository): Promise<void> {
 	const existingBranchNode = getBranchNode(repository.id);
 
-	// If branch node already exists, just touch it and return
 	if (existingBranchNode) {
 		touchNode(existingBranchNode.id);
 		setLastActiveNode(existingBranchNode.id);
 		return;
 	}
 
-	// Get current branch from main repo
 	const branch = await getCurrentBranch(repository.mainRepoPath);
 	if (!branch) {
 		console.warn(
@@ -112,7 +109,6 @@ async function ensureMainNode(repository: Repository): Promise<void> {
 		return;
 	}
 
-	// Insert new branch node with conflict handling for race conditions
 	// The unique partial index (repositoryId WHERE type='branch') prevents duplicates
 	const insertResult = localDb
 		.insert(nodes)
@@ -129,7 +125,6 @@ async function ensureMainNode(repository: Repository): Promise<void> {
 
 	const wasExisting = insertResult.length === 0;
 
-	// Only shift existing nodes if we successfully inserted
 	if (!wasExisting) {
 		const newNodeId = insertResult[0].id;
 		const repositoryNodes = localDb
@@ -153,7 +148,6 @@ async function ensureMainNode(repository: Repository): Promise<void> {
 		}
 	}
 
-	// Get the node (either newly created or existing from race condition)
 	const node = insertResult[0] ?? getBranchNode(repository.id);
 
 	if (!node) {
@@ -178,8 +172,6 @@ async function ensureMainNode(repository: Repository): Promise<void> {
 	}
 }
 
-// Safe filename regex: letters, numbers, dots, underscores, hyphens, spaces, and common unicode
-// Allows most valid Git repo names while avoiding path traversal characters
 const SAFE_REPO_NAME_REGEX = /^[a-zA-Z0-9._\- ]+$/;
 
 /**
@@ -187,14 +179,12 @@ const SAFE_REPO_NAME_REGEX = /^[a-zA-Z0-9._\- ]+$/;
  * Handles HTTP/HTTPS URLs, SSH-style URLs (git@host:user/repo), and edge cases.
  */
 function extractRepoName(urlInput: string): string | null {
-	// Normalize: trim whitespace and strip trailing slashes
 	let normalized = urlInput.trim().replace(/\/+$/, "");
 
 	if (!normalized) return null;
 
 	let repoSegment: string | undefined;
 
-	// Try parsing as HTTP/HTTPS URL first
 	try {
 		const parsed = new URL(normalized);
 		if (parsed.protocol === "http:" || parsed.protocol === "https:") {
@@ -231,7 +221,6 @@ function extractRepoName(urlInput: string): string | null {
 
 	repoSegment = repoSegment.trim();
 
-	// Validate against safe filename regex
 	if (!repoSegment || !SAFE_REPO_NAME_REGEX.test(repoSegment)) {
 		return null;
 	}
@@ -285,7 +274,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 
 				const git = simpleGit(repository.mainRepoPath);
 
-				// Check if origin remote exists
 				let hasOrigin = false;
 				try {
 					const remotes = await git.getRemotes();
@@ -294,7 +282,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					// If we can't get remotes, assume no origin
 				}
 
-				// Fetch latest remote refs so newly created branches appear
 				if (hasOrigin) {
 					try {
 						await git.fetch(["--prune"]);
@@ -318,13 +305,11 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					}
 				}
 
-				// Get branch dates for sorting - fetch from both local and remote
 				const branchMap = new Map<
 					string,
 					{ lastCommitDate: number; isLocal: boolean; isRemote: boolean }
 				>();
 
-				// First, get remote branch dates (if origin exists)
 				if (hasOrigin) {
 					try {
 						const remoteBranchInfo = await git.raw([
@@ -365,7 +350,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					}
 				}
 
-				// Then, add local-only branches
 				try {
 					const localBranchInfo = await git.raw([
 						"for-each-ref",
@@ -382,7 +366,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 
 						if (branch === "HEAD") continue;
 
-						// Only add if not already in map (remote takes precedence for date)
 						if (!branchMap.has(branch)) {
 							branchMap.set(branch, {
 								lastCommitDate: timestamp * 1000,
@@ -390,7 +373,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 								isRemote: remoteBranchSet.has(branch),
 							});
 						} else {
-							// Update isLocal flag for branches that exist both locally and remotely
 							const existing = branchMap.get(branch);
 							if (existing) {
 								existing.isLocal = true;
@@ -431,7 +413,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						.run();
 				}
 
-				// Sort: default branch first, then by date
 				branches.sort((a, b) => {
 					if (a.name === defaultBranch) return -1;
 					if (b.name === defaultBranch) return 1;
@@ -473,7 +454,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 			const defaultBranch = await getDefaultBranch(mainRepoPath);
 			const repository = upsertRepository(mainRepoPath, defaultBranch);
 
-			// Auto-create main node if it doesn't exist
 			await ensureMainNode(repository);
 
 			track("repository_opened", {
@@ -492,12 +472,10 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 			.mutation(async ({ input }): Promise<OpenNewResult> => {
 				const selectedPath = input.path;
 
-				// Check if path exists
 				if (!existsSync(selectedPath)) {
 					return { canceled: false, error: "Path does not exist" };
 				}
 
-				// Check if path is a directory
 				try {
 					const stats = statSync(selectedPath);
 					if (!stats.isDirectory()) {
@@ -547,22 +525,18 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 			.mutation(async ({ input }) => {
 				const git = simpleGit(input.path);
 
-				// Initialize git repository with 'main' as default branch
-				// Try with --initial-branch=main (Git 2.28+), fall back to plain init
+				// --initial-branch requires Git 2.28+
 				try {
 					await git.init(["--initial-branch=main"]);
 				} catch (err) {
-					// Likely an older Git version that doesn't support --initial-branch
 					console.warn("Git init with --initial-branch failed, using fallback:", err);
 					await git.init();
 				}
 
-				// Create initial commit so we have a valid branch ref
 				try {
 					await git.raw(["commit", "--allow-empty", "-m", "Initial commit"]);
 				} catch (err) {
 					const errorMessage = err instanceof Error ? err.message : String(err);
-					// Check for common git config issues
 					if (
 						errorMessage.includes("empty ident") ||
 						errorMessage.includes("user.email") ||
@@ -577,13 +551,11 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 					throw new Error(`Failed to create initial commit: ${errorMessage}`);
 				}
 
-				// Get the current branch name (will be 'main' or 'master' depending on git version/config)
 				const branchSummary = await git.branch();
 				const defaultBranch = branchSummary.current || "main";
 
 				const repository = upsertRepository(input.path, defaultBranch);
 
-				// Auto-create main node if it doesn't exist
 				await ensureMainNode(repository);
 
 				track("repository_opened", {
@@ -598,7 +570,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 			.input(
 				z.object({
 					url: z.string().url(),
-					// Trim and convert empty/whitespace strings to undefined
 					targetDirectory: z
 						.string()
 						.trim()
@@ -624,7 +595,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 							title: "Select Clone Destination",
 						});
 
-						// User canceled - return canceled state (not an error)
 						if (result.canceled || result.filePaths.length === 0) {
 							return { canceled: true as const, success: false as const };
 						}
@@ -643,7 +613,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 
 					const clonePath = join(targetDir, repoName);
 
-					// Check if we already have a repository for this path
 					const existingRepository = localDb
 						.select()
 						.from(repositories)
@@ -651,17 +620,14 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						.get();
 
 					if (existingRepository) {
-						// Verify the filesystem path still exists
 						try {
 							await access(clonePath);
-							// Directory exists - update lastOpenedAt and return existing repository
 							localDb
 								.update(repositories)
 								.set({ lastOpenedAt: Date.now() })
 								.where(eq(repositories.id, existingRepository.id))
 								.run();
 
-							// Auto-create main node if it doesn't exist
 							await ensureMainNode({
 								...existingRepository,
 								lastOpenedAt: Date.now(),
@@ -683,7 +649,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						}
 					}
 
-					// Check if target directory already exists (but not our repository)
 					if (existsSync(clonePath)) {
 						return {
 							canceled: false as const,
@@ -692,11 +657,9 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						};
 					}
 
-					// Clone the repository
 					const git = simpleGit();
 					await git.clone(input.url, clonePath);
 
-					// Create new repository
 					const name = basename(clonePath);
 					const defaultBranch = await getDefaultBranch(clonePath);
 					const repository = localDb
@@ -710,7 +673,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 						.returning()
 						.get();
 
-					// Auto-create main node if it doesn't exist
 					await ensureMainNode(repository);
 
 					track("repository_opened", {
@@ -904,7 +866,6 @@ export const createRepositoriesRouter = (getWindow: () => BrowserWindow | null) 
 				.where(eq(repositories.id, input.id))
 				.run();
 
-			// Update active node if it was in this repository
 			const currentSettings = localDb.select().from(settings).get();
 			if (
 				currentSettings?.lastActiveNodeId &&

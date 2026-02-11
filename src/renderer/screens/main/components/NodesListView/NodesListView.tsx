@@ -23,11 +23,9 @@ export function NodesListView() {
 	const navigate = useNavigate();
 	const utils = electronTrpc.useUtils();
 
-	// Fetch all data
 	const { data: groups = [] } = electronTrpc.nodes.getAllGrouped.useQuery();
 	const { data: allRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
 
-	// Fetch worktrees for all repositories
 	const worktreeQueries = electronTrpc.useQueries((t) =>
 		allRepositories.map((repository) =>
 			t.nodes.getWorktreesByRepository({ repositoryId: repository.id }),
@@ -37,7 +35,6 @@ export function NodesListView() {
 	const openWorktree = electronTrpc.nodes.openWorktree.useMutation({
 		onSuccess: (data) => {
 			utils.nodes.getAllGrouped.invalidate();
-			// Navigate to the newly opened node
 			if (data.node?.id) {
 				navigateToNode(data.node.id, navigate);
 			}
@@ -55,11 +52,9 @@ export function NodesListView() {
 		return map;
 	}, [groups]);
 
-	// Combine open nodes and closed worktrees into a single list
 	const allItems = useMemo<NodeItem[]>(() => {
 		const items: NodeItem[] = [];
 
-		// First, add all open nodes from groups
 		for (const group of groups) {
 			for (const ws of group.nodes) {
 				items.push({
@@ -81,7 +76,6 @@ export function NodesListView() {
 			}
 		}
 
-		// Add closed worktrees (those without active nodes)
 		for (let i = 0; i < allRepositories.length; i++) {
 			const repository = allRepositories[i];
 			const worktrees = worktreeQueries[i]?.data;
@@ -89,7 +83,6 @@ export function NodesListView() {
 			if (!worktrees) continue;
 
 			for (const wt of worktrees) {
-				// Skip if this worktree has an active node
 				if (wt.hasActiveNode) continue;
 
 				items.push({
@@ -114,18 +107,15 @@ export function NodesListView() {
 		return items;
 	}, [groups, allRepositories, worktreeQueries]);
 
-	// Filter by search query and filter mode
 	const filteredItems = useMemo(() => {
 		let items = allItems;
 
-		// Apply filter mode
 		if (filterMode === "active") {
 			items = items.filter((ws) => ws.isOpen);
 		} else if (filterMode === "closed") {
 			items = items.filter((ws) => !ws.isOpen);
 		}
 
-		// Apply search filter
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase();
 			items = items.filter(
@@ -139,7 +129,6 @@ export function NodesListView() {
 		return items;
 	}, [allItems, searchQuery, filterMode]);
 
-	// Group by repository
 	const repositoryGroups = useMemo<RepositoryGroup[]>(() => {
 		const groupsMap = new Map<string, RepositoryGroup>();
 
@@ -154,17 +143,13 @@ export function NodesListView() {
 			groupsMap.get(item.repositoryId)?.nodes.push(item);
 		}
 
-		// Sort nodes within each group: active first, then by lastOpenedAt
 		for (const group of groupsMap.values()) {
 			group.nodes.sort((a, b) => {
-				// Active nodes first
 				if (a.isOpen !== b.isOpen) return a.isOpen ? -1 : 1;
-				// Then by most recently opened/created
 				return b.lastOpenedAt - a.lastOpenedAt;
 			});
 		}
 
-		// Sort groups by most recent activity
 		return Array.from(groupsMap.values()).sort((a, b) => {
 			const aRecent = Math.max(...a.nodes.map((w) => w.lastOpenedAt));
 			const bRecent = Math.max(...b.nodes.map((w) => w.lastOpenedAt));
@@ -184,15 +169,12 @@ export function NodesListView() {
 		}
 	};
 
-	// Count stats for filter badges
 	const activeCount = allItems.filter((w) => w.isOpen).length;
 	const closedCount = allItems.filter((w) => !w.isOpen).length;
 
 	return (
 		<div className="flex-1 flex flex-col bg-card overflow-hidden">
-			{/* Header */}
 			<div className="flex items-center gap-3 px-3 py-2 border-b border-border/50">
-				{/* Filter toggle */}
 				<div className="flex items-center gap-0.5 bg-background/50 rounded-sm p-0.5">
 					{FILTER_OPTIONS.map((option) => {
 						const count =
@@ -220,7 +202,6 @@ export function NodesListView() {
 					})}
 				</div>
 
-				{/* Search */}
 				<div className="relative flex-1">
 					<LuSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground/50" />
 					<Input
@@ -232,7 +213,6 @@ export function NodesListView() {
 					/>
 				</div>
 
-				{/* Close button */}
 				<Button
 					variant="ghost"
 					size="icon"
@@ -243,13 +223,11 @@ export function NodesListView() {
 				</Button>
 			</div>
 
-			{/* Nodes list grouped by repository */}
 			<div className="flex-1 overflow-y-auto">
 				{repositoryGroups.map((group) => {
 					const isPathMissing = repoPathMissing.get(group.repositoryId) ?? false;
 					return (
 						<div key={group.repositoryId}>
-							{/* Repository header */}
 							<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border/50 flex items-center gap-1.5">
 								{isPathMissing && (
 									<HiExclamationTriangle className="size-3.5 text-amber-500 shrink-0" />
@@ -265,7 +243,6 @@ export function NodesListView() {
 								<span className="text-caption text-foreground/40">{group.nodes.length}</span>
 							</div>
 
-							{/* Nodes in this repository */}
 							{group.nodes.map((ws) => (
 								<NodeRow
 									key={ws.uniqueId}

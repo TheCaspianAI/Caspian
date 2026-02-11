@@ -1,9 +1,6 @@
 export interface NodeItem {
-	// Unique identifier - either node id or worktree id for closed ones
 	uniqueId: string;
-	// If open, this is the node id
 	nodeId: string | null;
-	// For closed worktrees, this is the worktree id
 	worktreeId: string | null;
 	repositoryId: string;
 	repositoryName: string;

@@ -53,21 +53,15 @@ function NodePage() {
 	});
 	const navigate = useNavigate();
 
-	// Check if node is initializing or failed
 	const isInitializing = useIsNodeInitializing(nodeId);
 	const hasFailed = useHasNodeFailed(nodeId);
 
-	// Check for incomplete init after app restart
 	const gitStatus = node?.worktree?.gitStatus;
 	const hasIncompleteInit =
 		node?.type === "worktree" && (gitStatus === null || gitStatus === undefined);
 
 	const isRepositoryMissing = node?.repository?.pathMissing === true;
 
-	// Show full-screen initialization view for:
-	// - Actively initializing nodes (shows progress)
-	// - Failed nodes (shows error with retry)
-	// - Interrupted nodes that aren't currently initializing (shows resume option)
 	const showInitView = isInitializing || hasFailed || hasIncompleteInit;
 
 	const isWorktreeMissing = node?.type === "worktree" && node?.worktreePathExists === false;
@@ -178,7 +172,6 @@ function NodePage() {
 		[activeTabId, activeTab?.layout, focusedPaneId, setFocusedPane],
 	);
 
-	// Open in last used app shortcut
 	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery();
 	const openInApp = electronTrpc.external.openInApp.useMutation();
 	useAppHotkey(
@@ -195,7 +188,6 @@ function NodePage() {
 		[node?.worktreePath, lastUsedApp],
 	);
 
-	// Copy path shortcut
 	const copyPath = electronTrpc.external.copyPath.useMutation();
 	useAppHotkey(
 		"COPY_PATH",
@@ -208,7 +200,6 @@ function NodePage() {
 		[node?.worktreePath],
 	);
 
-	// Pane splitting helper - resolves target pane for split operations
 	const resolveSplitTarget = useCallback(
 		(paneId: string, tabId: string, targetTab: Tab) => {
 			const path = findPanePath(targetTab.layout, paneId);
@@ -222,7 +213,6 @@ function NodePage() {
 		[setFocusedPane],
 	);
 
-	// Pane splitting shortcuts
 	useAppHotkey(
 		"SPLIT_AUTO",
 		() => {
@@ -265,7 +255,6 @@ function NodePage() {
 		[activeTabId, focusedPaneId, activeTab, splitPaneHorizontal, resolveSplitTarget],
 	);
 
-	// Navigate to previous node (⌘↑)
 	const getPreviousNode = electronTrpc.nodes.getPreviousNode.useQuery(
 		{ id: nodeId },
 		{ enabled: !!nodeId },
@@ -282,7 +271,6 @@ function NodePage() {
 		[getPreviousNode.data, navigate],
 	);
 
-	// Navigate to next node (⌘↓)
 	const getNextNode = electronTrpc.nodes.getNextNode.useQuery(
 		{ id: nodeId },
 		{ enabled: !!nodeId },
