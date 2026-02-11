@@ -22,6 +22,7 @@ import {
 	worktreeExists,
 } from "../utils/git";
 import { runTeardown } from "../utils/teardown";
+import { invalidateWorktreePathCache } from "../utils/worktree-path-cache";
 
 export const createDeleteProcedures = () => {
 	return router({
@@ -227,6 +228,7 @@ export const createDeleteProcedures = () => {
 
 			if (worktree) {
 				deleteWorktreeRecord(worktree.id);
+				invalidateWorktreePathCache();
 			}
 
 			if (repository) {
@@ -408,6 +410,7 @@ export const createDeleteProcedures = () => {
 				}
 
 				deleteWorktreeRecord(input.worktreeId);
+				invalidateWorktreePathCache();
 				hideRepositoryIfNoNodes(worktree.repositoryId);
 
 				track("worktree_deleted", { worktree_id: input.worktreeId });

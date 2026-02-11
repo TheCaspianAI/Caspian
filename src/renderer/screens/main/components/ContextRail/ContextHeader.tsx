@@ -14,6 +14,7 @@ import {
 	ContextMenuSeparator,
 	ContextMenuTrigger,
 } from "ui/components/ui/context-menu";
+import { toast } from "ui/components/ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { useNodeRename } from "../../hooks/useNodeRename/useNodeRename";
 import { useRepositoryRename } from "../../hooks/useRepositoryRename/useRepositoryRename";
@@ -69,8 +70,12 @@ export function ContextHeader() {
 		onSuccess: async () => {
 			await utils.repositories.invalidate();
 			await utils.nodes.invalidate();
-			// Navigate to start view after closing
 			navigate({ to: "/" });
+		},
+		onError: (error) => {
+			toast.error("Failed to close repository", {
+				description: error.message,
+			});
 		},
 	});
 
@@ -90,6 +95,11 @@ export function ContextHeader() {
 			await utils.nodes.invalidate();
 			await utils.repositories.invalidate();
 			navigate({ to: "/" });
+		},
+		onError: (error) => {
+			toast.error("Failed to remove repository", {
+				description: error.message,
+			});
 		},
 	});
 

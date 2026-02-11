@@ -8,6 +8,7 @@ import { getRepositoryHealth } from "../../repositories/utils/health-cache";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
+import { checkWorktreePathExists, refreshWorktreePathEntry } from "../utils/worktree-path-cache";
 
 type WorktreePathMap = Map<string, string>;
 
@@ -55,11 +56,9 @@ export const createQueryProcedures = () => {
 				? localDb.select().from(worktrees).where(eq(worktrees.id, node.worktreeId)).get()
 				: null;
 
-			// Detect and persist base branch for existing worktrees that don't have it
-			// We use undefined to mean "not yet attempted" and null to mean "attempted but not found"
+			// undefined = not yet attempted, null = attempted but not found
 			let baseBranch = worktree?.baseBranch;
 			if (worktree && baseBranch === undefined && repository) {
-				// Only attempt detection if there's a remote origin
 				const hasRemote = await hasOriginRemote(repository.mainRepoPath);
 				if (hasRemote) {
 					try {
@@ -68,14 +67,13 @@ export const createQueryProcedures = () => {
 						if (detected) {
 							baseBranch = detected;
 						}
-						// Persist the result (detected branch or null sentinel)
 						localDb
 							.update(worktrees)
 							.set({ baseBranch: detected ?? null })
 							.where(eq(worktrees.id, worktree.id))
 							.run();
 					} catch {
-						// Detection failed, persist null to avoid retrying
+						// Persist null to avoid retrying on every page load
 						localDb
 							.update(worktrees)
 							.set({ baseBranch: null })
@@ -83,7 +81,6 @@ export const createQueryProcedures = () => {
 							.run();
 					}
 				} else {
-					// No remote - persist null to avoid retrying
 					localDb
 						.update(worktrees)
 						.set({ baseBranch: null })
@@ -94,10 +91,16 @@ export const createQueryProcedures = () => {
 
 			const repoHealth = repository ? getRepositoryHealth({ repositoryId: repository.id }) : null;
 
+			const worktreePath = getNodePath(node) ?? "";
+			const worktreePathExists =
+				node.type === "branch" ||
+				(worktreePath !== "" && refreshWorktreePathEntry({ path: worktreePath }));
+
 			return {
 				...node,
 				type: node.type as "worktree" | "branch",
-				worktreePath: getNodePath(node) ?? "",
+				worktreePath,
+				worktreePathExists,
 				repository: repository
 					? {
 							id: repository.id,
@@ -155,6 +158,7 @@ export const createQueryProcedures = () => {
 						repositoryId: string;
 						worktreeId: string | null;
 						worktreePath: string;
+						worktreePathExists: boolean;
 						type: "worktree" | "branch";
 						branch: string;
 						name: string;
@@ -194,7 +198,6 @@ export const createQueryProcedures = () => {
 			for (const node of allNodes) {
 				const group = groupsMap.get(node.repositoryId);
 				if (group) {
-					// Resolve path from preloaded data instead of per-node DB queries
 					let worktreePath = "";
 					if (node.type === "worktree" && node.worktreeId) {
 						worktreePath = worktreePathMap.get(node.worktreeId) ?? "";
@@ -202,10 +205,15 @@ export const createQueryProcedures = () => {
 						worktreePath = group.repository.mainRepoPath;
 					}
 
+					const worktreePathExists =
+						node.type === "branch" ||
+						(worktreePath !== "" && checkWorktreePathExists({ path: worktreePath }));
+
 					group.nodes.push({
 						...node,
 						type: node.type as "worktree" | "branch",
 						worktreePath,
+						worktreePathExists,
 						isUnread: node.isUnread ?? false,
 					});
 				}
