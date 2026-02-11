@@ -38,7 +38,6 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 		);
 		const branchName = branchOutput.trim();
 
-		// Check if branch exists on remote, get PR info, and check push history in parallel
 		const [branchCheck, prInfo, hasBeenPushed] = await Promise.all([
 			branchExistsOnRemote(worktreePath, branchName),
 			getPRForBranch(worktreePath, branchName),
@@ -57,7 +56,6 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 			lastRefreshed: Date.now(),
 		};
 
-		// Cache the result
 		cache.set(worktreePath, { data: result, timestamp: Date.now() });
 
 		return result;
