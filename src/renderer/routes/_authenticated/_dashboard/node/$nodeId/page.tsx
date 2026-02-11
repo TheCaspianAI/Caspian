@@ -9,6 +9,7 @@ import { NotFound } from "renderer/routes/not-found";
 import { NodeInitializingView } from "renderer/screens/main/components/NodeView/NodeInitializingView/NodeInitializingView";
 import { NodeLayout } from "renderer/screens/main/components/NodeView/NodeLayout/NodeLayout";
 import { RepositoryMissingView } from "renderer/screens/main/components/NodeView/RepositoryMissingView";
+import { WorktreeMissingView } from "renderer/screens/main/components/NodeView/WorktreeMissingView";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useHasNodeFailed, useIsNodeInitializing } from "renderer/stores/node-init";
 import { getPaneDimensions } from "renderer/stores/tabs/pane-refs";
@@ -68,6 +69,8 @@ function NodePage() {
 	// - Failed nodes (shows error with retry)
 	// - Interrupted nodes that aren't currently initializing (shows resume option)
 	const showInitView = isInitializing || hasFailed || hasIncompleteInit;
+
+	const isWorktreeMissing = node?.type === "worktree" && node?.worktreePathExists === false;
 
 	const allTabs = useTabsStore((s) => s.tabs);
 	const activeTabIds = useTabsStore((s) => s.activeTabIds);
@@ -310,6 +313,8 @@ function NodePage() {
 						nodeName={node?.name ?? "Node"}
 						isInterrupted={hasIncompleteInit && !isInitializing}
 					/>
+				) : isWorktreeMissing ? (
+					<WorktreeMissingView nodeId={nodeId} nodeName={node?.name ?? "Node"} />
 				) : (
 					<NodeLayout />
 				)}

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
 import { nodes, repositories, worktrees } from "lib/local-db";
@@ -94,10 +95,15 @@ export const createQueryProcedures = () => {
 
 			const repoHealth = repository ? getRepositoryHealth({ repositoryId: repository.id }) : null;
 
+			const worktreePath = getNodePath(node) ?? "";
+			const worktreePathExists =
+				node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
+
 			return {
 				...node,
 				type: node.type as "worktree" | "branch",
-				worktreePath: getNodePath(node) ?? "",
+				worktreePath,
+				worktreePathExists,
 				repository: repository
 					? {
 							id: repository.id,
@@ -155,6 +161,7 @@ export const createQueryProcedures = () => {
 						repositoryId: string;
 						worktreeId: string | null;
 						worktreePath: string;
+						worktreePathExists: boolean;
 						type: "worktree" | "branch";
 						branch: string;
 						name: string;
@@ -202,10 +209,14 @@ export const createQueryProcedures = () => {
 						worktreePath = group.repository.mainRepoPath;
 					}
 
+					const worktreePathExists =
+						node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
+
 					group.nodes.push({
 						...node,
 						type: node.type as "worktree" | "branch",
 						worktreePath,
+						worktreePathExists,
 						isUnread: node.isUnread ?? false,
 					});
 				}

@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { LuArrowRight, LuCloudOff, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
+import {
+	LuArrowRight,
+	LuCloudOff,
+	LuFolder,
+	LuFolderGit2,
+	LuRotateCw,
+	LuTriangleAlert,
+} from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
 import { PRIcon } from "renderer/screens/main/components/PRIcon";
@@ -132,6 +139,20 @@ export function NodeRow({
 
 			{/* Branch deleted on remote indicator */}
 			{isBranchDeletedOnRemote && <LuCloudOff className="size-3.5 shrink-0 text-amber-500" />}
+
+			{/* Worktree directory missing indicator */}
+			{!node.worktreePathExists && node.type === "worktree" && (
+				<Tooltip delayDuration={300}>
+					<TooltipTrigger asChild>
+						<span>
+							<LuTriangleAlert className="size-3.5 shrink-0 text-destructive" />
+						</span>
+					</TooltipTrigger>
+					<TooltipContent side="top" sideOffset={4}>
+						<p className="text-xs">Worktree directory missing from disk</p>
+					</TooltipContent>
+				</Tooltip>
+			)}
 
 			{/* Unread indicator */}
 			{node.isUnread && (

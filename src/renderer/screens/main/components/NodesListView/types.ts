@@ -15,6 +15,7 @@ export interface NodeItem {
 	createdAt: number;
 	isUnread: boolean;
 	isOpen: boolean;
+	worktreePathExists: boolean;
 }
 
 export interface RepositoryGroup {

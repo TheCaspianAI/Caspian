@@ -76,6 +76,7 @@ export function NodesListView() {
 					createdAt: ws.createdAt,
 					isUnread: ws.isUnread,
 					isOpen: true,
+					worktreePathExists: ws.worktreePathExists,
 				});
 			}
 		}
@@ -105,6 +106,7 @@ export function NodesListView() {
 					createdAt: wt.createdAt,
 					isUnread: false,
 					isOpen: false,
+					worktreePathExists: true,
 				});
 			}
 		}
