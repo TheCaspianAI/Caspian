@@ -8,6 +8,7 @@ import { nodeInitManager } from "main/lib/node-init-manager";
 import { CASPIAN_DIR_NAME, WORKTREES_DIR_NAME } from "shared/constants";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
+import { invalidateRepositoryHealthCache } from "../../repositories/utils/health-cache";
 import {
 	activateRepository,
 	getBranchNode,
@@ -276,6 +277,8 @@ export const createCreateProcedures = () => {
 				if (!repository) {
 					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
+
+				invalidateRepositoryHealthCache();
 
 				let existingBranchName: string | undefined;
 				if (input.useExistingBranch) {
@@ -611,6 +614,8 @@ export const createCreateProcedures = () => {
 				if (!repository) {
 					throw new Error(`Repository ${input.repositoryId} not found`);
 				}
+
+				invalidateRepositoryHealthCache();
 
 				const parsed = parsePrUrl(input.prUrl);
 				if (!parsed) {

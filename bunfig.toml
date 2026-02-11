@@ -1,6 +1,8 @@
 [test]
 # Preload test setup before running tests
-preload = ["./test-setup.ts"]
+# 1. Global setup: browser globals, basic electron mock, local-db mock
+# 2. Integration setup: comprehensive electron mock, main process module mocks
+preload = ["./test-setup.ts", "./tests/integration/helpers/setup.ts"]
 
 [test.env]
 NODE_ENV = "test"

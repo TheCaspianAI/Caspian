@@ -15,13 +15,13 @@
 #
 # Local (gitignored):
 #   tests/integration/*.test.ts    — Feature-specific integration tests
-#   tests/e2e/*.spec.ts            — Feature-specific E2E tests
+#   tests/e2e/*.e2e.ts             — Feature-specific E2E tests
 #   tests/e2e/screenshots/         — E2E screenshot artifacts
 #   test-results/                  — Playwright results
 #   playwright-report/             — Playwright HTML report
 #   /coverage                      — Test coverage reports
 tests/integration/*.test.ts
-tests/e2e/*.spec.ts
+tests/e2e/*.e2e.ts
 /coverage
 
 # production

@@ -2,6 +2,7 @@ import path from "node:path";
 import { app, BrowserWindow, dialog, nativeImage } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
 import { settings } from "lib/local-db";
+import { initWorktreePathCache } from "lib/trpc/routers/nodes/utils/worktree-path-cache";
 import {
 	disposeHealthCache,
 	initHealthCache,
@@ -242,6 +243,7 @@ if (!gotTheLock) {
 		await initAppState();
 
 		initHealthCache();
+		initWorktreePathCache();
 
 		// Clean up stale daemon sessions from previous app runs
 		// Must happen BEFORE renderer restore runs

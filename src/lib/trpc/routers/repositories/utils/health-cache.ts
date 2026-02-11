@@ -3,10 +3,7 @@ import { repositories } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { checkRepositoryHealth, type RepositoryHealthCheck } from "./health";
 
-const REFRESH_INTERVAL_MS = 10_000;
-
 const cache = new Map<string, RepositoryHealthCheck>();
-let refreshTimer: ReturnType<typeof setInterval> | null = null;
 
 function sweep(): { total: number; missing: number } {
 	const activeRepos = localDb
@@ -28,14 +25,6 @@ function sweep(): { total: number; missing: number } {
 export function initHealthCache(): void {
 	const { total, missing } = sweep();
 	console.log(`[repository-health] Cache initialized: ${total} repositories (${missing} missing)`);
-
-	if (refreshTimer !== null) {
-		clearInterval(refreshTimer);
-	}
-	refreshTimer = setInterval(() => {
-		sweep();
-	}, REFRESH_INTERVAL_MS);
-	refreshTimer.unref();
 }
 
 export function getRepositoryHealth({
@@ -65,9 +54,5 @@ export function invalidateRepositoryHealthCache(): void {
 }
 
 export function disposeHealthCache(): void {
-	if (refreshTimer !== null) {
-		clearInterval(refreshTimer);
-		refreshTimer = null;
-	}
 	cache.clear();
 }

@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
 import { nodes, repositories, worktrees } from "lib/local-db";
@@ -9,6 +8,7 @@ import { getRepositoryHealth } from "../../repositories/utils/health-cache";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
+import { checkWorktreePathExists, refreshWorktreePathEntry } from "../utils/worktree-path-cache";
 
 type WorktreePathMap = Map<string, string>;
 
@@ -97,7 +97,8 @@ export const createQueryProcedures = () => {
 
 			const worktreePath = getNodePath(node) ?? "";
 			const worktreePathExists =
-				node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
+				node.type === "branch" ||
+				(worktreePath !== "" && refreshWorktreePathEntry({ path: worktreePath }));
 
 			return {
 				...node,
@@ -210,7 +211,8 @@ export const createQueryProcedures = () => {
 					}
 
 					const worktreePathExists =
-						node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
+						node.type === "branch" ||
+						(worktreePath !== "" && checkWorktreePathExists({ path: worktreePath }));
 
 					group.nodes.push({
 						...node,
