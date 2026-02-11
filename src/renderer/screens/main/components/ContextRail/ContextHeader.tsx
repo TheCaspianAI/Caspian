@@ -74,6 +74,25 @@ export function ContextHeader() {
 		},
 	});
 
+	const isRepositoryMissing = node?.repository?.pathMissing === true;
+
+	const relocateRepo = electronTrpc.repositories.relocate.useMutation({
+		onSuccess: (data) => {
+			if (data.success) {
+				utils.nodes.invalidate();
+				utils.repositories.invalidate();
+			}
+		},
+	});
+
+	const removeRepo = electronTrpc.repositories.remove.useMutation({
+		onSuccess: async () => {
+			await utils.nodes.invalidate();
+			await utils.repositories.invalidate();
+			navigate({ to: "/" });
+		},
+	});
+
 	const repoName = repository?.name ?? "No repository";
 	const nodeName = node?.name ?? "No node";
 	const isBranch = node?.type === "branch";
@@ -98,6 +117,18 @@ export function ContextHeader() {
 	const handleCloseRepo = () => {
 		if (node?.repositoryId) {
 			closeRepo.mutate({ id: node.repositoryId });
+		}
+	};
+
+	const handleLocateRepo = () => {
+		if (node?.repositoryId) {
+			relocateRepo.mutate({ id: node.repositoryId });
+		}
+	};
+
+	const handleRemoveRepo = () => {
+		if (node?.repositoryId) {
+			removeRepo.mutate({ id: node.repositoryId });
 		}
 	};
 
@@ -197,16 +228,22 @@ export function ContextHeader() {
 				</ContextMenuTrigger>
 				<ContextMenuContent>
 					{/* Node actions */}
-					<ContextMenuItem onSelect={() => nodeRename.startRename()} disabled={!nodeId}>
+					<ContextMenuItem
+						onSelect={() => nodeRename.startRename()}
+						disabled={!nodeId || isRepositoryMissing}
+					>
 						Rename node
 					</ContextMenuItem>
-					<ContextMenuItem onSelect={handleOpenInFinder} disabled={!node?.worktreePath}>
+					<ContextMenuItem
+						onSelect={handleOpenInFinder}
+						disabled={!node?.worktreePath || isRepositoryMissing}
+					>
 						Open in Finder
 					</ContextMenuItem>
 					<ContextMenuItem
 						onSelect={() => handleDeleteClick()}
 						className="text-destructive focus:text-destructive"
-						disabled={!nodeId}
+						disabled={!nodeId || isRepositoryMissing}
 					>
 						{deleteActionLabel}
 					</ContextMenuItem>
@@ -214,16 +251,36 @@ export function ContextHeader() {
 					<ContextMenuSeparator />
 
 					{/* Repository actions */}
-					<ContextMenuItem onSelect={() => repoRename.startRename()} disabled={!node?.repositoryId}>
-						Rename repository
-					</ContextMenuItem>
-					<ContextMenuItem
-						onSelect={handleCloseRepo}
-						className="text-destructive focus:text-destructive"
-						disabled={!node?.repositoryId}
-					>
-						Close repository
-					</ContextMenuItem>
+					{isRepositoryMissing ? (
+						<>
+							<ContextMenuItem onSelect={handleLocateRepo} disabled={!node?.repositoryId}>
+								Locate folder
+							</ContextMenuItem>
+							<ContextMenuItem
+								onSelect={handleRemoveRepo}
+								className="text-destructive focus:text-destructive"
+								disabled={!node?.repositoryId}
+							>
+								Remove repository
+							</ContextMenuItem>
+						</>
+					) : (
+						<>
+							<ContextMenuItem
+								onSelect={() => repoRename.startRename()}
+								disabled={!node?.repositoryId}
+							>
+								Rename repository
+							</ContextMenuItem>
+							<ContextMenuItem
+								onSelect={handleCloseRepo}
+								className="text-destructive focus:text-destructive"
+								disabled={!node?.repositoryId}
+							>
+								Close repository
+							</ContextMenuItem>
+						</>
+					)}
 				</ContextMenuContent>
 			</ContextMenu>
 

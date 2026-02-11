@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { HiExclamationTriangle } from "react-icons/hi2";
 import { LuSearch, LuX } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/node-navigation";
@@ -45,6 +46,14 @@ export function NodesListView() {
 			toast.error(`Failed to open node: ${error.message}`);
 		},
 	});
+
+	const repoPathMissing = useMemo(() => {
+		const map = new Map<string, boolean>();
+		for (const group of groups) {
+			map.set(group.repository.id, group.repository.pathMissing ?? false);
+		}
+		return map;
+	}, [groups]);
 
 	// Combine open nodes and closed worktrees into a single list
 	const allItems = useMemo<NodeItem[]>(() => {
@@ -234,30 +243,42 @@ export function NodesListView() {
 
 			{/* Nodes list grouped by repository */}
 			<div className="flex-1 overflow-y-auto">
-				{repositoryGroups.map((group) => (
-					<div key={group.repositoryId}>
-						{/* Repository header */}
-						<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border/50">
-							<span className="text-label font-medium text-foreground/70">
-								{group.repositoryName}
-							</span>
-							<span className="text-caption text-foreground/40 ml-2">{group.nodes.length}</span>
-						</div>
+				{repositoryGroups.map((group) => {
+					const isPathMissing = repoPathMissing.get(group.repositoryId) ?? false;
+					return (
+						<div key={group.repositoryId}>
+							{/* Repository header */}
+							<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border/50 flex items-center gap-1.5">
+								{isPathMissing && (
+									<HiExclamationTriangle className="size-3.5 text-amber-500 shrink-0" />
+								)}
+								<span
+									className={cn(
+										"text-label font-medium",
+										isPathMissing ? "text-amber-500" : "text-foreground/70",
+									)}
+								>
+									{group.repositoryName}
+								</span>
+								<span className="text-caption text-foreground/40">{group.nodes.length}</span>
+							</div>
 
-						{/* Nodes in this repository */}
-						{group.nodes.map((ws) => (
-							<NodeRow
-								key={ws.uniqueId}
-								node={ws}
-								onSwitch={() => handleSwitch(ws)}
-								onReopen={() => handleReopen(ws)}
-								isOpening={
-									openWorktree.isPending && openWorktree.variables?.worktreeId === ws.worktreeId
-								}
-							/>
-						))}
-					</div>
-				))}
+							{/* Nodes in this repository */}
+							{group.nodes.map((ws) => (
+								<NodeRow
+									key={ws.uniqueId}
+									node={ws}
+									onSwitch={() => handleSwitch(ws)}
+									onReopen={() => handleReopen(ws)}
+									isOpening={
+										openWorktree.isPending && openWorktree.variables?.worktreeId === ws.worktreeId
+									}
+									isRepositoryMissing={isPathMissing}
+								/>
+							))}
+						</div>
+					);
+				})}
 
 				{filteredItems.length === 0 && (
 					<div className="flex items-center justify-center h-32 text-foreground/50 text-label">

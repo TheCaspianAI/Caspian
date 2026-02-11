@@ -8,6 +8,7 @@ import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/
 import { NotFound } from "renderer/routes/not-found";
 import { NodeInitializingView } from "renderer/screens/main/components/NodeView/NodeInitializingView/NodeInitializingView";
 import { NodeLayout } from "renderer/screens/main/components/NodeView/NodeLayout/NodeLayout";
+import { RepositoryMissingView } from "renderer/screens/main/components/NodeView/RepositoryMissingView";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useHasNodeFailed, useIsNodeInitializing } from "renderer/stores/node-init";
 import { getPaneDimensions } from "renderer/stores/tabs/pane-refs";
@@ -59,6 +60,8 @@ function NodePage() {
 	const gitStatus = node?.worktree?.gitStatus;
 	const hasIncompleteInit =
 		node?.type === "worktree" && (gitStatus === null || gitStatus === undefined);
+
+	const isRepositoryMissing = node?.repository?.pathMissing === true;
 
 	// Show full-screen initialization view for:
 	// - Actively initializing nodes (shows progress)
@@ -296,7 +299,12 @@ function NodePage() {
 	return (
 		<div className="flex-1 h-full flex flex-col overflow-hidden">
 			<div className="flex-1 min-h-0 flex overflow-hidden">
-				{showInitView ? (
+				{isRepositoryMissing ? (
+					<RepositoryMissingView
+						repositoryId={node?.repository?.id ?? ""}
+						repositoryName={node?.repository?.name ?? "Unknown"}
+					/>
+				) : showInitView ? (
 					<NodeInitializingView
 						nodeId={nodeId}
 						nodeName={node?.name ?? "Node"}

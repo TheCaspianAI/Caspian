@@ -26,4 +26,18 @@ yarn-error.log*
 electron.vite.config.*.mjs
 
 # TanStack Router generated file
-routeTree.gen.tsrelease/
+routeTree.gen.ts
+release/
+
+# Local test infrastructure (run locally, not pushed to CI)
+tests/e2e/
+tests/e2e/screenshots/
+playwright.config.ts
+test-results/
+playwright-report/
+
+# QA checklists (local workflow only)
+qa/
+
+# Testing docs (local reference)
+TESTING.md

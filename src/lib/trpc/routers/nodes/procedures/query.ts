@@ -4,6 +4,7 @@ import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
+import { getRepositoryHealth } from "../../repositories/utils/health-cache";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
@@ -91,6 +92,8 @@ export const createQueryProcedures = () => {
 				}
 			}
 
+			const repoHealth = repository ? getRepositoryHealth({ repositoryId: repository.id }) : null;
+
 			return {
 				...node,
 				type: node.type as "worktree" | "branch",
@@ -100,6 +103,7 @@ export const createQueryProcedures = () => {
 							id: repository.id,
 							name: repository.name,
 							mainRepoPath: repository.mainRepoPath,
+							pathMissing: repoHealth ? !repoHealth.healthy : false,
 						}
 					: null,
 				worktree: worktree
@@ -144,6 +148,7 @@ export const createQueryProcedures = () => {
 						githubOwner: string | null;
 						mainRepoPath: string;
 						defaultBranch: string;
+						pathMissing: boolean;
 					};
 					nodes: Array<{
 						id: string;
@@ -163,6 +168,7 @@ export const createQueryProcedures = () => {
 			>();
 
 			for (const repository of activeRepositories) {
+				const health = getRepositoryHealth({ repositoryId: repository.id });
 				groupsMap.set(repository.id, {
 					repository: {
 						id: repository.id,
@@ -172,6 +178,7 @@ export const createQueryProcedures = () => {
 						githubOwner: repository.githubOwner ?? null,
 						mainRepoPath: repository.mainRepoPath,
 						defaultBranch: repository.defaultBranch ?? "main",
+						pathMissing: !health.healthy,
 					},
 					nodes: [],
 				});

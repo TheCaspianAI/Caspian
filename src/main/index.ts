@@ -2,6 +2,10 @@ import path from "node:path";
 import { app, BrowserWindow, dialog, nativeImage } from "electron";
 import { makeAppSetup } from "lib/electron-app/factories/app/setup";
 import { settings } from "lib/local-db";
+import {
+	disposeHealthCache,
+	initHealthCache,
+} from "lib/trpc/routers/repositories/utils/health-cache";
 import { DEFAULT_CONFIRM_ON_QUIT, PROTOCOL_SCHEME } from "shared/constants";
 import { setupAgentHooks } from "./lib/agent-setup";
 import { initAppState } from "./lib/app-state";
@@ -130,8 +134,7 @@ export function quitWithoutConfirmation(): void {
 app.on("before-quit", async (event) => {
 	if (isQuitting) return;
 
-	const isDev = process.env.NODE_ENV === "development";
-	const shouldConfirm = !skipConfirmation && !isDev && getConfirmOnQuitSetting();
+	const shouldConfirm = !skipConfirmation && !isE2ETest && getConfirmOnQuitSetting();
 
 	if (shouldConfirm) {
 		event.preventDefault();
@@ -158,6 +161,7 @@ app.on("before-quit", async (event) => {
 	// Quit confirmed or no confirmation needed - exit immediately
 	// Let OS clean up child processes, tray, etc.
 	isQuitting = true;
+	disposeHealthCache();
 	disposeTray();
 	app.exit(0);
 });
@@ -212,7 +216,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Single instance lock - required for second-instance event on Windows/Linux
-const gotTheLock = app.requestSingleInstanceLock();
+// Skip in E2E test mode to allow tests to launch alongside a dev instance.
+// Uses a custom env var because process.env.NODE_ENV is replaced at build time.
+const isE2ETest = process.env.CASPIAN_E2E_TEST === "1";
+const gotTheLock = isE2ETest || app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
 	// Another instance is already running, exit immediately without triggering before-quit
@@ -233,6 +240,8 @@ if (!gotTheLock) {
 		initSentry();
 
 		await initAppState();
+
+		initHealthCache();
 
 		// Clean up stale daemon sessions from previous app runs
 		// Must happen BEFORE renderer restore runs
