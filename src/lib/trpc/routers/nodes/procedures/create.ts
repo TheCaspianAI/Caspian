@@ -41,6 +41,7 @@ import {
 } from "../utils/git";
 import { initializeNodeWorktree } from "../utils/node-init";
 import { loadSetupConfig } from "../utils/setup";
+import { invalidateWorktreePathCache } from "../utils/worktree-path-cache";
 
 interface CreateNodeFromWorktreeParams {
 	repositoryId: string;
@@ -199,6 +200,7 @@ async function handleNewWorktree({
 		prInfo,
 		localBranchName,
 	});
+	invalidateWorktreePathCache();
 
 	const defaultBranch = repository.defaultBranch || "main";
 

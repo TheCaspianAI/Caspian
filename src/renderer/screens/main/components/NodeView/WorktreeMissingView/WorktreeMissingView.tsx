@@ -10,6 +10,7 @@ import {
 	AlertDialogTitle,
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
+import { toast } from "ui/components/ui/sonner";
 
 interface WorktreeMissingViewProps {
 	nodeId: string;
@@ -23,12 +24,19 @@ export function WorktreeMissingView({ nodeId, nodeName }: WorktreeMissingViewPro
 
 	const handleDelete = () => {
 		setShowDeleteConfirm(false);
-		deleteMutation.mutate(
-			{ id: nodeId },
-			{
-				onSuccess: () => {
-					utils.nodes.invalidate();
+		toast.promise(
+			deleteMutation.mutateAsync(
+				{ id: nodeId },
+				{
+					onSuccess: () => {
+						utils.nodes.invalidate();
+					},
 				},
+			),
+			{
+				loading: `Deleting "${nodeName}"...`,
+				success: `Deleted "${nodeName}"`,
+				error: (error) => (error instanceof Error ? error.message : "Failed to delete node"),
 			},
 		);
 	};

@@ -12,6 +12,7 @@ import {
 	AlertDialogTitle,
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
+import { toast } from "ui/components/ui/sonner";
 
 interface RepositoryMissingViewProps {
 	repositoryId: string;
@@ -49,7 +50,11 @@ export function RepositoryMissingView({
 
 	const handleRemove = () => {
 		setShowRemoveConfirm(false);
-		removeMutation.mutate({ id: repositoryId });
+		toast.promise(removeMutation.mutateAsync({ id: repositoryId }), {
+			loading: `Removing "${repositoryName}"...`,
+			success: `Removed "${repositoryName}"`,
+			error: (error) => (error instanceof Error ? error.message : "Failed to remove repository"),
+		});
 	};
 
 	return (
