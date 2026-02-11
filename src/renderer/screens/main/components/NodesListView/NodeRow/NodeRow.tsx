@@ -32,7 +32,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
 
 	// Lazy-load GitHub status on hover to avoid N+1 queries
-	const { data: githubStatus } = electronTrpc.nodes.getGitHubStatus.useQuery(
+	const { data: githubStatusData } = electronTrpc.nodes.getGitHubStatus.useQuery(
 		{ nodeId: node.nodeId ?? "" },
 		{
 			enabled: hasHovered && node.type === "worktree" && !!node.nodeId,
@@ -40,6 +40,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 		},
 	);
 
+	const githubStatus = githubStatusData?.status;
 	const pr = githubStatus?.pr;
 	const showDiffStats = pr && (pr.additions > 0 || pr.deletions > 0);
 	const isBranchDeletedOnRemote =
