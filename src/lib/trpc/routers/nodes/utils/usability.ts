@@ -1,7 +1,7 @@
+import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
 import { nodeInitManager } from "main/lib/node-init-manager";
 import type { NodeInitProgress } from "shared/types/node-init";
-import { checkWorktreePathExists } from "./worktree-path-cache";
 
 export type NodeUsabilityReason = "initializing" | "failed" | "path_missing" | "not_found";
 
@@ -44,7 +44,7 @@ export function checkNodeUsability(
 		return { usable: false, reason: "path_missing" };
 	}
 
-	if (!checkWorktreePathExists({ path: worktreePath })) {
+	if (!existsSync(worktreePath)) {
 		return { usable: false, reason: "path_missing" };
 	}
 
