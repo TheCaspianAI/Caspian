@@ -88,7 +88,6 @@ export function NodeSwitcherContent() {
 					createdAt: ws.createdAt,
 					isUnread: ws.isUnread,
 					isOpen: true,
-					worktreePathExists: ws.worktreePathExists,
 				});
 			}
 		}
@@ -116,7 +115,6 @@ export function NodeSwitcherContent() {
 					createdAt: wt.createdAt,
 					isUnread: false,
 					isOpen: false,
-					worktreePathExists: true,
 				});
 			}
 		}
