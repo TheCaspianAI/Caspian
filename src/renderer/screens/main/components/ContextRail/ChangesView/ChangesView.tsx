@@ -59,7 +59,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 		},
 	);
 
-	const { data: githubStatus, refetch: refetchGithubStatus } =
+	const { data: githubStatusData, refetch: refetchGithubStatus } =
 		electronTrpc.nodes.getGitHubStatus.useQuery(
 			{ nodeId: workspaceId ?? "" },
 			{
@@ -67,11 +67,22 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				refetchInterval: 10000,
 			},
 		);
+	const githubStatus = githubStatusData?.status ?? null;
 
 	const handleRefresh = () => {
 		refetch();
 		refetchGithubStatus();
 	};
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only fire on rename detection
+	useEffect(() => {
+		if (githubStatusData?.branchRenamed) {
+			const { from, to } = githubStatusData.branchRenamed;
+			toast.info(`Branch renamed: ${from} \u2192 ${to}`);
+			utils.nodes.get.invalidate();
+			utils.nodes.getAllGrouped.invalidate();
+		}
+	}, [githubStatusData?.branchRenamed?.from, githubStatusData?.branchRenamed?.to]);
 
 	const stageAllMutation = electronTrpc.changes.stageAll.useMutation({
 		onSuccess: () => refetch(),
@@ -182,7 +193,7 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 			if (githubStatus && workspaceId) {
 				utils.nodes.getGitHubStatus.setData(
 					{ nodeId: workspaceId },
-					{ ...githubStatus, branchExistsOnRemote: true },
+					{ status: { ...githubStatus, branchExistsOnRemote: true }, branchRenamed: null },
 				);
 			}
 			handleRefresh();

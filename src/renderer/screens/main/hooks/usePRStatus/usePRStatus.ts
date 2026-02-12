@@ -25,7 +25,7 @@ export function usePRStatus({
 	refetchInterval,
 }: UsePRStatusOptions): UsePRStatusResult {
 	const {
-		data: githubStatus,
+		data: githubStatusData,
 		isLoading,
 		refetch,
 	} = electronTrpc.nodes.getGitHubStatus.useQuery(
@@ -35,6 +35,8 @@ export function usePRStatus({
 			refetchInterval,
 		},
 	);
+
+	const githubStatus = githubStatusData?.status;
 
 	return {
 		pr: githubStatus?.pr ?? null,
