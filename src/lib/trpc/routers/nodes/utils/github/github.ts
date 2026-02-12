@@ -7,30 +7,21 @@ import { type GHPRResponse, GHPRResponseSchema, GHRepoResponseSchema } from "./t
 
 const execFileAsync = promisify(execFile);
 
-// Cache for GitHub status (10 second TTL)
 const cache = new Map<string, { data: GitHubStatus; timestamp: number }>();
 const CACHE_TTL_MS = 10_000;
 
-/**
- * Fetches GitHub PR status for a worktree using the `gh` CLI.
- * Returns null if `gh` is not installed, not authenticated, or on error.
- * Results are cached for 10 seconds.
- */
 export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubStatus | null> {
-	// Check cache first
 	const cached = cache.get(worktreePath);
 	if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
 		return cached.data;
 	}
 
 	try {
-		// First, get the repo URL
 		const repoUrl = await getRepoUrl(worktreePath);
 		if (!repoUrl) {
 			return null;
 		}
 
-		// Get current branch name
 		const { stdout: branchOutput } = await execFileAsync(
 			"git",
 			["rev-parse", "--abbrev-ref", "HEAD"],
@@ -44,8 +35,6 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 			branchHasBeenPushed({ worktreePath, branchName }),
 		]);
 
-		// Convert result to boolean - only "exists" is true
-		// "not_found" and "error" both mean we can't confirm it exists
 		const existsOnRemote = branchCheck.status === "exists";
 
 		const result: GitHubStatus = {
@@ -59,8 +48,11 @@ export async function fetchGitHubPRStatus(worktreePath: string): Promise<GitHubS
 		cache.set(worktreePath, { data: result, timestamp: Date.now() });
 
 		return result;
-	} catch {
-		// Any error (gh not installed, not auth'd, etc.) - return null
+	} catch (error) {
+		console.warn(
+			"[GitHub/fetchPRStatus] Failed:",
+			error instanceof Error ? error.message : String(error),
+		);
 		return null;
 	}
 }
@@ -78,20 +70,21 @@ async function getRepoUrl(worktreePath: string): Promise<string | null> {
 			return null;
 		}
 		return result.data.url;
-	} catch {
+	} catch (error) {
+		console.warn(
+			"[GitHub/getRepoUrl] Failed:",
+			error instanceof Error ? error.message : String(error),
+		);
 		return null;
 	}
 }
 
 async function getPRForBranch(worktreePath: string, _branch: string): Promise<GitHubStatus["pr"]> {
 	try {
-		// Use execWithShellEnv to handle macOS GUI app PATH issues
-		// Important: Do NOT pass the branch name argument. When `gh pr view` is
-		// called without arguments, it uses the branch's tracking info to find
-		// the associated PR. This is essential for fork PRs checked out via
-		// `gh pr checkout`, where the branch tracks `refs/pull/XXX/head`.
-		// Passing the branch name explicitly would search by head branch name,
-		// which fails for fork PRs since the branch exists on the fork, not origin.
+		// Do NOT pass the branch name — `gh pr view` without arguments uses
+		// tracking info (refs/pull/XXX/head), which is required for fork PRs.
+		// Passing branch name explicitly fails for forks since the branch
+		// exists on the fork remote, not origin.
 		const { stdout } = await execWithShellEnv(
 			"gh",
 			[
@@ -126,11 +119,9 @@ async function getPRForBranch(worktreePath: string, _branch: string): Promise<Gi
 			checks,
 		};
 	} catch (error) {
-		// "no pull requests found" is not an error - just no PR
 		if (error instanceof Error && error.message.includes("no pull requests found")) {
 			return null;
 		}
-		// Re-throw other errors to be caught by parent
 		throw error;
 	}
 }

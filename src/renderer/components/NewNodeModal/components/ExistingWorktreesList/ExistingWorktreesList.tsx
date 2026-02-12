@@ -120,7 +120,18 @@ export function ExistingWorktreesList({ repositoryId, onOpenSuccess }: ExistingW
 				});
 			}
 		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Failed to open PR");
+			const message = err instanceof Error ? err.message : "Failed to open PR";
+			if (message.includes("not installed")) {
+				toast.error("GitHub CLI required", {
+					description: "Install the GitHub CLI from cli.github.com to open PRs.",
+				});
+			} else if (message.includes("not logged in") || message.includes("auth login")) {
+				toast.error("GitHub CLI not authenticated", {
+					description: "Run 'gh auth login' in your terminal to connect your GitHub account.",
+				});
+			} else {
+				toast.error(message);
+			}
 		}
 	};
 
