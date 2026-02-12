@@ -6,13 +6,13 @@ A PR's CI checks finish, a review is submitted, or the PR is closed/merged. The 
 
 ## Current Behavior
 
-PR data is fetched lazily on hover with a 10-second cache TTL. There is no background polling. The sidebar shows stale PR information (or no information at all) until the user hovers over the node again.
+The Changes panel now polls GitHub status every 10 seconds for the active node (`refetchInterval: 10000`), so the active node's PR status stays current. However, PR info for other nodes in the NodesListView is still fetched lazily on hover with a 5-minute stale time. Non-active nodes show stale data until hovered.
 
 ## What's Missing
 
-- Periodic background refresh of PR status for active nodes (even at a low frequency like every 60 seconds)
-- Or at minimum, a visible "last updated" timestamp so users know the data may be stale
-- Push notifications or polling for status changes on open PRs
+- Background refresh of PR status for non-active nodes in the NodesListView (even at a low frequency like every 60 seconds)
+- Or a visible "last updated" timestamp so users know the data may be stale
+- Push notifications or webhook-based updates for status changes on open PRs
 
 ## Key Files
 
@@ -21,4 +21,4 @@ PR data is fetched lazily on hover with a 10-second cache TTL. There is no backg
 
 ## Impact
 
-Medium — users don't get timely feedback about PR state changes. They may miss review requests, CI failures, or merges.
+Low-Medium — the active node's PR status is now live. The remaining gap is the NodesListView, which still shows stale info until hovered.

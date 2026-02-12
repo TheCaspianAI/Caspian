@@ -6,8 +6,6 @@ import { useAppHotkey } from "renderer/stores/hotkeys";
 
 /**
  * Shared hook for node keyboard shortcuts.
- * Used by NodeSidebar for navigation between nodes.
- *
  * Handles Cmd+1-9 node switching shortcuts (global).
  */
 export function useNodeShortcuts() {

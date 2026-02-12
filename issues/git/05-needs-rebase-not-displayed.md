@@ -10,7 +10,7 @@ The default branch (e.g., `main`) has moved ahead. The node's branch is behind a
 
 ## What's Missing
 
-- Sidebar indicator or banner showing "X commits behind main"
+- Indicator in the Changes panel or NodesListView showing "X commits behind main"
 - Action to rebase or merge from the UI
 - The `needsRebase` field in `gitStatus` should be surfaced somewhere visible
 
