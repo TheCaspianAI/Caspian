@@ -1,14 +1,10 @@
 import type { Theme } from "../types";
 
 /**
- * Caspian v2 theme - Gold-standard reference theme
+ * Caspian theme — Instrument Panel
  *
- * Design principles:
- * - No pure black backgrounds (#0b0d10 minimum)
- * - Soft white foreground (#f2f4f8) with blue undertone
- * - Transparent borders using rgba overlays
- * - Pink accent (#e91e8c) reserved for: active states, selection, primary CTA, focus ring
- * - Clear tonal layering from background → tertiary → card → muted → accent
+ * Pure monochromatic palette. Hierarchy through luminosity alone.
+ * No accent color, no pink, no warm tints. Zero chroma.
  */
 export const caspianTheme: Theme = {
 	id: "caspian",
@@ -16,79 +12,80 @@ export const caspianTheme: Theme = {
 	author: "Caspian",
 	type: "dark",
 	isBuiltIn: true,
-	description: "Gold-standard Caspian theme — calm black surfaces with disciplined pink accents",
+	description: "Instrument Panel — monochromatic precision with engineered restraint",
 
 	ui: {
-		background: "#0b0d10",
-		foreground: "#f2f4f8",
+		background: "#1e1e1e",
+		foreground: "#d4d4d4",
 
-		card: "#111216",
-		cardForeground: "#f2f4f8",
+		card: "#222222",
+		cardForeground: "#d4d4d4",
 
-		popover: "#111216",
-		popoverForeground: "#f2f4f8",
+		popover: "#282828",
+		popoverForeground: "#d4d4d4",
 
-		primary: "#e91e8c",
-		primaryForeground: "#ffffff",
+		primary: "#d4d4d4",
+		primaryForeground: "#1e1e1e",
 
-		secondary: "#15171c",
-		secondaryForeground: "#f2f4f8",
+		secondary: "#282828",
+		secondaryForeground: "#d4d4d4",
 
-		muted: "#1b1d23",
-		mutedForeground: "#9aa0aa",
+		muted: "#222222",
+		mutedForeground: "#858585",
 
-		accent: "#15171c",
-		accentForeground: "#f2f4f8",
+		accent: "#282828",
+		accentForeground: "#d4d4d4",
 
-		tertiary: "#0e1014",
-		tertiaryActive: "#15171c",
+		tertiary: "#222222",
+		tertiaryActive: "#282828",
 
-		destructive: "#ff4d6a",
-		destructiveForeground: "#ffffff",
+		destructive: "#c04040",
+		destructiveForeground: "#c04040",
 
-		border: "rgba(242, 244, 248, 0.12)",
-		input: "rgba(242, 244, 248, 0.16)",
-		ring: "#e91e8c",
+		border: "#272727",
+		input: "#181818",
+		ring: "#4a4a4a",
 
-		sidebar: "#0e1014",
-		sidebarForeground: "#f2f4f8",
-		sidebarPrimary: "#e91e8c",
-		sidebarPrimaryForeground: "#ffffff",
-		sidebarAccent: "#15171c",
-		sidebarAccentForeground: "#f2f4f8",
-		sidebarBorder: "rgba(242, 244, 248, 0.10)",
-		sidebarRing: "#e91e8c",
+		sidebar: "#1e1e1e",
+		sidebarForeground: "#d4d4d4",
+		sidebarPrimary: "#d4d4d4",
+		sidebarPrimaryForeground: "#1e1e1e",
+		sidebarAccent: "#282828",
+		sidebarAccentForeground: "#d4d4d4",
+		sidebarBorder: "#232323",
+		sidebarRing: "#4a4a4a",
 
-		chart1: "#e91e8c",
-		chart2: "#ff6eb4",
-		chart3: "#ff9ecf",
-		chart4: "#f2f4f8",
-		chart5: "#9aa0aa",
+		chart1: "#808080",
+		chart2: "#999999",
+		chart3: "#b3b3b3",
+		chart4: "#666666",
+		chart5: "#8c8c8c",
 	},
 
 	terminal: {
-		background: "#0b0d10",
-		foreground: "#f2f4f8",
-		cursor: "#e91e8c",
-		cursorAccent: "#0b0d10",
-		selectionBackground: "rgba(233, 30, 140, 0.28)",
+		background: "transparent",
+		foreground: "#cccccc",
+		cursor: "#d4d4d4",
+		cursorAccent: "#181818",
+		selectionBackground: "#404040",
 
-		black: "#0e1014",
-		red: "#ff4d6a",
-		green: "#4ade80",
-		yellow: "#fbbf24",
-		blue: "#60a5fa",
-		magenta: "#e91e8c",
-		cyan: "#22d3ee",
-		white: "#f2f4f8",
+		// Desaturated ANSI colors for monochromatic environment
+		black: "#2a2a2a",
+		red: "#c04040",
+		green: "#50a050",
+		yellow: "#b0a040",
+		blue: "#4070b0",
+		magenta: "#806090",
+		cyan: "#408090",
+		white: "#c8c8c8",
 
-		brightBlack: "#3a3f47",
-		brightRed: "#ff6b84",
-		brightGreen: "#86efac",
-		brightYellow: "#fcd34d",
-		brightBlue: "#93c5fd",
-		brightMagenta: "#ff6eb4",
-		brightCyan: "#67e8f9",
-		brightWhite: "#ffffff",
+		brightBlack: "#606060",
+		brightRed: "#d06060",
+		brightGreen: "#80c080",
+		brightYellow: "#d0c870",
+		brightBlue: "#7090c0",
+		brightMagenta: "#a080a0",
+		brightCyan: "#60b0c0",
+		brightWhite: "#e8e8e8",
 	},
 };

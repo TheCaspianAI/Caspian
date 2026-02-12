@@ -28,7 +28,7 @@ function TabButton({
 			type="button"
 			onClick={onClick}
 			className={cn(
-				"h-7 px-2 text-xs rounded transition-colors",
+				"h-7 px-2 text-xs rounded-[4px] transition-colors duration-[80ms]",
 				isActive
 					? "text-foreground bg-accent/40"
 					: "text-muted-foreground hover:text-foreground hover:bg-muted/50",

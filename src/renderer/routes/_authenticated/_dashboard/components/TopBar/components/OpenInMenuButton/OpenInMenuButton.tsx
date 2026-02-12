@@ -77,17 +77,17 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 						onClick={handleOpenInEditor}
 						disabled={isLoading}
 						className={cn(
-							"group flex items-center gap-2 h-7 pl-2 pr-2.5 rounded-l border border-r-0 border-border/60 bg-secondary/50 text-xs font-medium leading-none",
-							"transition-all duration-150 ease-out",
-							"hover:bg-secondary hover:border-border",
+							"group flex items-center gap-2 h-7 pl-2 pr-2.5 rounded-l-[6px] border border-r-0 border-border bg-secondary text-xs font-medium leading-none",
+							"transition-colors duration-[80ms]",
+							"hover:bg-accent",
 							"focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-							"active:scale-[0.98]",
+							"active:brightness-90",
 							isLoading && "opacity-50 pointer-events-none",
 						)}
 					>
 						<img src={currentApp.icon} alt="" className="size-3.5 object-contain shrink-0" />
 						{branch && (
-							<span className="text-muted-foreground truncate max-w-[140px] tabular-nums leading-none">
+							<span className="text-muted-foreground font-mono truncate max-w-[140px] tabular-nums leading-none">
 								/{branch}
 							</span>
 						)}
@@ -116,11 +116,11 @@ export const OpenInMenuButton = memo(function OpenInMenuButton({
 						type="button"
 						disabled={isLoading}
 						className={cn(
-							"flex items-center justify-center h-7 w-7 rounded-r border border-border/60 bg-secondary/50 text-muted-foreground",
-							"transition-all duration-150 ease-out",
+							"flex items-center justify-center h-7 w-7 rounded-r-[6px] border border-border bg-secondary text-muted-foreground",
+							"transition-colors duration-[80ms]",
 							"hover:bg-secondary hover:border-border hover:text-foreground",
 							"focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-							"active:scale-[0.98]",
+							"active:brightness-90",
 							isLoading && "opacity-50 pointer-events-none",
 						)}
 					>

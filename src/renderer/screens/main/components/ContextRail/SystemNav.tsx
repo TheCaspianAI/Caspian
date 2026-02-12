@@ -63,7 +63,7 @@ export function SystemNav() {
 						<Button
 							variant="ghost"
 							size="sm"
-							className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal"
+							className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal transition-colors duration-[80ms]"
 							disabled={isLoading}
 						>
 							Add Repository

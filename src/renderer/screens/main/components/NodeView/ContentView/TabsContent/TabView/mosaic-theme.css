@@ -14,27 +14,27 @@
 }
 
 .mosaic-theme-dark .mosaic-window {
-	border: 0.5px solid var(--color-border);
+	border: 1px solid oklch(0 0 0 / 0.15);
 	border-radius: 0;
 	overflow: hidden;
 	box-shadow: none;
 }
 .mosaic-theme-dark .mosaic-window-focused {
-	border-color: var(--color-border);
+	border-color: oklch(1 0 0 / 0.08);
 }
 
 .mosaic-theme-dark .mosaic-window .mosaic-window-toolbar {
-	background: var(--color-tertiary);
+	background: var(--tertiary);
 	height: 28px;
 	padding: 0 8px;
 	display: flex;
 	align-items: center;
-	transition: background-color 0.15s ease;
+	transition: background-color 80ms;
 	border-radius: 0;
 }
 .mosaic-theme-dark .mosaic-window .mosaic-window-toolbar .mosaic-window-controls {
 	opacity: 0;
-	transition: opacity 0.15s ease;
+	transition: opacity 80ms;
 	display: flex;
 	align-items: center;
 	height: 100%;
@@ -45,22 +45,22 @@
 	opacity: 1;
 }
 .mosaic-theme-dark .mosaic-window-focused .mosaic-window-toolbar {
-	background: var(--color-secondary);
+	background: var(--secondary);
 }
 .mosaic-theme-dark .mosaic-window .mosaic-window-title {
-	color: var(--color-muted-foreground);
+	color: var(--muted-foreground);
 	font-size: 11px;
 	font-weight: 500;
 	letter-spacing: 0.01em;
-	transition: color 0.15s ease;
+	transition: color 80ms;
 }
 .mosaic-theme-dark .mosaic-window-focused .mosaic-window-title {
-	color: var(--color-foreground);
+	color: var(--foreground);
 }
 .mosaic-theme-dark .mosaic-window .mosaic-window-body {
-	background: transparent;
+	background: var(--input);
+	box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.3);
 	border: none;
-	box-shadow: none;
 	border-radius: 0;
 	overflow: hidden;
 }
@@ -69,13 +69,13 @@
 	outline: none;
 }
 .mosaic-window-content:focus-visible {
-	outline: 2px solid var(--color-ring);
-	outline-offset: -2px;
+	outline: 1px solid var(--ring);
+	outline-offset: -1px;
 }
 .mosaic-theme-dark .mosaic-split {
 	background: transparent;
 	opacity: 1;
-	transition: background-color 0.15s ease;
+	transition: background-color 80ms;
 }
 
 .mosaic-theme-dark .mosaic-split.-column {
@@ -88,7 +88,7 @@
 
 /* Drop target when hovering - shows the split preview */
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover {
-	background: rgba(59, 130, 246, 0.1);
-	border: 1px solid rgba(59, 130, 246, 0.3);
+	background: oklch(0.3 0 0 / 0.3);
+	border: 1px solid oklch(0.4 0 0 / 0.5);
 	opacity: 1;
 }

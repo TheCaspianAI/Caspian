@@ -68,7 +68,7 @@ function DashboardLayout() {
 	const showContextRail = isSidebarOpen && isNodeRoute;
 
 	return (
-		<div className="flex flex-col h-full w-full bg-tertiary">
+		<div className="flex flex-col h-full w-full bg-background">
 			<TopBar />
 			<div className="flex flex-1 overflow-hidden">
 				{showContextRail && (
@@ -84,7 +84,7 @@ function DashboardLayout() {
 						<ContextRail />
 					</ResizablePanel>
 				)}
-				<div className="flex-1 m-3 bg-background rounded-[var(--radius-modal)] overflow-hidden elevation-2">
+				<div className="flex-1 bg-background overflow-hidden border-l border-border/40">
 					<Outlet />
 				</div>
 			</div>

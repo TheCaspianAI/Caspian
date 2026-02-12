@@ -8,31 +8,31 @@
  * Default xterm.js terminal colors for dark mode
  */
 export const DEFAULT_TERMINAL_COLORS_DARK: TerminalColors = {
-	background: "#000000",
-	foreground: "#ffffff",
-	cursor: "#ffffff",
-	cursorAccent: "#000000",
-	selectionBackground: "#4d4d4d",
+	background: "transparent",
+	foreground: "#cccccc",
+	cursor: "#d4d4d4",
+	cursorAccent: "#181818",
+	selectionBackground: "#404040",
 
-	// Standard ANSI colors (xterm defaults)
-	black: "#2e3436",
-	red: "#cc0000",
-	green: "#4e9a06",
-	yellow: "#c4a000",
-	blue: "#3465a4",
-	magenta: "#75507b",
-	cyan: "#06989a",
-	white: "#d3d7cf",
+	// Standard ANSI colors (desaturated ~15% for monochromatic environment)
+	black: "#2a2a2a",
+	red: "#c04040",
+	green: "#50a050",
+	yellow: "#b0a040",
+	blue: "#4070b0",
+	magenta: "#806090",
+	cyan: "#408090",
+	white: "#c8c8c8",
 
-	// Bright ANSI colors (xterm defaults)
-	brightBlack: "#555753",
-	brightRed: "#ef2929",
-	brightGreen: "#8ae234",
-	brightYellow: "#fce94f",
-	brightBlue: "#729fcf",
-	brightMagenta: "#ad7fa8",
-	brightCyan: "#34e2e2",
-	brightWhite: "#eeeeec",
+	// Bright ANSI colors (desaturated ~15%)
+	brightBlack: "#606060",
+	brightRed: "#d06060",
+	brightGreen: "#80c080",
+	brightYellow: "#d0c870",
+	brightBlue: "#7090c0",
+	brightMagenta: "#a080a0",
+	brightCyan: "#60b0c0",
+	brightWhite: "#e8e8e8",
 };
 
 /**

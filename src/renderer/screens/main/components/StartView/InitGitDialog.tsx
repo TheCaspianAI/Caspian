@@ -142,7 +142,7 @@ export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGi
 	return (
 		// biome-ignore lint/a11y/useKeyWithClickEvents lint/a11y/noStaticElementInteractions: Modal backdrop dismiss pattern
 		<div
-			className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
 			onClick={handleBackdropClick}
 		>
 			<div

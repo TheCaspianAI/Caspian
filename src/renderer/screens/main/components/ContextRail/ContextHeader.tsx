@@ -149,7 +149,7 @@ export function ContextHeader() {
 					<button
 						type="button"
 						onClick={toggleDashboard}
-						className={`w-full h-12 px-3 text-left text-body font-medium transition-colors ${
+						className={`w-full h-9 px-3 text-left text-body font-medium transition-colors duration-[80ms] ${
 							isDashboardOpen
 								? "bg-accent text-foreground"
 								: "text-muted-foreground hover:bg-accent hover:text-foreground"
@@ -171,7 +171,7 @@ export function ContextHeader() {
 								<button
 									type="button"
 									onClick={handleHeaderClick}
-									className="group flex flex-col gap-1 px-3 py-2.5 text-left w-full hover:bg-muted/40 transition-colors"
+									className="group flex flex-col gap-1 px-3 py-2.5 text-left w-full hover:bg-muted/40 transition-colors duration-[80ms]"
 								>
 									{/* Repository name - with inline rename */}
 									{repoRename.isRenaming ? (
@@ -202,10 +202,10 @@ export function ContextHeader() {
 												onKeyDown={nodeRename.handleKeyDown}
 												onBlur={nodeRename.submitRename}
 												onClick={(e) => e.stopPropagation()}
-												className="text-caption font-normal text-foreground/70 bg-transparent border-b border-foreground/30 outline-none flex-1"
+												className="text-caption font-normal font-mono text-foreground/70 bg-transparent border-b border-foreground/30 outline-none flex-1"
 											/>
 										) : (
-											<span className="text-caption font-normal text-foreground/70 truncate flex-1">
+											<span className="text-caption font-normal font-mono text-foreground/70 truncate flex-1">
 												{nodeName}
 											</span>
 										)}
