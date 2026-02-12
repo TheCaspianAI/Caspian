@@ -101,7 +101,7 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.4, delay: delay / 1000 }}
-			className="w-52 h-44 rounded-lg border border-border/60 bg-[#0a0a0a] overflow-hidden flex flex-col"
+			className="w-36 sm:w-44 md:w-52 h-32 sm:h-38 md:h-44 rounded-lg border border-border/60 bg-[#0a0a0a] overflow-hidden flex flex-col"
 		>
 			{/* Title bar */}
 			<div className="flex items-center gap-1.5 px-3 py-2 border-b border-border/40 bg-card/50">
