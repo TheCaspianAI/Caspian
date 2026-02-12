@@ -84,7 +84,7 @@ function DashboardLayout() {
 						<ContextRail />
 					</ResizablePanel>
 				)}
-				<div className="flex-1 m-3 bg-background rounded-[var(--radius-modal)] overflow-hidden elevation-2">
+				<div className="flex-1 m-1.5 sm:m-2 md:m-3 bg-background rounded-[var(--radius-modal)] overflow-hidden elevation-2">
 					<Outlet />
 				</div>
 			</div>
