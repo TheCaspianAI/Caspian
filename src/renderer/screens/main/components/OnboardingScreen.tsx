@@ -126,7 +126,11 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					transition={{ duration: 0.5, delay: 1 }}
 					className="pb-8 sm:pb-0"
 				>
-					<Button size="lg" onClick={onContinue} className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base">
+					<Button
+						size="lg"
+						onClick={onContinue}
+						className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base"
+					>
 						Get Started
 					</Button>
 				</motion.div>

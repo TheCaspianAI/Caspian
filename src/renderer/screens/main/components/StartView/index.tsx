@@ -205,10 +205,14 @@ export function StartView() {
 					/>
 
 					{/* Title */}
-					<h1 className="text-2xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight mb-2 sm:mb-3">Caspian</h1>
+					<h1 className="text-2xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight mb-2 sm:mb-3">
+						Caspian
+					</h1>
 
 					{/* Subtext */}
-					<p className="text-sm sm:text-base md:text-[18px] text-neutral-500 mb-6 sm:mb-8 md:mb-12">Ship faster, one node at a time.</p>
+					<p className="text-sm sm:text-base md:text-[18px] text-neutral-500 mb-6 sm:mb-8 md:mb-12">
+						Ship faster, one node at a time.
+					</p>
 
 					{/* Action buttons row */}
 					<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
