@@ -20,7 +20,7 @@ interface InitGitDialogProps {
 	isOpen: boolean;
 	selectedPath: string;
 	onClose: () => void;
-	onSuccess: (repository: { id: string; name: string }) => void;
+	onSuccess: (repository: { id: string; name: string }) => void | Promise<void>;
 	onError: (error: string) => void;
 }
 
@@ -116,7 +116,12 @@ export function InitGitDialog({
 
 			utils.repositories.getRecents.invalidate().catch(console.error);
 
-			onSuccess(result.repository);
+			try {
+				await onSuccess(result.repository);
+			} catch (err) {
+				onError(`Post-init callback failed: ${getErrorMessage(err)}`);
+				return;
+			}
 			onClose();
 		} finally {
 			if (isMountedRef.current) {

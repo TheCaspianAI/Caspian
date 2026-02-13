@@ -8,6 +8,7 @@ export {
 	getBuiltInTheme,
 	githubDarkTheme,
 	githubLightTheme,
+	graceTheme,
 	hexTheme,
 	rosePineTheme,
 } from "./built-in";

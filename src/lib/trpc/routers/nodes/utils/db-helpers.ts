@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, isNull, not } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, not, sql } from "drizzle-orm";
 import {
 	nodes,
 	repositories,
@@ -286,9 +286,9 @@ export function ensureBranchNodeExists({
 	}
 
 	const newNodeId = insertResult[0].id;
-	const otherNodes = localDb
-		.select()
-		.from(nodes)
+	localDb
+		.update(nodes)
+		.set({ tabOrder: sql`${nodes.tabOrder} + 1` })
 		.where(
 			and(
 				eq(nodes.repositoryId, repositoryId),
@@ -296,15 +296,7 @@ export function ensureBranchNodeExists({
 				isNull(nodes.deletingAt),
 			),
 		)
-		.all();
-
-	for (const node of otherNodes) {
-		localDb
-			.update(nodes)
-			.set({ tabOrder: node.tabOrder + 1 })
-			.where(eq(nodes.id, node.id))
-			.run();
-	}
+		.run();
 }
 
 /**

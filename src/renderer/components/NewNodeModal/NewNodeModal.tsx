@@ -645,6 +645,10 @@ export function NewNodeModal() {
 					setSelectedRepositoryId(repository.id);
 				}}
 				onError={(error) => {
+					console.error("[NewNodeModal/git-init] Failed to initialize git repository", {
+						selectedPath: initGitDialog.selectedPath,
+						error,
+					});
 					toast.error("Failed to initialize git repository", { description: error });
 				}}
 			/>

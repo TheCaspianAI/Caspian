@@ -68,6 +68,40 @@ describe("built-in themes completeness", () => {
 				}
 			});
 
+			test("has all required terminal color fields", () => {
+				expect(theme.terminal).toBeDefined();
+				const terminal = theme.terminal!;
+
+				const requiredFields = [
+					"background",
+					"foreground",
+					"cursor",
+					"cursorAccent",
+					"selectionBackground",
+					"black",
+					"red",
+					"green",
+					"yellow",
+					"blue",
+					"magenta",
+					"cyan",
+					"white",
+					"brightBlack",
+					"brightRed",
+					"brightGreen",
+					"brightYellow",
+					"brightBlue",
+					"brightMagenta",
+					"brightCyan",
+					"brightWhite",
+				] as const;
+
+				for (const field of requiredFields) {
+					expect(terminal[field]).toBeDefined();
+					expect(typeof terminal[field]).toBe("string");
+				}
+			});
+
 			test("has valid theme metadata", () => {
 				expect(theme.id).toBeDefined();
 				expect(theme.name).toBeDefined();

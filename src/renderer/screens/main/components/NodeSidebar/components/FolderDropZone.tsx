@@ -111,6 +111,10 @@ export function FolderDropZone() {
 					});
 				}}
 				onError={(error) => {
+					console.error("[FolderDropZone/git-init] Failed to initialize git repository", {
+						selectedPath: initGitDialog.selectedPath,
+						error,
+					});
 					toast.error("Failed to initialize git repository", { description: error });
 				}}
 			/>

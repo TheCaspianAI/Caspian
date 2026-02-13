@@ -132,6 +132,10 @@ export function SystemNav({ isCollapsed }: SystemNavProps) {
 					});
 				}}
 				onError={(error) => {
+					console.error("[SystemNav/git-init] Failed to initialize git repository", {
+						selectedPath: initGitDialog.selectedPath,
+						error,
+					});
 					toast.error("Failed to initialize git repository", { description: error });
 				}}
 			/>

@@ -42,7 +42,7 @@ Tailwind classes like `bg-primary`, `text-foreground`, `border-border/40` resolv
 
 Every theme defines a clear surface stack. The Grace default theme uses this range:
 
-```
+```text
 Surface          oklch L     Role
 ─────────────────────────────────────────────────────
 input            0.11        Recessed wells (terminals, text inputs)
@@ -62,7 +62,7 @@ The sidebar uses a separate `--sidebar` token. In Grace, sidebar matches backgro
 
 Text carries the warmth. Primary text is warm cream, not stark white. Lower contrast equals higher perceived quality. Stark white on near-black reads as cheap. Warm cream on deep dark reads as considered.
 
-```
+```text
 Role             Grace value               Usage
 ─────────────────────────────────────────────────────
 Primary          oklch(0.90 0.025 80)      Headlines, active labels, content
@@ -76,7 +76,7 @@ The `navForeground` token exists specifically for sidebar/nav scanning text — 
 
 Each theme defines a `--primary` token. Grace uses warm cream/ivory (`oklch(0.88 0.035 80)`). Hex uses dusty rose (`oklch(0.68 0.10 15)`). Every active state in the UI references `--primary` through Tailwind opacity modifiers:
 
-```
+```text
 bg-primary/10    Active sidebar tab, dashboard button (when open)
 bg-primary/8     Active node row in sidebar
 bg-primary/6     Active content tab
@@ -90,7 +90,7 @@ The 3px left indicator on the active node row (`bg-primary`) provides a stronger
 
 Borders use semi-transparent white (`oklch(1 0 0 / N)`) rather than solid colors. This adapts to any theme's background — lighter backgrounds get lighter borders, darker backgrounds get darker borders. The opacity controls visibility:
 
-```
+```text
 Context          Opacity     Usage
 ─────────────────────────────────────────────────────
 Structural       /20         TopBar bottom border, dashboard header
@@ -104,7 +104,7 @@ Grace sets `--border` to `oklch(1 0 0 / 0.10)`. Hex sets it to `oklch(1 0 0 / 0.
 
 Status colors are the only values that stay constant across all themes:
 
-```
+```text
 --status-running:  oklch(0.72 0.15 145)   Green — process active
 --status-error:    oklch(0.63 0.20 25)    Red — failure
 --status-warning:  oklch(0.75 0.15 80)    Amber — caution
@@ -165,7 +165,7 @@ The sidebar and topbar have dedicated surface utilities (`surface-sidebar`, `sur
 
 Three shadow levels for non-surface use:
 
-```
+```text
 elevation-1     0 2px 8px, 0 1px 3px        Subtle lift
 elevation-2     0 8px 32px, 0 2px 8px       Standard overlay
 elevation-3     0 16px 48px, 0 4px 12px     Modal/dialog
@@ -187,7 +187,7 @@ The body element uses two subtle radial gradients layered over the background co
 
 ### Radius Scale
 
-```
+```text
 4px     — Small interactive: menu items, inner elements (rounded-[4px])
 6px     — Standard interactive: buttons, inputs, tabs (rounded-[6px])
 8px     — Containers: cards, tab lists, command palette (rounded-[8px])
@@ -207,7 +207,7 @@ Active states are the single most important visual signal in the app. The user i
 
 Every active state uses the same model: a subtle tint of the theme's `--primary` color at low opacity, plus a stronger anchor element (indicator line or bottom bar).
 
-```
+```text
 Sidebar view tab (active):     bg-primary/10
 Dashboard button (active):     bg-primary/10
 Node row (active):             bg-primary/8 + 3px left indicator (bg-primary)
@@ -226,7 +226,7 @@ Grey active states (`bg-accent`) communicate "this is selected" through luminosi
 
 ### Speed
 
-```
+```text
 80ms    — Hover states, color transitions, active states
 150ms   — Panel transitions, sidebar collapse
 250ms   — Slide-in panels, modal open/close

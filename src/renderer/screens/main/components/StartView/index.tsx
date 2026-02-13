@@ -272,6 +272,11 @@ export function StartView() {
 					try {
 						await createNode.mutateAsync({ repositoryId: repository.id });
 					} catch (err) {
+						console.error("[StartView/git-init] createNode.mutateAsync failed", {
+							repositoryId: repository.id,
+							repositoryName: repository.name,
+							error: err,
+						});
 						setError(err instanceof Error ? err.message : "Failed to create node");
 					}
 				}}
