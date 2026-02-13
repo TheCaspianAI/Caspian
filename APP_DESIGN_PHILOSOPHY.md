@@ -1,6 +1,6 @@
 # Caspian Design Philosophy
 
-> The interface disappears. The work remains.
+> Warmth in the dark. Confidence in restraint.
 
 ---
 
@@ -8,83 +8,101 @@
 
 Caspian is a supervision tool for AI coding agents. Users rotate through workspaces, scan terminal output, check progress, kick off tasks. The interface optimizes for fast scanning and instant switching — not for settling into one workspace.
 
-The design direction is **engineered restraint**. The app communicates competence through what it doesn't do. No gradients, no glows, no decorative color. Hierarchy comes from luminosity, weight, and spatial position alone. The lasting impression should be that someone cared about every pixel — not that someone tried to impress you.
+The design direction is **warm precision**. Deep dark surfaces with intentional warmth — not the cold blue-grey of most developer tools, and not the sterile pure-black of monochromatic themes. Warmth lives in the foreground: cream-toned text, warm accent colors, and surfaces that carry a barely perceptible undertone. The backgrounds stay deep and quiet. The content glows.
 
-Linear is the benchmark. Not because of any specific visual choice, but because it never breaks character. You never catch it being lazy. One wrong border radius, one inconsistent hover state, one off-by-one spacing — these kill perceived quality faster than any missing feature.
+Linear remains the benchmark for execution quality. Not for any specific color choice, but for the discipline: consistent spacing, consistent radii, consistent hover models, no lazy shortcuts. One wrong border radius kills perceived quality faster than any missing feature.
+
+The system supports multiple themes (Grace, Hex, Everforest, GitHub Dark/Light, Rose Pine) but all themes share the same structural principles. A theme changes the palette. It does not change the spatial logic, the border model, the typography, or the interaction patterns.
 
 ### Tenets
 
 1. **Content is king.** Terminal output and code diffs are the experience. Chrome frames them, never competes.
 2. **Density without clutter.** More information in less space, but never crowded. Precision spacing is the difference.
-3. **Monochrome confidence.** No accent color as a crutch. If hierarchy doesn't work in pure greyscale, it doesn't work.
-4. **Seamless surfaces.** Panels flow together. Borders are felt, not seen. No boxed-in grid of sections.
+3. **Warm confidence.** Warmth replaces sterility. Accent color marks every active state, but sparingly — a tint, not a shout.
+4. **Layered surfaces.** Panels sit on distinct planes. The sidebar is darker than content. Overlays are brighter. Depth is readable at a glance.
 5. **Instant response.** Every interaction responds within one frame. No easing that makes the user wait.
 
 ---
 
 ## Color System
 
-Pure achromatic. Zero chroma, zero hue. The entire palette is neutral grey at different luminosity levels.
+All colors are defined in oklch (lightness, chroma, hue). oklch provides perceptually uniform lightness steps — a 0.05 difference in L looks like the same amount of contrast everywhere in the palette. Hex values are used only for terminal ANSI colors where xterm.js requires them.
 
-### The Tonal Range
+### Theme Architecture
 
-The range is deliberately narrow. This is the single most important insight from Linear: a compressed tonal range makes everything feel cohesive. No surface jumps out. No panel looks like a separate app. Everything belongs to one unified plane.
+The theme store (`applyUIColors`) sets 34 CSS custom properties as inline styles on `:root`. The `globals.css` file defines fallback defaults. Both must use direct values, never `var()` references to other variables — that would create a two-layer token system that breaks theme switching.
+
+Each theme defines:
+- **ui**: 34 color tokens for app chrome (backgrounds, text, borders, accent)
+- **terminal**: 16 ANSI colors plus cursor/selection for xterm.js
+
+Tailwind classes like `bg-primary`, `text-foreground`, `border-border/40` resolve to the current theme's CSS variables automatically. Component code never hardcodes colors.
+
+### Surface Hierarchy
+
+Every theme defines a clear surface stack. The Grace default theme uses this range:
 
 ```
-Surface          oklch        hex        Role
-─────────────────────────────────────────────────────────
-Recessed         0.21  0 0    #181818    Terminal wells, inputs
-Background       0.235 0 0    #1e1e1e    App background, sidebar
-Card             0.25  0 0    #222222    Panels, toolbars
-Elevated         0.275 0 0    #282828    Popovers, hover states, active items
+Surface          oklch L     Role
+─────────────────────────────────────────────────────
+input            0.11        Recessed wells (terminals, text inputs)
+sidebar          0.13        Navigation plane
+background       0.13        App background
+tertiary         0.14        Toolbar level
+card / muted     0.15        Panel level
+secondary        0.16        Secondary surfaces
+popover          0.17        Overlays, dropdowns
 ```
 
-The total spread from recessed to elevated is only 0.065 in oklch lightness. This is tight by design. The previous system used a 0.09 spread (#1e1e1e to #2e2e2e) which made surfaces feel like separate zones. The current range makes them feel like facets of one surface.
+The total spread is deliberately tight (0.06 in lightness). Surfaces read as facets of one object, not separate zones. The Hex theme uses a wider spread (0.11 to 0.29) for a more dramatic layered effect — this is a per-theme choice, not a system rule.
 
-### Sidebar Is Background
-
-The sidebar uses the exact same background as the content area (#1e1e1e). There is no two-tone split. Separation comes from a barely-visible border and the content structure itself, not from surface color difference. This is how Linear handles it — the sidebar and content read as one unified surface.
+The sidebar uses a separate `--sidebar` token. In Grace, sidebar matches background for a seamless look. In Hex, sidebar is darker than background for a distinct two-plane split. Both are valid approaches — the token system supports either.
 
 ### Text
 
-Primary text is soft off-white, not stark. Lower contrast equals higher quality. Stark white on near-black reads as cheap. Soft off-white on dark grey reads as refined.
+Text carries the warmth. Primary text is warm cream, not stark white. Lower contrast equals higher perceived quality. Stark white on near-black reads as cheap. Warm cream on deep dark reads as considered.
 
 ```
-Role             oklch        hex        Usage
-─────────────────────────────────────────────────────────
-Primary          0.87  0 0    #d4d4d4    Headlines, active labels, content
-Secondary        0.62  0 0    #858585    Descriptions, inactive labels, meta
-Tertiary         0.45  0 0    —          Placeholders, timestamps, hints
-Disabled         0.30  0 0    —          Disabled states, decorative
+Role             Grace value               Usage
+─────────────────────────────────────────────────────
+Primary          oklch(0.90 0.025 80)      Headlines, active labels, content
+Nav              oklch(0.68 0.015 75)      Sidebar labels, inactive nav items
+Muted            oklch(0.55 0.01 70)       Descriptions, meta, timestamps
 ```
+
+The `navForeground` token exists specifically for sidebar/nav scanning text — a distinct luminosity between primary and muted that optimizes for peripheral reading.
+
+### Accent Color
+
+Each theme defines a `--primary` token. Grace uses warm cream/ivory (`oklch(0.88 0.035 80)`). Hex uses dusty rose (`oklch(0.68 0.10 15)`). Every active state in the UI references `--primary` through Tailwind opacity modifiers:
+
+```
+bg-primary/10    Active sidebar tab, dashboard button (when open)
+bg-primary/8     Active node row in sidebar
+bg-primary/6     Active content tab
+```
+
+This means active states automatically adopt the theme's accent color. A theme author only needs to set `--primary` and all active states shift to match. The accent tint is a wash — barely visible, never a solid fill. The eye reads it as "this one is different" without processing a specific color.
+
+The 3px left indicator on the active node row (`bg-primary`) provides a stronger anchor point. The 2px bottom line on the active content tab (`tab-active-indicator`) provides a secondary one. Both use the full primary color, not a tinted opacity.
 
 ### Borders
 
-Borders are the area that most separates a premium app from a generic one. In Linear, borders are barely perceptible — they define space through a whisper of contrast. They are felt more than seen.
-
-The approach: use opacity-based borders for structural elements, solid colors for interactive elements.
+Borders use semi-transparent white (`oklch(1 0 0 / N)`) rather than solid colors. This adapts to any theme's background — lighter backgrounds get lighter borders, darker backgrounds get darker borders. The opacity controls visibility:
 
 ```
-Context          Value                         Usage
-─────────────────────────────────────────────────────────
-Structural       border-border/40              Sidebar divider, tab separators, content header
-                 (~#272727 at 40% opacity)     Nearly invisible against background
-
-Interactive      var(--border) / #272727       Input borders, card outlines
-                 oklch(0.273 0 0)              Visible but subtle
-
-Focus            var(--ring) / #4a4a4a         Focus rings, active borders
-                 oklch(0.41 0 0)               Clear indicator without being loud
-
-Terminal panes   oklch(0 0 0 / 0.15)          Black at 15% opacity — adapts to any surface
-Terminal focus   oklch(1 0 0 / 0.08)          White at 8% — barely there
+Context          Opacity     Usage
+─────────────────────────────────────────────────────
+Structural       /20         TopBar bottom border, dashboard header
+Section          /40         Sidebar section divider, tab container bottom
+Default          /100        Input borders, card outlines (var(--border))
 ```
 
-The sidebar border uses #232323 (oklch 0.255), which is only 5 hex steps from the #1e1e1e background. This creates a divider you can perceive if you look for it but which doesn't create a visible line at a glance.
+Grace sets `--border` to `oklch(1 0 0 / 0.10)`. Hex sets it to `oklch(1 0 0 / 0.09)`. The opacity modifiers (`border-border/20`, `border-border/40`) scale from this base, so even the softest borders remain perceptible.
 
 ### Functional Colors
 
-The only non-grey in the palette. Used strictly for semantic meaning.
+Status colors are the only values that stay constant across all themes:
 
 ```
 --status-running:  oklch(0.72 0.15 145)   Green — process active
@@ -94,7 +112,7 @@ The only non-grey in the palette. Used strictly for semantic meaning.
 --status-done:     oklch(0.63 0 0)        Grey — completed
 ```
 
-Functional colors appear only in status dots, destructive button text, git diff markers, terminal ANSI output, and error messages. They never appear as backgrounds, borders, glows, or fills on interactive elements.
+These appear in status indicators, error messages, git diff markers, and terminal ANSI output. They never appear as backgrounds or borders on interactive elements.
 
 ---
 
@@ -108,15 +126,15 @@ Variable weight (100-900), tabular figures by default, optimized for small sizes
 
 ### Scale
 
-| Role | Font | Weight | Size | Tracking | Line Height |
-|------|------|--------|------|----------|-------------|
-| Page heading | Geist | 600 | 20px | -0.01em | 1.2 |
-| Section title | Geist | 500 | 14px | -0.005em | 1.3 |
-| Body / labels | Geist | 400 | 13px | 0 | 1.5 |
-| Caption / meta | Geist | 400 | 12px | 0.01em | 1.4 |
-| Badge / count | Geist | 500 | 11px | 0.02em | 1.0 |
-| Terminal | Geist Mono | 400 | 13px | 0 | 1.4 |
-| Code / paths | Geist Mono | 400 | 12px | 0 | 1.4 |
+The scale is defined as CSS custom properties and exposed as Tailwind utility classes:
+
+| Role | Class | Size | Tracking | Line Height | Usage |
+|------|-------|------|----------|-------------|-------|
+| Caption | `text-caption` | 11px | 0.02em | 1.0 | Badges, counts |
+| Label | `text-label` | 12px | 0.01em | 1.4 | Captions, meta, code/paths |
+| Body | `text-body` | 13px | 0 | 1.5 | Body, labels, primary content |
+| Section | `text-section` | 14px | -0.005em | 1.3 | Section titles |
+| Heading | `text-heading` | 20px | -0.01em | 1.2 | Page headings |
 
 ### Rules
 
@@ -125,22 +143,39 @@ Variable weight (100-900), tabular figures by default, optimized for small sizes
 - Monospace for anything machine-generated. File paths, branch names, commit hashes — all Geist Mono.
 - No italic. Use weight or opacity for emphasis.
 - Tight line heights for chrome (1.2-1.3), generous for readable content (1.5).
+- Always use the semantic utility classes (`text-body`, `text-label`) rather than raw Tailwind size classes (`text-sm`, `text-xs`). The scale is the system.
 
 ---
 
 ## Surfaces and Depth
 
-Surfaces are cut into the interface, not floating above it. Think instrument panel — gauges sit in recessed wells, flush with or below the surface.
+Surfaces communicate hierarchy through layering, not decoration.
 
 ### Three Levels
 
-1. **Recessed** — Terminal panes, text inputs. Content sits *in* the interface. Uses `var(--input)` (#181818) with `inset 0 1px 2px oklch(0 0 0 / 0.3)`.
+1. **Recessed** (`surface-recessed`) — Terminal panes, text inputs. Content sits *in* the interface. Uses `var(--input)` with a 1px border. The darkest surface in the UI.
 
-2. **Flush** — The default plane. Background, sidebar, panels. Everything lives here. Defined by hairline borders, not surface color difference.
+2. **Flush** (`surface-flush`) — The default plane. Cards, panels. Uses `var(--card)` with a 1px border. Where most UI lives.
 
-3. **Raised** — Temporary overlays only. Popovers, dropdowns, modals. Uses `var(--popover)` (#282828) with `0 4px 12px oklch(0 0 0 / 0.3)`.
+3. **Raised** (`surface-raised`) — Temporary overlays only. Popovers, dropdowns, modals. Uses `var(--popover)` with a 1px border and a two-layer shadow (`0 8px 32px`, `0 2px 8px`). Overlays are the brightest surfaces.
 
-Structural elements never use drop shadows. Cards and panels are defined by borders. The glass effect (backdrop-filter) is not used.
+The sidebar and topbar have dedicated surface utilities (`surface-sidebar`, `surface-topbar`) that use their respective tokens. These are structural surfaces, not elevation levels.
+
+### Elevation
+
+Three shadow levels for non-surface use:
+
+```
+elevation-1     0 2px 8px, 0 1px 3px        Subtle lift
+elevation-2     0 8px 32px, 0 2px 8px       Standard overlay
+elevation-3     0 16px 48px, 0 4px 12px     Modal/dialog
+```
+
+All shadows use `oklch(0 0 0 / N)` for consistent depth rendering across themes.
+
+### Background Atmosphere
+
+The body element uses two subtle radial gradients layered over the background color: a faint white glow at the top and a dark vignette around the edges. This creates the impression that the interface has ambient lighting rather than a flat fill. The effect is barely perceptible but contributes to the premium feel.
 
 ---
 
@@ -150,35 +185,46 @@ Structural elements never use drop shadows. Cards and panels are defined by bord
 
 1px. Everywhere. No 2px borders, no thick dividers. One weight.
 
-### Border Visibility
-
-This is where most dark UI designs go wrong. Borders that are too visible create a grid of boxes that fights the content. Borders that are invisible lose all structure. The target: borders you perceive without noticing.
-
-For structural borders (sidebar divider, tab separators, content header underline), use `border-border/40` — the border color at 40% opacity. This creates separation that's felt rather than seen.
-
-For interactive borders (input fields, card outlines), use `var(--border)` at full opacity. These need to be visible to communicate interactivity.
-
-For terminal pane borders, use `oklch(0 0 0 / 0.15)` — semi-transparent black that adapts to any surface and never draws attention.
-
 ### Radius Scale
 
 ```
-0px    — Structural: terminal wells, panel dividers
-3px    — Small interactive: badges, chips
-6px    — Standard interactive: buttons, inputs, tabs
-8px    — Containers: cards
-10px   — Overlays: modals, popovers (maximum)
+4px     — Small interactive: menu items, inner elements (rounded-[4px])
+6px     — Standard interactive: buttons, inputs, tabs (rounded-[6px])
+8px     — Containers: cards, tab lists, command palette (rounded-[8px])
+12px    — Structural: panels, sidebars (--radius-structural)
+14px    — Overlays: modals, dialogs (--radius-modal)
 ```
 
-No `rounded-full` anywhere except status dot indicators.
+The radius is soft but not round. No `rounded-full` except for status dot indicators. The system avoids both sharp corners (feels cheap) and pill shapes (feels playful). The target is the refined softness of a premium instrument panel.
+
+---
+
+## Active States
+
+Active states are the single most important visual signal in the app. The user is constantly switching between nodes, tabs, and views. The active state must be readable instantly without being loud.
+
+### The Pattern
+
+Every active state uses the same model: a subtle tint of the theme's `--primary` color at low opacity, plus a stronger anchor element (indicator line or bottom bar).
+
+```
+Sidebar view tab (active):     bg-primary/10
+Dashboard button (active):     bg-primary/10
+Node row (active):             bg-primary/8 + 3px left indicator (bg-primary)
+Content tab (active):          bg-primary/6 + 2px bottom line (bg-primary)
+```
+
+Inactive states use `text-nav-foreground` (dimmer) and hover to `bg-accent` (theme surface color, not primary tint). This creates a clear distinction: hover is a surface shift, active is a color signal.
+
+### Why Not Grey
+
+Grey active states (`bg-accent`) communicate "this is selected" through luminosity alone. Primary-tinted active states communicate it through both luminosity and color. In a dense interface where many elements compete for attention, the color signal is faster to parse. The tint is kept deliberately low (6-10% opacity) so it reads as a subtle warmth, not a highlight.
 
 ---
 
 ## Motion
 
 ### Speed
-
-Animations exist to prevent spatial disorientation, not to delight.
 
 ```
 80ms    — Hover states, color transitions, active states
@@ -193,6 +239,7 @@ Animations exist to prevent spatial disorientation, not to delight.
 - Hover feedback: 80ms background color shift only. No scale, no translate, no shadow changes.
 - No spring physics, no overshoot. Precise, not playful.
 - Scroll is native. No smooth-scroll override.
+- Use `transition-colors` for color-only transitions, `transition-all` only when animating non-color properties like the tab indicator.
 
 ---
 
@@ -202,23 +249,20 @@ Terminals are the primary content. Their presentation is the most important visu
 
 ### Well Treatment
 
-- Background: `var(--input)` (#181818) — recessed
-- Inner shadow: `inset 0 1px 2px oklch(0 0 0 / 0.3)`
-- Pane border: `1px solid oklch(0 0 0 / 0.15)` — nearly invisible
-- Focused pane border: `oklch(1 0 0 / 0.08)` — subtle white, not a bright ring
-- Radius: 0px. Sharp edges. Terminal wells are architectural.
-- Padding: 0px. Content goes edge-to-edge.
+- Background: `transparent` — inherits from the recessed surface beneath it
+- Pane border: via mosaic theme CSS, adapted per theme
+- Radius: 6px on mosaic windows, rounded top on toolbar, rounded bottom on body
+- Padding: 0px in xterm. Content goes edge-to-edge.
 
 ### Terminal Colors
 
-- Text: #cccccc (slightly dimmer than UI text)
-- Cursor: #d4d4d4 (solid block, no blink)
-- Selection: #404040 (grey, no color)
-- ANSI colors: standard palette desaturated 10-15% to fit the monochromatic environment
+Each theme defines its own ANSI palette. Grace uses desaturated neutrals. Hex uses warm rose-shifted colors. Community themes (Everforest, Rose Pine) bring their own palettes.
+
+Terminal text is slightly dimmer than UI text — `#cccccc` vs the UI's `oklch(0.90)` foreground. This keeps terminal content from competing with chrome labels while remaining fully readable.
 
 ### Toolbar
 
-The terminal header bar ("Terminal" label) uses `var(--tertiary)` (#222222), which is barely different from the background. Focused pane toolbar uses `var(--secondary)` (#282828). The toolbar should blend in, not stand out.
+The terminal pane toolbar uses `var(--tertiary)`, which is barely different from the background. Focused pane toolbar uses `var(--tertiary-active)`. The toolbar blends in, never draws attention.
 
 ---
 
@@ -226,25 +270,67 @@ The terminal header bar ("Terminal" label) uses `var(--tertiary)` (#222222), whi
 
 ### Buttons
 
-**Primary:** Soft-white fill (#d4d4d4), dark text (#1e1e1e). No border. 6px radius. Hover: slight dim. Active: further dim. No glow.
+**Primary:** `bg-primary text-primary-foreground`. Warm cream in Grace, dusty rose in Hex. No border. 6px radius. Hover: slight dim.
 
-**Secondary:** #282828 fill, #d4d4d4 text. 1px #272727 border. Hover: lighten background.
+**Secondary:** `bg-secondary text-secondary-foreground`. 1px border. Hover: lighten background.
 
-**Ghost:** No fill, no border. Hover: #282828 fill.
+**Ghost:** No fill, no border. Hover: `bg-accent` fill.
 
-**Destructive:** Transparent fill, #c04040 text. Hover: error color at 10% opacity fill.
+**Destructive:** Transparent fill, `text-destructive`. Hover: destructive color at 10% opacity fill.
 
 ### Inputs
 
-Background: #181818 (recessed). Border: 1px #272727. Focus: border shifts to #4a4a4a. Radius: 6px. No focus ring glow — just a border brightness shift.
+Background: `var(--input)` (recessed). Border: 1px `var(--border)`. Focus: border shifts to `var(--ring)`. Radius: 6px. No focus ring glow — just a border brightness shift.
 
 ### Dropdown Menus
 
-Background: #282828 (elevated). Border: 1px #272727. Shadow: raised surface shadow. Radius: 8px container, 4px items.
+Background: `var(--popover)`. Border: 1px. Shadow: `surface-raised` shadow. Outer radius: 8px. Inner item radius: 4px.
+
+### Tooltips
+
+Background: `bg-popover/90`. Text: `text-popover-foreground`. Radius: 8px. Uses the theme's own popover color, slightly transparent.
+
+### Keyboard Shortcuts (Kbd)
+
+Background: `bg-accent/40`. Border: 1px `border-border/20`. Radius: 4px. Creates a subtle keycap appearance that adapts to any theme.
 
 ### Modals
 
-Background: #222222. Border: 1px #272727. Shadow: raised surface. Radius: 10px. Backdrop: `oklch(0 0 0 / 0.6)`, no blur.
+Background: `var(--card)`. Border: 1px. Shadow: `elevation-3`. Radius: 14px (`--radius-modal`). Backdrop: `oklch(0 0 0 / 0.6)`.
+
+---
+
+## Theme Design Guide
+
+When creating a new built-in theme, follow these principles:
+
+### Surface Spread
+
+Decide on a contrast philosophy:
+- **Tight spread** (Grace: L 0.11-0.17) — surfaces feel unified, hierarchy comes from borders and text weight
+- **Wide spread** (Hex: L 0.11-0.29) — surfaces feel layered, hierarchy is spatial and immediate
+
+Both are valid. Tight spread is more subtle and refined. Wide spread is more dramatic and readable.
+
+### Warm vs Cool
+
+The system supports any temperature. Grace uses warm hue ~70-80 at very low chroma (0.004). Hex uses rose hue ~15 at moderate chroma (0.012). GitHub Dark uses cool neutrals. Everforest uses green. The structural principles work regardless of temperature.
+
+### Accent Choice
+
+The `--primary` token is the theme's signature color. It appears in:
+- Active state tints (bg-primary/6 through bg-primary/10)
+- Left indicators and bottom bars (bg-primary at full opacity)
+- Primary buttons (bg-primary)
+- Focus rings (var(--ring), typically matching primary)
+
+Choose an accent that has enough contrast against the theme's background at 6-10% opacity to be perceptible but not distracting.
+
+### Terminal Palette
+
+Terminal colors should feel cohesive with the theme. Desaturate ANSI colors 10-15% to match the theme's overall restraint. Shift hues toward the theme's dominant undertone for coherence (e.g., Hex shifts greens and blues slightly warm).
+
+Set `terminal.background` to `"transparent"` so the terminal inherits the app's recessed surface. Only use an opaque terminal background if the theme requires a distinct terminal color (like community themes that define their own terminal background).
 
 ---
 
@@ -253,67 +339,26 @@ Background: #222222. Border: 1px #272727. Shadow: raised surface. Radius: 10px. 
 These are the rules that, when violated, kill perceived quality:
 
 - One border weight (1px) everywhere
-- One hover model (background shifts one step) on every hoverable element
+- One hover model (background shifts to accent surface) on every hoverable element
 - One focus model (border brightens to ring color) on every focusable element
+- Active states always use `bg-primary/N`, never hardcoded colors
 - Spacing is never approximate — if a gap is 8px, it's 8px everywhere
-- Typography never drifts — if body is Geist 400 13px, it's that everywhere
-- Radius never drifts — if buttons are 6px, all buttons are 6px
+- Typography never drifts — use semantic utility classes, not raw sizes
+- Radius never drifts — if menu items are 4px, all menu items are 4px
 - Cursor types are always correct (pointer, default, text, resize, grab)
 - Text selection is controlled — chrome is `user-select: none`, content is selectable
 - Every interactive element has all states: default, hover, active, focused, disabled
 - Every list/panel has a considered empty state
 - Truncation is always ellipsis, never clip
 - Nothing shifts on interaction — no reflow from hover states or badge appearances
-
----
-
-## CSS Variable Reference
-
-These are the actual values in the design system. The theme store applies hex values from `caspian.ts` via inline styles, overriding the oklch defaults in `globals.css`.
-
-```css
-/* Surfaces */
---background:       oklch(0.235 0 0);    /* #1e1e1e */
---card:             oklch(0.25 0 0);     /* #222222 */
---popover:          oklch(0.275 0 0);    /* #282828 */
---secondary:        oklch(0.275 0 0);    /* #282828 */
---accent:           oklch(0.275 0 0);    /* #282828 */
---muted:            oklch(0.25 0 0);     /* #222222 */
---tertiary:         oklch(0.25 0 0);     /* #222222 */
---tertiary-active:  oklch(0.275 0 0);    /* #282828 */
---input:            oklch(0.21 0 0);     /* #181818 */
-
-/* Text */
---foreground:       oklch(0.87 0 0);     /* #d4d4d4 */
---muted-foreground: oklch(0.62 0 0);     /* #858585 */
-
-/* Borders */
---border:           oklch(0.273 0 0);    /* #272727 */
---ring:             oklch(0.41 0 0);     /* #4a4a4a */
-
-/* Sidebar (matches background — no two-tone) */
---sidebar:          oklch(0.235 0 0);    /* #1e1e1e */
---sidebar-border:   oklch(0.255 0 0);    /* #232323 */
-
-/* Status */
---status-running:   oklch(0.72 0.15 145);
---status-error:     oklch(0.63 0.2 25);
---status-warning:   oklch(0.75 0.15 80);
---status-info:      oklch(0.7 0.1 230);
---status-done:      oklch(0.63 0 0);
-```
-
-### Architecture Note
-
-The theme store (`applyUIColors` in `css-variables.ts`) sets CSS custom properties as inline styles on `document.documentElement`. This means the hex values in `caspian.ts` override the oklch defaults in `globals.css`. The oklch values are fallbacks for when no theme is applied. Both must stay in sync.
-
-Do not create intermediate CSS variables that reference other variables (e.g., `--bg-base: var(--background)`). This creates a two-layer token system that breaks theme switching, because `applyUIColors` only sets the shadcn-layer variables.
+- Theme preview cards use the theme's own colors, not the current theme's CSS variables
 
 ---
 
 ## Design References
 
-- **Linear** — The benchmark. Monochromatic dark, seamless surfaces, invisible borders, speed-obsessed.
+- **Linear** — Execution benchmark. Consistent surfaces, invisible borders, speed-obsessed.
+- **Antimetal** — Inspiration for Grace theme. Deep dark, cream text, premium restraint.
+- **Hex.tech** — Inspiration for Hex theme. Near-black with rose editorial warmth.
 - **Zed** — Minimal chrome, content-forward, sharp without being cold.
 - **Warp** — Modern terminal UX as a design problem. Rich but restrained.
-- **Figma** — Panel management, workspace navigation, information density.
