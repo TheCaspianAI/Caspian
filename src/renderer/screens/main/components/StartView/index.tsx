@@ -193,37 +193,41 @@ export function StartView() {
 
 				<div
 					className={cn(
-						"flex flex-col items-center w-full max-w-2xl px-6 transition-opacity duration-200",
+						"flex flex-col items-center w-full max-w-2xl px-4 sm:px-6 transition-opacity duration-200",
 						isDragOver && "opacity-30 pointer-events-none",
 					)}
 				>
 					<img
 						src="./assets/caspian-logo.png"
 						alt="Caspian"
-						className="w-36 h-36 object-contain mb-8"
+						className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain mb-4 sm:mb-6 md:mb-8"
 						draggable={false}
 					/>
 
-					<h1 className="text-[44px] font-semibold text-white tracking-tight mb-3">Caspian</h1>
+					<h1 className="text-2xl sm:text-4xl md:text-[44px] font-semibold text-white tracking-tight mb-2 sm:mb-3">
+						Caspian
+					</h1>
 
-					<p className="text-[18px] text-neutral-500 mb-12">Ship faster, one node at a time.</p>
+					<p className="text-sm sm:text-base md:text-[18px] text-neutral-500 mb-6 sm:mb-8 md:mb-12">
+						Ship faster, one node at a time.
+					</p>
 
-					<div className="flex items-center gap-3">
+					<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
 						<button
 							type="button"
 							onClick={handleOpenProject}
 							disabled={isLoading}
 							className={cn(
-								"inline-flex items-center gap-3 px-6 py-3",
+								"inline-flex items-center justify-center gap-2.5 sm:gap-3 px-5 sm:px-6 py-2.5 sm:py-3",
 								"rounded-[6px] border border-neutral-700/50 bg-transparent",
-								"text-[15px] text-neutral-300",
+								"text-sm sm:text-[15px] text-neutral-300",
 								"transition-all duration-[80ms]",
 								"hover:bg-white/5 hover:border-neutral-600",
 								"focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20",
 								"disabled:opacity-50 disabled:pointer-events-none",
 							)}
 						>
-							<LuFolderOpen className="w-[18px] h-[18px] text-neutral-400" />
+							<LuFolderOpen className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-neutral-400" />
 							<span>Open project</span>
 						</button>
 
@@ -232,22 +236,22 @@ export function StartView() {
 							onClick={() => setIsCloneDialogOpen(true)}
 							disabled={isLoading}
 							className={cn(
-								"inline-flex items-center gap-3 px-6 py-3",
+								"inline-flex items-center justify-center gap-2.5 sm:gap-3 px-5 sm:px-6 py-2.5 sm:py-3",
 								"rounded-[6px] border border-neutral-700/50 bg-transparent",
-								"text-[15px] text-neutral-300",
+								"text-sm sm:text-[15px] text-neutral-300",
 								"transition-all duration-[80ms]",
 								"hover:bg-white/5 hover:border-neutral-600",
 								"focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20",
 								"disabled:opacity-50 disabled:pointer-events-none",
 							)}
 						>
-							<LuGlobe className="w-[18px] h-[18px] text-neutral-400" />
+							<LuGlobe className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-neutral-400" />
 							<span>Clone from URL</span>
 						</button>
 					</div>
 
 					{error && (
-						<div className="mt-8 w-full max-w-md rounded-lg bg-red-950/30 border border-red-900/50 px-4 py-3">
+						<div className="mt-6 sm:mt-8 w-full max-w-md rounded-lg bg-red-950/30 border border-red-900/50 px-3 sm:px-4 py-2.5 sm:py-3">
 							<div className="flex items-start gap-3">
 								<span className="flex-1 text-sm text-red-400">{error}</span>
 								<button

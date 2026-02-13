@@ -10,32 +10,32 @@ interface OnboardingScreenProps {
 
 export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 	return (
-		<div className="flex-1 h-full flex flex-col items-center justify-center bg-background px-6">
+		<div className="flex-1 h-full flex flex-col items-center justify-start sm:justify-center bg-background px-4 sm:px-6 overflow-y-auto">
 			{/* Main content */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-				className="max-w-2xl w-full text-center"
+				className="max-w-2xl w-full text-center py-8 sm:py-0"
 			>
 				{/* Logo and Welcome */}
 				<motion.div
 					initial={{ opacity: 0, scale: 0.9 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-					className="mb-6"
+					className="mb-4 sm:mb-6"
 				>
 					<img
 						src={caspianLogo}
 						alt="Caspian"
-						className="w-28 h-28 object-contain mx-auto rounded-[10px]"
+						className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain mx-auto rounded-[10px]"
 					/>
 				</motion.div>
 				<motion.h1
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 0.1 }}
-					className="text-4xl font-semibold text-foreground tracking-tight mb-4"
+					className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-2 sm:mb-4"
 				>
 					Welcome to Caspian
 				</motion.h1>
@@ -45,7 +45,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 0.2 }}
-					className="text-lg text-muted-foreground mb-6"
+					className="text-sm sm:text-base md:text-lg text-muted-foreground mb-4 sm:mb-6"
 				>
 					AI coding assistants today work one task at a time.
 					<br />
@@ -57,7 +57,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 0.3 }}
-					className="text-lg text-foreground mb-12"
+					className="text-sm sm:text-base md:text-lg text-foreground mb-6 sm:mb-8 md:mb-12"
 				>
 					Caspian lets you run{" "}
 					<span className="text-primary font-medium">multiple AI agents in parallel</span>
@@ -70,7 +70,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
 					transition={{ duration: 0.6, delay: 0.4 }}
-					className="flex items-center justify-center gap-4 mb-8"
+					className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 flex-wrap"
 				>
 					{[
 						{ label: "Fix bugs", script: TERMINAL_SCRIPTS.fixBugs, delay: 1000 },
@@ -79,7 +79,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					].map((node) => (
 						<div key={node.label} className="flex flex-col items-center">
 							<AnimatedTerminal title={node.label} script={node.script} delay={node.delay} />
-							<div className="w-px h-4 bg-border/40 mt-2" />
+							<div className="w-px h-3 sm:h-4 bg-border/40 mt-1.5 sm:mt-2" />
 						</div>
 					))}
 				</motion.div>
@@ -89,14 +89,14 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0, scaleX: 0 }}
 					animate={{ opacity: 1, scaleX: 1 }}
 					transition={{ duration: 0.6, delay: 0.8 }}
-					className="flex items-center justify-center gap-3 mb-12"
+					className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-12"
 				>
-					<div className="h-px flex-1 max-w-[100px] bg-gradient-to-r from-transparent to-border/60" />
-					<div className="flex items-center gap-2 px-4 py-2 rounded-[6px] border border-border/40 bg-muted/30">
-						<LuGitBranch className="w-4 h-4 text-muted-foreground" />
-						<span className="text-sm text-muted-foreground">your codebase</span>
+					<div className="h-px flex-1 max-w-[60px] sm:max-w-[80px] md:max-w-[100px] bg-gradient-to-r from-transparent to-border/60" />
+					<div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] border border-border/40 bg-muted/30">
+						<LuGitBranch className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
+						<span className="text-xs sm:text-sm text-muted-foreground">your codebase</span>
 					</div>
-					<div className="h-px flex-1 max-w-[100px] bg-gradient-to-l from-transparent to-border/60" />
+					<div className="h-px flex-1 max-w-[60px] sm:max-w-[80px] md:max-w-[100px] bg-gradient-to-l from-transparent to-border/60" />
 				</motion.div>
 
 				{/* Tagline */}
@@ -104,15 +104,15 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.5, delay: 0.9 }}
-					className="flex items-center justify-center gap-6 mb-12 text-muted-foreground"
+					className="flex items-center justify-center gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-12 text-muted-foreground text-xs sm:text-sm md:text-base"
 				>
-					<span className="flex items-center gap-2">
-						<LuBot className="w-4 h-4" />
+					<span className="flex items-center gap-1.5 sm:gap-2">
+						<LuBot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
 						More agents
 					</span>
 					<span className="text-muted-foreground/30">·</span>
-					<span className="flex items-center gap-2">
-						<LuZap className="w-4 h-4" />
+					<span className="flex items-center gap-1.5 sm:gap-2">
+						<LuZap className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
 						More speed
 					</span>
 					<span className="text-muted-foreground/30">·</span>
@@ -124,8 +124,13 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5, delay: 1 }}
+					className="pb-8 sm:pb-0"
 				>
-					<Button size="lg" onClick={onContinue} className="px-8 py-6 text-base">
+					<Button
+						size="lg"
+						onClick={onContinue}
+						className="px-6 sm:px-8 py-4 sm:py-6 text-sm sm:text-base"
+					>
 						Get Started
 					</Button>
 				</motion.div>
