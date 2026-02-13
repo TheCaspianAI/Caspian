@@ -105,6 +105,9 @@ export interface UIColors {
 	secondary: string;
 	secondaryForeground: string;
 
+	// Navigation text (sidebar items, tabs, section headers — scanning targets)
+	navForeground?: string;
+
 	// Muted/subtle elements
 	muted: string;
 	mutedForeground: string;

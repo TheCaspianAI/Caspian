@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LuFolderGit, LuFolderOpen } from "react-icons/lu";
+import { LuFolderGit, LuFolderOpen, LuPlus } from "react-icons/lu";
 import { useCreateBranchNode } from "renderer/react-query/nodes";
 import { useOpenNew } from "renderer/react-query/repositories";
 import { Button } from "ui/components/ui/button";
@@ -10,9 +10,14 @@ import {
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { toast } from "ui/components/ui/sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { CloneRepoDialog } from "../StartView/CloneRepoDialog";
 
-export function SystemNav() {
+interface SystemNavProps {
+	isCollapsed?: boolean;
+}
+
+export function SystemNav({ isCollapsed }: SystemNavProps) {
 	const openNew = useOpenNew();
 	const createBranchNode = useCreateBranchNode();
 	const [isCloneDialogOpen, setIsCloneDialogOpen] = useState(false);
@@ -57,17 +62,33 @@ export function SystemNav() {
 
 	return (
 		<>
-			<div className="flex flex-col gap-0.5 px-3 py-2 mt-auto">
+			<div className="flex flex-col gap-0.5 px-3 py-2 mt-auto border-t border-border/40">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal transition-colors duration-[80ms]"
-							disabled={isLoading}
-						>
-							Add Repository
-						</Button>
+						{isCollapsed ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="size-8 mx-auto text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors duration-[80ms]"
+										disabled={isLoading}
+									>
+										<LuPlus className="size-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent side="right">Add Repository</TooltipContent>
+							</Tooltip>
+						) : (
+							<Button
+								variant="ghost"
+								size="sm"
+								className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal transition-colors duration-[80ms]"
+								disabled={isLoading}
+							>
+								Add Repository
+							</Button>
+						)}
 					</DropdownMenuTrigger>
 					<DropdownMenuContent side="top" align="start" className="w-48">
 						<DropdownMenuItem

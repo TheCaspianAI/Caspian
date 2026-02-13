@@ -1,5 +1,5 @@
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useCloseNode, useDeleteNode } from "renderer/react-query/nodes";
+import { useDeleteNode } from "renderer/react-query/nodes";
 import {
 	AlertDialog,
 	AlertDialogContent,
@@ -10,26 +10,16 @@ import {
 } from "ui/components/ui/alert-dialog";
 import { Button } from "ui/components/ui/button";
 import { toast } from "ui/components/ui/sonner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 
 interface DeleteNodeDialogProps {
 	nodeId: string;
 	nodeName: string;
-	nodeType?: "worktree" | "branch";
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
-export function DeleteNodeDialog({
-	nodeId,
-	nodeName,
-	nodeType = "worktree",
-	open,
-	onOpenChange,
-}: DeleteNodeDialogProps) {
-	const isBranch = nodeType === "branch";
+export function DeleteNodeDialog({ nodeId, nodeName, open, onOpenChange }: DeleteNodeDialogProps) {
 	const deleteNode = useDeleteNode();
-	const closeNode = useCloseNode();
 
 	const { data: gitStatusData, isLoading: isLoadingGitStatus } =
 		electronTrpc.nodes.canDelete.useQuery(
@@ -57,25 +47,6 @@ export function DeleteNodeDialog({
 		: terminalCountData;
 	const isLoading = isLoadingGitStatus;
 
-	const handleClose = () => {
-		onOpenChange(false);
-
-		toast.promise(closeNode.mutateAsync({ id: nodeId }), {
-			loading: "Hiding...",
-			success: (result) => {
-				if (result.terminalWarning) {
-					setTimeout(() => {
-						toast.warning("Terminal warning", {
-							description: result.terminalWarning,
-						});
-					}, 100);
-				}
-				return "Node hidden";
-			},
-			error: (error) => (error instanceof Error ? error.message : "Failed to hide"),
-		});
-	};
-
 	const handleDelete = () => {
 		onOpenChange(false);
 
@@ -101,51 +72,11 @@ export function DeleteNodeDialog({
 	const hasUnpushedCommits = canDeleteData?.hasUnpushedCommits ?? false;
 	const hasWarnings = hasChanges || hasUnpushedCommits;
 
-	// For branch nodes, use simplified dialog (only close option)
-	if (isBranch) {
-		return (
-			<AlertDialog open={open} onOpenChange={onOpenChange}>
-				<AlertDialogContent className="max-w-[340px] gap-0 p-0">
-					<AlertDialogHeader className="px-4 pt-4 pb-2">
-						<AlertDialogTitle className="font-medium">Close node "{nodeName}"?</AlertDialogTitle>
-						<AlertDialogDescription asChild>
-							<div className="text-muted-foreground space-y-1.5">
-								<span className="block">
-									This will close the node and kill any active terminals. Your branch and commits
-									will remain in the repository.
-								</span>
-							</div>
-						</AlertDialogDescription>
-					</AlertDialogHeader>
-
-					<AlertDialogFooter className="px-4 pb-4 pt-2 flex-row justify-end gap-2">
-						<Button
-							variant="ghost"
-							size="sm"
-							className="h-7 px-3 text-xs"
-							onClick={() => onOpenChange(false)}
-						>
-							Cancel
-						</Button>
-						<Button
-							variant="secondary"
-							size="sm"
-							className="h-7 px-3 text-xs"
-							onClick={handleClose}
-						>
-							Close
-						</Button>
-					</AlertDialogFooter>
-				</AlertDialogContent>
-			</AlertDialog>
-		);
-	}
-
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent className="max-w-[340px] gap-0 p-0">
 				<AlertDialogHeader className="px-4 pt-4 pb-2">
-					<AlertDialogTitle className="font-medium">Remove node "{nodeName}"?</AlertDialogTitle>
+					<AlertDialogTitle className="font-medium">Delete node "{nodeName}"?</AlertDialogTitle>
 					<AlertDialogDescription asChild>
 						<div className="text-muted-foreground space-y-1.5">
 							{isLoading ? (
@@ -154,8 +85,8 @@ export function DeleteNodeDialog({
 								<span className="text-destructive">{reason}</span>
 							) : (
 								<span className="block">
-									Deleting will permanently remove the worktree. You can hide instead to keep files
-									on disk.
+									This will permanently remove the node, its worktree, and kill any active
+									terminals. Your branch and commits will remain in the repository.
 								</span>
 							)}
 						</div>
@@ -184,30 +115,14 @@ export function DeleteNodeDialog({
 						Cancel
 					</Button>
 					<Button
-						variant="secondary"
+						variant="destructive"
 						size="sm"
 						className="h-7 px-3 text-xs"
-						onClick={handleClose}
-						disabled={isLoading}
+						onClick={handleDelete}
+						disabled={!canDelete || isLoading}
 					>
-						Hide
+						Delete
 					</Button>
-					<Tooltip delayDuration={400}>
-						<TooltipTrigger asChild>
-							<Button
-								variant="destructive"
-								size="sm"
-								className="h-7 px-3 text-xs"
-								onClick={handleDelete}
-								disabled={!canDelete || isLoading}
-							>
-								Delete
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="top" className="text-xs max-w-[200px]">
-							Permanently delete node and git worktree from disk.
-						</TooltipContent>
-					</Tooltip>
 				</AlertDialogFooter>
 			</AlertDialogContent>
 		</AlertDialog>

@@ -17,6 +17,7 @@ export const caspianTheme: Theme = {
 	ui: {
 		background: "#1e1e1e",
 		foreground: "#d4d4d4",
+		navForeground: "#ababab",
 
 		card: "#222222",
 		cardForeground: "#d4d4d4",
@@ -42,7 +43,7 @@ export const caspianTheme: Theme = {
 		destructive: "#c04040",
 		destructiveForeground: "#c04040",
 
-		border: "#272727",
+		border: "#343434",
 		input: "#181818",
 		ring: "#4a4a4a",
 
@@ -52,7 +53,7 @@ export const caspianTheme: Theme = {
 		sidebarPrimaryForeground: "#1e1e1e",
 		sidebarAccent: "#282828",
 		sidebarAccentForeground: "#d4d4d4",
-		sidebarBorder: "#232323",
+		sidebarBorder: "#303030",
 		sidebarRing: "#4a4a4a",
 
 		chart1: "#808080",

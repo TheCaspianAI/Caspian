@@ -15,6 +15,7 @@ export const githubDarkTheme: Theme = {
 	ui: {
 		background: "#0d1117",
 		foreground: "#e6edf3",
+		navForeground: "#bfc6ce",
 		card: "#161b22",
 		cardForeground: "#e6edf3",
 		popover: "#161b22",

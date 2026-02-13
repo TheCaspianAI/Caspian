@@ -15,7 +15,7 @@ export function TopBar() {
 	const isMac = platform === undefined || platform === "darwin";
 
 	return (
-		<div className="drag h-9 w-full flex items-end justify-between">
+		<div className="drag h-9 w-full flex items-end justify-between border-b border-border/40">
 			{/* Spacer for Mac traffic lights */}
 			<div style={{ width: isMac ? "72px" : "16px" }} />
 

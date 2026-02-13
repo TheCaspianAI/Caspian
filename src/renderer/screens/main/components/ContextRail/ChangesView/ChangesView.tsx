@@ -679,7 +679,6 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				<DeleteNodeDialog
 					nodeId={workspaceId}
 					nodeName={workspace?.name ?? ""}
-					nodeType="worktree"
 					open={showMergedDeleteDialog}
 					onOpenChange={setShowMergedDeleteDialog}
 				/>
@@ -689,7 +688,6 @@ export function ChangesView({ onFileOpen, isExpandedView }: ChangesViewProps) {
 				<DeleteNodeDialog
 					nodeId={workspaceId}
 					nodeName={workspace?.name ?? ""}
-					nodeType="worktree"
 					open={showDeletedBranchDeleteDialog}
 					onOpenChange={setShowDeletedBranchDeleteDialog}
 				/>

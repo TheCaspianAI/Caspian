@@ -233,8 +233,8 @@ export function FilesView() {
 
 	if (!worktreePath) {
 		return (
-			<div className="flex-1 flex items-center justify-center text-muted-foreground text-sm p-4">
-				No node selected
+			<div className="flex-1 flex items-center justify-center text-muted-foreground text-caption">
+				Open a node to get started
 			</div>
 		);
 	}

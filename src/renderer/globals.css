@@ -57,14 +57,15 @@
 	 * Tightened tonal range — Linear-inspired.
 	 * Key: surfaces are close together, borders nearly invisible.
 	 * Background spread: 0.21 (recessed) → 0.235 (base) → 0.25 (surface) → 0.275 (elevated)
-	 * Text: 0.87 primary, 0.62 secondary
-	 * Borders: 0.273 (nearly invisible against surfaces)
+	 * Text: 0.87 primary, 0.75 navigation, 0.62 secondary
+	 * Borders: 0.32 (subtle but visible against surfaces)
 	 * Sidebar: same as background (no two-tone split)
 	 *
 	 * Hex equivalents: #1e1e1e (bg), #222222 (card), #282828 (elevated)
 	 */
 	--background: oklch(0.235 0 0);
 	--foreground: oklch(0.87 0 0);
+	--nav-foreground: oklch(0.75 0 0);
 	--card: oklch(0.25 0 0);
 	--card-foreground: oklch(0.87 0 0);
 	--popover: oklch(0.275 0 0);
@@ -81,7 +82,7 @@
 	--tertiary-active: oklch(0.275 0 0);
 	--destructive: oklch(0.63 0.2 25);
 	--destructive-foreground: oklch(0.63 0.2 25);
-	--border: oklch(0.273 0 0);
+	--border: oklch(0.32 0 0);
 	--input: oklch(0.21 0 0);
 	--ring: oklch(0.41 0 0);
 
@@ -92,7 +93,7 @@
 	--sidebar-primary-foreground: oklch(0.235 0 0);
 	--sidebar-accent: oklch(0.275 0 0);
 	--sidebar-accent-foreground: oklch(0.87 0 0);
-	--sidebar-border: oklch(0.255 0 0);
+	--sidebar-border: oklch(0.3 0 0);
 	--sidebar-ring: oklch(0.41 0 0);
 
 	/* Charts — neutral greys */
@@ -126,6 +127,7 @@
 	/* Shadcn color mappings — these resolve var(--X) which the theme store overrides */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-nav-foreground: var(--nav-foreground);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);

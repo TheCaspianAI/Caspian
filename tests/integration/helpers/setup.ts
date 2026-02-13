@@ -100,6 +100,7 @@ mock.module("main/lib/analytics", () => ({
 
 const mockTerminal = {
 	killByWorkspaceId: mock(() => Promise.resolve({ failed: 0 })),
+	getSessionCountByWorkspaceId: mock(() => Promise.resolve(0)),
 	createOrAttach: mock(() => Promise.resolve()),
 	kill: mock(() => Promise.resolve()),
 	createSession: mock(() => Promise.resolve()),
@@ -157,6 +158,11 @@ mock.module("main/lib/node-init-manager", () => ({
 		onStatusChange: mock(() => () => {}),
 		start: mock(() => Promise.resolve()),
 		cancel: mock(() => {}),
+		isInitializing: mock(() => false),
+		waitForInit: mock(() => Promise.resolve()),
+		acquireRepositoryLock: mock(() => Promise.resolve()),
+		releaseRepositoryLock: mock(() => {}),
+		clearJob: mock(() => {}),
 	},
 }));
 

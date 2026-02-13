@@ -10,6 +10,7 @@ export interface NodeItem {
 	name: string;
 	lastOpenedAt: number;
 	createdAt: number;
+	tabOrder: number;
 	isUnread: boolean;
 	isOpen: boolean;
 }
@@ -17,6 +18,8 @@ export interface NodeItem {
 export interface RepositoryGroup {
 	repositoryId: string;
 	repositoryName: string;
+	repositoryColor: string;
+	repositoryPath: string;
 	nodes: NodeItem[];
 }
 

@@ -46,7 +46,14 @@ export function NodeSwitcherContent() {
 
 	// Fetch all data
 	const { data: groups = [] } = electronTrpc.nodes.getAllGrouped.useQuery();
-	const { data: allRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
+	const { data: allRepositoriesRaw = [] } = electronTrpc.repositories.getRecents.useQuery();
+
+	// Only include active repositories (tabOrder != null) to avoid showing closed repos
+	const activeRepoIds = useMemo(() => new Set(groups.map((g) => g.repository.id)), [groups]);
+	const allRepositories = useMemo(
+		() => allRepositoriesRaw.filter((r) => activeRepoIds.has(r.id)),
+		[allRepositoriesRaw, activeRepoIds],
+	);
 
 	// Fetch worktrees for all repositories
 	const worktreeQueries = electronTrpc.useQueries((t) =>
@@ -86,6 +93,7 @@ export function NodeSwitcherContent() {
 					name: ws.name,
 					lastOpenedAt: ws.lastOpenedAt,
 					createdAt: ws.createdAt,
+					tabOrder: ws.tabOrder,
 					isUnread: ws.isUnread,
 					isOpen: true,
 				});
@@ -113,6 +121,7 @@ export function NodeSwitcherContent() {
 					name: wt.branch,
 					lastOpenedAt: wt.createdAt,
 					createdAt: wt.createdAt,
+					tabOrder: Number.MAX_SAFE_INTEGER,
 					isUnread: false,
 					isOpen: false,
 				});
@@ -154,6 +163,8 @@ export function NodeSwitcherContent() {
 				groupsMap.set(item.repositoryId, {
 					repositoryId: item.repositoryId,
 					repositoryName: item.repositoryName,
+					repositoryColor: "#6b7280",
+					repositoryPath: "",
 					nodes: [],
 				});
 			}

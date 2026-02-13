@@ -23,7 +23,14 @@ export function NodesListView() {
 	const utils = electronTrpc.useUtils();
 
 	const { data: groups = [] } = electronTrpc.nodes.getAllGrouped.useQuery();
-	const { data: allRepositories = [] } = electronTrpc.repositories.getRecents.useQuery();
+	const { data: allRepositoriesRaw = [] } = electronTrpc.repositories.getRecents.useQuery();
+
+	// Only include active repositories (tabOrder != null) to avoid showing closed repos
+	const activeRepoIds = useMemo(() => new Set(groups.map((g) => g.repository.id)), [groups]);
+	const allRepositories = useMemo(
+		() => allRepositoriesRaw.filter((r) => activeRepoIds.has(r.id)),
+		[allRepositoriesRaw, activeRepoIds],
+	);
 
 	const worktreeQueries = electronTrpc.useQueries((t) =>
 		allRepositories.map((repository) =>
@@ -60,6 +67,7 @@ export function NodesListView() {
 					name: ws.name,
 					lastOpenedAt: ws.lastOpenedAt,
 					createdAt: ws.createdAt,
+					tabOrder: ws.tabOrder,
 					isUnread: ws.isUnread,
 					isOpen: true,
 				});
@@ -87,6 +95,7 @@ export function NodesListView() {
 					name: wt.branch,
 					lastOpenedAt: wt.createdAt,
 					createdAt: wt.createdAt,
+					tabOrder: Number.MAX_SAFE_INTEGER,
 					isUnread: false,
 					isOpen: false,
 				});
@@ -126,6 +135,8 @@ export function NodesListView() {
 				groupsMap.set(item.repositoryId, {
 					repositoryId: item.repositoryId,
 					repositoryName: item.repositoryName,
+					repositoryColor: "#6b7280",
+					repositoryPath: "",
 					nodes: [],
 				});
 			}
@@ -215,7 +226,7 @@ export function NodesListView() {
 			<div className="flex-1 overflow-y-auto">
 				{repositoryGroups.map((group) => (
 					<div key={group.repositoryId}>
-						<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border/50 flex items-center gap-1.5">
+						<div className="sticky top-0 bg-card/95 px-3 py-2 border-b border-border flex items-center gap-1.5">
 							<span className="text-label font-medium text-foreground/70">
 								{group.repositoryName}
 							</span>
