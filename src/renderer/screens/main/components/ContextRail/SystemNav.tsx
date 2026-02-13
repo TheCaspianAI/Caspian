@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LuFolderGit, LuFolderOpen, LuPlus } from "react-icons/lu";
+import { InitGitDialog } from "renderer/components/InitGitDialog";
 import { useCreateBranchNode } from "renderer/react-query/nodes";
 import { useOpenNew } from "renderer/react-query/repositories";
 import { Button } from "ui/components/ui/button";
@@ -21,6 +22,10 @@ export function SystemNav({ isCollapsed }: SystemNavProps) {
 	const openNew = useOpenNew();
 	const createBranchNode = useCreateBranchNode();
 	const [isCloneDialogOpen, setIsCloneDialogOpen] = useState(false);
+	const [initGitDialog, setInitGitDialog] = useState<{ isOpen: boolean; selectedPath: string }>({
+		isOpen: false,
+		selectedPath: "",
+	});
 
 	const isLoading = openNew.isPending || createBranchNode.isPending;
 
@@ -37,9 +42,7 @@ export function SystemNav({ isCollapsed }: SystemNavProps) {
 				return;
 			}
 			if ("needsGitInit" in result) {
-				toast.error("Selected folder is not a git repository", {
-					description: "Please use 'Open repository' from the start view to initialize git.",
-				});
+				setInitGitDialog({ isOpen: true, selectedPath: result.selectedPath });
 				return;
 			}
 			toast.promise(createBranchNode.mutateAsync({ repositoryId: result.repository.id }), {
@@ -115,6 +118,26 @@ export function SystemNav({ isCollapsed }: SystemNavProps) {
 				isOpen={isCloneDialogOpen}
 				onClose={() => setIsCloneDialogOpen(false)}
 				onError={handleCloneError}
+			/>
+
+			<InitGitDialog
+				isOpen={initGitDialog.isOpen}
+				selectedPath={initGitDialog.selectedPath}
+				onClose={() => setInitGitDialog({ isOpen: false, selectedPath: "" })}
+				onSuccess={(repository) => {
+					toast.promise(createBranchNode.mutateAsync({ repositoryId: repository.id }), {
+						loading: "Opening repository...",
+						success: "Repository opened",
+						error: (err) => (err instanceof Error ? err.message : "Failed to open repository"),
+					});
+				}}
+				onError={(error) => {
+					console.error("[SystemNav/git-init] Failed to initialize git repository", {
+						selectedPath: initGitDialog.selectedPath,
+						error,
+					});
+					toast.error("Failed to initialize git repository", { description: error });
+				}}
 			/>
 		</>
 	);

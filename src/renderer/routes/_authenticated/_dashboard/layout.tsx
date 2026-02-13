@@ -96,7 +96,7 @@ function DashboardLayout() {
 				<div
 					className={cn(
 						"flex-1 bg-background overflow-hidden",
-						hasNodes && isSidebarOpen && "border-l border-border",
+						hasNodes && isSidebarOpen && "border-l border-border/40",
 					)}
 				>
 					<Outlet />

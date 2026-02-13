@@ -12,6 +12,7 @@ import { publicProcedure, router } from "../../..";
 import { checkRepositoryHealth } from "../../repositories/utils/health";
 import {
 	activateRepository,
+	ensureBranchNodeExists,
 	getBranchNode,
 	getMaxNodeTabOrder,
 	getRepository,
@@ -229,6 +230,11 @@ async function handleNewWorktree({
 		is_fork: prInfo.isCrossRepository,
 	});
 
+	ensureBranchNodeExists({
+		repositoryId: repository.id,
+		defaultBranch,
+	});
+
 	nodeInitManager.startJob(node.id, repository.id);
 	initializeNodeWorktree({
 		nodeId: node.id,
@@ -400,6 +406,11 @@ export const createCreateProcedures = () => {
 					branch: branch,
 					base_branch: targetBranch,
 					use_existing_branch: input.useExistingBranch ?? false,
+				});
+
+				ensureBranchNodeExists({
+					repositoryId: input.repositoryId,
+					defaultBranch: targetBranch,
 				});
 
 				nodeInitManager.startJob(node.id, input.repositoryId);

@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { caspianTheme } from "./caspian";
 import { everforestTheme } from "./everforest";
 import { githubDarkTheme } from "./github-dark";
 import { githubLightTheme } from "./github-light";
-import { nordTheme } from "./nord";
+import { graceTheme } from "./grace";
+import { hexTheme } from "./hex";
 import { rosePineTheme } from "./rose-pine";
 
 const ALL_THEMES = [
-	caspianTheme,
+	graceTheme,
 	everforestTheme,
 	githubDarkTheme,
 	githubLightTheme,
-	nordTheme,
+	hexTheme,
 	rosePineTheme,
 ];
 
@@ -65,6 +65,40 @@ describe("built-in themes completeness", () => {
 				for (const field of requiredFields) {
 					expect(theme.ui[field]).toBeDefined();
 					expect(typeof theme.ui[field]).toBe("string");
+				}
+			});
+
+			test("has all required terminal color fields", () => {
+				expect(theme.terminal).toBeDefined();
+				const terminal = theme.terminal!;
+
+				const requiredFields = [
+					"background",
+					"foreground",
+					"cursor",
+					"cursorAccent",
+					"selectionBackground",
+					"black",
+					"red",
+					"green",
+					"yellow",
+					"blue",
+					"magenta",
+					"cyan",
+					"white",
+					"brightBlack",
+					"brightRed",
+					"brightGreen",
+					"brightYellow",
+					"brightBlue",
+					"brightMagenta",
+					"brightCyan",
+					"brightWhite",
+				] as const;
+
+				for (const field of requiredFields) {
+					expect(terminal[field]).toBeDefined();
+					expect(typeof terminal[field]).toBe("string");
 				}
 			});
 

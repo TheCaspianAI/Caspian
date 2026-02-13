@@ -1,15 +1,17 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { LuFolderOpen, LuGlobe, LuX } from "react-icons/lu";
+import { InitGitDialog } from "renderer/components/InitGitDialog";
+import { useCreateNode } from "renderer/react-query/nodes";
 import { useOpenFromPath, useOpenNew } from "renderer/react-query/repositories";
 import { cn } from "ui/lib/utils";
 import { CloneRepoDialog } from "./CloneRepoDialog";
-import { InitGitDialog } from "./InitGitDialog";
 
 export function StartView() {
 	const navigate = useNavigate();
 	const openNew = useOpenNew();
 	const openFromPath = useOpenFromPath();
+	const createNode = useCreateNode();
 	const [error, setError] = useState<string | null>(null);
 	const [initGitDialog, setInitGitDialog] = useState<{
 		isOpen: boolean;
@@ -178,7 +180,6 @@ export function StartView() {
 				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
 			>
-				{/* Drop overlay */}
 				{isDragOver && (
 					<div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80">
 						<div className="flex flex-col items-center gap-3 text-center">
@@ -196,7 +197,6 @@ export function StartView() {
 						isDragOver && "opacity-30 pointer-events-none",
 					)}
 				>
-					{/* Logo */}
 					<img
 						src="./assets/caspian-logo.png"
 						alt="Caspian"
@@ -204,15 +204,11 @@ export function StartView() {
 						draggable={false}
 					/>
 
-					{/* Title */}
 					<h1 className="text-[44px] font-semibold text-white tracking-tight mb-3">Caspian</h1>
 
-					{/* Subtext */}
 					<p className="text-[18px] text-neutral-500 mb-12">Ship faster, one node at a time.</p>
 
-					{/* Action buttons row */}
 					<div className="flex items-center gap-3">
-						{/* Open project button */}
 						<button
 							type="button"
 							onClick={handleOpenProject}
@@ -231,7 +227,6 @@ export function StartView() {
 							<span>Open project</span>
 						</button>
 
-						{/* Clone from URL button */}
 						<button
 							type="button"
 							onClick={() => setIsCloneDialogOpen(true)}
@@ -251,7 +246,6 @@ export function StartView() {
 						</button>
 					</div>
 
-					{/* Error message */}
 					{error && (
 						<div className="mt-8 w-full max-w-md rounded-lg bg-red-950/30 border border-red-900/50 px-4 py-3">
 							<div className="flex items-start gap-3">
@@ -274,6 +268,18 @@ export function StartView() {
 				isOpen={initGitDialog.isOpen}
 				selectedPath={initGitDialog.selectedPath}
 				onClose={() => setInitGitDialog({ isOpen: false, selectedPath: "" })}
+				onSuccess={async (repository) => {
+					try {
+						await createNode.mutateAsync({ repositoryId: repository.id });
+					} catch (err) {
+						console.error("[StartView/git-init] createNode.mutateAsync failed", {
+							repositoryId: repository.id,
+							repositoryName: repository.name,
+							error: err,
+						});
+						setError(err instanceof Error ? err.message : "Failed to create node");
+					}
+				}}
 				onError={setError}
 			/>
 

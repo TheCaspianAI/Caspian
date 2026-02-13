@@ -5,15 +5,11 @@
 @source "../ui/**/*.{ts,tsx}";
 
 /**
- * Design System — Instrument Panel
+ * Design System — Antimetal
  *
- * Design principles:
- * - Monochromatic luminosity: hierarchy through brightness, not color
- * - Recessed surfaces for content wells, flush for panels, raised for overlays only
- * - Hairline 1px borders everywhere, tighter radii (6px interactive, 10px overlay max)
- * - 13px base font size with Geist + Geist Mono
- * - No accent color, no glows, no glass, no gradients
- * - Speed: 80ms hovers, instant node/tab switching
+ * Deep neutral dark theme with warm cream text and ivory accent.
+ * Inspired by Antimetal's premium dark aesthetic.
+ * Warmth lives in foreground elements, not surfaces.
  *
  * IMPORTANT: All shadcn variables (--background, --foreground, etc.) use DIRECT values,
  * not var() references. The theme store (applyUIColors) overrides these via inline styles
@@ -47,68 +43,57 @@
 	--status-done: oklch(0.63 0 0);
 
 	/*
-	 * Shadcn variable definitions — DIRECT values only.
-	 * These are the canonical color tokens. The theme store overrides them via
-	 * inline styles (document.documentElement.style.setProperty) when themes change.
-	 *
-	 * Default values here represent the Instrument Panel dark theme.
+	 * Grace default theme — Antimetal-inspired deep dark with cream accent.
+	 * Near-neutral backgrounds (hue ~70, chroma ~0.004).
+	 * Warm cream foreground/accent (hue ~80, chroma 0.025-0.035).
+	 * The theme store overrides these via inline styles when themes change.
 	 */
-	/*
-	 * Tightened tonal range — Linear-inspired.
-	 * Key: surfaces are close together, borders nearly invisible.
-	 * Background spread: 0.21 (recessed) → 0.235 (base) → 0.25 (surface) → 0.275 (elevated)
-	 * Text: 0.87 primary, 0.75 navigation, 0.62 secondary
-	 * Borders: 0.32 (subtle but visible against surfaces)
-	 * Sidebar: same as background (no two-tone split)
-	 *
-	 * Hex equivalents: #1e1e1e (bg), #222222 (card), #282828 (elevated)
-	 */
-	--background: oklch(0.235 0 0);
-	--foreground: oklch(0.87 0 0);
-	--nav-foreground: oklch(0.75 0 0);
-	--card: oklch(0.25 0 0);
-	--card-foreground: oklch(0.87 0 0);
-	--popover: oklch(0.275 0 0);
-	--popover-foreground: oklch(0.87 0 0);
-	--primary: oklch(0.87 0 0);
-	--primary-foreground: oklch(0.235 0 0);
-	--secondary: oklch(0.275 0 0);
-	--secondary-foreground: oklch(0.87 0 0);
-	--muted: oklch(0.25 0 0);
-	--muted-foreground: oklch(0.62 0 0);
-	--accent: oklch(0.275 0 0);
-	--accent-foreground: oklch(0.87 0 0);
-	--tertiary: oklch(0.25 0 0);
-	--tertiary-active: oklch(0.275 0 0);
+	--background: oklch(0.13 0.004 70);
+	--foreground: oklch(0.9 0.025 80);
+	--nav-foreground: oklch(0.68 0.015 75);
+	--card: oklch(0.15 0.004 70);
+	--card-foreground: oklch(0.9 0.025 80);
+	--popover: oklch(0.17 0.005 70);
+	--popover-foreground: oklch(0.9 0.025 80);
+	--primary: oklch(0.88 0.035 80);
+	--primary-foreground: oklch(0.13 0.004 70);
+	--secondary: oklch(0.16 0.004 70);
+	--secondary-foreground: oklch(0.9 0.025 80);
+	--muted: oklch(0.15 0.004 70);
+	--muted-foreground: oklch(0.55 0.01 70);
+	--accent: oklch(0.18 0.006 72);
+	--accent-foreground: oklch(0.88 0.025 78);
+	--tertiary: oklch(0.14 0.004 70);
+	--tertiary-active: oklch(0.16 0.004 70);
 	--destructive: oklch(0.63 0.2 25);
 	--destructive-foreground: oklch(0.63 0.2 25);
-	--border: oklch(0.32 0 0);
-	--input: oklch(0.21 0 0);
-	--ring: oklch(0.41 0 0);
+	--border: oklch(1 0 0 / 0.1);
+	--input: oklch(0.11 0.003 70);
+	--ring: oklch(0.88 0.035 80);
 
-	/* Sidebar — same as background for seamless look */
-	--sidebar: oklch(0.235 0 0);
-	--sidebar-foreground: oklch(0.87 0 0);
-	--sidebar-primary: oklch(0.87 0 0);
-	--sidebar-primary-foreground: oklch(0.235 0 0);
-	--sidebar-accent: oklch(0.275 0 0);
-	--sidebar-accent-foreground: oklch(0.87 0 0);
-	--sidebar-border: oklch(0.3 0 0);
-	--sidebar-ring: oklch(0.41 0 0);
+	/* Sidebar — matches background for seamless look */
+	--sidebar: oklch(0.13 0.004 70);
+	--sidebar-foreground: oklch(0.9 0.025 80);
+	--sidebar-primary: oklch(0.88 0.035 80);
+	--sidebar-primary-foreground: oklch(0.13 0.004 70);
+	--sidebar-accent: oklch(0.18 0.006 72);
+	--sidebar-accent-foreground: oklch(0.88 0.025 78);
+	--sidebar-border: oklch(1 0 0 / 0.1);
+	--sidebar-ring: oklch(0.88 0.035 80);
 
-	/* Charts — neutral greys */
-	--chart-1: oklch(0.5 0 0);
-	--chart-2: oklch(0.6 0 0);
-	--chart-3: oklch(0.7 0 0);
-	--chart-4: oklch(0.4 0 0);
-	--chart-5: oklch(0.55 0 0);
+	/* Charts — neutral with subtle warm shift */
+	--chart-1: oklch(0.5 0.008 72);
+	--chart-2: oklch(0.6 0.01 74);
+	--chart-3: oklch(0.7 0.012 76);
+	--chart-4: oklch(0.4 0.006 70);
+	--chart-5: oklch(0.55 0.009 73);
 
-	/* Radius system — Instrument Panel tighter radii */
-	--radius: 0.375rem; /* 6px base */
+	/* Radius system — premium soft radii */
+	--radius: 0.5rem; /* 8px base */
 	--radius-none: 0px;
-	--radius-structural: 0px; /* panels, terminal wells — sharp */
-	--radius-interactive: 0.375rem; /* 6px — buttons, inputs, tabs */
-	--radius-modal: 0.625rem; /* 10px — modals, overlays */
+	--radius-structural: 0.75rem; /* 12px — panels, sidebars */
+	--radius-interactive: 0.5rem; /* 8px — buttons, inputs, tabs */
+	--radius-modal: 0.875rem; /* 14px — modals, overlays */
 	--radius-scrollbar: 3px;
 
 	/* Typography scale — 13px base */
@@ -196,6 +181,9 @@
 		@apply bg-background text-foreground;
 		font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 		font-size: 13px;
+		background-image:
+			radial-gradient(ellipse 80% 50% at 50% 20%, oklch(1 0 0 / 0.015) 0%, transparent 70%),
+			radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, oklch(0 0 0 / 0.15) 100%);
 	}
 
 	html {
@@ -252,7 +240,7 @@
 
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: oklch(0.3 0 0) transparent;
+		scrollbar-color: #2a2a2a transparent;
 	}
 	*::-webkit-scrollbar {
 		width: 6px;
@@ -262,11 +250,11 @@
 		background: transparent;
 	}
 	*::-webkit-scrollbar-thumb {
-		background: oklch(0.3 0 0);
+		background: #2a2a2a;
 		border-radius: var(--radius-scrollbar);
 	}
 	*::-webkit-scrollbar-thumb:hover {
-		background: oklch(0.4 0 0);
+		background: #3a3a3a;
 	}
 
 	/* Drag regions */
@@ -291,15 +279,17 @@
 
 @layer utilities {
 	/*
-	 * Surface model — uses shadcn variable names so they respond to theme switching.
-	 * - recessed: darker than background (for content wells, inputs)
-	 * - flush: card-level background (for panels, toolbars)
-	 * - raised: elevated background with shadow (for overlays, dropdowns)
+	 * Surface model — semantic background layers.
+	 * - recessed: darker than background (content wells, inputs)
+	 * - flush: card-level (panels, toolbars)
+	 * - raised: elevated overlays with shadow (dropdowns, popovers)
+	 *
+	 * All surfaces are solid and opaque. Borders and shadows
+	 * provide depth cues instead of backdrop blur.
 	 */
 	.surface-recessed {
 		background: var(--input);
-		box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.3);
-		border: 1px solid oklch(0 0 0 / 0.2);
+		border: 1px solid var(--border);
 	}
 
 	.surface-flush {
@@ -311,25 +301,25 @@
 		background: var(--popover);
 		border: 1px solid var(--border);
 		box-shadow:
-			0 4px 12px oklch(0 0 0 / 0.3),
-			0 1px 3px oklch(0 0 0 / 0.2);
+			0 8px 32px oklch(0 0 0 / 0.3),
+			0 2px 8px oklch(0 0 0 / 0.2);
 	}
 
-	/* Elevation system — kept as aliases for migration compatibility */
+	/* Elevation system */
 	.elevation-1 {
 		box-shadow:
-			0 1px 3px oklch(0 0 0 / 0.12),
-			0 1px 2px oklch(0 0 0 / 0.08);
+			0 2px 8px oklch(0 0 0 / 0.15),
+			0 1px 3px oklch(0 0 0 / 0.1);
 	}
 	.elevation-2 {
 		box-shadow:
-			0 4px 12px oklch(0 0 0 / 0.3),
-			0 1px 3px oklch(0 0 0 / 0.2);
+			0 8px 32px oklch(0 0 0 / 0.3),
+			0 2px 8px oklch(0 0 0 / 0.2);
 	}
 	.elevation-3 {
 		box-shadow:
-			0 8px 24px oklch(0 0 0 / 0.25),
-			0 4px 8px oklch(0 0 0 / 0.15);
+			0 16px 48px oklch(0 0 0 / 0.35),
+			0 4px 12px oklch(0 0 0 / 0.2);
 	}
 
 	/* Semantic typography utilities — size + tracking + line-height per spec role */
@@ -371,7 +361,32 @@
 		transform: translateY(-50%);
 		width: 3px;
 		height: 60%;
-		background: var(--foreground);
+		background: var(--primary);
 		border-radius: 0 2px 2px 0;
+	}
+
+	/* Sidebar surface — uses theme sidebar token for distinct visual plane */
+	.surface-sidebar {
+		background: var(--sidebar);
+	}
+
+	/* TopBar surface — uses theme background token */
+	.surface-topbar {
+		background: var(--background);
+	}
+
+	/* Active tab bottom indicator (2px gold line) */
+	.tab-active-indicator {
+		position: relative;
+	}
+	.tab-active-indicator::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 8px;
+		right: 8px;
+		height: 2px;
+		background: var(--primary);
+		border-radius: 1px 1px 0 0;
 	}
 }

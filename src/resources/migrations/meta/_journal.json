@@ -127,6 +127,13 @@
 			"when": 1770000000000,
 			"tag": "0017_rename_workspaces_to_nodes",
 			"breakpoints": true
+		},
+		{
+			"idx": 18,
+			"version": "6",
+			"when": 1770100000000,
+			"tag": "0018_rename_unique_branch_index",
+			"breakpoints": true
 		}
 	]
 }

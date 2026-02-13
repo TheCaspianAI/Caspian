@@ -219,7 +219,7 @@ export function NodesPanel({ isCollapsed }: { isCollapsed: boolean }) {
 
 	return (
 		<>
-			<div className="flex-1 overflow-y-auto min-h-0">
+			<div className="flex-1 overflow-y-auto min-h-0 pt-1">
 				{repositoryGroups.length === 0 ? (
 					<div className="flex flex-1 items-center justify-center text-muted-foreground text-caption">
 						{!isCollapsed && "Open a node to get started"}

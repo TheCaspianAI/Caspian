@@ -139,10 +139,10 @@ export function SidebarNodeRow({
 			}
 			disabled={isOpening}
 			className={cn(
-				"group relative flex items-start gap-2 w-full pl-7 pr-3 text-left",
-				showBranch ? "py-1" : "py-1.5",
+				"group relative flex items-start gap-2 w-full pl-[30px] pr-3 text-left",
+				showBranch ? "py-2" : "py-2.5",
 				"transition-colors duration-[80ms]",
-				isActive ? "bg-accent/60 text-foreground" : "text-nav-foreground hover:bg-muted/40",
+				isActive ? "bg-primary/8 text-foreground" : "text-nav-foreground hover:bg-accent/20",
 				!node.isOpen && "opacity-50",
 				isOpening && "cursor-wait",
 				isDragging && "opacity-30",
@@ -151,7 +151,7 @@ export function SidebarNodeRow({
 			{...rest}
 		>
 			{/* Active left border indicator */}
-			{isActive && <span className="absolute left-0 top-1 bottom-1 w-0.5 bg-primary rounded-r" />}
+			{isActive && <span className="absolute left-0 top-1 bottom-1 w-[3px] bg-primary rounded-r" />}
 
 			{/* Icon with type tooltip */}
 			<Tooltip delayDuration={500}>

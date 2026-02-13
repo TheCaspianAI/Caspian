@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { useCreateNode } from "renderer/react-query/nodes";
 import { Button } from "ui/components/ui/button";
 
 function getBasename(path: string): string {
@@ -21,18 +20,23 @@ interface InitGitDialogProps {
 	isOpen: boolean;
 	selectedPath: string;
 	onClose: () => void;
+	onSuccess: (repository: { id: string; name: string }) => void | Promise<void>;
 	onError: (error: string) => void;
 }
 
-export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGitDialogProps) {
+export function InitGitDialog({
+	isOpen,
+	selectedPath,
+	onClose,
+	onSuccess,
+	onError,
+}: InitGitDialogProps) {
 	const utils = electronTrpc.useUtils();
 	const initGitAndOpen = electronTrpc.repositories.initGitAndOpen.useMutation();
-	const createNode = useCreateNode();
 
-	// Track the entire async sequence to keep modal locked
 	const [isProcessing, setIsProcessing] = useState(false);
 
-	// Guard against setState after unmount
+	// Prevents setState-after-unmount when the async init outlives the component
 	const isMountedRef = useRef(true);
 	useEffect(() => {
 		isMountedRef.current = true;
@@ -41,30 +45,24 @@ export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGi
 		};
 	}, []);
 
-	// Accessibility: unique ID for aria-labelledby
 	const titleId = useId();
-
-	// Focus management refs
 	const dialogRef = useRef<HTMLDivElement>(null);
 	const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
-	// Save previous focus and move focus into dialog when opening
 	useEffect(() => {
 		if (isOpen) {
 			previouslyFocusedRef.current = document.activeElement as HTMLElement;
-			// Move focus to the first focusable element in the dialog
 			requestAnimationFrame(() => {
 				const firstFocusable = dialogRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
 				firstFocusable?.focus();
 			});
 		} else {
-			// Restore focus when closing
 			previouslyFocusedRef.current?.focus();
 			previouslyFocusedRef.current = null;
 		}
 	}, [isOpen]);
 
-	// Focus trap: cycle focus within the dialog
+	// Focus trap — keeps Tab/Shift+Tab cycling within the dialog
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
 			if (e.key === "Escape" && !isProcessing) {
@@ -93,14 +91,13 @@ export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGi
 	);
 
 	const handleBackdropClick = (e: React.MouseEvent) => {
-		// Only close if clicking the backdrop, not the dialog content
 		if (e.target === e.currentTarget && !isProcessing) {
 			onClose();
 		}
 	};
 
 	const handleInitGit = async () => {
-		if (isProcessing) return; // Prevent double-clicks
+		if (isProcessing) return;
 		setIsProcessing(true);
 
 		try {
@@ -117,16 +114,14 @@ export function InitGitDialog({ isOpen, selectedPath, onClose, onError }: InitGi
 				return;
 			}
 
-			// Invalidate cache in background - don't block the primary workflow
 			utils.repositories.getRecents.invalidate().catch(console.error);
 
 			try {
-				await createNode.mutateAsync({ repositoryId: result.repository.id });
+				await onSuccess(result.repository);
 			} catch (err) {
-				onError(`Failed to create node: ${getErrorMessage(err)}`);
+				onError(`Post-init callback failed: ${getErrorMessage(err)}`);
 				return;
 			}
-
 			onClose();
 		} finally {
 			if (isMountedRef.current) {

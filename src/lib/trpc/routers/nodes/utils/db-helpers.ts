@@ -1,4 +1,4 @@
-import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, isNull, not, sql } from "drizzle-orm";
 import {
 	nodes,
 	repositories,
@@ -250,6 +250,56 @@ export function getBranchNode(repositoryId: string): SelectNode | undefined {
 			and(eq(nodes.repositoryId, repositoryId), eq(nodes.type, "branch"), isNull(nodes.deletingAt)),
 		)
 		.get();
+}
+
+/**
+ * Ensure a branch node exists for a repository.
+ * If no branch node exists, creates one with tabOrder 0 and bumps all other nodes down.
+ * Safe to call multiple times — uses onConflictDoNothing and early-exit check.
+ */
+export function ensureBranchNodeExists({
+	repositoryId,
+	defaultBranch,
+}: {
+	repositoryId: string;
+	defaultBranch: string;
+}): void {
+	if (getBranchNode(repositoryId)) {
+		return;
+	}
+
+	const insertResult = localDb
+		.insert(nodes)
+		.values({
+			repositoryId,
+			type: "branch",
+			branch: defaultBranch,
+			name: defaultBranch,
+			tabOrder: 0,
+		})
+		.onConflictDoNothing({
+			target: nodes.repositoryId,
+			where: sql`${nodes.type} = 'branch'`,
+		})
+		.returning()
+		.all();
+
+	if (insertResult.length === 0) {
+		return;
+	}
+
+	const newNodeId = insertResult[0].id;
+	localDb
+		.update(nodes)
+		.set({ tabOrder: sql`${nodes.tabOrder} + 1` })
+		.where(
+			and(
+				eq(nodes.repositoryId, repositoryId),
+				not(eq(nodes.id, newNodeId)),
+				isNull(nodes.deletingAt),
+			),
+		)
+		.run();
 }
 
 /**

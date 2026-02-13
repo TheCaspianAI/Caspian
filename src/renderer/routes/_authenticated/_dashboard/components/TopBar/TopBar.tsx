@@ -15,13 +15,13 @@ export function TopBar() {
 	const isMac = platform === undefined || platform === "darwin";
 
 	return (
-		<div className="drag h-9 w-full flex items-end justify-between border-b border-border/40">
+		<div className="drag h-10 w-full flex items-center justify-between border-b border-border/20 surface-topbar">
 			{/* Spacer for Mac traffic lights */}
 			<div style={{ width: isMac ? "72px" : "16px" }} />
 
 			<div className="flex-1" />
 
-			<div className="no-drag flex items-end gap-2 pr-3 shrink-0">
+			<div className="no-drag flex items-center gap-2 pr-3 shrink-0">
 				{workspace?.worktreePath && (
 					<OpenInMenuButton
 						worktreePath={workspace.worktreePath}
