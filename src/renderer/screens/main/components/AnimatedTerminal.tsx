@@ -114,8 +114,8 @@ export function AnimatedTerminal({ title, script, delay = 0 }: AnimatedTerminalP
 			{/* Terminal content */}
 			<div className="flex-1 p-2 font-mono text-xs overflow-hidden">
 				{/* Completed lines */}
-				{script.slice(0, visibleLines).map((line, i) => (
-					<div key={i} className={`${getLineColor(line.type)} whitespace-pre`}>
+				{script.slice(0, visibleLines).map((line) => (
+					<div key={line.text} className={`${getLineColor(line.type)} whitespace-pre`}>
 						{getPrefix(line.type)}
 						{line.text}
 					</div>

@@ -1,5 +1,5 @@
 export type AgentStatus = "running" | "waiting" | "completed" | "idle" | "error";
-export type ColumnStatus = "running" | "waiting" | "completed" | "idle";
+export type LaneStatus = "running" | "waiting" | "completed" | "idle";
 
 export interface AgentCardData {
 	/** The terminal/agent name (e.g., "npm run dev", "Terminal 1") */

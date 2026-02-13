@@ -236,7 +236,10 @@ export async function initializeNodeWorktree({
 
 		let startPoint: string;
 		if (hasRemote) {
-			const branchCheck = await branchExistsOnRemote(mainRepoPath, effectiveBaseBranch);
+			const branchCheck = await branchExistsOnRemote({
+				worktreePath: mainRepoPath,
+				branchName: effectiveBaseBranch,
+			});
 
 			if (branchCheck.status === "error") {
 				const sanitizedError = sanitizeGitError(branchCheck.message);

@@ -66,9 +66,9 @@ export function SettingsContent({ onClose }: SettingsContentProps) {
 
 	// Get visible item IDs for each section
 	const getVisibleItems = useCallback(
-		(section: string) => {
+		(section: SettingsSection) => {
 			if (!searchQuery) return null;
-			return getMatchingItemsForSection(searchQuery, section as any).map((item) => item.id);
+			return getMatchingItemsForSection(searchQuery, section).map((item) => item.id);
 		},
 		[searchQuery],
 	);

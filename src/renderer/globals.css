@@ -2,121 +2,117 @@
 @import "tw-animate-css";
 
 @source "./**/*.{ts,tsx}";
-@source "../../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../ui/**/*.{ts,tsx}";
 
 /**
- * Design System - Linear-quality polish
+ * Design System — Antimetal
  *
- * Design principles:
- * - Structural surfaces use solid backgrounds, not glass
- * - Glass reserved for temporary overlays only
- * - Pink accent (#ff7aed) used sparingly for primary actions
- * - Three-tier elevation system (max 3 levels)
- * - Tight density in navigation, relaxed in input areas
- * - Typography scale locked: caption (12px), label (14px), body (16px), heading (20px)
+ * Deep neutral dark theme with warm cream text and ivory accent.
+ * Inspired by Antimetal's premium dark aesthetic.
+ * Warmth lives in foreground elements, not surfaces.
+ *
+ * IMPORTANT: All shadcn variables (--background, --foreground, etc.) use DIRECT values,
+ * not var() references. The theme store (applyUIColors) overrides these via inline styles
+ * when a theme is applied. Using var() references would create a two-layer token system
+ * that breaks theme switching.
  */
 
-/* Satoshi Font Family */
+/* Geist Font Family */
 @font-face {
-	font-family: "Satoshi";
-	src: url("./assets/fonts/Satoshi-Variable.woff2") format("woff2");
-	font-weight: 300 900;
+	font-family: "Geist";
+	src: url("./assets/fonts/GeistVF.woff2") format("woff2");
+	font-weight: 100 900;
 	font-display: swap;
 	font-style: normal;
 }
 
 @font-face {
-	font-family: "Satoshi";
-	src: url("./assets/fonts/Satoshi-Regular.woff2") format("woff2");
-	font-weight: 400;
-	font-display: swap;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: "Satoshi";
-	src: url("./assets/fonts/Satoshi-Medium.woff2") format("woff2");
-	font-weight: 500;
-	font-display: swap;
-	font-style: normal;
-}
-
-@font-face {
-	font-family: "Satoshi";
-	src: url("./assets/fonts/Satoshi-Bold.woff2") format("woff2");
-	font-weight: 700;
+	font-family: "Geist Mono";
+	src: url("./assets/fonts/GeistMonoVF.woff2") format("woff2");
+	font-weight: 100 900;
 	font-display: swap;
 	font-style: normal;
 }
 
 :root {
-	/* Default to dark theme colors as fallback */
-	--background: oklch(0.145 0 0);
-	--foreground: oklch(0.985 0 0);
-	--card: oklch(0.145 0 0);
-	--card-foreground: oklch(0.985 0 0);
-	--popover: oklch(0.145 0 0);
-	--popover-foreground: oklch(0.985 0 0);
-	--primary: oklch(0.985 0 0);
-	--primary-foreground: oklch(0.205 0 0);
-	--secondary: oklch(0.269 0 0);
-	--secondary-foreground: oklch(0.985 0 0);
-	--muted: oklch(0.269 0 0);
-	--muted-foreground: oklch(0.708 0 0);
-	--accent: oklch(0.269 0 0);
-	--accent-foreground: oklch(0.985 0 0);
-	--tertiary: oklch(0.18 0.005 40);
-	--tertiary-active: oklch(0.24 0.005 40);
-	--destructive: oklch(0.396 0.141 25.723);
-	--destructive-foreground: oklch(0.637 0.237 25.331);
-	--border: oklch(0.269 0 0);
-	--input: oklch(0.269 0 0);
-	--ring: oklch(0.439 0 0);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.205 0 0);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.269 0 0);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(0.269 0 0);
-	--sidebar-ring: oklch(0.439 0 0);
+	/* Functional (semantic) colors — the only non-grey in default theme */
+	--status-running: oklch(0.72 0.15 145);
+	--status-error: oklch(0.63 0.2 25);
+	--status-warning: oklch(0.75 0.15 80);
+	--status-info: oklch(0.7 0.1 230);
+	--status-done: oklch(0.63 0 0);
 
-	/* Radius system - three tiers */
-	--radius: 0.625rem;
-	--radius-structural: 0.25rem; /* 4px - sidebars, panels, structural chrome */
-	--radius-interactive: 0.5rem; /* 8px - buttons, inputs, tabs */
-	--radius-modal: 0.75rem; /* 12px - modals, major overlays */
+	/*
+	 * Grace default theme — Antimetal-inspired deep dark with cream accent.
+	 * Near-neutral backgrounds (hue ~70, chroma ~0.004).
+	 * Warm cream foreground/accent (hue ~80, chroma 0.025-0.035).
+	 * The theme store overrides these via inline styles when themes change.
+	 */
+	--background: oklch(0.13 0.004 70);
+	--foreground: oklch(0.9 0.025 80);
+	--nav-foreground: oklch(0.68 0.015 75);
+	--card: oklch(0.15 0.004 70);
+	--card-foreground: oklch(0.9 0.025 80);
+	--popover: oklch(0.17 0.005 70);
+	--popover-foreground: oklch(0.9 0.025 80);
+	--primary: oklch(0.88 0.035 80);
+	--primary-foreground: oklch(0.13 0.004 70);
+	--secondary: oklch(0.16 0.004 70);
+	--secondary-foreground: oklch(0.9 0.025 80);
+	--muted: oklch(0.15 0.004 70);
+	--muted-foreground: oklch(0.55 0.01 70);
+	--accent: oklch(0.18 0.006 72);
+	--accent-foreground: oklch(0.88 0.025 78);
+	--tertiary: oklch(0.14 0.004 70);
+	--tertiary-active: oklch(0.16 0.004 70);
+	--destructive: oklch(0.63 0.2 25);
+	--destructive-foreground: oklch(0.63 0.2 25);
+	--border: oklch(1 0 0 / 0.1);
+	--input: oklch(0.11 0.003 70);
+	--ring: oklch(0.88 0.035 80);
+
+	/* Sidebar — matches background for seamless look */
+	--sidebar: oklch(0.13 0.004 70);
+	--sidebar-foreground: oklch(0.9 0.025 80);
+	--sidebar-primary: oklch(0.88 0.035 80);
+	--sidebar-primary-foreground: oklch(0.13 0.004 70);
+	--sidebar-accent: oklch(0.18 0.006 72);
+	--sidebar-accent-foreground: oklch(0.88 0.025 78);
+	--sidebar-border: oklch(1 0 0 / 0.1);
+	--sidebar-ring: oklch(0.88 0.035 80);
+
+	/* Charts — neutral with subtle warm shift */
+	--chart-1: oklch(0.5 0.008 72);
+	--chart-2: oklch(0.6 0.01 74);
+	--chart-3: oklch(0.7 0.012 76);
+	--chart-4: oklch(0.4 0.006 70);
+	--chart-5: oklch(0.55 0.009 73);
+
+	/* Radius system — premium soft radii */
+	--radius: 0.5rem; /* 8px base */
+	--radius-none: 0px;
+	--radius-structural: 0.75rem; /* 12px — panels, sidebars */
+	--radius-interactive: 0.5rem; /* 8px — buttons, inputs, tabs */
+	--radius-modal: 0.875rem; /* 14px — modals, overlays */
 	--radius-scrollbar: 3px;
 
-	/* Typography scale - locked (matches Tailwind: xs, sm, base, xl) */
-	--text-caption: 0.75rem; /* 12px - badges, counts, hints */
-	--text-label: 0.875rem; /* 14px - labels, section titles, meta text */
-	--text-body: 1rem; /* 16px - primary content, descriptions */
-	--text-heading: 1.25rem; /* 20px - page titles */
-
-	/* Glass effect - for OVERLAYS ONLY, not structural surfaces */
-	--glass-bg: oklch(0.12 0.02 328 / 0.65);
-	--glass-border: oklch(0.5 0.05 328 / 0.1);
-	--glass-blur: 12px;
-}
-
-/* Light theme fallback */
-:root.light {
-	--background: oklch(0.97 0.005 328);
-	--foreground: oklch(0.15 0.02 328);
-	--card: oklch(1 0 0 / 0.8);
-	--glass-bg: oklch(1 0 0 / 0.7);
-	--glass-border: oklch(0.5 0.05 328 / 0.15);
+	/* Typography scale — 13px base */
+	--text-caption: 0.6875rem; /* 11px — badges, counts */
+	--text-label: 0.75rem; /* 12px — captions, meta, code/paths */
+	--text-body: 0.8125rem; /* 13px — body, labels, primary content */
+	--text-section: 0.875rem; /* 14px — section titles */
+	--text-heading: 1.25rem; /* 20px — page headings */
 }
 
 @theme inline {
+	/* Font families */
+	--font-family-sans: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+	--font-family-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+	/* Shadcn color mappings — these resolve var(--X) which the theme store overrides */
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-nav-foreground: var(--nav-foreground);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
 	--color-popover: var(--popover);
@@ -141,19 +137,31 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+
+	/* Radius */
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
-	/* Semantic radius tiers */
 	--radius-structural: var(--radius-structural);
 	--radius-interactive: var(--radius-interactive);
 	--radius-modal: var(--radius-modal);
+
 	/* Typography scale */
 	--font-size-caption: var(--text-caption);
 	--font-size-label: var(--text-label);
 	--font-size-body: var(--text-body);
+	--font-size-section: var(--text-section);
 	--font-size-heading: var(--text-heading);
+
+	/* Status colors (functional, always the same regardless of theme) */
+	--color-status-running: var(--status-running);
+	--color-status-error: var(--status-error);
+	--color-status-warning: var(--status-warning);
+	--color-status-info: var(--status-info);
+	--color-status-done: var(--status-done);
+
+	/* Sidebar */
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -171,11 +179,14 @@
 
 	body {
 		@apply bg-background text-foreground;
-		font-family: "Satoshi", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+		font-family: "Geist", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+		font-size: 13px;
+		background-image:
+			radial-gradient(ellipse 80% 50% at 50% 20%, oklch(1 0 0 / 0.015) 0%, transparent 70%),
+			radial-gradient(ellipse 70% 60% at 50% 50%, transparent 30%, oklch(0 0 0 / 0.15) 100%);
 	}
 
 	html {
-		/* Standard base font size for predictable rem calculations */
 		font-size: 16px;
 	}
 
@@ -200,14 +211,6 @@
 		min-height: 100vh;
 	}
 
-	/* Ambient background - subtle gradient, not busy */
-	.ambient-bg {
-		background:
-			radial-gradient(ellipse 100% 80% at 70% -20%, oklch(0.72 0.25 328 / 0.07) 0%, transparent 50%),
-			radial-gradient(ellipse 80% 60% at 20% 100%, oklch(0.6 0.2 340 / 0.04) 0%, transparent 40%),
-			var(--background);
-	}
-
 	/* Terminal */
 	.xterm {
 		height: 100%;
@@ -226,7 +229,7 @@
 		cursor: pointer;
 	}
 
-	/* Scrollbars - subtle */
+	/* Scrollbars — neutral grey, no pink tint */
 	.hide-scrollbar {
 		scrollbar-width: none;
 		-ms-overflow-style: none;
@@ -237,7 +240,7 @@
 
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: oklch(0.4 0.03 328 / 0.4) transparent;
+		scrollbar-color: #2a2a2a transparent;
 	}
 	*::-webkit-scrollbar {
 		width: 6px;
@@ -247,11 +250,11 @@
 		background: transparent;
 	}
 	*::-webkit-scrollbar-thumb {
-		background: oklch(0.4 0.03 328 / 0.4);
+		background: #2a2a2a;
 		border-radius: var(--radius-scrollbar);
 	}
 	*::-webkit-scrollbar-thumb:hover {
-		background: oklch(0.5 0.04 328 / 0.5);
+		background: #3a3a3a;
 	}
 
 	/* Drag regions */
@@ -275,65 +278,78 @@
 }
 
 @layer utilities {
-	/* Glass - for TEMPORARY OVERLAYS ONLY
-	 * Do NOT use for: TopBar, sidebars, structural containers
-	 * Use solid bg-tertiary or bg-card instead */
-	.glass {
-		background: var(--glass-bg);
-		backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
-		-webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
-		border: 1px solid var(--glass-border);
+	/*
+	 * Surface model — semantic background layers.
+	 * - recessed: darker than background (content wells, inputs)
+	 * - flush: card-level (panels, toolbars)
+	 * - raised: elevated overlays with shadow (dropdowns, popovers)
+	 *
+	 * All surfaces are solid and opaque. Borders and shadows
+	 * provide depth cues instead of backdrop blur.
+	 */
+	.surface-recessed {
+		background: var(--input);
+		border: 1px solid var(--border);
 	}
 
-	/* Modal overlay blur - requires webkit prefix for Electron */
-	.modal-backdrop-blur {
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
+	.surface-flush {
+		background: var(--card);
+		border: 1px solid var(--border);
 	}
 
-	/* Elevation system - THREE LEVELS ONLY, no more
-	 * elevation-1: hover states, transient emphasis
-	 * elevation-2: dropdowns, dialogs, popovers
-	 * elevation-3: major overlays (dashboard modal) - MAXIMUM */
+	.surface-raised {
+		background: var(--popover);
+		border: 1px solid var(--border);
+		box-shadow:
+			0 8px 32px oklch(0 0 0 / 0.3),
+			0 2px 8px oklch(0 0 0 / 0.2);
+	}
+
+	/* Elevation system */
 	.elevation-1 {
 		box-shadow:
-			0 1px 3px oklch(0 0 0 / 0.12),
-			0 1px 2px oklch(0 0 0 / 0.08);
+			0 2px 8px oklch(0 0 0 / 0.15),
+			0 1px 3px oklch(0 0 0 / 0.1);
 	}
 	.elevation-2 {
 		box-shadow:
-			0 4px 12px oklch(0 0 0 / 0.15),
-			0 2px 4px oklch(0 0 0 / 0.08);
+			0 8px 32px oklch(0 0 0 / 0.3),
+			0 2px 8px oklch(0 0 0 / 0.2);
 	}
 	.elevation-3 {
 		box-shadow:
-			0 8px 24px oklch(0 0 0 / 0.2),
-			0 4px 8px oklch(0 0 0 / 0.1);
+			0 16px 48px oklch(0 0 0 / 0.35),
+			0 4px 12px oklch(0 0 0 / 0.2);
 	}
 
-	/* Semantic typography utilities */
+	/* Semantic typography utilities — size + tracking + line-height per spec role */
 	.text-caption {
 		font-size: var(--text-caption);
-	} /* 12px */
+		letter-spacing: 0.02em;
+		line-height: 1;
+	} /* 11px — badges, counts */
 	.text-label {
 		font-size: var(--text-label);
-	} /* 14px */
+		letter-spacing: 0.01em;
+		line-height: 1.4;
+	} /* 12px — captions, meta, code/paths */
 	.text-body {
 		font-size: var(--text-body);
-	} /* 16px */
+		letter-spacing: 0;
+		line-height: 1.5;
+	} /* 13px — body, labels */
+	.text-section {
+		font-size: var(--text-section);
+		letter-spacing: -0.005em;
+		line-height: 1.3;
+	} /* 14px — section titles */
 	.text-heading {
 		font-size: var(--text-heading);
-	} /* 20px */
+		letter-spacing: -0.01em;
+		line-height: 1.2;
+	} /* 20px — page headings */
 
-	/* Primary glow - ONLY for primary interactive elements */
-	.primary-glow {
-		box-shadow: 0 0 20px oklch(0.72 0.25 328 / 0.25);
-	}
-	.primary-glow-subtle {
-		box-shadow: 0 0 12px oklch(0.72 0.25 328 / 0.15);
-	}
-
-	/* Active indicator - simple and clean */
+	/* Active indicator — uses theme-aware foreground */
 	.active-indicator {
 		position: relative;
 	}
@@ -347,5 +363,30 @@
 		height: 60%;
 		background: var(--primary);
 		border-radius: 0 2px 2px 0;
+	}
+
+	/* Sidebar surface — uses theme sidebar token for distinct visual plane */
+	.surface-sidebar {
+		background: var(--sidebar);
+	}
+
+	/* TopBar surface — uses theme background token */
+	.surface-topbar {
+		background: var(--background);
+	}
+
+	/* Active tab bottom indicator (2px gold line) */
+	.tab-active-indicator {
+		position: relative;
+	}
+	.tab-active-indicator::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 8px;
+		right: 8px;
+		height: 2px;
+		background: var(--primary);
+		border-radius: 1px 1px 0 0;
 	}
 }

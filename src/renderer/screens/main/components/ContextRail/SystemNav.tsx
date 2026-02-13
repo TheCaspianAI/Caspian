@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { LuFolderGit, LuFolderOpen } from "react-icons/lu";
+import { LuFolderGit, LuFolderOpen, LuPlus } from "react-icons/lu";
+import { InitGitDialog } from "renderer/components/InitGitDialog";
 import { useCreateBranchNode } from "renderer/react-query/nodes";
 import { useOpenNew } from "renderer/react-query/repositories";
 import { Button } from "ui/components/ui/button";
@@ -10,12 +11,21 @@ import {
 	DropdownMenuTrigger,
 } from "ui/components/ui/dropdown-menu";
 import { toast } from "ui/components/ui/sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "ui/components/ui/tooltip";
 import { CloneRepoDialog } from "../StartView/CloneRepoDialog";
 
-export function SystemNav() {
+interface SystemNavProps {
+	isCollapsed?: boolean;
+}
+
+export function SystemNav({ isCollapsed }: SystemNavProps) {
 	const openNew = useOpenNew();
 	const createBranchNode = useCreateBranchNode();
 	const [isCloneDialogOpen, setIsCloneDialogOpen] = useState(false);
+	const [initGitDialog, setInitGitDialog] = useState<{ isOpen: boolean; selectedPath: string }>({
+		isOpen: false,
+		selectedPath: "",
+	});
 
 	const isLoading = openNew.isPending || createBranchNode.isPending;
 
@@ -32,9 +42,7 @@ export function SystemNav() {
 				return;
 			}
 			if ("needsGitInit" in result) {
-				toast.error("Selected folder is not a git repository", {
-					description: "Please use 'Open repository' from the start view to initialize git.",
-				});
+				setInitGitDialog({ isOpen: true, selectedPath: result.selectedPath });
 				return;
 			}
 			toast.promise(createBranchNode.mutateAsync({ repositoryId: result.repository.id }), {
@@ -57,17 +65,33 @@ export function SystemNav() {
 
 	return (
 		<>
-			<div className="flex flex-col gap-0.5 px-3 py-2 mt-auto">
+			<div className="flex flex-col gap-0.5 px-3 py-2 mt-auto border-t border-border/40">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button
-							variant="ghost"
-							size="sm"
-							className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal"
-							disabled={isLoading}
-						>
-							Add Repository
-						</Button>
+						{isCollapsed ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="size-8 mx-auto text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors duration-[80ms]"
+										disabled={isLoading}
+									>
+										<LuPlus className="size-4" />
+									</Button>
+								</TooltipTrigger>
+								<TooltipContent side="right">Add Repository</TooltipContent>
+							</Tooltip>
+						) : (
+							<Button
+								variant="ghost"
+								size="sm"
+								className="w-full justify-start px-2 py-1.5 h-auto text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 font-normal transition-colors duration-[80ms]"
+								disabled={isLoading}
+							>
+								Add Repository
+							</Button>
+						)}
 					</DropdownMenuTrigger>
 					<DropdownMenuContent side="top" align="start" className="w-48">
 						<DropdownMenuItem
@@ -94,6 +118,26 @@ export function SystemNav() {
 				isOpen={isCloneDialogOpen}
 				onClose={() => setIsCloneDialogOpen(false)}
 				onError={handleCloneError}
+			/>
+
+			<InitGitDialog
+				isOpen={initGitDialog.isOpen}
+				selectedPath={initGitDialog.selectedPath}
+				onClose={() => setInitGitDialog({ isOpen: false, selectedPath: "" })}
+				onSuccess={(repository) => {
+					toast.promise(createBranchNode.mutateAsync({ repositoryId: repository.id }), {
+						loading: "Opening repository...",
+						success: "Repository opened",
+						error: (err) => (err instanceof Error ? err.message : "Failed to open repository"),
+					});
+				}}
+				onError={(error) => {
+					console.error("[SystemNav/git-init] Failed to initialize git repository", {
+						selectedPath: initGitDialog.selectedPath,
+						error,
+					});
+					toast.error("Failed to initialize git repository", { description: error });
+				}}
 			/>
 		</>
 	);

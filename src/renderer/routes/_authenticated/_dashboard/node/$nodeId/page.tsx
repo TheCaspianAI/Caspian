@@ -8,6 +8,8 @@ import { navigateToNode } from "renderer/routes/_authenticated/_dashboard/utils/
 import { NotFound } from "renderer/routes/not-found";
 import { NodeInitializingView } from "renderer/screens/main/components/NodeView/NodeInitializingView/NodeInitializingView";
 import { NodeLayout } from "renderer/screens/main/components/NodeView/NodeLayout/NodeLayout";
+import { RepositoryMissingView } from "renderer/screens/main/components/NodeView/RepositoryMissingView";
+import { WorktreeMissingView } from "renderer/screens/main/components/NodeView/WorktreeMissingView";
 import { useAppHotkey } from "renderer/stores/hotkeys";
 import { useHasNodeFailed, useIsNodeInitializing } from "renderer/stores/node-init";
 import { getPaneDimensions } from "renderer/stores/tabs/pane-refs";
@@ -51,20 +53,18 @@ function NodePage() {
 	});
 	const navigate = useNavigate();
 
-	// Check if node is initializing or failed
 	const isInitializing = useIsNodeInitializing(nodeId);
 	const hasFailed = useHasNodeFailed(nodeId);
 
-	// Check for incomplete init after app restart
 	const gitStatus = node?.worktree?.gitStatus;
 	const hasIncompleteInit =
 		node?.type === "worktree" && (gitStatus === null || gitStatus === undefined);
 
-	// Show full-screen initialization view for:
-	// - Actively initializing nodes (shows progress)
-	// - Failed nodes (shows error with retry)
-	// - Interrupted nodes that aren't currently initializing (shows resume option)
+	const isRepositoryMissing = node?.repository?.pathMissing === true;
+
 	const showInitView = isInitializing || hasFailed || hasIncompleteInit;
+
+	const isWorktreeMissing = node?.type === "worktree" && node?.worktreePathExists === false;
 
 	const allTabs = useTabsStore((s) => s.tabs);
 	const activeTabIds = useTabsStore((s) => s.activeTabIds);
@@ -172,7 +172,6 @@ function NodePage() {
 		[activeTabId, activeTab?.layout, focusedPaneId, setFocusedPane],
 	);
 
-	// Open in last used app shortcut
 	const { data: lastUsedApp = "cursor" } = electronTrpc.settings.getLastUsedApp.useQuery();
 	const openInApp = electronTrpc.external.openInApp.useMutation();
 	useAppHotkey(
@@ -189,7 +188,6 @@ function NodePage() {
 		[node?.worktreePath, lastUsedApp],
 	);
 
-	// Copy path shortcut
 	const copyPath = electronTrpc.external.copyPath.useMutation();
 	useAppHotkey(
 		"COPY_PATH",
@@ -202,7 +200,6 @@ function NodePage() {
 		[node?.worktreePath],
 	);
 
-	// Pane splitting helper - resolves target pane for split operations
 	const resolveSplitTarget = useCallback(
 		(paneId: string, tabId: string, targetTab: Tab) => {
 			const path = findPanePath(targetTab.layout, paneId);
@@ -216,7 +213,6 @@ function NodePage() {
 		[setFocusedPane],
 	);
 
-	// Pane splitting shortcuts
 	useAppHotkey(
 		"SPLIT_AUTO",
 		() => {
@@ -259,7 +255,6 @@ function NodePage() {
 		[activeTabId, focusedPaneId, activeTab, splitPaneHorizontal, resolveSplitTarget],
 	);
 
-	// Navigate to previous node (⌘↑)
 	const getPreviousNode = electronTrpc.nodes.getPreviousNode.useQuery(
 		{ id: nodeId },
 		{ enabled: !!nodeId },
@@ -276,7 +271,6 @@ function NodePage() {
 		[getPreviousNode.data, navigate],
 	);
 
-	// Navigate to next node (⌘↓)
 	const getNextNode = electronTrpc.nodes.getNextNode.useQuery(
 		{ id: nodeId },
 		{ enabled: !!nodeId },
@@ -296,12 +290,19 @@ function NodePage() {
 	return (
 		<div className="flex-1 h-full flex flex-col overflow-hidden">
 			<div className="flex-1 min-h-0 flex overflow-hidden">
-				{showInitView ? (
+				{isRepositoryMissing ? (
+					<RepositoryMissingView
+						repositoryId={node?.repository?.id ?? ""}
+						repositoryName={node?.repository?.name ?? "Unknown"}
+					/>
+				) : showInitView ? (
 					<NodeInitializingView
 						nodeId={nodeId}
 						nodeName={node?.name ?? "Node"}
 						isInterrupted={hasIncompleteInit && !isInitializing}
 					/>
+				) : isWorktreeMissing ? (
+					<WorktreeMissingView nodeId={nodeId} nodeName={node?.name ?? "Node"} />
 				) : (
 					<NodeLayout />
 				)}

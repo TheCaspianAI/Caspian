@@ -130,10 +130,10 @@ export function GroupStrip() {
 	}, []);
 
 	return (
-		<div className="flex items-center h-10 flex-1 min-w-0">
+		<div className="flex items-center h-9 flex-1 min-w-0">
 			{tabs.length > 0 && (
 				<div
-					className="flex items-center h-full overflow-x-auto overflow-y-hidden border-l border-border"
+					className="flex items-center h-full overflow-x-auto overflow-y-hidden border-l border-border/20"
 					style={{ scrollbarWidth: "none" }}
 				>
 					{tabs.map((tab, index) => {

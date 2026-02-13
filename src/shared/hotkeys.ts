@@ -401,9 +401,9 @@ export const HOTKEYS = {
 	// Layout
 	TOGGLE_NODE_SIDEBAR: defineHotkey({
 		keys: "meta+b",
-		label: "Toggle Context Pane",
+		label: "Toggle Sidebar",
 		category: "Layout",
-		description: "Show or hide the context pane (Files/Changes)",
+		description: "Show or hide the sidebar",
 	}),
 	SPLIT_RIGHT: defineHotkey({
 		keys: "meta+d",

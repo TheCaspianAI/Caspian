@@ -130,8 +130,7 @@ export function quitWithoutConfirmation(): void {
 app.on("before-quit", async (event) => {
 	if (isQuitting) return;
 
-	const isDev = process.env.NODE_ENV === "development";
-	const shouldConfirm = !skipConfirmation && !isDev && getConfirmOnQuitSetting();
+	const shouldConfirm = !skipConfirmation && !isE2ETest && getConfirmOnQuitSetting();
 
 	if (shouldConfirm) {
 		event.preventDefault();
@@ -212,7 +211,10 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Single instance lock - required for second-instance event on Windows/Linux
-const gotTheLock = app.requestSingleInstanceLock();
+// Skip in E2E test mode to allow tests to launch alongside a dev instance.
+// Uses a custom env var because process.env.NODE_ENV is replaced at build time.
+const isE2ETest = process.env.CASPIAN_E2E_TEST === "1";
+const gotTheLock = isE2ETest || app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
 	// Another instance is already running, exit immediately without triggering before-quit

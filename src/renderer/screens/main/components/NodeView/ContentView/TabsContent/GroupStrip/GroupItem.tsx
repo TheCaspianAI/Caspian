@@ -141,10 +141,10 @@ export function GroupItem({
 	};
 
 	const tabStyles = cn(
-		"flex items-center gap-2 transition-all w-full shrink-0 px-3 h-full",
+		"flex items-center gap-2 transition-all duration-[80ms] w-full shrink-0 px-3 h-full",
 		isActive
-			? "text-foreground bg-border/30"
-			: "text-muted-foreground/70 hover:text-muted-foreground hover:bg-tertiary/20",
+			? "text-foreground bg-primary/6"
+			: "text-muted-foreground/70 hover:text-muted-foreground hover:bg-accent/30",
 	);
 
 	return (
@@ -153,7 +153,8 @@ export function GroupItem({
 				drag(drop(node));
 			}}
 			className={cn(
-				"group relative flex items-center shrink-0 h-full border-r border-border",
+				"group relative flex items-center shrink-0 h-full border-r border-border/20",
+				isActive && "tab-active-indicator",
 				isOver && canDrop && "bg-primary/5",
 				isDragging && "opacity-50 text-muted-foreground/50",
 			)}
@@ -169,7 +170,7 @@ export function GroupItem({
 						onBlur={handleSave}
 						onKeyDown={handleKeyDown}
 						maxLength={64}
-						className="text-sm bg-transparent border-none outline-none flex-1 text-left min-w-0"
+						className="text-[13px] bg-transparent border-none outline-none flex-1 text-left min-w-0"
 					/>
 				</div>
 			) : (
@@ -187,7 +188,7 @@ export function GroupItem({
 							}}
 							className={tabStyles}
 						>
-							<span className="text-sm whitespace-nowrap overflow-hidden flex-1 text-left">
+							<span className="text-[13px] whitespace-nowrap overflow-hidden flex-1 text-left">
 								{displayName}
 							</span>
 							{status && status !== "idle" && <StatusIndicator status={status} />}
@@ -219,7 +220,7 @@ export function GroupItem({
 							onClose();
 						}}
 						className={cn(
-							"absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer size-5 bg-muted hover:bg-background",
+							"absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer size-5 rounded-[4px] text-muted-foreground hover:text-foreground hover:bg-accent",
 							isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
 						)}
 						aria-label="Close group"

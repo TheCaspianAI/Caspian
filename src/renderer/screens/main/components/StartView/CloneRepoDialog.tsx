@@ -57,7 +57,7 @@ export function CloneRepoDialog({ isOpen, onClose, onError }: CloneRepoDialogPro
 	const isLoading = cloneRepo.isPending || createNode.isPending;
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
 			<div className="bg-card border border-border rounded-lg p-5 sm:p-8 w-full max-w-[calc(100%-2rem)] sm:max-w-md mx-4 sm:mx-0 elevation-3">
 				<h2 className="text-lg sm:text-xl font-normal text-foreground mb-4 sm:mb-6">
 					Clone Repository

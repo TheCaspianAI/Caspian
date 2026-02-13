@@ -14,10 +14,10 @@ function Input({ className, type, variant = "default", ...props }: InputProps) {
 			type={type}
 			data-slot="input"
 			className={cn(
-				"h-9 w-full min-w-0 rounded-lg px-3 py-2 text-sm",
+				"h-8 w-full min-w-0 rounded-[6px] px-3 py-1.5 text-[13px]",
 				"text-foreground placeholder:text-muted-foreground",
-				"transition-all duration-200 ease-out",
-				"focus:outline-none focus:border-primary/60 focus:ring-1 focus:ring-primary/20",
+				"transition-colors duration-[80ms]",
+				"focus:outline-none focus:border-ring",
 				"disabled:cursor-not-allowed disabled:opacity-50",
 				"file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground",
 				"aria-invalid:border-destructive",

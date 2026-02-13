@@ -1,5 +1,6 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { TRPCError } from "@trpc/server";
 import { and, eq, isNull, not } from "drizzle-orm";
 import { nodes, repositories, settings, worktrees } from "lib/local-db";
 import { track } from "main/lib/analytics";
@@ -8,8 +9,10 @@ import { nodeInitManager } from "main/lib/node-init-manager";
 import { CASPIAN_DIR_NAME, WORKTREES_DIR_NAME } from "shared/constants";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
+import { checkRepositoryHealth } from "../../repositories/utils/health";
 import {
 	activateRepository,
+	ensureBranchNodeExists,
 	getBranchNode,
 	getMaxNodeTabOrder,
 	getRepository,
@@ -227,6 +230,11 @@ async function handleNewWorktree({
 		is_fork: prInfo.isCrossRepository,
 	});
 
+	ensureBranchNodeExists({
+		repositoryId: repository.id,
+		defaultBranch,
+	});
+
 	nodeInitManager.startJob(node.id, repository.id);
 	initializeNodeWorktree({
 		nodeId: node.id,
@@ -275,6 +283,14 @@ export const createCreateProcedures = () => {
 					.get();
 				if (!repository) {
 					throw new Error(`Repository ${input.repositoryId} not found`);
+				}
+
+				const health = checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath });
+				if (!health.healthy) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: "Repository directory not found on disk",
+					});
 				}
 
 				let existingBranchName: string | undefined;
@@ -392,6 +408,11 @@ export const createCreateProcedures = () => {
 					use_existing_branch: input.useExistingBranch ?? false,
 				});
 
+				ensureBranchNodeExists({
+					repositoryId: input.repositoryId,
+					defaultBranch: targetBranch,
+				});
+
 				nodeInitManager.startJob(node.id, input.repositoryId);
 				initializeNodeWorktree({
 					nodeId: node.id,
@@ -407,7 +428,6 @@ export const createCreateProcedures = () => {
 
 				const setupConfig = loadSetupConfig(repository.mainRepoPath);
 
-				// Use custom setup script if provided, otherwise fall back to repository config
 				const initialCommands = input.setupScript?.trim()
 					? [input.setupScript.trim()]
 					: setupConfig?.setup || null;
@@ -610,6 +630,14 @@ export const createCreateProcedures = () => {
 				const repository = getRepository(input.repositoryId);
 				if (!repository) {
 					throw new Error(`Repository ${input.repositoryId} not found`);
+				}
+
+				const health = checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath });
+				if (!health.healthy) {
+					throw new TRPCError({
+						code: "PRECONDITION_FAILED",
+						message: "Repository directory not found on disk",
+					});
 				}
 
 				const parsed = parsePrUrl(input.prUrl);

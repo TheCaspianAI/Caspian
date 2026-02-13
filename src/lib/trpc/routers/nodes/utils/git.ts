@@ -47,19 +47,12 @@ async function getGitEnv(): Promise<Record<string, string>> {
 }
 
 /**
- * Runs `git status` with --no-optional-locks to avoid holding locks on the repository.
- * This prevents blocking other git operations that may need to acquire locks.
- * Returns a StatusResult-compatible object that can be used with parseGitStatus.
+ * Runs `git status` with --no-optional-locks to avoid blocking concurrent git operations.
  */
 export async function getStatusNoLock(repoPath: string): Promise<StatusResult> {
 	const env = await getGitEnv();
 
 	try {
-		// Run git status with --no-optional-locks to avoid holding locks
-		// Use porcelain=v1 for machine-parseable output, -b for branch info
-		// Use -z for NUL-terminated output (handles filenames with special chars)
-		// Use -uall to show individual files in untracked directories (not just the directory)
-		// Note: porcelain=v1 already includes rename info (R/C status codes) without needing -M
 		const { stdout } = await execFileAsync(
 			"git",
 			["--no-optional-locks", "-C", repoPath, "status", "--porcelain=v1", "-b", "-z", "-uall"],
@@ -68,7 +61,6 @@ export async function getStatusNoLock(repoPath: string): Promise<StatusResult> {
 
 		return parsePortelainStatus(stdout);
 	} catch (error) {
-		// Provide more descriptive error messages
 		if (isExecFileException(error)) {
 			if (error.code === "ENOENT") {
 				throw new Error("Git is not installed or not found in PATH");
@@ -85,19 +77,15 @@ export async function getStatusNoLock(repoPath: string): Promise<StatusResult> {
 }
 
 /**
- * Parses git status --porcelain=v1 -z output into a StatusResult-compatible object.
- * The -z format uses NUL characters to separate entries, which safely handles
- * filenames containing spaces, newlines, or other special characters.
+ * Parses git status --porcelain=v1 -z (NUL-separated) output into a StatusResult.
  */
 function parsePortelainStatus(stdout: string): StatusResult {
-	// Split by NUL character - the -z format separates entries with NUL
 	const entries = stdout.split("\0").filter(Boolean);
 
 	let current: string | null = null;
 	let tracking: string | null = null;
 	let isDetached = false;
 
-	// Parse file status entries
 	const files: StatusResult["files"] = [];
 	// Use Sets to avoid duplicates (e.g., MM status would otherwise add to modified twice)
 	const stagedSet = new Set<string>();
@@ -116,16 +104,13 @@ function parsePortelainStatus(stdout: string): StatusResult {
 			continue;
 		}
 
-		// Parse branch line: ## branch...tracking or ## branch
 		if (entry.startsWith("## ")) {
 			const branchInfo = entry.slice(3);
 
-			// Check for detached HEAD states
 			if (branchInfo.startsWith("HEAD (no branch)") || branchInfo === "HEAD") {
 				isDetached = true;
 				current = "HEAD";
 			} else if (
-				// Handle empty repo: "No commits yet on BRANCH" or "Initial commit on BRANCH"
 				branchInfo.startsWith("No commits yet on ") ||
 				branchInfo.startsWith("Initial commit on ")
 			) {
@@ -133,13 +118,11 @@ function parsePortelainStatus(stdout: string): StatusResult {
 				const parts = branchInfo.split(" ");
 				current = parts[parts.length - 1] || null;
 			} else {
-				// Check for tracking info: "branch...origin/branch [ahead 1, behind 2]"
 				const trackingMatch = branchInfo.match(/^(.+?)\.\.\.(.+?)(?:\s|$)/);
 				if (trackingMatch) {
 					current = trackingMatch[1];
 					tracking = trackingMatch[2].split(" ")[0] || null;
 				} else {
-					// No tracking branch, just get branch name (before any space)
 					current = branchInfo.split(" ")[0] || null;
 				}
 			}
@@ -147,7 +130,6 @@ function parsePortelainStatus(stdout: string): StatusResult {
 			continue;
 		}
 
-		// Parse file status: "XY path" where X=index, Y=working tree
 		if (entry.length < 3) {
 			i++;
 			continue;
@@ -155,11 +137,9 @@ function parsePortelainStatus(stdout: string): StatusResult {
 
 		const indexStatus = entry[0];
 		const workingStatus = entry[1];
-		// entry[2] is a space separator
 		const path = entry.slice(3);
 		let from: string | undefined;
 
-		// For renames/copies, the next entry is the original path
 		if (indexStatus === "R" || indexStatus === "C") {
 			i++;
 			from = entries[i];
@@ -173,7 +153,6 @@ function parsePortelainStatus(stdout: string): StatusResult {
 			working_dir: workingStatus,
 		});
 
-		// Populate convenience arrays for checkBranchCheckoutSafety compatibility
 		if (indexStatus === "?" && workingStatus === "?") {
 			notAddedSet.add(path);
 		} else {
@@ -399,8 +378,6 @@ export async function createWorktree(
 	const usesLfs = await repoUsesLfs(mainRepoPath);
 
 	try {
-		// Validate that the start point exists before attempting worktree creation
-		// This provides a clearer error message than the git command failure
 		const startPointExists = await refExistsLocally(mainRepoPath, startPoint);
 		if (!startPointExists) {
 			throw new Error(
@@ -529,24 +506,19 @@ export async function createWorktreeFromExistingBranch({
 			}
 		}
 
-		// First, check if the branch exists locally
 		const git = simpleGit(mainRepoPath);
 		const localBranches = await git.branchLocal();
 		const branchExistsLocally = localBranches.all.includes(branch);
 
 		if (branchExistsLocally) {
-			// Branch exists locally - just checkout into the worktree
 			await execFileAsync("git", ["-C", mainRepoPath, "worktree", "add", worktreePath, branch], {
 				env,
 				timeout: 120_000,
 			});
 		} else {
-			// Branch doesn't exist locally - check if it's a remote branch
 			const remoteBranches = await git.branch(["-r"]);
 			const remoteBranchName = `origin/${branch}`;
 			if (remoteBranches.all.includes(remoteBranchName)) {
-				// Create worktree with local tracking branch from remote
-				// This creates a new local branch that tracks the remote
 				await execFileAsync(
 					"git",
 					[
@@ -602,7 +574,6 @@ export async function createWorktreeFromExistingBranch({
 			);
 		}
 
-		// Check if the branch is already checked out in another worktree
 		if (
 			lowerError.includes("already checked out") ||
 			lowerError.includes("is already used by worktree")
@@ -690,7 +661,6 @@ export async function getBranchWorktreePath({
 				if (branchName === branch && currentWorktreePath) {
 					return currentWorktreePath;
 				}
-				// Reset after processing this worktree's branch line
 				currentWorktreePath = null;
 			}
 		}
@@ -715,18 +685,15 @@ export async function hasOriginRemote(mainRepoPath: string): Promise<boolean> {
 export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 	const git = simpleGit(mainRepoPath);
 
-	// First check if we have an origin remote
 	const hasRemote = await hasOriginRemote(mainRepoPath);
 
 	if (hasRemote) {
-		// Try to get the default branch from origin/HEAD
 		try {
 			const headRef = await git.raw(["symbolic-ref", "refs/remotes/origin/HEAD"]);
 			const match = headRef.trim().match(/refs\/remotes\/origin\/(.+)/);
 			if (match) return match[1];
 		} catch {}
 
-		// Check remote branches for common default branch names
 		try {
 			const branches = await git.branch(["-r"]);
 			const remoteBranches = branches.all.map((b) => b.replace("origin/", ""));
@@ -738,7 +705,6 @@ export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 			}
 		} catch {}
 
-		// Try ls-remote as last resort for remote repos
 		try {
 			const result = await git.raw(["ls-remote", "--symref", "origin", "HEAD"]);
 			const symrefMatch = result.match(/ref:\s+refs\/heads\/(.+?)\tHEAD/);
@@ -747,7 +713,6 @@ export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 			}
 		} catch {}
 	} else {
-		// No remote - use the current local branch or check for common branch names
 		try {
 			const currentBranch = await getCurrentBranch(mainRepoPath);
 			if (currentBranch) {
@@ -755,7 +720,6 @@ export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 			}
 		} catch {}
 
-		// Fallback: check for common default branch names locally
 		try {
 			const localBranches = await git.branchLocal();
 			for (const candidate of ["main", "master", "develop", "trunk"]) {
@@ -763,7 +727,6 @@ export async function getDefaultBranch(mainRepoPath: string): Promise<string> {
 					return candidate;
 				}
 			}
-			// If we have any local branches, use the first one
 			if (localBranches.all.length > 0) {
 				return localBranches.all[0];
 			}
@@ -931,10 +894,42 @@ function categorizeGitError(errorMessage: string): BranchExistsResult {
 	};
 }
 
-export async function branchExistsOnRemote(
-	worktreePath: string,
-	branchName: string,
-): Promise<BranchExistsResult> {
+/**
+ * Checks whether a branch has ever been pushed by looking for local upstream tracking config.
+ * Returns true if `branch.<name>.remote` exists in git config (set by `git push --set-upstream`).
+ * This config persists even after the remote branch is deleted or `git fetch --prune` runs.
+ */
+export async function branchHasBeenPushed({
+	worktreePath,
+	branchName,
+}: {
+	worktreePath: string;
+	branchName: string;
+}): Promise<boolean> {
+	try {
+		const { stdout } = await execFileAsync(
+			"git",
+			["-C", worktreePath, "config", "--get", `branch.${branchName}.remote`],
+			{ timeout: 5_000 },
+		);
+		return stdout.trim().length > 0;
+	} catch (error) {
+		// Exit code 1 = key not found, which is the expected case for unpushed branches
+		if (isExecFileException(error) && error.code === 1) {
+			return false;
+		}
+		console.error("[git/branchHasBeenPushed] Unexpected error:", error);
+		return false;
+	}
+}
+
+export async function branchExistsOnRemote({
+	worktreePath,
+	branchName,
+}: {
+	worktreePath: string;
+	branchName: string;
+}): Promise<BranchExistsResult> {
 	const env = await getGitEnv();
 
 	try {
@@ -945,10 +940,8 @@ export async function branchExistsOnRemote(
 			["-C", worktreePath, "ls-remote", "--exit-code", "--heads", "origin", branchName],
 			{ env, timeout: 30_000 },
 		);
-		// Exit code 0 = branch exists (--exit-code flag ensures this)
 		return { status: "exists" };
 	} catch (error) {
-		// Use type guard to safely access ExecFileException properties
 		if (!isExecFileException(error)) {
 			return {
 				status: "error",
@@ -956,7 +949,6 @@ export async function branchExistsOnRemote(
 			};
 		}
 
-		// Handle spawn/system errors first (code is a string like "ENOENT")
 		if (typeof error.code === "string") {
 			if (error.code === "ENOENT") {
 				return {
@@ -970,14 +962,12 @@ export async function branchExistsOnRemote(
 					message: "Git command timed out. Check your network connection.",
 				};
 			}
-			// Other system errors
 			return {
 				status: "error",
 				message: `System error: ${error.code}`,
 			};
 		}
 
-		// Handle killed/timed out processes (timeout option triggers this)
 		if (error.killed || error.signal) {
 			return {
 				status: "error",

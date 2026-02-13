@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { LuArrowRight, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
+import { LuArrowRight, LuCloudOff, LuFolderGit2, LuLaptop, LuRotateCw } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
+import { PRIcon } from "renderer/screens/main/components/PRIcon";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -31,7 +32,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 	const { showDeleteDialog, setShowDeleteDialog, handleDeleteClick } = useNodeDeleteHandler();
 
 	// Lazy-load GitHub status on hover to avoid N+1 queries
-	const { data: githubStatus } = electronTrpc.nodes.getGitHubStatus.useQuery(
+	const { data: githubStatusData } = electronTrpc.nodes.getGitHubStatus.useQuery(
 		{ nodeId: node.nodeId ?? "" },
 		{
 			enabled: hasHovered && node.type === "worktree" && !!node.nodeId,
@@ -39,8 +40,14 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 		},
 	);
 
+	const githubStatus = githubStatusData?.status;
 	const pr = githubStatus?.pr;
 	const showDiffStats = pr && (pr.additions > 0 || pr.deletions > 0);
+	const isBranchDeletedOnRemote =
+		githubStatus != null &&
+		!githubStatus.branchExistsOnRemote &&
+		githubStatus.branchHasBeenPushed &&
+		pr?.state !== "merged";
 
 	const timeText = node.isOpen
 		? `Opened ${getRelativeTime(node.lastOpenedAt)}`
@@ -66,7 +73,6 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				isOpening && "opacity-50 cursor-wait",
 			)}
 		>
-			{/* Icon */}
 			<Tooltip delayDuration={500}>
 				<TooltipTrigger asChild>
 					<div
@@ -76,7 +82,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 						)}
 					>
 						{isBranch ? (
-							<LuFolder className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
+							<LuLaptop className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						) : (
 							<LuFolderGit2 className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						)}
@@ -101,14 +107,16 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				</TooltipContent>
 			</Tooltip>
 
-			{/* Node/branch name */}
 			<span
 				className={cn("text-sm truncate text-foreground/80", !node.isOpen && "text-foreground/50")}
 			>
-				{node.name}
+				{isBranch ? "local" : node.name}
 			</span>
 
-			{/* Unread indicator */}
+			{pr?.state === "merged" && <PRIcon state="merged" className="size-3.5 shrink-0" />}
+
+			{isBranchDeletedOnRemote && <LuCloudOff className="size-3.5 shrink-0 text-amber-500" />}
+
 			{node.isUnread && (
 				<span className="relative flex size-2 shrink-0">
 					<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
@@ -116,7 +124,6 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				</span>
 			)}
 
-			{/* Diff stats */}
 			{showDiffStats && (
 				<div className="flex items-center gap-1 text-caption font-mono shrink-0">
 					<span className="text-emerald-500">+{pr.additions}</span>
@@ -124,15 +131,12 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				</div>
 			)}
 
-			{/* Spacer */}
 			<div className="flex-1" />
 
-			{/* Time context */}
 			<span className="text-caption text-foreground/40 shrink-0 group-hover:hidden">
 				{timeText}
 			</span>
 
-			{/* Action indicator - visible on hover */}
 			<div className="hidden group-hover:flex items-center gap-1.5 text-xs shrink-0">
 				{isOpening ? (
 					<>
@@ -154,7 +158,6 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 		</button>
 	);
 
-	// Determine the delete/close action label based on node type and state
 	const isOpenNode = node.nodeId !== null;
 	const isClosedWorktree = !isOpenNode && node.worktreeId !== null;
 	const actionLabel = isBranch
@@ -163,7 +166,6 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 			? "Delete worktree"
 			: "Delete node";
 
-	// Can delete open nodes or closed worktrees
 	const canDelete = isOpenNode || isClosedWorktree;
 
 	return (
@@ -181,18 +183,15 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				</ContextMenuContent>
 			</ContextMenu>
 
-			{/* Dialog for open nodes */}
 			{node.nodeId && (
 				<DeleteNodeDialog
 					nodeId={node.nodeId}
 					nodeName={node.name}
-					nodeType={node.type}
 					open={showDeleteDialog}
 					onOpenChange={setShowDeleteDialog}
 				/>
 			)}
 
-			{/* Dialog for closed worktrees */}
 			{isClosedWorktree && node.worktreeId && (
 				<DeleteWorktreeDialog
 					worktreeId={node.worktreeId}

@@ -1,9 +1,11 @@
+import { existsSync } from "node:fs";
 import { TRPCError } from "@trpc/server";
 import { eq, isNotNull, isNull } from "drizzle-orm";
 import { nodes, repositories, worktrees } from "lib/local-db";
 import { localDb } from "main/lib/local-db";
 import { z } from "zod";
 import { publicProcedure, router } from "../../..";
+import { checkRepositoryHealth } from "../../repositories/utils/health";
 import { getNode } from "../utils/db-helpers";
 import { detectBaseBranch, hasOriginRemote } from "../utils/git";
 import { getNodePath } from "../utils/worktree";
@@ -54,11 +56,9 @@ export const createQueryProcedures = () => {
 				? localDb.select().from(worktrees).where(eq(worktrees.id, node.worktreeId)).get()
 				: null;
 
-			// Detect and persist base branch for existing worktrees that don't have it
-			// We use undefined to mean "not yet attempted" and null to mean "attempted but not found"
+			// undefined = not yet attempted, null = attempted but not found
 			let baseBranch = worktree?.baseBranch;
 			if (worktree && baseBranch === undefined && repository) {
-				// Only attempt detection if there's a remote origin
 				const hasRemote = await hasOriginRemote(repository.mainRepoPath);
 				if (hasRemote) {
 					try {
@@ -67,14 +67,13 @@ export const createQueryProcedures = () => {
 						if (detected) {
 							baseBranch = detected;
 						}
-						// Persist the result (detected branch or null sentinel)
 						localDb
 							.update(worktrees)
 							.set({ baseBranch: detected ?? null })
 							.where(eq(worktrees.id, worktree.id))
 							.run();
 					} catch {
-						// Detection failed, persist null to avoid retrying
+						// Persist null to avoid retrying on every page load
 						localDb
 							.update(worktrees)
 							.set({ baseBranch: null })
@@ -82,7 +81,6 @@ export const createQueryProcedures = () => {
 							.run();
 					}
 				} else {
-					// No remote - persist null to avoid retrying
 					localDb
 						.update(worktrees)
 						.set({ baseBranch: null })
@@ -91,15 +89,25 @@ export const createQueryProcedures = () => {
 				}
 			}
 
+			const repoHealth = repository
+				? checkRepositoryHealth({ mainRepoPath: repository.mainRepoPath })
+				: null;
+
+			const worktreePath = getNodePath(node) ?? "";
+			const worktreePathExists =
+				node.type === "branch" || (worktreePath !== "" && existsSync(worktreePath));
+
 			return {
 				...node,
 				type: node.type as "worktree" | "branch",
-				worktreePath: getNodePath(node) ?? "",
+				worktreePath,
+				worktreePathExists,
 				repository: repository
 					? {
 							id: repository.id,
 							name: repository.name,
 							mainRepoPath: repository.mainRepoPath,
+							pathMissing: repoHealth ? !repoHealth.healthy : false,
 						}
 					: null,
 				worktree: worktree
@@ -187,7 +195,6 @@ export const createQueryProcedures = () => {
 			for (const node of allNodes) {
 				const group = groupsMap.get(node.repositoryId);
 				if (group) {
-					// Resolve path from preloaded data instead of per-node DB queries
 					let worktreePath = "";
 					if (node.type === "worktree" && node.worktreeId) {
 						worktreePath = worktreePathMap.get(node.worktreeId) ?? "";

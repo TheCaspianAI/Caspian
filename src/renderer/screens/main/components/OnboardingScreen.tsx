@@ -28,7 +28,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					<img
 						src={caspianLogo}
 						alt="Caspian"
-						className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain mx-auto rounded-xl sm:rounded-2xl"
+						className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain mx-auto rounded-[10px]"
 					/>
 				</motion.div>
 				<motion.h1
@@ -92,7 +92,7 @@ export function OnboardingScreen({ onContinue }: OnboardingScreenProps) {
 					className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 md:mb-12"
 				>
 					<div className="h-px flex-1 max-w-[60px] sm:max-w-[80px] md:max-w-[100px] bg-gradient-to-r from-transparent to-border/60" />
-					<div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-border/40 bg-muted/30">
+					<div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-[6px] border border-border/40 bg-muted/30">
 						<LuGitBranch className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
 						<span className="text-xs sm:text-sm text-muted-foreground">your codebase</span>
 					</div>

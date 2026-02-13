@@ -22,21 +22,21 @@ export function WindowControls() {
 		<div className="flex items-center h-full">
 			<button
 				type="button"
-				className="h-full w-12 flex items-center justify-center hover:bg-accent transition-colors"
+				className="h-full w-12 flex items-center justify-center hover:bg-accent transition-colors duration-[80ms]"
 				onClick={handleMinimize}
 			>
 				<HiMiniMinus className="h-4 w-4" />
 			</button>
 			<button
 				type="button"
-				className="h-full w-12 flex items-center justify-center hover:bg-accent transition-colors"
+				className="h-full w-12 flex items-center justify-center hover:bg-accent transition-colors duration-[80ms]"
 				onClick={handleMaximize}
 			>
 				<HiMiniStop className="h-3 w-3" />
 			</button>
 			<button
 				type="button"
-				className="h-full w-12 flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
+				className="h-full w-12 flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors duration-[80ms]"
 				onClick={handleClose}
 			>
 				<HiMiniXMark className="h-4 w-4" />

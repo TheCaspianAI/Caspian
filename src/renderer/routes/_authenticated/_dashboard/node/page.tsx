@@ -2,10 +2,13 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { OnboardingScreen } from "renderer/screens/main/components/OnboardingScreen";
+import { SetupCheckScreen } from "renderer/screens/main/components/SetupCheckScreen";
 import { StartView } from "renderer/screens/main/components/StartView";
 import { Spinner } from "ui/components/ui/spinner";
 
 const ONBOARDING_SEEN_KEY = "caspian-onboarding-seen";
+
+type OnboardingStep = "welcome" | "setup-check" | "done";
 
 export const Route = createFileRoute("/_authenticated/_dashboard/node/")({
 	component: NodeIndexPage,
@@ -26,21 +29,23 @@ function NodeIndexPage() {
 	const allNodes = nodes?.flatMap((group: { nodes: Array<{ id: string }> }) => group.nodes) ?? [];
 	const hasNoNodes = !isLoading && allNodes.length === 0;
 
-	// Onboarding state - show only for first-time users with no nodes
-	const [showOnboarding, setShowOnboarding] = useState(() => {
-		return !localStorage.getItem(ONBOARDING_SEEN_KEY);
+	const [onboardingStep, setOnboardingStep] = useState<OnboardingStep>(() => {
+		return localStorage.getItem(ONBOARDING_SEEN_KEY) ? "done" : "welcome";
 	});
 
-	const handleOnboardingComplete = () => {
+	const handleWelcomeComplete = () => {
+		setOnboardingStep("setup-check");
+	};
+
+	const handleSetupCheckComplete = () => {
 		localStorage.setItem(ONBOARDING_SEEN_KEY, "true");
-		setShowOnboarding(false);
+		setOnboardingStep("done");
 	};
 
 	useEffect(() => {
 		if (isLoading || !nodes) return;
-		if (allNodes.length === 0) return; // Show StartView instead
+		if (allNodes.length === 0) return;
 
-		// Try to restore last viewed node
 		const lastViewedId = localStorage.getItem("lastViewedNodeId");
 		const targetNode = allNodes.find((n: { id: string }) => n.id === lastViewedId) ?? allNodes[0];
 
@@ -53,9 +58,12 @@ function NodeIndexPage() {
 		}
 	}, [nodes, isLoading, navigate, allNodes]);
 
-	// Show onboarding first for new users with no nodes
-	if (hasNoNodes && showOnboarding) {
-		return <OnboardingScreen onContinue={handleOnboardingComplete} />;
+	if (hasNoNodes && onboardingStep === "welcome") {
+		return <OnboardingScreen onContinue={handleWelcomeComplete} />;
+	}
+
+	if (hasNoNodes && onboardingStep === "setup-check") {
+		return <SetupCheckScreen onContinue={handleSetupCheckComplete} />;
 	}
 
 	if (hasNoNodes) {

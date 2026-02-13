@@ -26,16 +26,16 @@ export function SettingsModal() {
 	return (
 		<div className="fixed inset-0 z-50">
 			{/* Backdrop with blur */}
-			<div
-				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+			<button
+				type="button"
+				className="absolute inset-0 bg-black/60"
 				onClick={closeSettings}
 				onKeyDown={(e) => e.key === "Escape" && closeSettings()}
-				role="button"
 				tabIndex={0}
 				aria-label="Close settings"
 			/>
 			{/* Modal content */}
-			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-xl elevation-3 bg-background flex flex-col">
+			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-3xl max-h-[85vh] overflow-hidden rounded-[10px] surface-raised bg-background flex flex-col">
 				<SettingsContent onClose={closeSettings} />
 			</div>
 		</div>

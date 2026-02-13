@@ -1,0 +1,9 @@
+[test]
+# Integration tests use a different setup than unit tests:
+# - Real SQLite database via bun:sqlite (not mocked)
+# - External deps (Electron, analytics) still mocked
+preload = ["./helpers/setup.ts"]
+
+[test.env]
+NODE_ENV = "test"
+SKIP_ENV_VALIDATION = "1"

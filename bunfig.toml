@@ -1,5 +1,4 @@
 [test]
-# Preload test setup before running tests
 preload = ["./test-setup.ts"]
 
 [test.env]

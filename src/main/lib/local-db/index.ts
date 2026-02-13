@@ -71,6 +71,12 @@ console.log(`[local-db] Running migrations from: ${migrationsFolder}`);
 
 export const localDb = drizzle(sqlite, { schema });
 
+// Expose raw SQLite instance for E2E test data seeding via electronApp.evaluate().
+// Uses a custom env var because process.env.NODE_ENV is replaced at build time.
+if (process.env.CASPIAN_EXPOSE_TEST_DB === "1") {
+	(globalThis as Record<string, unknown>).__caspianTestDb = sqlite;
+}
+
 try {
 	migrate(localDb, { migrationsFolder });
 } catch (error) {

@@ -7,11 +7,13 @@ import {
 	getNode,
 	getRepository,
 	getWorktree,
+	touchNode,
 	updateRepositoryDefaultBranch,
 } from "../utils/db-helpers";
 import {
 	checkNeedsRebase,
 	fetchDefaultBranch,
+	getCurrentBranch,
 	getDefaultBranch,
 	refreshDefaultBranch,
 } from "../utils/git";
@@ -83,10 +85,33 @@ export const createGitStatusProcedures = () => {
 					return null;
 				}
 
-				// Always fetch fresh data on hover
+				let branchRenamed: { from: string; to: string } | null = null;
+				const actualBranch = await getCurrentBranch(worktree.path);
+
+				if (actualBranch && actualBranch !== worktree.branch) {
+					branchRenamed = { from: worktree.branch, to: actualBranch };
+
+					const worktreeUpdate: { branch: string; gitStatus?: typeof worktree.gitStatus } = {
+						branch: actualBranch,
+					};
+					if (worktree.gitStatus) {
+						worktreeUpdate.gitStatus = { ...worktree.gitStatus, branch: actualBranch };
+					}
+					localDb.update(worktrees).set(worktreeUpdate).where(eq(worktrees.id, worktree.id)).run();
+
+					// Only update display name if it still matches the old branch (not custom)
+					touchNode(node.id, {
+						branch: actualBranch,
+						...(node.name === worktree.branch ? { name: actualBranch } : {}),
+					});
+
+					console.log(
+						`[git-status/getGitHubStatus] Branch renamed: ${worktree.branch} -> ${actualBranch} (node ${node.id})`,
+					);
+				}
+
 				const freshStatus = await fetchGitHubPRStatus(worktree.path);
 
-				// Update cache if we got data
 				if (freshStatus) {
 					localDb
 						.update(worktrees)
@@ -95,7 +120,7 @@ export const createGitStatusProcedures = () => {
 						.run();
 				}
 
-				return freshStatus;
+				return { status: freshStatus, branchRenamed };
 			}),
 
 		getWorktreeInfo: publicProcedure.input(z.object({ nodeId: z.string() })).query(({ input }) => {

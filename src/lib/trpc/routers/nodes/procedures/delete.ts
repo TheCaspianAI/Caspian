@@ -62,19 +62,6 @@ export const createDeleteProcedures = () => {
 					.getForNodeId(input.id)
 					.terminal.getSessionCountByWorkspaceId(input.id);
 
-				// Branch nodes are non-destructive to close - no git checks needed
-				if (node.type === "branch") {
-					return {
-						canDelete: true,
-						reason: null,
-						node,
-						warning: null,
-						activeTerminalCount,
-						hasChanges: false,
-						hasUnpushedCommits: false,
-					};
-				}
-
 				// Polling uses skipGitChecks to avoid expensive git operations
 				if (input.skipGitChecks) {
 					return {
@@ -180,7 +167,7 @@ export const createDeleteProcedures = () => {
 
 			let worktree: SelectWorktree | undefined;
 
-			if (node.type === "worktree" && node.worktreeId) {
+			if (node.worktreeId) {
 				worktree = getWorktree(node.worktreeId);
 
 				if (worktree && repository) {

@@ -3,7 +3,25 @@
 /.pnp
 .pnp.js
 
-# testing
+# Testing — shared infrastructure is committed, feature tests are local
+#
+# Committed (shared):
+#   tests/integration/helpers/     — seed, test-db, trpc-caller, setup
+#   tests/integration/bunfig.toml  — Bun config for integration runner
+#   tests/e2e/fixtures/            — Playwright Electron fixture
+#   playwright.config.ts           — Playwright config
+#   test-setup.ts                  — Unit test global setup
+#   src/**/*.test.ts               — Unit tests (co-located with source)
+#
+# Local (gitignored):
+#   tests/integration/*.test.ts    — Feature-specific integration tests
+#   tests/e2e/*.e2e.ts             — Feature-specific E2E tests
+#   tests/e2e/screenshots/         — E2E screenshot artifacts
+#   test-results/                  — Playwright results
+#   playwright-report/             — Playwright HTML report
+#   /coverage                      — Test coverage reports
+tests/integration/*.test.ts
+tests/e2e/*.e2e.ts
 /coverage
 
 # production
@@ -26,4 +44,13 @@ yarn-error.log*
 electron.vite.config.*.mjs
 
 # TanStack Router generated file
-routeTree.gen.tsrelease/
+routeTree.gen.ts
+release/
+
+tests/e2e/screenshots/
+test-results/
+playwright-report/
+
+# Local workflow artifacts
+qa/
+plans/

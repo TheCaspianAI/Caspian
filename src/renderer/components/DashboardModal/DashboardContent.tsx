@@ -17,10 +17,8 @@ export function DashboardContent({ onClose }: DashboardContentProps) {
 
 	const handleAgentSelect = useCallback(
 		(nodeId: string, paneId: string, tabId: string) => {
-			// Navigate to the node
 			navigate({ to: "/node/$nodeId", params: { nodeId: nodeId } });
 
-			// If we have a specific pane, focus it
 			if (paneId && tabId) {
 				const targetTab = tabs.find((t) => t.id === tabId);
 				if (targetTab) {
@@ -29,22 +27,21 @@ export function DashboardContent({ onClose }: DashboardContentProps) {
 				}
 			}
 
-			// Close the modal
 			onClose();
 		},
 		[navigate, tabs, setActiveTab, setFocusedPane, onClose],
 	);
 
 	return (
-		<div className="flex flex-col h-full">
+		<div className="flex flex-col flex-1 min-h-0">
 			{/* Header */}
-			<div className="flex items-center px-4 py-3 border-b border-border/30">
-				<span className="text-sm font-medium">Agents Dashboard</span>
+			<div className="flex items-center shrink-0 px-6 py-4 border-b border-border">
+				<span className="text-section font-medium text-muted-foreground">Agents Dashboard</span>
 			</div>
 
-			{/* Lanes - lifecycle order: Running → Waiting → Completed → Idle */}
-			<div className="flex-1 overflow-x-auto overflow-y-hidden">
-				<div className="flex h-full p-4 gap-4">
+			{/* Lanes */}
+			<div className="flex-1 min-h-0 overflow-x-auto">
+				<div className="flex h-full divide-x divide-border">
 					<StatusLane
 						title="Running"
 						status="running"

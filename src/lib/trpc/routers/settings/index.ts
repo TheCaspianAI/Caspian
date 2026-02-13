@@ -17,6 +17,7 @@ import {
 import { z } from "zod";
 import { publicProcedure, router } from "../..";
 import { getGitAuthorName, getGitHubUsername } from "../nodes/utils/git";
+import { checkToolStatus } from "./utils/check-tools";
 
 function getSettings() {
 	let row = localDb.select().from(settings).get();
@@ -301,6 +302,10 @@ export const createSettingsRouter = () => {
 
 				return { success: true };
 			}),
+
+		getToolStatus: publicProcedure.query(async () => {
+			return checkToolStatus();
+		}),
 
 		getGitInfo: publicProcedure.query(async () => {
 			const githubUsername = await getGitHubUsername();

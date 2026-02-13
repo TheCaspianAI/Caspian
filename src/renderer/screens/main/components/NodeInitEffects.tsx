@@ -147,8 +147,7 @@ export function NodeInitEffects() {
 				return;
 			}
 
-			// No setup script and no default preset - that's fine, user can configure
-			// scripts during node creation in Advanced Options if they want
+			addTab(setup.nodeId);
 			onComplete();
 		},
 		[addTab, setTabAutoTitle, createOrAttach, createPresetTerminal, shouldApplyPreset],
