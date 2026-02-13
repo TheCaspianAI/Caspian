@@ -6,41 +6,47 @@ import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
 	[
-		"inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium",
-		"rounded-lg transition-colors duration-150 cursor-pointer",
-		"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+		"inline-flex items-center justify-center gap-2 whitespace-nowrap text-[13px] font-medium",
+		"rounded-[6px] transition-colors duration-[80ms] cursor-pointer",
+		"focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
 		"disabled:pointer-events-none disabled:opacity-50",
 		"[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
 	],
 	{
 		variants: {
 			variant: {
-				// Primary - pink accent, subtle glow on hover only
+				// Primary — white fill, dark text, no glow
 				default: [
 					"bg-primary text-primary-foreground",
-					"hover:bg-primary/90",
-					"hover:shadow-[0_0_16px_oklch(0.72_0.25_328_/_0.25)]",
+					"hover:bg-primary/85",
+					"active:bg-primary/75",
 				],
-				// Secondary - muted background
-				secondary: ["bg-secondary text-secondary-foreground", "hover:bg-secondary/70"],
-				// Outline - border, transparent bg
+				// Secondary — transparent fill, secondary text, border
+				secondary: [
+					"bg-transparent text-muted-foreground border border-border",
+					"hover:bg-accent hover:text-accent-foreground",
+				],
+				// Outline — same as secondary
 				outline: [
 					"border border-border bg-transparent text-foreground",
 					"hover:bg-accent hover:text-accent-foreground",
 				],
-				// Ghost - no background until hover
-				ghost: ["text-foreground", "hover:bg-accent hover:text-accent-foreground"],
-				// Destructive
-				destructive: ["bg-destructive text-destructive-foreground", "hover:bg-destructive/90"],
+				// Ghost — no fill, no border
+				ghost: ["text-muted-foreground", "hover:bg-accent hover:text-accent-foreground"],
+				// Destructive — transparent fill, error text, border
+				destructive: [
+					"bg-transparent text-destructive border border-border",
+					"hover:bg-destructive/10",
+				],
 				// Link
-				link: ["text-primary underline-offset-4", "hover:underline"],
+				link: ["text-foreground underline-offset-4", "hover:underline"],
 			},
 			size: {
-				default: "h-9 px-4 py-2",
-				sm: "h-8 px-3 text-xs",
-				lg: "h-10 px-5",
-				icon: "size-9",
-				"icon-sm": "size-8",
+				default: "h-8 px-3.5 py-1.5",
+				sm: "h-7 px-2.5 text-xs",
+				lg: "h-9 px-5",
+				icon: "size-8",
+				"icon-sm": "size-7",
 			},
 		},
 		defaultVariants: {

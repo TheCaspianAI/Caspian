@@ -162,7 +162,7 @@ export function FileItem({
 		<div
 			className={cn(
 				"group w-full flex items-stretch gap-1 px-3 text-left rounded-sm",
-				"hover:bg-muted/50 cursor-pointer transition-colors overflow-hidden",
+				"hover:bg-muted/50 cursor-pointer transition-colors duration-[80ms] overflow-hidden",
 				isHighlighted && "bg-muted",
 			)}
 		>
@@ -179,7 +179,7 @@ export function FileItem({
 				<span className="flex-1 min-w-0 flex items-center gap-1">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<span className="text-xs text-start truncate overflow-hidden text-ellipsis">
+							<span className="text-xs font-mono text-start truncate overflow-hidden text-ellipsis">
 								{fileName}
 							</span>
 						</TooltipTrigger>

@@ -15,6 +15,7 @@ export const nordTheme: Theme = {
 	ui: {
 		background: "#2e3440",
 		foreground: "#eceff4",
+		navForeground: "#e5e9f0",
 		card: "#3b4252",
 		cardForeground: "#eceff4",
 		popover: "#3b4252",

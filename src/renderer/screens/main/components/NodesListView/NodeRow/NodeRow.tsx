@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LuArrowRight, LuCloudOff, LuFolder, LuFolderGit2, LuRotateCw } from "react-icons/lu";
+import { LuArrowRight, LuCloudOff, LuFolderGit2, LuLaptop, LuRotateCw } from "react-icons/lu";
 import { electronTrpc } from "renderer/lib/electron-trpc";
 import { useNodeDeleteHandler } from "renderer/react-query/nodes/useNodeDeleteHandler";
 import { PRIcon } from "renderer/screens/main/components/PRIcon";
@@ -82,7 +82,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 						)}
 					>
 						{isBranch ? (
-							<LuFolder className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
+							<LuLaptop className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						) : (
 							<LuFolderGit2 className="size-4 text-muted-foreground" strokeWidth={STROKE_WIDTH} />
 						)}
@@ -110,7 +110,7 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 			<span
 				className={cn("text-sm truncate text-foreground/80", !node.isOpen && "text-foreground/50")}
 			>
-				{node.name}
+				{isBranch ? "local" : node.name}
 			</span>
 
 			{pr?.state === "merged" && <PRIcon state="merged" className="size-3.5 shrink-0" />}
@@ -187,7 +187,6 @@ export function NodeRow({ node, onSwitch, onReopen, isOpening }: NodeRowProps) {
 				<DeleteNodeDialog
 					nodeId={node.nodeId}
 					nodeName={node.name}
-					nodeType={node.type}
 					open={showDeleteDialog}
 					onOpenChange={setShowDeleteDialog}
 				/>

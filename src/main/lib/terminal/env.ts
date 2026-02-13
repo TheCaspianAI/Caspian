@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import os from "node:os";
-import defaultShell from "default-shell";
+import { detectDefaultShell } from "default-shell";
 import { PORTS } from "shared/constants";
 import { getShellEnv } from "../agent-setup/shell-wrappers";
 
@@ -15,8 +15,13 @@ export const FALLBACK_SHELL = os.platform() === "win32" ? "cmd.exe" : "/bin/sh";
 export const SHELL_CRASH_THRESHOLD_MS = 1000;
 
 export function getDefaultShell(): string {
-	if (defaultShell) {
-		return defaultShell;
+	try {
+		const shell = detectDefaultShell();
+		if (shell) {
+			return shell;
+		}
+	} catch {
+		// Fall through to manual detection
 	}
 
 	const platform = os.platform();

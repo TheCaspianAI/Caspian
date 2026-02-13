@@ -15,6 +15,7 @@ export const everforestTheme: Theme = {
 	ui: {
 		background: "#1e2326",
 		foreground: "#d3c6aa",
+		navForeground: "#b6b39e",
 		card: "#272e33",
 		cardForeground: "#d3c6aa",
 		popover: "#272e33",

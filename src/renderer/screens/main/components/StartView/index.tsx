@@ -180,9 +180,9 @@ export function StartView() {
 			>
 				{/* Drop overlay */}
 				{isDragOver && (
-					<div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+					<div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80">
 						<div className="flex flex-col items-center gap-3 text-center">
-							<div className="w-16 h-16 rounded-2xl border-2 border-dashed border-white/30 flex items-center justify-center">
+							<div className="w-16 h-16 rounded-[10px] border-2 border-dashed border-white/30 flex items-center justify-center">
 								<LuFolderOpen className="w-8 h-8 text-white/60" />
 							</div>
 							<span className="text-sm text-white/60 font-medium">Drop to open project</span>
@@ -219,9 +219,9 @@ export function StartView() {
 							disabled={isLoading}
 							className={cn(
 								"inline-flex items-center gap-3 px-6 py-3",
-								"rounded-xl border border-neutral-700/50 bg-transparent",
+								"rounded-[6px] border border-neutral-700/50 bg-transparent",
 								"text-[15px] text-neutral-300",
-								"transition-all duration-150",
+								"transition-all duration-[80ms]",
 								"hover:bg-white/5 hover:border-neutral-600",
 								"focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20",
 								"disabled:opacity-50 disabled:pointer-events-none",
@@ -238,9 +238,9 @@ export function StartView() {
 							disabled={isLoading}
 							className={cn(
 								"inline-flex items-center gap-3 px-6 py-3",
-								"rounded-xl border border-neutral-700/50 bg-transparent",
+								"rounded-[6px] border border-neutral-700/50 bg-transparent",
 								"text-[15px] text-neutral-300",
-								"transition-all duration-150",
+								"transition-all duration-[80ms]",
 								"hover:bg-white/5 hover:border-neutral-600",
 								"focus:outline-none focus-visible:ring-1 focus-visible:ring-white/20",
 								"disabled:opacity-50 disabled:pointer-events-none",

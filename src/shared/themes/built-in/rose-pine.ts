@@ -15,6 +15,7 @@ export const rosePineTheme: Theme = {
 	ui: {
 		background: "#191724",
 		foreground: "#e0def4",
+		navForeground: "#c2bfd8",
 		card: "#26233a",
 		cardForeground: "#e0def4",
 		popover: "#26233a",

@@ -31,14 +31,14 @@ export function NodeSwitcherModal() {
 			{/* Backdrop with blur */}
 			<button
 				type="button"
-				className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+				className="absolute inset-0 bg-black/60"
 				onClick={closeModal}
 				onKeyDown={(e) => e.key === "Escape" && closeModal()}
 				tabIndex={0}
 				aria-label="Close modal"
 			/>
 			{/* Modal content */}
-			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-[540px] max-h-[70vh] overflow-hidden rounded-xl elevation-2 bg-background">
+			<div className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-full max-w-[540px] max-h-[70vh] overflow-hidden rounded-[10px] surface-raised bg-background">
 				<NodeSwitcherContent />
 			</div>
 		</div>

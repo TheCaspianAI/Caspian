@@ -76,7 +76,9 @@ function FolderRowHeader({
 				<span
 					className={cn(
 						"truncate",
-						isGrouped ? "w-0 grow text-left" : "flex-1 min-w-0 text-xs text-foreground",
+						isGrouped
+							? "w-0 grow text-left font-mono"
+							: "flex-1 min-w-0 text-xs font-mono text-foreground",
 					)}
 					dir={isGrouped ? "rtl" : undefined}
 				>
@@ -120,7 +122,7 @@ export function FolderRow({
 		<CollapsibleTrigger
 			className={cn(
 				"w-full flex items-center gap-2 px-3 py-1.5 text-left rounded-sm",
-				"hover:bg-muted/50 cursor-pointer transition-colors",
+				"hover:bg-muted/50 cursor-pointer transition-colors duration-[80ms]",
 				"text-xs items-stretch",
 				isGrouped && "text-muted-foreground",
 			)}

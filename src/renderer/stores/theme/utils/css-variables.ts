@@ -6,6 +6,7 @@ import type { UIColors } from "shared/themes/types";
 const UI_COLOR_TO_CSS_VAR: Record<keyof UIColors, string> = {
 	background: "--background",
 	foreground: "--foreground",
+	navForeground: "--nav-foreground",
 	card: "--card",
 	cardForeground: "--card-foreground",
 	popover: "--popover",

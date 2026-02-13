@@ -111,7 +111,7 @@ export function FileTreeItem({
 			aria-expanded={isFolder ? isExpanded : undefined}
 			className={cn(
 				"flex items-center gap-1 px-3 cursor-pointer select-none",
-				"hover:bg-muted/50 transition-colors",
+				"hover:bg-muted/50 transition-colors duration-[80ms]",
 				item.isSelected() && "bg-accent/30",
 			)}
 			onClick={handleClick}
@@ -130,7 +130,7 @@ export function FileTreeItem({
 
 			<Icon className={cn("size-4 shrink-0 opacity-50", color)} />
 
-			<span className={cn("flex-1 min-w-0 text-xs truncate", isFolder && "font-medium")}>
+			<span className={cn("flex-1 min-w-0 text-xs font-mono truncate", isFolder && "font-medium")}>
 				{entry.name}
 			</span>
 		</div>

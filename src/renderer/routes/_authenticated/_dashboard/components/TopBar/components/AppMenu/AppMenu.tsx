@@ -35,7 +35,7 @@ export function AppMenu() {
 			<DropdownMenuTrigger asChild>
 				<button
 					type="button"
-					className="no-drag flex items-center justify-center size-7 rounded border border-border/60 bg-secondary/50 hover:bg-secondary hover:border-border transition-all duration-150 ease-out focus:outline-none focus:ring-1 focus:ring-ring"
+					className="no-drag flex items-center justify-center size-7 rounded-[6px] border border-border bg-secondary hover:bg-accent transition-colors duration-[80ms] focus:outline-none focus:ring-1 focus:ring-ring"
 					aria-label="App menu"
 				>
 					<LuSettings2 className="h-4 w-4 text-muted-foreground" />

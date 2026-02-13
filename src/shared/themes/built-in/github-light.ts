@@ -15,6 +15,7 @@ export const githubLightTheme: Theme = {
 	ui: {
 		background: "#ffffff",
 		foreground: "#1f2328",
+		navForeground: "#393f45",
 		card: "#f6f8fa",
 		cardForeground: "#1f2328",
 		popover: "#ffffff",

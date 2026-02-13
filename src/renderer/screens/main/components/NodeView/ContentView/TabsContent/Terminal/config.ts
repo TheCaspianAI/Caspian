@@ -31,7 +31,7 @@ const TERMINAL_FONT_FAMILY = [
 ].join(", ");
 
 export const TERMINAL_OPTIONS: ITerminalOptions = {
-	cursorBlink: true,
+	cursorBlink: false,
 	fontSize: 14,
 	fontFamily: TERMINAL_FONT_FAMILY,
 	theme: TERMINAL_THEME,

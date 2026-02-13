@@ -1,6 +1,7 @@
-import { createFileRoute, Outlet, useMatchRoute } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useMatchRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { electronTrpc } from "renderer/lib/electron-trpc";
-import { ContextRail } from "renderer/screens/main/components/ContextRail";
+import { NodeSidebar } from "renderer/screens/main/components/NodeSidebar";
 import { ResizablePanel } from "renderer/screens/main/components/ResizablePanel";
 import { useToggleDashboardModal } from "renderer/stores/dashboard-modal";
 import { useAppHotkey } from "renderer/stores/hotkeys";
@@ -8,10 +9,11 @@ import { useOpenNewNodeModal } from "renderer/stores/new-node-modal";
 import { useToggleNodeSwitcherModal } from "renderer/stores/node-switcher-modal";
 import { useOpenSettings } from "renderer/stores/settings-state";
 import {
+	COLLAPSED_SIDEBAR_WIDTH,
 	MAX_SIDEBAR_WIDTH,
-	MIN_SIDEBAR_WIDTH,
 	useSidebarStore,
 } from "renderer/stores/sidebar-state";
+import { cn } from "ui/lib/utils";
 import { TopBar } from "./components/TopBar";
 
 export const Route = createFileRoute("/_authenticated/_dashboard")({
@@ -24,7 +26,6 @@ function DashboardLayout() {
 	const toggleNodeSwitcher = useToggleNodeSwitcherModal();
 	const openSettings = useOpenSettings();
 
-	// Get current node from route to pre-select repository in new node modal
 	const matchRoute = useMatchRoute();
 	const currentNodeMatch = matchRoute({
 		to: "/node/$nodeId",
@@ -37,10 +38,21 @@ function DashboardLayout() {
 		{ enabled: !!currentNodeId },
 	);
 
+	const navigate = useNavigate();
+	const { data: nodeGroups } = electronTrpc.nodes.getAllGrouped.useQuery();
+	const hasNodes = !!nodeGroups && nodeGroups.length > 0;
+
+	const prevHasNodes = useRef(hasNodes);
+	useEffect(() => {
+		if (prevHasNodes.current && !hasNodes) {
+			navigate({ to: "/node" });
+		}
+		prevHasNodes.current = hasNodes;
+	}, [hasNodes, navigate]);
+
 	const { isSidebarOpen, sidebarWidth, setSidebarWidth, isResizing, setIsResizing, toggleSidebar } =
 		useSidebarStore();
 
-	// Global hotkeys for dashboard
 	useAppHotkey("OPEN_SETTINGS", () => openSettings(), undefined, [openSettings]);
 
 	useAppHotkey("SHOW_HOTKEYS", () => openSettings("preferences"), undefined, [openSettings]);
@@ -63,28 +75,30 @@ function DashboardLayout() {
 
 	useAppHotkey("OPEN_DASHBOARD", () => toggleDashboardModal(), undefined, [toggleDashboardModal]);
 
-	// Only show ContextRail on node routes (requires node context for Files/Changes)
-	const isNodeRoute = !!currentNodeId;
-	const showContextRail = isSidebarOpen && isNodeRoute;
-
 	return (
-		<div className="flex flex-col h-full w-full bg-tertiary">
+		<div className="flex flex-col h-full w-full bg-background">
 			<TopBar />
 			<div className="flex flex-1 overflow-hidden">
-				{showContextRail && (
+				{hasNodes && isSidebarOpen && (
 					<ResizablePanel
 						width={sidebarWidth}
 						onWidthChange={setSidebarWidth}
 						isResizing={isResizing}
 						onResizingChange={setIsResizing}
-						minWidth={MIN_SIDEBAR_WIDTH}
+						minWidth={COLLAPSED_SIDEBAR_WIDTH}
 						maxWidth={MAX_SIDEBAR_WIDTH}
 						handleSide="right"
+						clampWidth={false}
 					>
-						<ContextRail />
+						<NodeSidebar />
 					</ResizablePanel>
 				)}
-				<div className="flex-1 m-3 bg-background rounded-[var(--radius-modal)] overflow-hidden elevation-2">
+				<div
+					className={cn(
+						"flex-1 bg-background overflow-hidden",
+						hasNodes && isSidebarOpen && "border-l border-border",
+					)}
+				>
 					<Outlet />
 				</div>
 			</div>
