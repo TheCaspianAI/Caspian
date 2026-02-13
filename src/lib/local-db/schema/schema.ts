@@ -1,4 +1,5 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { v4 as uuidv4 } from "uuid";
 
 import type {
@@ -119,6 +120,9 @@ export const nodes = sqliteTable(
 		index("nodes_project_id_idx").on(table.repositoryId),
 		index("nodes_worktree_id_idx").on(table.worktreeId),
 		index("nodes_last_opened_at_idx").on(table.lastOpenedAt),
+		uniqueIndex("nodes_unique_branch_per_project")
+			.on(table.repositoryId)
+			.where(sql`${table.type} = 'branch'`),
 	],
 );
 

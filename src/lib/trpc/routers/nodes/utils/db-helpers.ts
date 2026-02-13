@@ -277,7 +277,10 @@ export function ensureBranchNodeExists({
 			name: defaultBranch,
 			tabOrder: 0,
 		})
-		.onConflictDoNothing()
+		.onConflictDoNothing({
+			target: nodes.repositoryId,
+			where: sql`${nodes.type} = 'branch'`,
+		})
 		.returning()
 		.all();
 
