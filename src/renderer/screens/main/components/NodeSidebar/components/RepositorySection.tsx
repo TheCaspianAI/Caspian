@@ -347,7 +347,7 @@ export function RepositorySection({
 						transition={{ duration: 0.15, ease: "easeOut" }}
 						className="overflow-hidden"
 					>
-						<div className="pb-1">
+						<div className="pt-0.5 pb-2">
 							{group.nodes.map((node, nodeIndex) => {
 								const handleClose =
 									node.isOpen && node.nodeId && node.type !== "branch"

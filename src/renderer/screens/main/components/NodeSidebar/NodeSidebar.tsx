@@ -29,9 +29,9 @@ export function NodeSidebar() {
 	const showTabLabels = !isCollapsed && sidebarWidth >= TAB_LABEL_THRESHOLD;
 
 	return (
-		<aside className="flex flex-col h-full overflow-hidden">
+		<aside className="flex flex-col h-full overflow-hidden surface-sidebar">
 			{/* Dashboard button — matches TopBar height so borders align */}
-			<div className="shrink-0 h-9 flex items-center border-b border-border/40">
+			<div className="shrink-0 h-10 flex items-center border-b border-border/20 surface-topbar">
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<button
@@ -43,7 +43,7 @@ export function NodeSidebar() {
 									? "flex items-center justify-center size-8 mx-auto rounded-md"
 									: "w-full h-full px-3 text-left text-section font-semibold flex items-center",
 								isDashboardOpen
-									? "bg-accent text-foreground"
+									? "bg-primary/10 text-foreground"
 									: "text-nav-foreground hover:bg-accent hover:text-foreground",
 							)}
 						>
@@ -59,8 +59,8 @@ export function NodeSidebar() {
 			{/* View tabs */}
 			<div
 				className={cn(
-					"flex shrink-0 border-b border-border",
-					isCollapsed ? "flex-col gap-1 py-1.5 items-center" : "gap-0.5 px-1.5 py-1.5",
+					"flex shrink-0 border-b border-border/40",
+					isCollapsed ? "flex-col gap-1 py-2 items-center" : "gap-1 px-3 py-2",
 				)}
 			>
 				{TABS.map((tab) => {
@@ -77,8 +77,8 @@ export function NodeSidebar() {
 								isCollapsed ? "size-8" : "h-7 flex-1 min-w-0",
 								!isCollapsed && showTabLabels && "px-2",
 								isActive
-									? "bg-accent text-foreground"
-									: "text-nav-foreground hover:bg-accent hover:text-foreground",
+									? "bg-primary/10 text-foreground"
+									: "text-nav-foreground hover:bg-accent/60 hover:text-foreground",
 							)}
 						>
 							<Icon className="size-3.5 shrink-0" />

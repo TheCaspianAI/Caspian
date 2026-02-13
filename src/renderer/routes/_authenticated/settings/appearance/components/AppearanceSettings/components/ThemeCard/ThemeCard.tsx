@@ -10,7 +10,7 @@ interface ThemeCardProps {
 
 export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
 	const terminal = getTerminalColors(theme);
-	const bgColor = terminal.background;
+	const bgColor = terminal.background === "transparent" ? theme.ui.background : terminal.background;
 	const fgColor = terminal.foreground;
 	const accentColors = [
 		terminal.red,
@@ -61,10 +61,19 @@ export function ThemeCard({ theme, isSelected, onSelect }: ThemeCardProps) {
 			</div>
 
 			{/* Theme Info */}
-			<div className="p-3 bg-card border-t flex items-center justify-between">
+			<div
+				className="p-3 border-t flex items-center justify-between"
+				style={{ backgroundColor: theme.ui.card, borderColor: theme.ui.border }}
+			>
 				<div>
-					<div className="text-sm font-medium">{theme.name}</div>
-					{theme.author && <div className="text-xs text-muted-foreground">{theme.author}</div>}
+					<div className="text-sm font-medium" style={{ color: theme.ui.cardForeground }}>
+						{theme.name}
+					</div>
+					{theme.author && (
+						<div className="text-xs" style={{ color: theme.ui.mutedForeground }}>
+							{theme.author}
+						</div>
+					)}
 				</div>
 				{isSelected && (
 					<div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
