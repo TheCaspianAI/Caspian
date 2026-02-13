@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { caspianTheme } from "./caspian";
 import { everforestTheme } from "./everforest";
 import { githubDarkTheme } from "./github-dark";
 import { githubLightTheme } from "./github-light";
-import { nordTheme } from "./nord";
+import { graceTheme } from "./grace";
+import { hexTheme } from "./hex";
 import { rosePineTheme } from "./rose-pine";
 
 const ALL_THEMES = [
-	caspianTheme,
+	graceTheme,
 	everforestTheme,
 	githubDarkTheme,
 	githubLightTheme,
-	nordTheme,
+	hexTheme,
 	rosePineTheme,
 ];
 

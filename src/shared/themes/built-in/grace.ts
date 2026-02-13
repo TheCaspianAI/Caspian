@@ -1,16 +1,16 @@
 import type { Theme } from "../types";
 
 /**
- * Caspian theme — Antimetal-inspired
+ * Grace theme — Antimetal-inspired
  *
  * Deep near-neutral dark palette with warm cream text and ivory accent.
  * Backgrounds have barely perceptible warm hint (oklch hue ~70, chroma ~0.004).
  * Foreground and accent use warm cream (oklch hue ~80, chroma 0.025-0.035).
  * Inspired by Antimetal's premium dark aesthetic.
  */
-export const caspianTheme: Theme = {
-	id: "caspian",
-	name: "Caspian",
+export const graceTheme: Theme = {
+	id: "grace",
+	name: "Grace",
 	author: "Caspian",
 	type: "dark",
 	isBuiltIn: true,

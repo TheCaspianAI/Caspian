@@ -8,7 +8,7 @@ export {
 	getBuiltInTheme,
 	githubDarkTheme,
 	githubLightTheme,
-	nordTheme,
+	hexTheme,
 	rosePineTheme,
 } from "./built-in";
 export type { TerminalColors, Theme, ThemeMetadata, UIColors } from "./types";

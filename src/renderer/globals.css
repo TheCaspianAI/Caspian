@@ -43,7 +43,7 @@
 	--status-done: oklch(0.63 0 0);
 
 	/*
-	 * Caspian default theme — Antimetal-inspired deep dark with cream accent.
+	 * Grace default theme — Antimetal-inspired deep dark with cream accent.
 	 * Near-neutral backgrounds (hue ~70, chroma ~0.004).
 	 * Warm cream foreground/accent (hue ~80, chroma 0.025-0.035).
 	 * The theme store overrides these via inline styles when themes change.
