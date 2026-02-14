@@ -2,7 +2,7 @@
 	"name": "@caspian/desktop",
 	"productName": "Caspian",
 	"description": "AI-powered development environment",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"main": "./dist/main/index.js",
 	"resources": "src/resources",
 	"repository": {
