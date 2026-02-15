@@ -15,10 +15,8 @@ import { MainWindow } from "./windows/main";
 // Initialize local SQLite database (runs migrations + legacy data migration on import)
 console.log("[main] Local database ready:", !!localDb);
 
-// Set app name
 app.setName("Caspian");
 
-// Set dock icon on macOS (after app is ready)
 if (process.platform === "darwin") {
 	app.whenReady().then(() => {
 		if (app.dock) {
@@ -54,17 +52,13 @@ if (process.defaultApp) {
 async function processDeepLink(url: string): Promise<void> {
 	console.log("[main] Processing deep link:", url);
 
-	// Extract path and navigate in renderer
-	// e.g. caspian://settings/appearance -> /settings/appearance
 	const deepLinkPath = `/${url.split("://")[1]}`;
 
 	focusMainWindow();
 
-	// Navigate in renderer via loading the route directly
 	const windows = BrowserWindow.getAllWindows();
 	if (windows.length > 0) {
 		const mainWindow = windows[0];
-		// Send navigation request to renderer
 		mainWindow.webContents.send("deep-link-navigate", deepLinkPath);
 	}
 }
@@ -91,7 +85,6 @@ function focusMainWindow(): void {
 	}
 }
 
-// Handle deep links when app is already running (macOS)
 app.on("open-url", async (event, url) => {
 	event.preventDefault();
 	await processDeepLink(url);
@@ -146,7 +139,6 @@ app.on("before-quit", async (event) => {
 			});
 
 			if (response === 1) {
-				// User cancelled
 				return;
 			}
 		} catch (error) {
@@ -154,8 +146,6 @@ app.on("before-quit", async (event) => {
 		}
 	}
 
-	// Quit confirmed or no confirmation needed - exit immediately
-	// Let OS clean up child processes, tray, etc.
 	isQuitting = true;
 	disposeTray();
 	app.exit(0);
@@ -217,10 +207,8 @@ const isE2ETest = process.env.CASPIAN_E2E_TEST === "1";
 const gotTheLock = isE2ETest || app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
-	// Another instance is already running, exit immediately without triggering before-quit
 	app.exit(0);
 } else {
-	// Handle deep links when second instance is launched (Windows/Linux)
 	app.on("second-instance", async (_event, argv) => {
 		focusMainWindow();
 		const url = findDeepLinkInArgv(argv);
@@ -250,10 +238,8 @@ if (!gotTheLock) {
 		await makeAppSetup(() => MainWindow());
 		setupAutoUpdater();
 
-		// Initialize system tray (macOS menu bar icon for daemon management)
 		initTray();
 
-		// Handle cold-start deep links (Windows/Linux - app launched via deep link)
 		const coldStartUrl = findDeepLinkInArgv(process.argv);
 		if (coldStartUrl) {
 			await processDeepLink(coldStartUrl);

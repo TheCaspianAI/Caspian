@@ -49,19 +49,11 @@ import {
 	type WriteRequest,
 } from "./types";
 
-// =============================================================================
-// Connection State
-// =============================================================================
-
 enum ConnectionState {
 	DISCONNECTED = "disconnected",
 	CONNECTING = "connecting",
 	CONNECTED = "connected",
 }
-
-// =============================================================================
-// Configuration
-// =============================================================================
 
 const DEBUG_CLIENT = process.env.CASPIAN_TERMINAL_DEBUG === "1";
 
@@ -83,10 +75,6 @@ const SPAWN_LOCK_TIMEOUT_MS = 10000; // Max time to hold spawn lock
 // Queue limits
 const MAX_NOTIFY_QUEUE_BYTES = 2_000_000; // 2MB cap to prevent OOM
 const MAX_DAEMON_LOG_BYTES = 5 * 1024 * 1024; // 5MB cap for daemon.log
-
-// =============================================================================
-// NDJSON Parser
-// =============================================================================
 
 class NdjsonParser {
 	private remainder = "";
@@ -125,19 +113,11 @@ class NdjsonParser {
 	}
 }
 
-// =============================================================================
-// Pending Request Tracker
-// =============================================================================
-
 interface PendingRequest {
 	resolve: (value: unknown) => void;
 	reject: (error: Error) => void;
 	timeoutId: NodeJS.Timeout;
 }
-
-// =============================================================================
-// TerminalHostClient
-// =============================================================================
 
 export interface TerminalHostClientEvents {
 	data: (sessionId: string, data: string) => void;
@@ -181,10 +161,6 @@ export class TerminalHostClient extends EventEmitter {
 			});
 		}
 	}
-
-	// ===========================================================================
-	// Connection Management
-	// ===========================================================================
 
 	/**
 	 * Ensure we have a connected, authenticated socket.
@@ -868,10 +844,6 @@ export class TerminalHostClient extends EventEmitter {
 		}
 	}
 
-	// ===========================================================================
-	// Daemon Spawning
-	// ===========================================================================
-
 	/**
 	 * Check if there's an active daemon listening on the socket.
 	 * Returns true if socket is live and responding.
@@ -1130,10 +1102,6 @@ export class TerminalHostClient extends EventEmitter {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	// ===========================================================================
-	// Request/Response
-	// ===========================================================================
-
 	/**
 	 * Send a request to the daemon and wait for response
 	 */
@@ -1218,10 +1186,6 @@ export class TerminalHostClient extends EventEmitter {
 			}
 		}
 	}
-
-	// ===========================================================================
-	// Public API
-	// ===========================================================================
 
 	/**
 	 * Create or attach to a terminal session
@@ -1389,10 +1353,6 @@ export class TerminalHostClient extends EventEmitter {
 		this.removeAllListeners();
 	}
 }
-
-// =============================================================================
-// Singleton Instance
-// =============================================================================
 
 let clientInstance: TerminalHostClient | null = null;
 

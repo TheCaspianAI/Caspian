@@ -28,10 +28,6 @@ import {
 	PtySubprocessIpcType,
 } from "./pty-subprocess-ipc";
 
-// =============================================================================
-// Constants
-// =============================================================================
-
 /**
  * Timeout for flushing emulator writes during attach.
  * Prevents indefinite hang when continuous output (e.g., tail -f) keeps the queue non-empty.
@@ -44,10 +40,6 @@ const ATTACH_FLUSH_TIMEOUT_MS = 500;
  * 2MB is generous - typical large paste is ~50KB.
  */
 const MAX_SUBPROCESS_STDIN_QUEUE_BYTES = 2_000_000;
-
-// =============================================================================
-// Types
-// =============================================================================
 
 export interface SessionOptions {
 	sessionId: string;
@@ -69,10 +61,6 @@ export interface AttachedClient {
 	socket: Socket;
 	attachedAt: number;
 }
-
-// =============================================================================
-// Session Class
-// =============================================================================
 
 export class Session {
 	readonly sessionId: string;
@@ -814,10 +802,6 @@ export class Session {
 		this.onSessionExit = callback;
 	}
 
-	// ===========================================================================
-	// Private Methods
-	// ===========================================================================
-
 	/**
 	 * Broadcast an event to all attached clients with backpressure awareness.
 	 */
@@ -902,10 +886,6 @@ export class Session {
 		return [];
 	}
 }
-
-// =============================================================================
-// Factory Functions
-// =============================================================================
 
 /**
  * Create a new session from request parameters

@@ -18,10 +18,6 @@ import type {
 	TerminalRuntime,
 } from "./types";
 
-// =============================================================================
-// Terminal Runtime Adapter
-// =============================================================================
-
 /**
  * Adapts DaemonTerminalManager to the TerminalRuntime interface.
  *
@@ -51,10 +47,6 @@ class LocalTerminalRuntime implements TerminalRuntime {
 			resetHistoryPersistence: () => backend.resetHistoryPersistence(),
 		};
 	}
-
-	// ===========================================================================
-	// Session Operations (delegate to backend)
-	// ===========================================================================
 
 	createOrAttach: TerminalRuntime["createOrAttach"] = (params) => {
 		return this.backend.createOrAttach(params);
@@ -92,10 +84,6 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		return this.backend.getSession(paneId);
 	};
 
-	// ===========================================================================
-	// Workspace Operations (delegate to backend)
-	// ===========================================================================
-
 	killByWorkspaceId: TerminalRuntime["killByWorkspaceId"] = (workspaceId) => {
 		return this.backend.killByWorkspaceId(workspaceId);
 	};
@@ -107,10 +95,6 @@ class LocalTerminalRuntime implements TerminalRuntime {
 	refreshPromptsForWorkspace: TerminalRuntime["refreshPromptsForWorkspace"] = (workspaceId) => {
 		return this.backend.refreshPromptsForWorkspace(workspaceId);
 	};
-
-	// ===========================================================================
-	// Event Source (delegate to backend EventEmitter)
-	// ===========================================================================
 
 	// EventEmitter methods - delegate to backend
 	// Use method syntax to preserve `this` return type correctly
@@ -187,18 +171,10 @@ class LocalTerminalRuntime implements TerminalRuntime {
 		this.backend.detachAllListeners();
 	}
 
-	// ===========================================================================
-	// Cleanup
-	// ===========================================================================
-
 	cleanup: TerminalRuntime["cleanup"] = () => {
 		return this.backend.cleanup();
 	};
 }
-
-// =============================================================================
-// Local Node Runtime
-// =============================================================================
 
 /**
  * Local node runtime implementation.

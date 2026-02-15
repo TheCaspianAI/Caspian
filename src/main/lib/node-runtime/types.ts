@@ -19,18 +19,10 @@ import type { EventEmitter } from "node:events";
 import type { CreateSessionParams, SessionResult } from "../terminal/types";
 import type { ListSessionsResponse } from "../terminal-host/types";
 
-// =============================================================================
-// Identity Types
-// =============================================================================
-
 /**
  * Node runtime identifier - unique per runtime instance.
  */
 export type NodeRuntimeId = string;
-
-// =============================================================================
-// Terminal Capabilities
-// =============================================================================
 
 /**
  * Terminal backend capabilities.
@@ -42,10 +34,6 @@ export interface TerminalCapabilities {
 	/** Cold restore from disk is supported after unclean shutdown */
 	coldRestore: boolean;
 }
-
-// =============================================================================
-// Terminal Management (Session Admin)
-// =============================================================================
 
 /**
  * Terminal management capabilities for listing and killing sessions.
@@ -59,10 +47,6 @@ export interface TerminalManagement {
 	/** Reset history persistence (reinitialize all history writers) */
 	resetHistoryPersistence(): Promise<void>;
 }
-
-// =============================================================================
-// Terminal Session Operations
-// =============================================================================
 
 /**
  * Core terminal session operations.
@@ -102,10 +86,6 @@ export interface TerminalSessionOperations {
 	getSession(paneId: string): { isAlive: boolean; cwd: string; lastActive: number } | null;
 }
 
-// =============================================================================
-// Terminal Workspace Operations
-// =============================================================================
-
 /**
  * Workspace-scoped terminal operations.
  * These operate on all sessions within a workspace.
@@ -120,10 +100,6 @@ export interface TerminalWorkspaceOperations {
 	/** Send newline to all terminals in a workspace to refresh prompts */
 	refreshPromptsForWorkspace(workspaceId: string): void;
 }
-
-// =============================================================================
-// Terminal Event Source
-// =============================================================================
 
 /**
  * Terminal event source interface.
@@ -141,10 +117,6 @@ export interface TerminalEventSource extends EventEmitter {
 	/** Remove all terminal-specific listeners */
 	detachAllListeners(): void;
 }
-
-// =============================================================================
-// Terminal Runtime
-// =============================================================================
 
 /**
  * Terminal runtime interface - the backend-agnostic terminal surface.
@@ -169,10 +141,6 @@ export interface TerminalRuntime
 	cleanup(): Promise<void>;
 }
 
-// =============================================================================
-// Node Runtime
-// =============================================================================
-
 /**
  * Node runtime interface - the node-scoped provider boundary.
  *
@@ -193,10 +161,6 @@ export interface NodeRuntime {
 		// Future: changes, files, agentEvents capabilities
 	};
 }
-
-// =============================================================================
-// Node Runtime Registry
-// =============================================================================
 
 /**
  * Node runtime registry - process-scoped selection of runtime providers.

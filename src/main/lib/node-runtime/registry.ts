@@ -16,10 +16,6 @@
 import { LocalNodeRuntime } from "./local";
 import type { NodeRuntime, NodeRuntimeRegistry } from "./types";
 
-// =============================================================================
-// Registry Implementation
-// =============================================================================
-
 /**
  * Default registry implementation.
  *
@@ -54,10 +50,6 @@ class DefaultNodeRuntimeRegistry implements NodeRuntimeRegistry {
 		return this.localRuntime;
 	}
 }
-
-// =============================================================================
-// Singleton Instance
-// =============================================================================
 
 let registryInstance: NodeRuntimeRegistry | null = null;
 
