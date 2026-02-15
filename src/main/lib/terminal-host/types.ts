@@ -9,10 +9,6 @@
 // Protocol version - increment for breaking changes
 export const PROTOCOL_VERSION = 2;
 
-// =============================================================================
-// Mode Tracking
-// =============================================================================
-
 /**
  * Terminal modes that affect input behavior and must be restored on attach.
  * These correspond to DECSET/DECRST (CSI ? Pm h/l) escape sequences.
@@ -68,10 +64,6 @@ export const DEFAULT_MODES: TerminalModes = {
 	autoWrap: true,
 };
 
-// =============================================================================
-// Snapshot Types
-// =============================================================================
-
 /**
  * Snapshot payload returned when attaching to a session.
  * Contains everything needed to restore terminal state in the renderer.
@@ -110,10 +102,6 @@ export interface TerminalSnapshot {
 	};
 }
 
-// =============================================================================
-// Session Types
-// =============================================================================
-
 /**
  * Session metadata stored on disk
  */
@@ -128,10 +116,6 @@ export interface SessionMeta {
 	lastAttachedAt: string;
 	shell: string;
 }
-
-// =============================================================================
-// IPC Protocol Types
-// =============================================================================
 
 /**
  * Hello request - initial handshake with daemon
@@ -260,10 +244,6 @@ export interface ShutdownRequest {
 	killSessions?: boolean;
 }
 
-// =============================================================================
-// IPC Message Framing
-// =============================================================================
-
 /**
  * Request message format (client -> daemon)
  */
@@ -334,10 +314,6 @@ export interface TerminalErrorEvent {
 }
 
 export type TerminalEvent = TerminalDataEvent | TerminalExitEvent | TerminalErrorEvent;
-
-// =============================================================================
-// Request/Response Type Map
-// =============================================================================
 
 /** Empty response for operations that don't return data */
 export interface EmptyResponse {

@@ -155,10 +155,7 @@ export const settings = sqliteTable("settings", {
 export type InsertSettings = typeof settings.$inferInsert;
 export type SelectSettings = typeof settings.$inferSelect;
 
-// =============================================================================
-// Synced tables - mirrored from cloud Postgres via Electric SQL
 // Column names match Postgres exactly (snake_case) so Electric data writes directly
-// =============================================================================
 
 export type TaskPriority = "urgent" | "high" | "medium" | "low" | "none";
 export type IntegrationProvider = "linear";

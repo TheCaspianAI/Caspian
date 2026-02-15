@@ -54,3 +54,6 @@ playwright-report/
 # Local workflow artifacts
 qa/
 plans/
+.superset/
+.cache/
+.caspian/

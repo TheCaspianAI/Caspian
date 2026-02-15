@@ -43,10 +43,7 @@ function getNodeNameFromDb(nodeId: string | undefined): string {
 	}
 }
 
-// Current window reference - updated on window create/close
 let currentWindow: BrowserWindow | null = null;
-
-// Getter for routers to access current window without stale references
 const getWindow = () => currentWindow;
 
 export async function MainWindow() {
@@ -94,17 +91,13 @@ export async function MainWindow() {
 		});
 	}
 
-	// Start notifications HTTP server
 	const server = notificationsApp.listen(PORTS.NOTIFICATIONS, "127.0.0.1", () => {
 		console.log(`[notifications] Listening on http://127.0.0.1:${PORTS.NOTIFICATIONS}`);
 	});
 
-	// Handle agent lifecycle notifications (Stop = completion, PermissionRequest = needs input)
 	notificationsEmitter.on(NOTIFICATION_EVENTS.AGENT_LIFECYCLE, (event: AgentLifecycleEvent) => {
-		// Only notify on Stop (completion) and PermissionRequest - not on Start
 		if (event.eventType === "Start") return;
 
-		// Skip notification if user is already viewing this pane (Slack pattern)
 		if (window.isFocused() && event.nodeId && event.tabId && event.paneId) {
 			const isVisible = isPaneVisible({
 				currentNodeId: extractNodeIdFromUrl(window.webContents.getURL()),
@@ -176,11 +169,9 @@ export async function MainWindow() {
 
 	window.webContents.on("did-finish-load", async () => {
 		console.log("[main-window] Renderer loaded successfully");
-		// Restore maximized state if it was saved
 		if (initialBounds.isMaximized) {
 			window.maximize();
 		}
-		// Restore zoom level if it was saved
 		if (savedWindowState?.zoomLevel !== undefined) {
 			window.webContents.setZoomLevel(savedWindowState.zoomLevel);
 		}
@@ -192,7 +183,6 @@ export async function MainWindow() {
 		console.error(`  Error code: ${errorCode}`);
 		console.error(`  Description: ${errorDescription}`);
 		console.error(`  URL: ${validatedURL}`);
-		// Show the window anyway so user can see something is wrong
 		window.show();
 	});
 
@@ -207,7 +197,6 @@ export async function MainWindow() {
 	});
 
 	window.on("close", () => {
-		// Save window state first, before any cleanup
 		const isMaximized = window.isMaximized();
 		const bounds = isMaximized ? window.getNormalBounds() : window.getBounds();
 		const zoomLevel = window.webContents.getZoomLevel();
@@ -222,11 +211,9 @@ export async function MainWindow() {
 
 		server.close();
 		notificationsEmitter.removeAllListeners();
-		// Remove terminal listeners to prevent duplicates when window reopens on macOS
+		// Prevent duplicate listeners when window reopens on macOS
 		getNodeRuntimeRegistry().getDefault().terminal.detachAllListeners();
-		// Detach window from IPC handler (handler stays alive for window reopen)
 		ipcHandler?.detachWindow(window);
-		// Clear current window reference
 		currentWindow = null;
 	});
 

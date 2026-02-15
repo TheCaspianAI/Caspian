@@ -44,10 +44,6 @@ import { BRANCH_PREFIX_MODE_LABELS } from "../../../utils/branch-prefix";
 
 const CATEGORY_ORDER: HotkeyCategory[] = ["Node", "Terminal", "Layout", "Window", "Help"];
 
-// ============================================================================
-// Keyboard Shortcuts Components
-// ============================================================================
-
 function HotkeyRow({
 	id,
 	label,
@@ -95,16 +91,9 @@ function HotkeyRow({
 	);
 }
 
-// ============================================================================
-// Main PreferencesSettings Component
-// ============================================================================
-
 export function PreferencesSettings() {
 	const utils = electronTrpc.useUtils();
 
-	// ========================================================================
-	// Notification Sounds State
-	// ========================================================================
 	const { data: isMutedData, isLoading: isMutedLoading } =
 		electronTrpc.settings.getNotificationSoundsMuted.useQuery();
 	const isMuted = isMutedData ?? false;
@@ -127,9 +116,6 @@ export function PreferencesSettings() {
 		setMuted.mutate({ muted: !enabled });
 	};
 
-	// ========================================================================
-	// Keyboard Shortcuts State
-	// ========================================================================
 	const [searchQuery, setSearchQuery] = useState("");
 	const [recordingId, setRecordingId] = useState<HotkeyId | null>(null);
 	const [pendingConflict, setPendingConflict] = useState<{
@@ -280,9 +266,6 @@ export function PreferencesSettings() {
 		setPendingConflict(null);
 	};
 
-	// ========================================================================
-	// Application Behavior State
-	// ========================================================================
 	const { data: confirmOnQuit, isLoading: isConfirmLoading } =
 		electronTrpc.settings.getConfirmOnQuit.useQuery();
 	const setConfirmOnQuit = electronTrpc.settings.setConfirmOnQuit.useMutation({
@@ -354,9 +337,6 @@ export function PreferencesSettings() {
 				? "username"
 				: null);
 
-	// ========================================================================
-	// Link Behavior State
-	// ========================================================================
 	const { data: terminalLinkBehavior, isLoading: isLoadingLinkBehavior } =
 		electronTrpc.settings.getTerminalLinkBehavior.useQuery();
 
@@ -383,9 +363,6 @@ export function PreferencesSettings() {
 		});
 	};
 
-	// ========================================================================
-	// Render
-	// ========================================================================
 	return (
 		<>
 			<div className="space-y-10">

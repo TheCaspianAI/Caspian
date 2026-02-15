@@ -11,11 +11,6 @@ import { SerializeAddon } from "@xterm/addon-serialize";
 import { Terminal } from "@xterm/headless";
 import { DEFAULT_MODES, type TerminalModes, type TerminalSnapshot } from "./types";
 
-// =============================================================================
-// Mode Tracking Constants
-// =============================================================================
-
-// Escape character
 const ESC = "\x1b";
 const BEL = "\x07";
 
@@ -41,10 +36,6 @@ const MODE_MAP: Record<number, keyof TerminalModes> = {
 	1049: "alternateScreen", // Modern alternate screen with save/restore
 	2004: "bracketedPaste",
 };
-
-// =============================================================================
-// Headless Emulator Class
-// =============================================================================
 
 export interface HeadlessEmulatorOptions {
 	cols?: number;
@@ -321,10 +312,6 @@ export class HeadlessEmulator {
 		this.terminal.dispose();
 	}
 
-	// ===========================================================================
-	// Private Methods
-	// ===========================================================================
-
 	/**
 	 * Parse escape sequences with chunk-safe buffering.
 	 * PTY output can split sequences across chunks, so we buffer partial sequences.
@@ -540,10 +527,6 @@ export class HeadlessEmulator {
 		return sequences.join("");
 	}
 }
-
-// =============================================================================
-// Utility Functions
-// =============================================================================
 
 /**
  * Escape special regex characters in a string

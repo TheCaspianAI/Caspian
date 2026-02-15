@@ -14,10 +14,7 @@ import * as pty from "node-pty";
 import treeKill from "tree-kill";
 import { PtySubprocessFrameDecoder, PtySubprocessIpcType, writeFrame } from "./pty-subprocess-ipc";
 
-// =============================================================================
-// Types (kept local to avoid bundling/import surprises)
-// =============================================================================
-
+// Types kept local to avoid bundling/import surprises
 interface SpawnPayload {
 	shell: string;
 	args: string[];
@@ -26,10 +23,6 @@ interface SpawnPayload {
 	rows: number;
 	env: Record<string, string>;
 }
-
-// =============================================================================
-// State
-// =============================================================================
 
 let ptyProcess: IPty | null = null;
 let ptyFd: number | null = null;
@@ -61,10 +54,6 @@ let stdoutDraining = true;
 let ptyPaused = false;
 
 const DEBUG_OUTPUT_BATCHING = process.env.CASPIAN_PTY_SUBPROCESS_DEBUG === "1";
-
-// =============================================================================
-// Helpers
-// =============================================================================
 
 function send(type: PtySubprocessIpcType, payload?: Buffer): void {
 	stdoutDraining = writeFrame(process.stdout, type, payload);
@@ -247,10 +236,6 @@ function flush(): void {
 
 	flushing = false;
 }
-
-// =============================================================================
-// Message Handlers
-// =============================================================================
 
 function handleSpawn(payload: Buffer): void {
 	if (ptyProcess) {
@@ -443,10 +428,6 @@ function handleDispose(): void {
 
 	process.exit(0);
 }
-
-// =============================================================================
-// Main
-// =============================================================================
 
 const decoder = new PtySubprocessFrameDecoder();
 

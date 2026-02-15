@@ -30,7 +30,6 @@ export const createBranchProcedures = () => {
 					fetch: input.fetch,
 				});
 
-				// Get branches that are in use by worktrees, with their node IDs
 				const repositoryNodes = localDb
 					.select()
 					.from(nodes)
@@ -50,7 +49,6 @@ export const createBranchProcedures = () => {
 				};
 			}),
 
-		// Switch an existing branch node to a different branch
 		switchBranchNode: publicProcedure
 			.input(
 				z.object({
@@ -73,10 +71,8 @@ export const createBranchProcedures = () => {
 					throw new Error("No branch node found for this repository");
 				}
 
-				// Checkout the new branch with safety checks (terminals continue running on the new branch)
 				await safeCheckoutBranch(repository.mainRepoPath, input.branch);
 
-				// Send newline to terminals so their prompts refresh with new branch
 				getNodeRuntimeRegistry().getForNodeId(node.id).terminal.refreshPromptsForWorkspace(node.id);
 
 				// Update the node - name is always the branch for branch nodes

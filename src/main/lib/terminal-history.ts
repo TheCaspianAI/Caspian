@@ -44,10 +44,6 @@ export function truncateUtf8ToLastBytes(input: string, maxBytes: number): string
 	return buffer.subarray(start).toString("utf8");
 }
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface SessionMetadata {
 	cwd: string;
 	cols: number;
@@ -56,10 +52,6 @@ export interface SessionMetadata {
 	endedAt?: string;
 	exitCode?: number;
 }
-
-// =============================================================================
-// Path Helpers
-// =============================================================================
 
 const TERMINAL_HISTORY_DIR_NAME = "terminal-history";
 
@@ -102,10 +94,6 @@ function getScrollbackPath(workspaceId: string, paneId: string): string {
 function getMetadataPath(workspaceId: string, paneId: string): string {
 	return join(getHistoryDir(workspaceId, paneId), "meta.json");
 }
-
-// =============================================================================
-// HistoryWriter
-// =============================================================================
 
 /**
  * Writes terminal output to disk for cold restore.
@@ -436,10 +424,6 @@ export class HistoryWriter {
 		}
 	}
 }
-
-// =============================================================================
-// HistoryReader
-// =============================================================================
 
 /**
  * Reads terminal history for cold restore.

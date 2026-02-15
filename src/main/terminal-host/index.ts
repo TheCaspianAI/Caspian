@@ -39,10 +39,6 @@ import {
 } from "../lib/terminal-host/types";
 import { TerminalHost } from "./terminal-host";
 
-// =============================================================================
-// Configuration
-// =============================================================================
-
 const DAEMON_VERSION = "1.0.0";
 
 // Determine caspian directory based on NODE_ENV
@@ -54,10 +50,6 @@ const SOCKET_PATH = join(CASPIAN_HOME_DIR, "terminal-host.sock");
 const TOKEN_PATH = join(CASPIAN_HOME_DIR, "terminal-host.token");
 const PID_PATH = join(CASPIAN_HOME_DIR, "terminal-host.pid");
 
-// =============================================================================
-// Logging
-// =============================================================================
-
 function log(level: "info" | "warn" | "error", message: string, data?: unknown) {
 	const timestamp = new Date().toISOString();
 	const prefix = `[${timestamp}] [terminal-host] [${level.toUpperCase()}]`;
@@ -67,10 +59,6 @@ function log(level: "info" | "warn" | "error", message: string, data?: unknown) 
 		console.log(`${prefix} ${message}`);
 	}
 }
-
-// =============================================================================
-// Token Management
-// =============================================================================
 
 let authToken: string;
 
@@ -90,10 +78,6 @@ function ensureAuthToken(): string {
 function validateToken(token: string): boolean {
 	return token === authToken;
 }
-
-// =============================================================================
-// NDJSON Framing
-// =============================================================================
 
 class NdjsonParser {
 	private buffer = "";
@@ -145,15 +129,7 @@ function sendError(socket: Socket, id: string, code: string, message: string) {
 	sendResponse(socket, { id, ok: false, error: { code, message } });
 }
 
-// =============================================================================
-// Terminal Host Instance
-// =============================================================================
-
 let terminalHost: TerminalHost;
-
-// =============================================================================
-// Request Handlers
-// =============================================================================
 
 type RequestHandler = (
 	socket: Socket,
@@ -526,10 +502,6 @@ async function handleRequest(
 	}
 }
 
-// =============================================================================
-// Socket Server
-// =============================================================================
-
 let server: Server | null = null;
 
 function handleConnection(socket: Socket) {
@@ -744,10 +716,6 @@ function stopServer(): Promise<void> {
 	});
 }
 
-// =============================================================================
-// Signal Handling
-// =============================================================================
-
 function setupSignalHandlers() {
 	const shutdown = async (signal: string) => {
 		log("info", `Received ${signal}, shutting down...`);
@@ -773,10 +741,6 @@ function setupSignalHandlers() {
 		stopServer().then(() => process.exit(1));
 	});
 }
-
-// =============================================================================
-// Main
-// =============================================================================
 
 async function main() {
 	log("info", "Terminal Host Daemon starting...");

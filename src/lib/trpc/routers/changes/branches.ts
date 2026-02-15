@@ -60,7 +60,6 @@ export const createBranchesRouter = () => {
 				const worktree = getRegisteredWorktree(input.worktreePath);
 				await gitSwitchBranch(input.worktreePath, input.branch);
 
-				// Update the branch in the worktree record
 				const gitStatus = worktree.gitStatus
 					? { ...worktree.gitStatus, branch: input.branch }
 					: null;

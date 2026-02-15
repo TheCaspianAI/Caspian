@@ -26,11 +26,9 @@ function ensureConfigExists(mainRepoPath: string): string {
 	const caspianDir = join(mainRepoPath, ".caspian");
 
 	if (!existsSync(configPath)) {
-		// Create .caspian directory if it doesn't exist
 		if (!existsSync(caspianDir)) {
 			mkdirSync(caspianDir, { recursive: true });
 		}
-		// Create config.json with template
 		writeFileSync(configPath, CONFIG_TEMPLATE, "utf-8");
 	}
 
@@ -39,7 +37,6 @@ function ensureConfigExists(mainRepoPath: string): string {
 
 export const createConfigRouter = () => {
 	return router({
-		// Check if we should show the config toast for a project
 		shouldShowConfigToast: publicProcedure
 			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
@@ -52,7 +49,6 @@ export const createConfigRouter = () => {
 					return false;
 				}
 
-				// Don't show if already dismissed or if config exists
 				if (repository.configToastDismissed) {
 					return false;
 				}
@@ -60,7 +56,6 @@ export const createConfigRouter = () => {
 				return !configExists(repository.mainRepoPath);
 			}),
 
-		// Mark the config toast as dismissed for a project
 		dismissConfigToast: publicProcedure
 			.input(z.object({ repositoryId: z.string() }))
 			.mutation(({ input }) => {
@@ -72,7 +67,6 @@ export const createConfigRouter = () => {
 				return { success: true };
 			}),
 
-		// Get the config file path (creates it if it doesn't exist)
 		getConfigFilePath: publicProcedure
 			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
@@ -87,7 +81,6 @@ export const createConfigRouter = () => {
 				return ensureConfigExists(repository.mainRepoPath);
 			}),
 
-		// Get the config file content
 		getConfigContent: publicProcedure
 			.input(z.object({ repositoryId: z.string() }))
 			.query(({ input }) => {
@@ -113,7 +106,6 @@ export const createConfigRouter = () => {
 				}
 			}),
 
-		// Update the config file with new setup/teardown scripts
 		updateConfig: publicProcedure
 			.input(
 				z.object({
@@ -134,7 +126,6 @@ export const createConfigRouter = () => {
 
 				const configPath = ensureConfigExists(repository.mainRepoPath);
 
-				// Read and parse existing config, preserving other fields
 				let existingConfig: Record<string, unknown> = {};
 				try {
 					const existingContent = readFileSync(configPath, "utf-8");
@@ -147,7 +138,6 @@ export const createConfigRouter = () => {
 					existingConfig = {};
 				}
 
-				// Merge existing config with new setup/teardown values
 				const config = {
 					...existingConfig,
 					setup: input.setup,
